@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Numeri Nascosti - Memoria Visuo-Spaziale</title>
+    <!-- Tailwind CSS per uno styling rapido ed elegante -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Inter per massima leggibilità -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Icone Lucide tramite CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        /* Transizioni fluide e rilassanti per la griglia */
+        .grid-cell {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            aspect-ratio: 1 / 1;
+        }
+        .perspective-1000 {
+            perspective: 1000px;
+        }
+        /* Animazione di errore soft */
+        @keyframes soft-shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-4px); }
+            75% { transform: translateX(4px); }
+        }
+        .shake-effect {
+            animation: soft-shake 0.4s ease-in-out;
+        }
+        /* Personalizzazione della barra di scorrimento */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-[#f0f4f8] to-[#e2e8f0] min-h-screen text-slate-800 flex flex-col justify-between overflow-x-hidden">
+
+    <!-- Header -->
+    <header class="w-full max-w-4xl mx-auto px-4 pt-6 pb-2 flex justify-between items-center">
+        <div class="flex items-center space-x-3">
+            <div class="p-2.5 bg-indigo-100 text-indigo-600 rounded-xl shadow-inner">
+                <i data-lucide="brain-circuit" class="w-6 h-6"></i>
+            </div>
+            <div>
+                <h1 class="text-xl font-bold tracking-tight text-slate-800">Numeri Nascosti</h1>
+                <p class="text-xs text-slate-500 font-medium">Allenamento Visuo-Spaziale</p>
+            </div>
+        </div>
+        
+        <div class="flex items-center space-x-3">
+            <!-- Interruttore Audio Pastello -->
+            <button id="audio-toggle" class="p-2.5 rounded-xl bg-white hover:bg-slate-50 shadow-sm border border-slate-100 text-slate-600 hover:text-indigo-600 transition" title="Attiva/Disattiva Audio">
+                <i id="audio-icon" data-lucide="volume-2" class="w-5 h-5"></i>
+            </button>
+            <!-- Info / Guida rapida -->
+            <button id="info-btn" class="p-2.5 rounded-xl bg-white hover:bg-slate-50 shadow-sm border border-slate-100 text-slate-600 hover:text-indigo-600 transition" title="Istruzioni">
+                <i data-lucide="help-circle" class="w-5 h-5"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow w-full max-w-md mx-auto px-4 py-4 flex flex-col justify-center">
+        
+        <!-- SCHERMATA DI BENVENUTO / SELEZIONE LIVELLO -->
+        <div id="screen-menu" class="bg-white rounded-3xl p-6 md:p-8 shadow-xl shadow-slate-200/50 border border-slate-100 flex flex-col space-y-6">
+            <div class="text-center space-y-2">
+                <span class="px-3 py-1 text-xs font-semibold text-indigo-600 bg-indigo-50 rounded-full">Stimolazione Cognitiva</span>
+                <h2 class="text-2xl font-extrabold text-slate-800 tracking-tight">Allena la tua mente</h2>
+                <p class="text-sm text-slate-500 leading-relaxed">
+                    Osserva la griglia, memorizza la posizione dei numeri in ordine crescente e selezionali correttamente dopo la loro scomparsa.
+                </p>
+            </div>
+
+            <!-- Istruzioni Sintetiche Visive -->
+            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 space-y-3 text-xs text-slate-600">
+                <div class="flex items-start space-x-2.5">
+                    <div class="flex-shrink-0 w-5 h-5 bg-indigo-100 text-indigo-700 rounded-full flex items-center justify-center font-bold">1</div>
+                    <p>Osserva la posizione dei numeri per <strong>3 secondi</strong> prima che si nascondano.</p>
+                </div>
+                <div class="flex items-start space-x-2.5">
+                    <div class="flex-shrink-0 w-5 h-5 bg-indigo-100 text-indigo-700 rounded-full flex items-center justify-center font-bold">2</div>
+                    <p>Clicca le caselle vuote in sequenza numerica corretta: <strong>da 1 a salire</strong>.</p>
+                </div>
+                <div class="flex items-start space-x-2.5">
+                    <div class="flex-shrink-0 w-5 h-5 bg-indigo-100 text-indigo-700 rounded-full flex items-center justify-center font-bold">3</div>
+                    <p>Completa una sessione da <strong>10 round</strong> per valutare la tua memoria.</p>
+                </div>
+            </div>
+
+            <!-- Selezione Livelli -->
+            <div class="space-y-3">
+                <span class="text-xs font-bold text-slate-400 tracking-wider uppercase block text-center mb-1">Seleziona Difficoltà</span>
+                
+                <!-- Livello 1 -->
+                <button onclick="startGame(1)" class="w-full group relative overflow-hidden flex items-center justify-between p-4 bg-gradient-to-r from-emerald-50 to-teal-50 hover:from-emerald-100 hover:to-teal-100 border border-emerald-200/60 rounded-2xl transition duration-300 text-left">
+                    <div class="flex items-center space-x-3.5 z-10">
+                        <div class="w-10 h-10 rounded-xl bg-emerald-500 text-white flex items-center justify-center shadow-md shadow-emerald-200">
+                            <span class="font-extrabold text-lg">1</span>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-emerald-950 text-base">Livello Facile</h3>
+                            <p class="text-xs text-emerald-700 font-medium">Griglia 3x3 • 3 Numeri da ricordare</p>
+                        </div>
+                    </div>
+                    <i data-lucide="chevron-right" class="w-5 h-5 text-emerald-500 group-hover:translate-x-1 transition z-10"></i>
+                </button>
+
+                <!-- Livello 2 -->
+                <button onclick="startGame(2)" class="w-full group relative overflow-hidden flex items-center justify-between p-4 bg-gradient-to-r from-indigo-50 to-blue-50 hover:from-indigo-100 hover:to-blue-100 border border-indigo-200/60 rounded-2xl transition duration-300 text-left">
+                    <div class="flex items-center space-x-3.5 z-10">
+                        <div class="w-10 h-10 rounded-xl bg-indigo-500 text-white flex items-center justify-center shadow-md shadow-indigo-200">
+                            <span class="font-extrabold text-lg">2</span>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-indigo-950 text-base">Livello Medio</h3>
+                            <p class="text-xs text-indigo-700 font-medium">Griglia 4x4 • 4 Numeri da ricordare</p>
+                        </div>
+                    </div>
+                    <i data-lucide="chevron-right" class="w-5 h-5 text-indigo-500 group-hover:translate-x-1 transition z-10"></i>
+                </button>
+
+                <!-- Livello 3 -->
+                <button onclick="startGame(3)" class="w-full group relative overflow-hidden flex items-center justify-between p-4 bg-gradient-to-r from-purple-50 to-fuchsia-50 hover:from-purple-100 hover:to-fuchsia-100 border border-purple-200/60 rounded-2xl transition duration-300 text-left">
+                    <div class="flex items-center space-x-3.5 z-10">
+                        <div class="w-10 h-10 rounded-xl bg-purple-500 text-white flex items-center justify-center shadow-md shadow-purple-200">
+                            <span class="font-extrabold text-lg">3</span>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-purple-950 text-base">Livello Sfida</h3>
+                            <p class="text-xs text-purple-700 font-medium">Griglia 4x4 • 5 Numeri da ricordare</p>
+                        </div>
+                    </div>
+                    <i data-lucide="chevron-right" class="w-5 h-5 text-purple-500 group-hover:translate-x-1 transition z-10"></i>
+                </button>
+
+                <!-- Livello Adattivo -->
+                <button onclick="startGame(4)" class="w-full group relative overflow-hidden flex items-center justify-between p-4 bg-gradient-to-r from-amber-50 to-orange-50 hover:from-amber-100 hover:to-orange-100 border border-amber-200/60 rounded-2xl transition duration-300 text-left">
+                    <div class="flex items-center space-x-3.5 z-10">
+                        <div class="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center shadow-md shadow-amber-200 animate-pulse">
+                            <i data-lucide="sparkles" class="w-5 h-5 text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-amber-950 text-base flex items-center space-x-1.5">
+                                <span>Allenamento Adattivo</span>
+                            </h3>
+                            <p class="text-xs text-amber-700 font-medium">Griglia Dinamica • La difficoltà sale ogni 4 successi</p>
+                        </div>
+                    </div>
+                    <i data-lucide="chevron-right" class="w-5 h-5 text-amber-500 group-hover:translate-x-1 transition z-10"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- SCHERMATA DI GIOCO -->
+        <div id="screen-game" class="hidden relative bg-white rounded-3xl p-5 md:p-6 shadow-xl shadow-slate-200/50 border border-slate-100 flex flex-col space-y-5">
+            
+            <!-- Toast Adattivo in Sovrimpressione -->
+            <div id="adaptive-toast" class="pointer-events-none opacity-0 transform translate-y-2 transition-all duration-300 absolute top-20 left-1/2 -translate-x-1/2 bg-amber-500 text-white font-bold text-xs py-2 px-4 rounded-full shadow-lg z-30 flex items-center space-x-1.5">
+                <i data-lucide="sparkles" class="w-4 h-4"></i>
+                <span id="adaptive-toast-text">Difficoltà Aumentata!</span>
+            </div>
+
+            <!-- Barra Stato Superiore -->
+            <div class="flex justify-between items-center bg-slate-50 px-4 py-2.5 rounded-2xl border border-slate-100">
+                <div class="flex items-center space-x-2">
+                    <span class="text-xs text-slate-400 font-bold tracking-wider uppercase">Round:</span>
+                    <span id="game-round-indicator" class="text-sm font-extrabold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md">1/10</span>
+                </div>
+                <!-- Indicatore Streak (Nascosto di base, visibile solo in modalità adattiva) -->
+                <div id="adaptive-streak-container" class="hidden items-center space-x-1.5">
+                    <span class="text-xs text-slate-400 font-bold tracking-wider uppercase">Streak:</span>
+                    <span id="adaptive-streak" class="text-sm font-extrabold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-md">0/4</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <span class="text-xs text-slate-400 font-bold tracking-wider uppercase">Punti:</span>
+                    <span id="game-score-indicator" class="text-sm font-extrabold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">0</span>
+                </div>
+                <div id="level-badge" class="text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">
+                    -
+                </div>
+            </div>
+
+            <!-- Area Istruzioni Dinamiche / Feedback Temporaneo -->
+            <div class="text-center h-8 flex items-center justify-center">
+                <p id="game-status-text" class="text-sm font-semibold transition-all duration-300">
+                    --
+                </p>
+            </div>
+
+            <!-- Griglia di Gioco Contenitore -->
+            <div class="w-full flex justify-center">
+                <div id="grid-container" class="w-full max-w-[320px] bg-slate-100 p-3 rounded-2xl grid gap-3 shadow-inner relative">
+                    <!-- I bottoni verranno inseriti dinamicamente via JS -->
+                </div>
+            </div>
+
+            <!-- Timer a Barra (Memorizzazione) -->
+            <div class="space-y-1.5 w-full">
+                <div class="flex justify-between items-center text-xs font-semibold text-slate-400 px-1">
+                    <span id="timer-label">Tempo per memorizzare</span>
+                    <span id="timer-text">3.0s</span>
+                </div>
+                <div class="w-full h-3 bg-slate-100 rounded-full overflow-hidden p-0.5 border border-slate-200">
+                    <div id="timer-bar" class="h-full bg-gradient-to-r from-indigo-500 to-indigo-400 rounded-full w-full transition-all duration-100 ease-linear"></div>
+                </div>
+            </div>
+
+            <!-- Pulsantiera Inferiore Campo Gioco -->
+            <div class="flex space-x-3 pt-2">
+                <button onclick="abortGame()" class="flex-1 py-3 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-2xl transition duration-200 text-sm flex items-center justify-center space-x-2">
+                    <i data-lucide="home" class="w-4 h-4"></i>
+                    <span>Menu Iniziale</span>
+                </button>
+                <button onclick="restartCurrentSession()" class="py-3 px-4 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold rounded-2xl transition duration-200 text-sm flex items-center justify-center space-x-2">
+                    <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+                    <span>Ricomincia</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- SCHERMATA RIEPILOGO FINALE -->
+        <div id="screen-summary" class="hidden bg-white rounded-3xl p-6 md:p-8 shadow-xl shadow-slate-200/50 border border-slate-100 flex flex-col space-y-6">
+            
+            <!-- Icona e Complimento -->
+            <div class="text-center space-y-2">
+                <div class="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-2 shadow-inner">
+                    <i data-lucide="trophy" class="w-8 h-8"></i>
+                </div>
+                <h2 class="text-2xl font-extrabold text-slate-800 tracking-tight">Sessione Completata!</h2>
+                <p id="summary-compliment" class="text-sm text-slate-500 leading-relaxed px-4">
+                    Ottimo lavoro, hai completato tutti i 10 round. Ecco i dettagli della tua performance cognitiva.
+                </p>
+            </div>
+
+            <!-- Quadro Statistiche -->
+            <div class="grid grid-cols-2 gap-4">
+                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 text-center space-y-1">
+                    <span class="text-xs font-semibold text-slate-400 block">Esiti Corretti</span>
+                    <span id="summary-score" class="text-2xl font-black text-slate-800">0 / 10</span>
+                    <span id="summary-percent" class="text-[10px] font-bold text-emerald-600 block bg-emerald-50 py-0.5 px-2 rounded-full w-max mx-auto">0% Successo</span>
+                </div>
+                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 text-center space-y-1">
+                    <span class="text-xs font-semibold text-slate-400 block">Livello Giocato</span>
+                    <span id="summary-level" class="text-lg font-extrabold text-slate-800">Livello 1</span>
+                    <span id="summary-grid-info" class="text-[10px] font-medium text-slate-500 block">Griglia 3x3 • 3 Num</span>
+                </div>
+            </div>
+
+            <!-- Analisi Dettagliata Visuo-Spaziale -->
+            <div class="bg-slate-50 rounded-2xl p-4 border border-slate-100 space-y-2.5">
+                <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider">Valutazione della Performance</h3>
+                <div class="space-y-2 text-xs text-slate-600">
+                    <div class="flex justify-between items-center py-1 border-b border-slate-200/60">
+                        <span>Tempo medio di risposta:</span>
+                        <span id="summary-avg-time" class="font-bold text-slate-800">1.2 secondi</span>
+                    </div>
+                    <div class="flex justify-between items-center py-1">
+                        <span>Stato cognitivo stimato:</span>
+                        <span id="summary-cognitive-rating" class="font-bold text-indigo-600">Ottimo</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pulsanti di Controllo Riepilogo -->
+            <div class="space-y-2 pt-2">
+                <button onclick="startGame(currentLevel)" class="w-full py-3.5 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl shadow-lg shadow-indigo-200 transition duration-200 flex items-center justify-center space-x-2">
+                    <i data-lucide="play" class="w-4 h-4"></i>
+                    <span>Riprova Stesso Livello</span>
+                </button>
+                <button onclick="abortGame()" class="w-full py-3 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-2xl transition duration-200 text-sm flex items-center justify-center space-x-2">
+                    <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                    <span>Torna ai Livelli</span>
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- MODAL DETTAGLI (INFO) -->
+    <div id="modal-info" class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-100 space-y-4">
+            <div class="flex justify-between items-start">
+                <div class="flex items-center space-x-2.5">
+                    <div class="p-1.5 bg-indigo-50 text-indigo-600 rounded-lg">
+                        <i data-lucide="activity" class="w-5 h-5"></i>
+                    </div>
+                    <h3 class="font-bold text-slate-800 text-lg">Benefici Cognitivi</h3>
+                </div>
+                <button onclick="toggleInfoModal()" class="text-slate-400 hover:text-slate-600 transition">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div class="space-y-3 text-xs text-slate-600 leading-relaxed">
+                <p>
+                    La <strong>memoria di lavoro visuo-spaziale</strong> è una componente cruciale del nostro sistema cognitivo che ci permette di trattenere temporaneamente e manipolare informazioni spaziali (la posizione di oggetti o elementi nello spazio).
+                </p>
+                <p>
+                    Questa applicazione stimola il <strong>Taccuino Visuo-Spaziale</strong>, facilitando la plasticità neuronale e migliorando la prontezza mentale attraverso un esercizio ludico privo di stress.
+                </p>
+                <p class="bg-slate-50 p-3 rounded-xl border border-slate-100 font-medium text-slate-500">
+                    Consiglio: Evita di verbalizzare i numeri ad alta voce (es. "alto a destra, centro, basso"). Prova invece a concentrarti sulla "forma geometrica complessiva" creata dal percorso dei numeri.
+                </p>
+            </div>
+            <button onclick="toggleInfoModal()" class="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs transition">
+                Ho capito, grazie!
+            </button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="w-full max-w-4xl mx-auto px-4 py-4 text-center text-[10px] text-slate-400 font-medium">
+        Dispositivo Medico non diagnostico • Focalizzato sulla stimolazione della memoria visuo-spaziale attiva.
+    </footer>
+
+    <!-- LOGICA DI GIOCO IN JAVASCRIPT -->
+    <script>
+        // Inizializzazione icone Lucide
+        lucide.createIcons();
+
+        // Configurazione e variabili di stato globali
+        let currentLevel = 1;
+        let currentRound = 1;
+        let score = 0;
+        let audioEnabled = true;
+        let gameState = 'menu'; // menu, memorizing, playing, reviewing, summary
+        
+        // Modalità adattiva (streak & sublevels)
+        let isAdaptiveMode = false;
+        let adaptiveStreak = 0;
+        let adaptiveSubLevel = 0;
+
+        let gridConfig = {
+            1: { size: 3, numCount: 3, label: 'Facile', themeClass: 'bg-emerald-50 text-emerald-800 border-emerald-200' },
+            2: { size: 4, numCount: 4, label: 'Medio', themeClass: 'bg-indigo-50 text-indigo-800 border-indigo-200' },
+            3: { size: 4, numCount: 5, label: 'Sfida', themeClass: 'bg-purple-50 text-purple-800 border-purple-200' }
+        };
+
+        // Livelli dinamici per l'allenamento adattivo
+        let adaptiveConfigs = [
+            { size: 3, numCount: 3, label: 'Adattivo Base (L1)', themeClass: 'bg-amber-50 text-amber-800 border-amber-200' },
+            { size: 3, numCount: 4, label: 'Adattivo (L2)', themeClass: 'bg-amber-50 text-amber-800 border-amber-200' },
+            { size: 4, numCount: 4, label: 'Adattivo (L3)', themeClass: 'bg-amber-100 text-amber-800 border-amber-300' },
+            { size: 4, numCount: 5, label: 'Adattivo Medio (L4)', themeClass: 'bg-amber-100 text-amber-900 border-amber-300' },
+            { size: 4, numCount: 6, label: 'Adattivo Avanzato (L5)', themeClass: 'bg-orange-50 text-orange-950 border-orange-200' },
+            { size: 5, numCount: 6, label: 'Adattivo Sfida (L6)', themeClass: 'bg-orange-100 text-orange-950 border-orange-300' },
+            { size: 5, numCount: 7, label: 'Adattivo Genio (L7)', themeClass: 'bg-rose-50 text-rose-950 border-rose-300 animate-pulse' }
+        ];
+
+        let roundData = []; // Informazioni generate per il round corrente
+        let userClicks = []; // Indici della griglia cliccati dall'utente nel round
+        let expectedNextNumber = 1;
+        let memorizationTimer = null;
+        let timerStart = null;
+        const MEMORIZE_DURATION = 3000; // 3 secondi
+        let clickTimestamps = []; // Per calcolare il tempo di reazione
+
+        // Statistiche finali cumulabili per la sessione
+        let sessionDurations = []; 
+
+        // Riferimenti DOM principali
+        const screenMenu = document.getElementById('screen-menu');
+        const screenGame = document.getElementById('screen-game');
+        const screenSummary = document.getElementById('screen-summary');
+        const gridContainer = document.getElementById('grid-container');
+        const gameRoundIndicator = document.getElementById('game-round-indicator');
+        const gameScoreIndicator = document.getElementById('game-score-indicator');
+        const levelBadge = document.getElementById('level-badge');
+        const gameStatusText = document.getElementById('game-status-text');
+        const timerBar = document.getElementById('timer-bar');
+        const timerText = document.getElementById('timer-text');
+        const timerLabel = document.getElementById('timer-label');
+        const modalInfo = document.getElementById('modal-info');
+        const audioToggle = document.getElementById('audio-toggle');
+        const audioIcon = document.getElementById('audio-icon');
+        const adaptiveStreakContainer = document.getElementById('adaptive-streak-container');
+        const adaptiveStreakIndicator = document.getElementById('adaptive-streak');
+
+        // Audio Synthesizer usando Web Audio API per suoni pastello estremamente delicati
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        
+        function playTone(freq, type, duration, volume) {
+            if (!audioEnabled) return;
+            try {
+                // Resume audio context if suspended (browser compliance)
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+                const osc = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                
+                osc.type = type; // 'sine' o 'triangle' per suoni molto morbidi
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                
+                // Profilo di inviluppo delicato (fade out morbido)
+                gainNode.gain.setValueAtTime(volume, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+                
+                osc.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch (e) {
+                console.warn("Audio non riproducibile:", e);
+            }
+        }
+
+        // Suoni dedicati
+        function playSoundCorrectClick() {
+            // Nota singola dolce, alta e breve
+            playTone(880, 'sine', 0.15, 0.1); 
+        }
+
+        function playSoundErrorClick() {
+            // Due toni bassi e vellutati in successione per non frustrare
+            playTone(220, 'triangle', 0.3, 0.15);
+            setTimeout(() => playTone(180, 'triangle', 0.4, 0.15), 100);
+        }
+
+        function playSoundSuccessRound() {
+            // Arpeggio ascendente rilassante
+            const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+            notes.forEach((freq, idx) => {
+                setTimeout(() => {
+                    playTone(freq, 'sine', 0.25, 0.08);
+                }, idx * 80);
+            });
+        }
+
+        function playSoundTransition() {
+            // Un fruscio gentile prima della scomparsa
+            playTone(440, 'sine', 0.1, 0.05);
+        }
+
+        function playSoundEndSession() {
+            // Tonalità calde di festa accogliente
+            const chords = [523.25, 659.25, 783.99, 987.77, 1046.50];
+            chords.forEach((freq, idx) => {
+                setTimeout(() => {
+                    playTone(freq, 'sine', 0.4, 0.06);
+                }, idx * 120);
+            });
+        }
+
+        function playSoundLevelUp() {
+            // Trillo scintillante per l'aumento di livello adattivo
+            const notes = [523.25, 783.99, 1046.50, 1318.51]; 
+            notes.forEach((freq, idx) => {
+                setTimeout(() => {
+                    playTone(freq, 'sine', 0.3, 0.09);
+                }, idx * 70);
+            });
+        }
+
+        // Ottiene la configurazione attiva in base al livello o alla modalità adattiva corrente
+        function getCurrentConfig() {
+            if (isAdaptiveMode) {
+                return adaptiveConfigs[adaptiveSubLevel];
+            }
+            return gridConfig[currentLevel];
+        }
+
+        // Gestione Click Audio Switcher
+        audioToggle.addEventListener('click', () => {
+            audioEnabled = !audioEnabled;
+            if (audioEnabled) {
+                audioIcon.setAttribute('data-lucide', 'volume-2');
+                audioIcon.classList.remove('text-rose-500');
+                audioIcon.classList.add('text-slate-600');
+                // Play feedback soft
+                playTone(523.25, 'sine', 0.2, 0.1);
+            } else {
+                audioIcon.setAttribute('data-lucide', 'volume-x');
+                audioIcon.classList.add('text-rose-500');
+                audioIcon.classList.remove('text-slate-600');
+            }
+            lucide.createIcons();
+        });
+
+        // Gestione Modal Informativo
+        function toggleInfoModal() {
+            modalInfo.classList.toggle('hidden');
+        }
+        document.getElementById('info-btn').addEventListener('click', toggleInfoModal);
+
+        // Toast per le modifiche della difficoltà
+        function showAdaptiveToast(message) {
+            const toast = document.getElementById('adaptive-toast');
+            const toastText = document.getElementById('adaptive-toast-text');
+            toastText.textContent = message;
+            toast.classList.remove('opacity-0', 'translate-y-2');
+            toast.classList.add('opacity-100', 'translate-y-0');
+            setTimeout(() => {
+                toast.classList.remove('opacity-100', 'translate-y-0');
+                toast.classList.add('opacity-0', 'translate-y-2');
+            }, 1800);
+        }
+
+        // Avvia una sessione di gioco da 10 round sul livello selezionato
+        function startGame(level) {
+            currentLevel = level;
+            currentRound = 1;
+            score = 0;
+            sessionDurations = [];
+            
+            if (level === 4) {
+                isAdaptiveMode = true;
+                adaptiveStreak = 0;
+                adaptiveSubLevel = 0;
+                adaptiveStreakContainer.classList.remove('hidden');
+                adaptiveStreakContainer.classList.add('flex');
+                adaptiveStreakIndicator.textContent = `0/4`;
+            } else {
+                isAdaptiveMode = false;
+                adaptiveStreakContainer.classList.add('hidden');
+                adaptiveStreakContainer.classList.remove('flex');
+            }
+            
+            // UI setup per schermata di gioco
+            screenMenu.classList.add('hidden');
+            screenSummary.classList.add('hidden');
+            screenGame.classList.remove('hidden');
+            
+            // Configurazione Tema Badge Livello
+            const config = getCurrentConfig();
+            levelBadge.className = `text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider ${config.themeClass}`;
+            levelBadge.textContent = isAdaptiveMode ? config.label : `Livello ${level}`;
+
+            setupRound();
+        }
+
+        // Resetta la sessione corrente allo stesso livello
+        function restartCurrentSession() {
+            if (memorizationTimer) clearInterval(memorizationTimer);
+            startGame(currentLevel);
+        }
+
+        // Ritorna al menu principale annullando la sessione corrente
+        function abortGame() {
+            if (memorizationTimer) clearInterval(memorizationTimer);
+            screenGame.classList.add('hidden');
+            screenSummary.classList.add('hidden');
+            screenMenu.classList.remove('hidden');
+            gameState = 'menu';
+        }
+
+        // Genera il round corrente posizionando i numeri in modo non sovrapposto
+        function setupRound() {
+            gameState = 'memorizing';
+            userClicks = [];
+            clickTimestamps = [];
+            expectedNextNumber = 1;
+            
+            // Update indicatori testuali
+            gameRoundIndicator.textContent = `${currentRound}/10`;
+            gameScoreIndicator.textContent = score;
+            gameStatusText.textContent = "Memorizza la posizione dei numeri!";
+            gameStatusText.className = "text-sm font-semibold text-indigo-600 animate-pulse";
+
+            if (isAdaptiveMode) {
+                adaptiveStreakIndicator.textContent = `${adaptiveStreak}/4`;
+            }
+
+            const config = getCurrentConfig();
+            const size = config.size;
+            const totalCells = size * size;
+
+            // Genera array di indici unici per piazzare i numeri
+            const indices = Array.from({ length: totalCells }, (_, i) => i);
+            shuffleArray(indices);
+            const selectedIndices = indices.slice(0, config.numCount);
+
+            // Costruisci i dati del round
+            roundData = Array.from({ length: totalCells }, (_, i) => {
+                const targetIndex = selectedIndices.indexOf(i);
+                return {
+                    id: i,
+                    hasNumber: targetIndex !== -1,
+                    number: targetIndex !== -1 ? targetIndex + 1 : null,
+                    clicked: false,
+                    isCorrect: null
+                };
+            });
+
+            // Aggiorna il badge con la difficoltà adattiva corrente
+            levelBadge.className = `text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider ${config.themeClass}`;
+            levelBadge.textContent = config.label;
+
+            // Disegna la griglia di gioco
+            renderGrid(size, true); // true = mostra i numeri per la memorizzazione
+            
+            // Avvia la barra del timer e il countdown
+            startMemorizationCountdown();
+        }
+
+        // Algoritmo Fisher-Yates per mescolare
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Disegna dinamicamente la griglia supportando i formati 3x3, 4x4 e 5x5
+        function renderGrid(size, showNumbers) {
+            gridContainer.innerHTML = '';
+            
+            // Gestione colonne Tailwind dinamica (supporta 3, 4, 5)
+            gridContainer.style.gridTemplateColumns = `repeat(${size}, minmax(0, 1fr))`;
+
+            roundData.forEach(cell => {
+                const button = document.createElement('button');
+                button.className = 'grid-cell w-full bg-white rounded-xl shadow-sm border border-slate-200/80 flex items-center justify-center font-extrabold text-2xl transition duration-200 focus:outline-none';
+                button.setAttribute('data-id', cell.id);
+                
+                // Gestione stati visualizzazione
+                if (showNumbers && cell.hasNumber) {
+                    button.textContent = cell.number;
+                    button.classList.add('bg-indigo-50', 'text-indigo-600', 'border-indigo-300', 'scale-100');
+                } else {
+                    button.textContent = '';
+                    button.classList.add('hover:bg-slate-50', 'active:scale-95');
+                }
+
+                // Event listener del Click / Tap
+                button.addEventListener('click', (e) => handleCellClick(cell.id, button));
+                
+                gridContainer.appendChild(button);
+            });
+        }
+
+        // Avvio del timer di scomposizione numerica (3s)
+        function startMemorizationCountdown() {
+            let timeLeft = MEMORIZE_DURATION;
+            timerLabel.textContent = "Tempo per memorizzare";
+            timerText.textContent = "3.0s";
+            timerBar.style.width = "100%";
+            timerBar.className = "h-full bg-gradient-to-r from-indigo-500 to-indigo-400 rounded-full w-full transition-all duration-100 ease-linear";
+
+            const intervalTime = 100; // Aggiornamento ogni 100ms
+            
+            if (memorizationTimer) clearInterval(memorizationTimer);
+            
+            timerStart = Date.now();
+            
+            memorizationTimer = setInterval(() => {
+                const elapsed = Date.now() - timerStart;
+                timeLeft = Math.max(0, MEMORIZE_DURATION - elapsed);
+                
+                const percentage = (timeLeft / MEMORIZE_DURATION) * 100;
+                timerBar.style.width = `${percentage}%`;
+                timerText.textContent = `${(timeLeft / 1000).toFixed(1)}s`;
+
+                // Colore barra dinamico
+                if (percentage < 35) {
+                    timerBar.className = "h-full bg-gradient-to-r from-amber-500 to-amber-400 rounded-full transition-all duration-100 ease-linear";
+                }
+
+                if (timeLeft <= 0) {
+                    clearInterval(memorizationTimer);
+                    hideNumbersAndStartPlay();
+                }
+            }, intervalTime);
+        }
+
+        function hideNumbersAndStartPlay() {
+            gameState = 'playing';
+            playSoundTransition();
+            
+            // Aggiorna interfaccia e nascondi numeri
+            gameStatusText.textContent = "Seleziona i numeri da 1 in poi!";
+            gameStatusText.className = "text-sm font-semibold text-slate-700";
+            
+            timerLabel.textContent = "Tempo di risposta attivo";
+            timerText.textContent = "Trova 1";
+            timerBar.style.width = "100%";
+            timerBar.className = "h-full bg-gradient-to-r from-emerald-500 to-emerald-400 rounded-full w-full transition-all duration-500";
+
+            // Aggiorna la visualizzazione della griglia nascondendo i numeri
+            const cells = gridContainer.querySelectorAll('.grid-cell');
+            cells.forEach(button => {
+                const id = parseInt(button.getAttribute('data-id'));
+                const cell = roundData[id];
+                
+                button.textContent = '';
+                button.className = 'grid-cell w-full bg-white rounded-xl shadow-sm border border-slate-200/80 flex items-center justify-center font-extrabold text-2xl transition duration-200 hover:bg-slate-50 active:scale-95 focus:outline-none';
+            });
+
+            // Avvia la misurazione dei tempi di reazione dell'utente per questo round
+            clickTimestamps.push(Date.now());
+        }
+
+        // Gestisce il click sul bottone della griglia
+        function handleCellClick(cellId, buttonElement) {
+            if (gameState !== 'playing') return;
+
+            const cell = roundData[cellId];
+            
+            if (cell.clicked && cell.isCorrect) return;
+
+            // Determina se il click è corretto
+            if (cell.hasNumber && cell.number === expectedNextNumber) {
+                // SUCCESS: Cella corretta in sequenza
+                cell.clicked = true;
+                cell.isCorrect = true;
+                
+                playSoundCorrectClick();
+
+                // Mostra il numero in verde pastello
+                buttonElement.textContent = cell.number;
+                buttonElement.className = 'grid-cell w-full bg-emerald-50 text-emerald-700 border-2 border-emerald-400 flex items-center justify-center font-extrabold text-2xl scale-95 transition duration-200 focus:outline-none cursor-default';
+
+                // Passa al prossimo numero atteso
+                expectedNextNumber++;
+                const maxNum = getCurrentConfig().numCount;
+
+                if (expectedNextNumber > maxNum) {
+                    endRound(true);
+                } else {
+                    timerText.textContent = `Trova ${expectedNextNumber}`;
+                }
+
+            } else {
+                // ERRORE: L'utente ha sbagliato sequenza o premuto a vuoto
+                cell.clicked = true;
+                cell.isCorrect = false;
+                
+                playSoundErrorClick();
+
+                buttonElement.classList.add('bg-rose-50', 'border-2', 'border-rose-400', 'text-rose-700');
+                if (cell.hasNumber) {
+                    buttonElement.textContent = cell.number;
+                } else {
+                    buttonElement.textContent = '✗';
+                }
+
+                // Aggiungi un effetto oscillazione soft alla griglia
+                gridContainer.classList.add('shake-effect');
+                setTimeout(() => {
+                    gridContainer.classList.remove('shake-effect');
+                }, 400);
+
+                endRound(false);
+            }
+        }
+
+        // Fine del round corrente
+        function endRound(isSuccess) {
+            gameState = 'reviewing';
+            
+            const roundEndTime = Date.now();
+            const roundStartTime = clickTimestamps[0] || roundEndTime;
+            const durationSec = (roundEndTime - roundStartTime) / 1000;
+            
+            if (isSuccess) {
+                score++;
+                sessionDurations.push(durationSec);
+                
+                if (isAdaptiveMode) {
+                    adaptiveStreak++;
+                    adaptiveStreakIndicator.textContent = `${adaptiveStreak}/4`;
+                    
+                    if (adaptiveStreak === 4) {
+                        // Incrementa difficoltà!
+                        if (adaptiveSubLevel < adaptiveConfigs.length - 1) {
+                            adaptiveSubLevel++;
+                            playSoundLevelUp();
+                            setTimeout(() => {
+                                showAdaptiveToast("Difficoltà Aumentata! 🚀");
+                            }, 300);
+                        } else {
+                            showAdaptiveToast("Difficoltà Massima Raggiunta! 🔥");
+                        }
+                        adaptiveStreak = 0; // Resetta per l'incremento successivo
+                    }
+                }
+                
+                timerBar.style.width = "100%";
+                timerBar.className = "h-full bg-emerald-500 rounded-full transition-all";
+                timerText.textContent = "Esatto!";
+                
+                gameStatusText.textContent = "Ottimo! Sequenza corretta.";
+                gameStatusText.className = "text-sm font-semibold text-emerald-600";
+                
+                playSoundSuccessRound();
+
+                setTimeout(() => {
+                    proceedToNextRound();
+                }, 1200);
+
+            } else {
+                sessionDurations.push(durationSec);
+                
+                if (isAdaptiveMode) {
+                    // Resetta lo streak al primo errore commesso
+                    adaptiveStreak = 0;
+                    adaptiveStreakIndicator.textContent = `0/4`;
+                }
+                
+                gameStatusText.textContent = "Ops! Ecco la sequenza corretta.";
+                gameStatusText.className = "text-sm font-semibold text-rose-600";
+                
+                timerText.textContent = "Rivelazione";
+                timerBar.style.width = "100%";
+                timerBar.className = "h-full bg-rose-400 rounded-full transition-all";
+
+                revealCorrectPositions();
+
+                setTimeout(() => {
+                    proceedToNextRound();
+                }, 1800);
+            }
+        }
+
+        function revealCorrectPositions() {
+            const cells = gridContainer.querySelectorAll('.grid-cell');
+            cells.forEach(button => {
+                const id = parseInt(button.getAttribute('data-id'));
+                const cell = roundData[id];
+
+                if (cell.hasNumber) {
+                    button.textContent = cell.number;
+                    if (!cell.clicked || !cell.isCorrect) {
+                        button.className = 'grid-cell w-full bg-amber-50 text-amber-700 border-2 border-amber-300 flex items-center justify-center font-extrabold text-2xl transition duration-200 focus:outline-none';
+                    }
+                }
+            });
+        }
+
+        function proceedToNextRound() {
+            if (currentRound < 10) {
+                currentRound++;
+                setupRound();
+            } else {
+                showSummary();
+            }
+        }
+
+        // Schermata di fine sessione
+        function showSummary() {
+            gameState = 'summary';
+            playSoundEndSession();
+            
+            screenGame.classList.add('hidden');
+            screenSummary.classList.remove('hidden');
+
+            const percentSuccess = (score / 10) * 100;
+            document.getElementById('summary-score').textContent = `${score} / 10`;
+            
+            const percentBadge = document.getElementById('summary-percent');
+            percentBadge.textContent = `${percentSuccess}% Successo`;
+            
+            if (percentSuccess >= 80) {
+                percentBadge.className = "text-[10px] font-bold text-emerald-600 bg-emerald-50 py-0.5 px-2.5 rounded-full w-max mx-auto";
+            } else if (percentSuccess >= 50) {
+                percentBadge.className = "text-[10px] font-bold text-amber-600 bg-amber-50 py-0.5 px-2.5 rounded-full w-max mx-auto";
+            } else {
+                percentBadge.className = "text-[10px] font-bold text-rose-600 bg-rose-50 py-0.5 px-2.5 rounded-full w-max mx-auto";
+            }
+
+            // Testo livello giocato
+            const config = getCurrentConfig();
+            document.getElementById('summary-level').textContent = isAdaptiveMode ? "Allenamento Adattivo" : `Livello ${currentLevel}`;
+            document.getElementById('summary-grid-info').textContent = isAdaptiveMode 
+                ? `Raggiunto: ${config.label} (Griglia ${config.size}x${config.size})`
+                : `Griglia ${config.size}x${config.size} • ${config.numCount} Num`;
+
+            // Calcolo del tempo di reazione medio
+            const validDurations = sessionDurations.filter(d => !isNaN(d) && d > 0);
+            const avgTime = validDurations.length > 0 
+                ? (validDurations.reduce((sum, val) => sum + val, 0) / validDurations.length).toFixed(2)
+                : "N/A";
+            
+            document.getElementById('summary-avg-time').textContent = `${avgTime} secondi`;
+
+            // Valutazione dello stato cognitivo stimato
+            let rating = "Inizio";
+            let compliment = "Sessione conclusa. Continua ad allenarti regolarmente per stimolare le connessioni neuronali visuo-spaziali!";
+            
+            if (percentSuccess === 100) {
+                rating = "Eccellente (Zenith)";
+                compliment = isAdaptiveMode 
+                    ? "Incredibile! Ottima performance in modalità adattiva. Hai dimostrato una plasticità cerebrale eccezionale!"
+                    : "Incredibile! Hai dimostrato una memoria visuo-spaziale perfetta e impeccabile. Ottimo potenziale di focus!";
+            } else if (percentSuccess >= 80) {
+                rating = "Ottimo";
+                compliment = "Eccellente coordinazione visuo-spaziale! Il tuo taccuino cognitivo lavora a pieno regime.";
+            } else if (percentSuccess >= 60) {
+                rating = "Buono";
+                compliment = "Buon punteggio. Mantieni viva l'attenzione cercando di guardare la griglia nel suo insieme geometrico.";
+            } else if (percentSuccess >= 40) {
+                rating = "Sufficiente";
+                compliment = "La tua memoria risponde bene, ma puoi migliorare. Fai una breve pausa e riprova rilassando lo sguardo.";
+            } else {
+                rating = "Necessita Allenamento";
+                compliment = "Non ti preoccupare, la memoria spaziale risente molto di stanchezza o distrazioni. Riprova con calma!";
+            }
+
+            document.getElementById('summary-cognitive-rating').textContent = rating;
+            document.getElementById('summary-compliment').textContent = compliment;
+        }
+
+    </script>
+</body>
+</html>

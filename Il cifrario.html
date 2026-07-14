@@ -1,0 +1,1100 @@
+<!DOCTYPE html>
+<html lang="it" class="h-full bg-slate-950 text-slate-100">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Il Cifrario Vigilante - Brain Training</title>
+    <!-- Loading Tailwind CSS for premium look and feel -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Loading Google Fonts: Inter for optimal reading contrast -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Loading Chart.js for real-time cognitive mapping -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        /* Pulse glow for active targeted symbol */
+        @keyframes pulse-glow {
+            0%, 100% { transform: scale(1); filter: drop-shadow(0 0 4px rgba(56, 189, 248, 0.5)); }
+            50% { transform: scale(1.04); filter: drop-shadow(0 0 14px rgba(56, 189, 248, 0.8)); }
+        }
+        .active-target {
+            animation: pulse-glow 1.2s infinite ease-in-out;
+        }
+        /* Active pulse glow for Level 2 mismatch targets */
+        @keyframes active-stroop-glow {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 4px rgba(244, 63, 94, 0.4); }
+            50% { transform: scale(1.04); box-shadow: 0 0 15px rgba(244, 63, 94, 0.8); }
+        }
+        .active-target-stroop {
+            animation: active-stroop-glow 1.2s infinite ease-in-out;
+        }
+        /* Subtle visual alert flash when Legend updates in real-time */
+        @keyframes flash-legend {
+            0% { border-color: rgb(244, 63, 94); box-shadow: 0 0 15px rgba(244, 63, 94, 0.3); }
+            100% { border-color: rgb(30, 41, 59); box-shadow: none; }
+        }
+        .flash-legend-active {
+            animation: flash-legend 0.6s ease-out;
+        }
+    </style>
+</head>
+<body class="min-h-full flex flex-col justify-between overflow-x-hidden relative bg-slate-950">
+
+    <!-- Interactive backdrop for active canvas visual noise -->
+    <canvas id="distractorCanvas" class="absolute inset-0 w-full h-full pointer-events-none z-0 opacity-40"></canvas>
+
+    <!-- Main Container -->
+    <div class="relative z-10 flex flex-col min-h-screen w-full max-w-4xl mx-auto px-4 py-4 sm:py-6 justify-between gap-4">
+
+        <!-- HEADER / APPLICATION TITLE -->
+        <header class="text-center shrink-0">
+            <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 via-sky-400 to-indigo-500">
+                IL CIFRARIO VIGILANTE
+            </h1>
+            <p class="text-xs sm:text-sm text-slate-400 font-medium mt-1">
+                Allenamento Attenzione Selettiva Visiva &amp; Velocità Esecutiva
+            </p>
+        </header>
+
+        <!-- SCHERMATA INIZIALE / MENU -->
+        <main id="menuScreen" class="flex-1 flex flex-col justify-center my-auto max-w-md mx-auto w-full">
+            <div class="bg-slate-900/95 border border-slate-850 rounded-2xl p-6 shadow-2xl backdrop-blur-md">
+                <h2 class="text-lg font-bold text-center mb-4 text-cyan-400">Configura la Sessione</h2>
+                
+                <!-- Selection of Difficulty -->
+                <div class="mb-5">
+                    <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2">Livello di Difficoltà</label>
+                    <div class="grid grid-cols-1 gap-3">
+                        <!-- Level 1: Static -->
+                        <button type="button" onclick="selectDifficulty(1)" id="btnDiff1" class="difficulty-btn p-3 rounded-xl border text-left transition-all duration-200 border-cyan-500 bg-cyan-950/30 text-cyan-100 ring-2 ring-cyan-500/50">
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="font-bold text-sm">Livello 1: Base</span>
+                                <span class="text-[10px] px-2 py-0.5 rounded-full bg-cyan-900/50 text-cyan-300 font-semibold border border-cyan-700/50">Statico</span>
+                            </div>
+                            <p class="text-xs text-slate-400">Stringa da 4 simboli, sfondo scuro statico privo di elementi di disturbo visivo.</p>
+                        </button>
+                        
+                        <!-- Level 2: Active Distraction and Stroop Color Mismatch -->
+                        <button type="button" onclick="selectDifficulty(2)" id="btnDiff2" class="difficulty-btn p-3 rounded-xl border text-left transition-all duration-200 border-slate-800 bg-slate-900 text-slate-300 hover:border-slate-700">
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="font-bold text-sm">Livello 2: Distrazione Attiva</span>
+                                <span class="text-[10px] px-2 py-0.5 rounded-full bg-rose-950 text-rose-300 font-semibold border border-rose-800">Forte Carico</span>
+                            </div>
+                            <p class="text-xs text-slate-400 font-light">Stringa da 6 simboli, colori scombinati (*Stroop effect*) e legenda dinamica che cambia ad ogni sequenza. Sfondo interattivo con icone fluttuanti.</p>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Session Duration Selection -->
+                <div class="mb-6">
+                    <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2">Durata Sessione</label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button type="button" onclick="selectDuration(90)" id="btnDur90" class="duration-btn py-2.5 rounded-xl border font-bold text-sm transition-all duration-200 border-cyan-500 bg-cyan-950/30 text-cyan-100 ring-2 ring-cyan-500/50">
+                            90 Secondi
+                        </button>
+                        <button type="button" onclick="selectDuration(180)" id="btnDur180" class="duration-btn py-2.5 rounded-xl border font-bold text-sm transition-all duration-200 border-slate-800 bg-slate-900 text-slate-300 hover:border-slate-700">
+                            180 Secondi
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Trigger Start Button -->
+                <button type="button" onclick="startGame()" class="w-full py-3.5 bg-gradient-to-r from-cyan-500 to-sky-600 hover:from-cyan-400 hover:to-sky-500 text-slate-950 font-extrabold text-base tracking-wide rounded-xl shadow-lg shadow-cyan-500/20 active:scale-[0.98] transition-all duration-150">
+                    AVVIA ALLENAMENTO
+                </button>
+            </div>
+            
+            <div class="mt-4 text-center text-slate-400 text-xs px-4 leading-relaxed">
+                <p>💡 <strong>Istruzioni:</strong> Associa ogni figura geometrica della sequenza al rispettivo numero mostrato nella legenda fissa in alto. Premi i tasti corrispondenti il più velocemente possibile per allenare la scarica visuo-motoria.</p>
+            </div>
+        </main>
+
+        <!-- SCHERMATA DEL GIOCO ATTIVO -->
+        <main id="gameScreen" class="hidden flex-1 flex flex-col justify-between py-2 gap-4">
+            
+            <!-- Superior status bar -->
+            <div class="flex items-center justify-between bg-slate-900/90 border border-slate-800 px-4 py-2 rounded-xl backdrop-blur-sm shadow-md">
+                <div class="flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span class="text-[10px] sm:text-xs font-semibold tracking-wider text-slate-300 uppercase" id="gameLevelBadge">LIVELLO 1</span>
+                </div>
+                
+                <!-- Timer display -->
+                <div class="flex items-center gap-1.5 font-mono text-lg sm:text-xl font-black text-amber-400" aria-live="polite">
+                    <svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <span id="timerDisplay">00:00</span>
+                </div>
+
+                <!-- Stats counters -->
+                <div class="flex gap-3 sm:gap-4 text-xs font-bold">
+                    <div>
+                        <span class="text-slate-400">Corrette: </span><span id="scoreDisplay" class="text-emerald-400 text-sm">0</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400">Errori: </span><span id="errorsDisplay" class="text-rose-500 text-sm">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Legenda Cifratura Fissa -->
+            <section id="legendSection" class="bg-slate-900/95 border border-slate-800 p-3 sm:p-4 rounded-xl shadow-lg backdrop-blur-md transition-all duration-300" aria-label="Legenda di cifratura">
+                <div class="text-center mb-2 flex justify-center items-center gap-2">
+                    <span class="text-[9px] sm:text-[10px] font-bold tracking-widest text-slate-400 uppercase">LEGENDA DI CIFRATURA (Mappa Attiva)</span>
+                    <span id="legendChangeBadge" class="hidden text-[8px] px-1.5 py-0.5 rounded bg-rose-950 border border-rose-800 text-rose-300 font-extrabold animate-pulse">MODIFICATA</span>
+                </div>
+                <div id="legendContainer" class="grid grid-cols-5 gap-1.5 sm:gap-3 justify-center">
+                    <!-- Popolated dynamically via Javascript -->
+                </div>
+            </section>
+
+            <!-- Sequence code target area -->
+            <section class="flex-1 flex flex-col justify-center items-center py-5 bg-slate-900/40 border border-slate-800/40 rounded-2xl relative overflow-hidden backdrop-blur-sm min-h-[140px]" aria-label="Sequenza corrente">
+                <p class="text-[10px] font-bold tracking-wider text-slate-400 uppercase mb-3">Sequenza da Decifrare</p>
+                
+                <!-- Target symbols row -->
+                <div id="targetStringContainer" class="flex flex-wrap gap-2.5 justify-center px-4 max-w-full transition-all duration-150">
+                    <!-- Popolated dynamically via Javascript -->
+                </div>
+                
+                <div class="mt-4 flex items-center justify-center gap-1.5 text-slate-400 font-mono text-xs">
+                    Progresso stringa: <span id="progressIndicator" class="text-cyan-400 font-extrabold">0 / 4</span>
+                </div>
+            </section>
+
+            <!-- Mobile and touch friendly responsive virtual keyboard -->
+            <section class="shrink-0 max-w-md mx-auto w-full" aria-label="Tastierino numerico virtuale">
+                <div class="grid grid-cols-5 gap-2">
+                    <!-- Virtual buttons with strict IDs for visual feedbacks on input -->
+                    <button type="button" id="virtual-key-1" onclick="handleVirtualKeyPress(1)" class="py-4 bg-slate-900 hover:bg-slate-800 border-2 border-slate-800 active:border-cyan-500 text-slate-100 font-extrabold text-xl rounded-xl shadow-md transition-all duration-75 active:scale-95 flex flex-col items-center justify-center">
+                        <span>1</span>
+                    </button>
+                    <button type="button" id="virtual-key-2" onclick="handleVirtualKeyPress(2)" class="py-4 bg-slate-900 hover:bg-slate-800 border-2 border-slate-800 active:border-cyan-500 text-slate-100 font-extrabold text-xl rounded-xl shadow-md transition-all duration-75 active:scale-95 flex flex-col items-center justify-center">
+                        <span>2</span>
+                    </button>
+                    <button type="button" id="virtual-key-3" onclick="handleVirtualKeyPress(3)" class="py-4 bg-slate-900 hover:bg-slate-800 border-2 border-slate-800 active:border-cyan-500 text-slate-100 font-extrabold text-xl rounded-xl shadow-md transition-all duration-75 active:scale-95 flex flex-col items-center justify-center">
+                        <span>3</span>
+                    </button>
+                    <button type="button" id="virtual-key-4" onclick="handleVirtualKeyPress(4)" class="py-4 bg-slate-900 hover:bg-slate-800 border-2 border-slate-800 active:border-cyan-500 text-slate-100 font-extrabold text-xl rounded-xl shadow-md transition-all duration-75 active:scale-95 flex flex-col items-center justify-center">
+                        <span>4</span>
+                    </button>
+                    <button type="button" id="virtual-key-5" onclick="handleVirtualKeyPress(5)" class="py-4 bg-slate-900 hover:bg-slate-800 border-2 border-slate-800 active:border-cyan-500 text-slate-100 font-extrabold text-xl rounded-xl shadow-md transition-all duration-75 active:scale-95 flex flex-col items-center justify-center">
+                        <span>5</span>
+                    </button>
+                </div>
+                <div class="text-center mt-2.5">
+                    <p class="text-[10px] text-slate-400">Puoi usare anche la tastiera fisica premendo i tasti numerici da <kbd class="px-1.5 py-0.5 bg-slate-800 rounded text-slate-200">1</kbd> a <kbd class="px-1.5 py-0.5 bg-slate-800 rounded text-slate-200">5</kbd></p>
+                </div>
+            </section>
+        </main>
+
+        <!-- SCHERMATA DEI RISULTATI FINALI -->
+        <main id="resultScreen" class="hidden flex-1 flex flex-col justify-start my-auto max-w-2xl mx-auto w-full">
+            <div class="bg-slate-900/95 border border-slate-800 rounded-2xl p-4 sm:p-6 shadow-2xl backdrop-blur-md text-center">
+                <span class="text-[10px] px-2.5 py-1 rounded-full bg-emerald-950/80 text-emerald-400 border border-emerald-800/60 font-extrabold tracking-widest uppercase">Sessione Completata</span>
+                <h2 class="text-xl sm:text-2xl font-black mt-2 mb-4 text-slate-100">Report delle Performance Cognitive</h2>
+
+                <!-- Metrics grid -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mb-6">
+                    <div class="bg-slate-950/85 p-3 rounded-xl border border-slate-800">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Sequenze Corrette</p>
+                        <p id="resCorrect" class="text-xl font-extrabold text-cyan-400 mt-0.5">0</p>
+                    </div>
+                    <div class="bg-slate-950/85 p-3 rounded-xl border border-slate-800">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Accuratezza Tasti</p>
+                        <p id="resAccuracy" class="text-xl font-extrabold text-emerald-400 mt-0.5">0%</p>
+                    </div>
+                    <div class="bg-slate-950/85 p-3 rounded-xl border border-slate-800">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Tempo per Sequenza</p>
+                        <p id="resAvgSpeed" class="text-xl font-extrabold text-amber-400 mt-0.5">0s</p>
+                    </div>
+                    <div class="bg-slate-950/85 p-3 rounded-xl border border-slate-800">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Affaticamento</p>
+                        <p id="resFatigue" class="text-xl font-extrabold text-rose-400 mt-0.5">0%</p>
+                    </div>
+                </div>
+
+                <!-- Real-time performance chart -->
+                <div class="mb-5">
+                    <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2 text-left flex items-center gap-1.5">
+                        <svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 002 2h2a2 2 0 002-2"></path></svg>
+                        Grafico della Velocità di Scarica (Rendimento Attentivo / Tempo)
+                    </h3>
+                    <div class="bg-slate-950 rounded-xl p-2 sm:p-4 border border-slate-800 h-64 relative">
+                        <canvas id="performanceChart"></canvas>
+                    </div>
+                    <p class="text-[9px] text-slate-400 mt-2 text-left leading-normal">
+                        *L'asse temporale mostra l'andamento della sessione. Eventuali cali o flessioni della linea indicano momenti di affaticamento dell'attenzione sostenuta.
+                    </p>
+                </div>
+
+                <!-- Personal feedback analysis -->
+                <div class="bg-slate-950 border border-slate-800 p-4 rounded-xl text-left mb-6">
+                    <h4 class="text-xs font-extrabold text-cyan-400 uppercase tracking-wide mb-1">Analisi Funzionale Attentiva</h4>
+                    <p id="cognitiveEvaluation" class="text-xs sm:text-sm text-slate-300 leading-relaxed font-light">
+                        Elaborazione statistica in corso...
+                    </p>
+                </div>
+
+                <!-- Actions / Replays options -->
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <button type="button" onclick="returnToMenu()" class="flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-sm rounded-xl transition-all duration-155 border border-slate-700 active:scale-95">
+                        Ritorna al Menu
+                    </button>
+                    <button type="button" onclick="restartSession()" class="flex-1 py-3 bg-gradient-to-r from-cyan-500 to-sky-600 hover:from-cyan-400 hover:to-sky-500 text-slate-950 font-extrabold text-sm rounded-xl transition-all duration-155 shadow-lg shadow-cyan-500/10 active:scale-95">
+                        Riprova Stesso Setup
+                    </button>
+                </div>
+            </div>
+        </main>
+
+        <!-- FOOTER / NOTA SCIENTIFICA -->
+        <footer class="text-center py-2 shrink-0 border-t border-slate-900 mt-2">
+            <p class="text-[9px] text-slate-500 font-medium">Training cognitivo clinico basato sul principio del Digit Symbol Substitution Test • © 2026</p>
+        </footer>
+
+    </div>
+
+    <script>
+        /*
+          Web Audio API integration for immediate response feedback.
+          Initialized lazily to avoid auto-play blocking warnings in browsers.
+        */
+        let audioCtx = null;
+
+        function playSound(type) {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            const now = audioCtx.currentTime;
+
+            if (type === 'correct') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(650, now);
+                osc.frequency.exponentialRampToValueAtTime(1100, now + 0.08);
+                gainNode.gain.setValueAtTime(0.06, now);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+                osc.start(now);
+                osc.stop(now + 0.1);
+            } else if (type === 'error') {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(160, now);
+                osc.frequency.exponentialRampToValueAtTime(70, now + 0.2);
+                gainNode.gain.setValueAtTime(0.12, now);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+                osc.start(now);
+                osc.stop(now + 0.22);
+            } else if (type === 'complete') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(523.25, now); // C5
+                osc.frequency.setValueAtTime(659.25, now + 0.05); // E5
+                osc.frequency.setValueAtTime(783.99, now + 0.1); // G5
+                osc.frequency.exponentialRampToValueAtTime(1046.50, now + 0.2); // C6
+                gainNode.gain.setValueAtTime(0.08, now);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+                osc.start(now);
+                osc.stop(now + 0.25);
+            } else if (type === 'gameover') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(440, now); // A4
+                osc.frequency.setValueAtTime(554.37, now + 0.12); // C#5
+                osc.frequency.setValueAtTime(659.25, now + 0.24); // E5
+                osc.frequency.setValueAtTime(880, now + 0.36); // A5
+                gainNode.gain.setValueAtTime(0.1, now);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.7);
+                osc.start(now);
+                osc.stop(now + 0.7);
+            }
+        }
+    </script>
+
+    <script>
+        /*
+          Dynamic Floating particles rendering module.
+          Controls interactive shapes designed to test and distract the visual field.
+        */
+        const canvas = document.getElementById('distractorCanvas');
+        const ctx = canvas.getContext('2d');
+        let animationFrameId = null;
+        let particles = [];
+        let isStaticBackground = true;
+
+        const SHAPES = ['circle', 'triangle', 'square', 'star', 'rhombus'];
+        const DIS_COLORS = [
+            'rgba(34, 211, 238, opacity)', // cyan
+            'rgba(16, 185, 129, opacity)', // emerald
+            'rgba(99, 102, 241, opacity)', // indigo
+            'rgba(245, 158, 11, opacity)', // amber
+            'rgba(217, 70, 239, opacity)', // fuchsia
+            'rgba(244, 63, 94, opacity)'   // rose
+        ];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            if (isStaticBackground) {
+                renderStaticBackground();
+            }
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+
+        class DistractorParticle {
+            constructor() {
+                this.reset();
+                this.y = Math.random() * canvas.height;
+            }
+
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = -50;
+                this.size = Math.random() * 20 + 15;
+                this.speedX = (Math.random() - 0.5) * 1.2;
+                this.speedY = Math.random() * 1.8 + 0.6; 
+                this.rotation = Math.random() * Math.PI * 2;
+                this.rotationSpeed = (Math.random() - 0.5) * 0.025;
+                this.shape = SHAPES[Math.floor(Math.random() * SHAPES.length)];
+                this.colorIndex = Math.floor(Math.random() * DIS_COLORS.length);
+                this.opacity = Math.random() * 0.12 + 0.04;
+                this.colorPulse = Math.random() * 0.003 + 0.001;
+            }
+
+            update() {
+                if (isStaticBackground) return;
+
+                this.x += this.speedX;
+                this.y += this.speedY;
+                this.rotation += this.rotationSpeed;
+                
+                // Color and opacity cycle
+                this.opacity += this.colorPulse;
+                if (this.opacity > 0.22 || this.opacity < 0.03) {
+                    this.colorPulse = -this.colorPulse;
+                }
+
+                if (this.y > canvas.height + 50 || this.x < -50 || this.x > canvas.width + 50) {
+                    this.reset();
+                }
+            }
+
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.rotation);
+                
+                const colorStr = DIS_COLORS[this.colorIndex].replace('opacity', this.opacity.toFixed(2));
+                ctx.fillStyle = colorStr;
+                ctx.strokeStyle = colorStr;
+                ctx.lineWidth = 1.5;
+
+                ctx.beginPath();
+                if (this.shape === 'circle') {
+                    ctx.arc(0, 0, this.size / 2, 0, Math.PI * 2);
+                    ctx.fill();
+                } else if (this.shape === 'triangle') {
+                    ctx.moveTo(0, -this.size / 2);
+                    ctx.lineTo(this.size / 2, this.size / 2);
+                    ctx.lineTo(-this.size / 2, this.size / 2);
+                    ctx.closePath();
+                    ctx.fill();
+                } else if (this.shape === 'square') {
+                    ctx.rect(-this.size / 2, -this.size / 2, this.size, this.size);
+                    ctx.fill();
+                } else if (this.shape === 'rhombus') {
+                    ctx.moveTo(0, -this.size / 2);
+                    ctx.lineTo(this.size / 2, 0);
+                    ctx.lineTo(0, this.size / 2);
+                    ctx.lineTo(-this.size / 2, 0);
+                    ctx.closePath();
+                    ctx.fill();
+                } else if (this.shape === 'star') {
+                    let spikes = 5;
+                    let outerRadius = this.size / 2;
+                    let innerRadius = this.size / 4;
+                    let rot = Math.PI / 2 * 3;
+                    let x = 0, y = 0;
+                    let step = Math.PI / spikes;
+
+                    ctx.moveTo(0, -outerRadius);
+                    for (let i = 0; i < spikes; i++) {
+                        x = Math.cos(rot) * outerRadius;
+                        y = Math.sin(rot) * outerRadius;
+                        ctx.lineTo(x, y);
+                        rot += step;
+
+                        x = Math.cos(rot) * innerRadius;
+                        y = Math.sin(rot) * innerRadius;
+                        ctx.lineTo(x, y);
+                        rot += step;
+                    }
+                    ctx.closePath();
+                    ctx.fill();
+                }
+                ctx.restore();
+            }
+        }
+
+        function initParticles(count) {
+            particles = [];
+            for (let i = 0; i < count; i++) {
+                particles.push(new DistractorParticle());
+            }
+        }
+
+        function renderStaticBackground() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        function animationLoop() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            for (let i = 0; i < particles.length; i++) {
+                particles[i].update();
+                particles[i].draw();
+            }
+
+            animationFrameId = requestAnimationFrame(animationLoop);
+        }
+
+        function setBackgroundDistraction(level) {
+            cancelAnimationFrame(animationFrameId);
+            if (level === 1) {
+                isStaticBackground = true;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            } else {
+                isStaticBackground = false;
+                initParticles(35);
+                animationLoop();
+            }
+        }
+
+        resizeCanvas();
+    </script>
+
+    <script>
+        /*
+          Core Architectural Module for Il Cifrario Vigilante.
+          Manages states, inputs, timers, statistics, and Stroop effects.
+        */
+        let currentLevel = 1;
+        let sessionDuration = 90; 
+        let timeRemaining = 90;
+        let timerInterval = null;
+        let statTrackingInterval = null;
+        let isGameRunning = false;
+
+        let cipherMapping = {}; 
+        
+        // Symbols metadata (SVG-based custom vectors)
+        const SYMBOLS_DATA = {
+            circle: {
+                name: 'Cerchio',
+                colorClass: 'text-cyan-400 bg-cyan-950/20 border-cyan-500/30',
+                color: '#22d3ee',
+                svg: `<svg viewBox="0 0 100 100" class="w-12 h-12 stroke-current fill-none" stroke-width="12"><circle cx="50" cy="50" r="35"/></svg>`
+            },
+            triangle: {
+                name: 'Triangolo',
+                colorClass: 'text-emerald-400 bg-emerald-950/20 border-emerald-500/30',
+                color: '#10b981',
+                svg: `<svg viewBox="0 0 100 100" class="w-12 h-12 stroke-current fill-none" stroke-width="10" stroke-linejoin="round"><polygon points="50,15 88,82 12,82"/></svg>`
+            },
+            square: {
+                name: 'Quadrato',
+                colorClass: 'text-indigo-400 bg-indigo-950/20 border-indigo-500/30',
+                color: '#6366f1',
+                svg: `<svg viewBox="0 0 100 100" class="w-11 h-11 stroke-current fill-none" stroke-width="11" stroke-linejoin="round"><rect x="15" y="15" width="70" height="70" rx="6"/></svg>`
+            },
+            rhombus: {
+                name: 'Rombo',
+                colorClass: 'text-amber-400 bg-amber-950/20 border-amber-500/30',
+                color: '#f59e0b',
+                svg: `<svg viewBox="0 0 100 100" class="w-12 h-12 stroke-current fill-none" stroke-width="11" stroke-linejoin="round"><polygon points="50,11 89,50 50,89 11,50"/></svg>`
+            },
+            star: {
+                name: 'Stella',
+                colorClass: 'text-fuchsia-400 bg-fuchsia-950/20 border-fuchsia-500/30',
+                color: '#d946ef',
+                svg: `<svg viewBox="0 0 100 100" class="w-12 h-12 stroke-current fill-none" stroke-width="10" stroke-linejoin="round"><polygon points="50,10 62,38 92,38 68,56 77,85 50,68 23,85 32,56 8,38 38,38"/></svg>`
+            }
+        };
+
+        const SYMBOL_KEYS = Object.keys(SYMBOLS_DATA);
+
+        let correctStringsCount = 0;
+        let totalKeyPresses = 0;
+        let correctKeyPresses = 0;
+        let errorKeyPresses = 0;
+
+        let currentTargetSymbols = [];
+        let currentActiveTargetIndex = 0; 
+
+        let chartDataPoints = []; 
+        let speedDataPoints = []; 
+        let stringsCompletedInLastWindow = 0;
+        let throughputHistory = []; 
+
+        /*
+          State toggling and menus
+        */
+        function selectDifficulty(level) {
+            currentLevel = level;
+            document.querySelectorAll('.difficulty-btn').forEach(btn => {
+                btn.className = "difficulty-btn p-3 rounded-xl border text-left transition-all duration-200 border-slate-800 bg-slate-900 text-slate-300 hover:border-slate-700";
+            });
+            const activeBtn = document.getElementById(`btnDiff${level}`);
+            if (level === 1) {
+                activeBtn.className = "difficulty-btn p-3 rounded-xl border text-left transition-all duration-200 border-cyan-500 bg-cyan-950/30 text-cyan-100 ring-2 ring-cyan-500/50";
+            } else {
+                activeBtn.className = "difficulty-btn p-3 rounded-xl border text-left transition-all duration-200 border-rose-500 bg-rose-950/30 text-rose-100 ring-2 ring-rose-500/50";
+            }
+        }
+
+        function selectDuration(seconds) {
+            sessionDuration = seconds;
+            timeRemaining = seconds;
+            document.querySelectorAll('.duration-btn').forEach(btn => {
+                btn.className = "duration-btn py-2.5 rounded-xl border font-bold text-sm transition-all duration-200 border-slate-800 bg-slate-900 text-slate-300 hover:border-slate-700";
+            });
+            const activeBtn = document.getElementById(`btnDur${seconds}`);
+            activeBtn.className = "duration-btn py-2.5 rounded-xl border font-bold text-sm transition-all duration-200 border-cyan-500 bg-cyan-950/30 text-cyan-100 ring-2 ring-cyan-500/50";
+        }
+
+        /*
+          Random cipher mapping generator (Fisher-Yates)
+        */
+        function generateCipherMapping(isUpdate = false) {
+            const numbers = [1, 2, 3, 4, 5];
+            for (let i = numbers.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [numbers[i], numbers[j]] = [numbers[j], numbers[i]];
+            }
+            cipherMapping = {};
+            SYMBOL_KEYS.forEach((key, index) => {
+                cipherMapping[key] = numbers[index];
+            });
+
+            // If it's a real-time update in Level 2, trigger the visual alert flash
+            if (isUpdate && currentLevel === 2) {
+                const legendSec = document.getElementById('legendSection');
+                const badge = document.getElementById('legendChangeBadge');
+                
+                legendSec.classList.remove('flash-legend-active');
+                void legendSec.offsetWidth; // Trigger reflow for animation reset
+                legendSec.classList.add('flash-legend-active');
+
+                badge.classList.remove('hidden');
+                setTimeout(() => {
+                    badge.classList.add('hidden');
+                }, 1000);
+            }
+        }
+
+        function renderLegend() {
+            const legendContainer = document.getElementById('legendContainer');
+            legendContainer.innerHTML = '';
+            
+            SYMBOL_KEYS.forEach(symbolKey => {
+                const assignedNum = cipherMapping[symbolKey];
+                const data = SYMBOLS_DATA[symbolKey];
+                
+                const card = document.createElement('div');
+                card.className = `flex flex-col items-center justify-center p-2 rounded-xl border ${data.colorClass} shadow-md transition-all duration-150 transform hover:scale-105`;
+                card.innerHTML = `
+                    <div class="mb-1">${data.svg}</div>
+                    <div class="text-[10px] text-slate-400 font-medium mb-0.5">${data.name}</div>
+                    <div class="text-sm sm:text-base font-black px-2.5 py-0.5 rounded bg-slate-950 border border-slate-800 text-slate-100">${assignedNum}</div>
+                `;
+                legendContainer.appendChild(card);
+            });
+        }
+
+        /*
+          Interactive targeted symbol string builder
+        */
+        function generateTargetString() {
+            const length = currentLevel === 1 ? 4 : 6;
+            currentTargetSymbols = [];
+            for (let i = 0; i < length; i++) {
+                const randomShape = SYMBOL_KEYS[Math.floor(Math.random() * SYMBOL_KEYS.length)];
+                
+                let colorClass = SYMBOLS_DATA[randomShape].colorClass;
+                if (currentLevel === 2) {
+                    // Active Stroop mismatch: force a different color scheme to distract
+                    const otherShapes = SYMBOL_KEYS.filter(k => k !== randomShape);
+                    const colorShapeKey = otherShapes[Math.floor(Math.random() * otherShapes.length)];
+                    colorClass = SYMBOLS_DATA[colorShapeKey].colorClass;
+                }
+                
+                currentTargetSymbols.push({
+                    key: randomShape,
+                    colorClass: colorClass
+                });
+            }
+            currentActiveTargetIndex = 0;
+            renderTargetString();
+            updateProgressIndicator();
+        }
+
+        function renderTargetString() {
+            const container = document.getElementById('targetStringContainer');
+            container.innerHTML = '';
+            
+            currentTargetSymbols.forEach((targetObj, index) => {
+                const symbolKey = targetObj.key;
+                const data = SYMBOLS_DATA[symbolKey];
+                const isCompleted = index < currentActiveTargetIndex;
+                const isActive = index === currentActiveTargetIndex;
+                
+                let statusClasses = "border-slate-800 bg-slate-900/40 text-slate-500 opacity-60 scale-95";
+                if (isCompleted) {
+                    statusClasses = "border-emerald-500/50 bg-emerald-950/40 text-emerald-300 scale-95 opacity-80";
+                } else if (isActive) {
+                    if (currentLevel === 2) {
+                        const colorParts = targetObj.colorClass.split(' ');
+                        const textCol = colorParts[0];
+                        const bgCol = colorParts[1];
+                        const borderCol = colorParts[2];
+                        statusClasses = `${textCol} ${bgCol} scale-100 active-target-stroop border-2 border-rose-500`;
+                    } else {
+                        statusClasses = `border-cyan-400 bg-cyan-900/15 text-cyan-300 scale-100 active-target ring-2 ring-cyan-500/40`;
+                    }
+                }
+                
+                const element = document.createElement('div');
+                element.className = `w-12 h-16 sm:w-14 sm:h-20 flex flex-col items-center justify-center p-1 rounded-xl border-2 shadow-lg transition-all duration-150 relative ${statusClasses}`;
+                
+                let svgHtml = data.svg;
+                let checkOverlay = '';
+                if (isCompleted) {
+                    checkOverlay = `
+                        <div class="absolute -top-1.5 -right-1.5 bg-emerald-500 text-slate-950 rounded-full p-0.5 shadow-md">
+                            <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+                        </div>
+                    `;
+                }
+
+                element.innerHTML = `
+                    ${checkOverlay}
+                    <div class="flex-1 flex items-center justify-center">
+                        ${svgHtml}
+                    </div>
+                    <div class="text-[9px] uppercase font-bold tracking-wider ${isActive ? (currentLevel === 2 ? 'text-rose-400' : 'text-cyan-400') : 'text-slate-500'} mt-0.5">
+                        ${isActive ? 'Digita' : (isCompleted ? 'OK' : '•')}
+                    </div>
+                `;
+                container.appendChild(element);
+            });
+        }
+
+        function updateProgressIndicator() {
+            const length = currentLevel === 1 ? 4 : 6;
+            document.getElementById('progressIndicator').innerText = `${currentActiveTargetIndex} / ${length}`;
+        }
+
+        /*
+          Main user input handler
+        */
+        function processDigitInput(number) {
+            if (!isGameRunning) return;
+
+            totalKeyPresses++;
+            const currentExpectedSymbol = currentTargetSymbols[currentActiveTargetIndex].key;
+            const correctNumber = cipherMapping[currentExpectedSymbol];
+
+            if (number === correctNumber) {
+                correctKeyPresses++;
+                currentActiveTargetIndex++;
+                playSound('correct');
+                
+                triggerKeyFlash(number, 'success');
+
+                const totalLength = currentLevel === 1 ? 4 : 6;
+                if (currentActiveTargetIndex >= totalLength) {
+                    correctStringsCount++;
+                    stringsCompletedInLastWindow++;
+                    playSound('complete');
+                    document.getElementById('scoreDisplay').innerText = correctStringsCount;
+                    
+                    const area = document.getElementById('targetStringContainer');
+                    area.classList.add('bg-emerald-500/10');
+                    setTimeout(() => area.classList.remove('bg-emerald-500/10'), 120);
+
+                    // LEVEL 2 SPECIAL ACTION: Change the legend (cipher mapping) at each completed sequence
+                    if (currentLevel === 2) {
+                        generateCipherMapping(true); // true triggers the flash animation
+                        renderLegend();
+                    }
+
+                    generateTargetString();
+                } else {
+                    renderTargetString();
+                    updateProgressIndicator();
+                }
+            } else {
+                errorKeyPresses++;
+                playSound('error');
+                document.getElementById('errorsDisplay').innerText = errorKeyPresses;
+                
+                triggerKeyFlash(number, 'error');
+
+                const area = document.getElementById('targetStringContainer');
+                area.classList.add('bg-rose-500/10', 'scale-[0.98]');
+                setTimeout(() => {
+                    area.classList.remove('bg-rose-500/10', 'scale-[0.98]');
+                }, 120);
+            }
+        }
+
+        function triggerKeyFlash(number, type) {
+            const targetBtn = document.getElementById(`virtual-key-${number}`);
+            if (!targetBtn) return;
+
+            if (type === 'success') {
+                targetBtn.classList.add('border-emerald-500', 'bg-emerald-950/40', 'text-emerald-300');
+                setTimeout(() => {
+                    targetBtn.classList.remove('border-emerald-500', 'bg-emerald-950/40', 'text-emerald-300');
+                }, 120);
+            } else {
+                targetBtn.classList.add('border-rose-500', 'bg-rose-950/40', 'text-rose-300');
+                setTimeout(() => {
+                    targetBtn.classList.remove('border-rose-500', 'bg-rose-950/40', 'text-rose-300');
+                }, 120);
+            }
+        }
+
+        function handleVirtualKeyPress(num) {
+            processDigitInput(num);
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (!isGameRunning) return;
+            const validKeys = ['1', '2', '3', '4', '5'];
+            if (validKeys.includes(e.key)) {
+                processDigitInput(parseInt(e.key));
+            }
+        });
+
+        /*
+          Starts the training loop
+        */
+        function startGame() {
+            document.getElementById('menuScreen').classList.add('hidden');
+            document.getElementById('gameScreen').classList.remove('hidden');
+            document.getElementById('resultScreen').classList.add('hidden');
+
+            const badge = document.getElementById('gameLevelBadge');
+            if (currentLevel === 1) {
+                badge.innerText = 'LIVELLO 1: STATICO';
+                badge.className = 'text-xs font-semibold tracking-wider text-cyan-400 uppercase';
+                document.getElementById('legendChangeBadge').classList.add('hidden');
+            } else {
+                badge.innerText = 'LIVELLO 2: DISTRAZIONE ATTIVA';
+                badge.className = 'text-xs font-semibold tracking-wider text-rose-400 uppercase';
+            }
+
+            // Stats and state resets
+            correctStringsCount = 0;
+            totalKeyPresses = 0;
+            correctKeyPresses = 0;
+            errorKeyPresses = 0;
+            stringsCompletedInLastWindow = 0;
+
+            document.getElementById('scoreDisplay').innerText = '0';
+            document.getElementById('errorsDisplay').innerText = '0';
+
+            // Generate initial cipher mapping and hide mapping alert initially
+            generateCipherMapping(false);
+            renderLegend();
+
+            setBackgroundDistraction(currentLevel);
+            generateTargetString();
+
+            timeRemaining = sessionDuration;
+            updateTimerDisplay();
+
+            chartDataPoints = [];
+            speedDataPoints = [];
+            throughputHistory = [];
+
+            isGameRunning = true;
+
+            // Defensive intervals clearing
+            if (timerInterval) clearInterval(timerInterval);
+            if (statTrackingInterval) clearInterval(statTrackingInterval);
+
+            // Timer loop
+            timerInterval = setInterval(() => {
+                timeRemaining--;
+                updateTimerDisplay();
+                if (timeRemaining <= 0) {
+                    endGame();
+                }
+            }, 1000);
+
+            // Monitoring window (5 seconds chunks)
+            const trackingWindowSec = 5;
+            let elapsedSec = 0;
+            statTrackingInterval = setInterval(() => {
+                elapsedSec += trackingWindowSec;
+                
+                const ratePerMinute = (stringsCompletedInLastWindow / trackingWindowSec) * 60;
+                
+                chartDataPoints.push(`${elapsedSec}s`);
+                speedDataPoints.push(Math.round(ratePerMinute * 10) / 10); 
+                
+                throughputHistory.push({
+                    second: elapsedSec,
+                    count: stringsCompletedInLastWindow,
+                    rate: ratePerMinute
+                });
+
+                stringsCompletedInLastWindow = 0;
+            }, trackingWindowSec * 1000);
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeRemaining / 60);
+            const seconds = timeRemaining % 60;
+            document.getElementById('timerDisplay').innerText = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function endGame() {
+            isGameRunning = false;
+            if (timerInterval) clearInterval(timerInterval);
+            if (statTrackingInterval) clearInterval(statTrackingInterval);
+            
+            playSound('gameover');
+            setBackgroundDistraction(1);
+
+            showReport();
+        }
+
+        /*
+          Compiles the cognitive diagnostic report
+        */
+        function showReport() {
+            document.getElementById('gameScreen').classList.add('hidden');
+            document.getElementById('resultScreen').classList.remove('hidden');
+
+            document.getElementById('resCorrect').innerText = correctStringsCount;
+
+            const accuracy = totalKeyPresses > 0 
+                ? Math.round((correctKeyPresses / totalKeyPresses) * 100) 
+                : 0;
+            document.getElementById('resAccuracy').innerText = `${accuracy}%`;
+
+            const activeSessionTime = sessionDuration - timeRemaining;
+            const avgSpeed = correctStringsCount > 0 
+                ? (activeSessionTime / correctStringsCount).toFixed(1) 
+                : '0.0';
+            document.getElementById('resAvgSpeed').innerText = `${avgSpeed}s`;
+
+            // Mental fatigue evaluation
+            const midIndex = Math.floor(throughputHistory.length / 2);
+            let firstHalfSum = 0;
+            let secondHalfSum = 0;
+
+            for (let i = 0; i < throughputHistory.length; i++) {
+                if (i < midIndex) {
+                    firstHalfSum += throughputHistory[i].count;
+                } else {
+                    secondHalfSum += throughputHistory[i].count;
+                }
+            }
+
+            let fatigueIndexText = '0%';
+            let fatigueValue = 0;
+            if (firstHalfSum > 0) {
+                const percentChange = ((secondHalfSum - firstHalfSum) / firstHalfSum) * 100;
+                fatigueValue = percentChange;
+                
+                if (percentChange < 0) {
+                    fatigueIndexText = `-${Math.abs(Math.round(percentChange))}%`;
+                    document.getElementById('resFatigue').className = 'text-xl font-extrabold text-rose-400 mt-0.5';
+                } else if (percentChange > 0) {
+                    fatigueIndexText = `+${Math.round(percentChange)}%`;
+                    document.getElementById('resFatigue').className = 'text-xl font-extrabold text-emerald-400 mt-0.5';
+                } else {
+                    fatigueIndexText = 'Stabile';
+                    document.getElementById('resFatigue').className = 'text-xl font-extrabold text-slate-400 mt-0.5';
+                }
+            } else {
+                fatigueIndexText = 'N/D';
+            }
+            document.getElementById('resFatigue').innerText = fatigueIndexText;
+
+            generateCognitiveInterpretation(correctStringsCount, accuracy, avgSpeed, fatigueValue);
+            renderPerformanceChart();
+        }
+
+        function generateCognitiveInterpretation(correctCount, accuracy, avgSpeed, fatigueValue) {
+            let evaluation = "";
+            
+            if (correctCount === 0) {
+                evaluation = "Filtro attentivo debole. Consigliamo di riprovare riducendo al minimo le distrazioni e memorizzando preliminarmente gli accoppiamenti numerici della legenda.";
+                document.getElementById('cognitiveEvaluation').innerText = evaluation;
+                return;
+            }
+
+            let speedProfile = "";
+            const floatSpeed = parseFloat(avgSpeed);
+            if (floatSpeed < (currentLevel === 1 ? 2.2 : 3.8)) {
+                speedProfile = "Velocità di elaborazione e scarica motoria eccezionale. Dimostra una notevole fluidità nei processi di scansione percettiva visiva.";
+            } else if (floatSpeed < (currentLevel === 1 ? 4.8 : 6.5)) {
+                speedProfile = "Velocità esecutiva nei range medi di attenzione focalizzata normotipica.";
+            } else {
+                speedProfile = "I tempi di reazione indicano una latenza nell'elaborazione visuo-spaziale delle icone geometriche o nel recupero della mappa cifrata.";
+            }
+
+            let accuracyProfile = "";
+            if (accuracy >= 94) {
+                accuracyProfile = " L'accuratezza rasenta l'eccellenza: hai mantenuto un controllo inibitorio eccellente sopprimendo gli impulsi di errore prassico anche sotto sforzo temporale.";
+            } else if (accuracy >= 82) {
+                accuracyProfile = " L'accuratezza è moderata, indicando transitori deficit attentivi superati grazie ad un'adeguata autocorrezione.";
+            } else {
+                accuracyProfile = " Si riscontra un pattern impulsivo marcato (Speed-Accuracy Trade-off). Hai privilegiato la velocità esecutiva compromettendo severamente la precisione del codice.";
+            }
+
+            let fatigueProfile = "";
+            if (fatigueValue < -12) {
+                fatigueProfile = " Si rileva una flessione sensibile nella seconda parte della sessione. Questo indica una vulnerabilità della tenuta attentiva prolungata (rapido affaticamento corticale prefrontale).";
+            } else if (fatigueValue >= -12 && fatigueValue <= 4) {
+                fatigueProfile = " La tenuta dell'attenzione risulta perfettamente costante e resiliente, immune al carico temporale e alle distrazioni dello sfondo.";
+            } else {
+                fatigueProfile = " Si evidenzia un forte effetto di riscaldamento cognitivo (warming up): l'efficacia dell'attenzione selettiva e del filtro visivo si è consolidata ed è migliorata con il passare dei secondi.";
+            }
+
+            let distractorNote = "";
+            if (currentLevel === 2) {
+                distractorNote = " L'allenamento a Livello 2 ha stimolato vigorosamente la corteccia prefrontale costringendoti a ignorare gli elementi fluttuanti, a superare l'effetto Stroop di mismatch dei colori e ad aggiornare continuamente la mappa mentale della legenda a ogni sequenza completata.";
+            }
+
+            evaluation = `${speedProfile}${accuracyProfile}${fatigueProfile}${distractorNote}`;
+            document.getElementById('cognitiveEvaluation').innerText = evaluation;
+        }
+
+        let chartInstance = null;
+
+        function renderPerformanceChart() {
+            const ctxChart = document.getElementById('performanceChart').getContext('2d');
+            
+            if (chartInstance) {
+                chartInstance.destroy();
+            }
+
+            const mainColor = currentLevel === 1 ? 'rgba(34, 211, 238, 1)' : 'rgba(244, 63, 94, 1)';
+            const gradientBg = ctxChart.createLinearGradient(0, 0, 0, 240);
+            gradientBg.addColorStop(0, currentLevel === 1 ? 'rgba(34, 211, 238, 0.22)' : 'rgba(244, 63, 94, 0.22)');
+            gradientBg.addColorStop(1, 'rgba(15, 23, 42, 0)');
+
+            chartInstance = new Chart(ctxChart, {
+                type: 'line',
+                data: {
+                    labels: chartDataPoints,
+                    datasets: [{
+                        label: 'Velocità di scarica',
+                        data: speedDataPoints,
+                        borderColor: mainColor,
+                        backgroundColor: gradientBg,
+                        borderWidth: 2.5,
+                        pointBackgroundColor: '#ffffff',
+                        pointBorderColor: mainColor,
+                        pointHoverRadius: 6,
+                        pointRadius: 3,
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false 
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(15, 23, 42, 0.96)',
+                            titleColor: '#94a3b8',
+                            bodyColor: '#f1f5f9',
+                            borderColor: 'rgba(51, 65, 85, 0.6)',
+                            borderWidth: 1,
+                            padding: 8,
+                            cornerRadius: 6,
+                            displayColors: false,
+                            callbacks: {
+                                label: function(context) {
+                                    return `Velocità: ${context.parsed.y} stringhe/min`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(51, 65, 85, 0.12)'
+                            },
+                            ticks: {
+                                color: '#94a3b8',
+                                font: {
+                                    size: 9,
+                                    weight: 'bold'
+                                }
+                            },
+                            title: {
+                                display: true,
+                                text: 'Stringhe / Minuto',
+                                color: '#64748b',
+                                font: {
+                                    size: 9,
+                                    weight: 'bold'
+                                }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                color: '#94a3b8',
+                                font: {
+                                    size: 9,
+                                    weight: 'bold'
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        /*
+          Navigation Helpers
+        */
+        function returnToMenu() {
+            document.getElementById('menuScreen').classList.remove('hidden');
+            document.getElementById('gameScreen').classList.add('hidden');
+            document.getElementById('resultScreen').classList.add('hidden');
+        }
+
+        function restartSession() {
+            startGame();
+        }
+    </script>
+</body>
+</html>

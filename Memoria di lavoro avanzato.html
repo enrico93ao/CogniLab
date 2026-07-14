@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NeuroTraining Pro - Palestra Cognitiva</title>
+  
+  <!-- Tailwind CSS per uno styling moderno ed elegante -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Font Inter da Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <!-- Lucide Icons per icone vettoriali nitide -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+    
+    /* Scrollbar personalizzata per la lista dei risultati */
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #f1f1f1;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 10px;
+    }
+    
+    /* Animazione di scuotimento in caso di errore nel calcolo matematico */
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-6px); }
+      75% { transform: translateX(6px); }
+    }
+    .shake-animation {
+      animation: shake 0.2s ease-in-out 0s 2;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-slate-100 flex items-center justify-center p-4 text-slate-900">
+
+  <!-- Contenitore Principale dell'Applicazione -->
+  <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden border border-slate-200">
+    
+    <!-- Header Fisso dell'Applicazione -->
+    <div class="bg-slate-800 text-white p-4 text-center">
+      <span class="font-bold uppercase tracking-widest text-xs opacity-80">Cognitive Gym v2.3 (HTML)</span>
+    </div>
+
+    <!-- Area dei Contenuti ad Altezza Minima per evitare sfarfallii -->
+    <div class="min-h-[520px] flex flex-col justify-center p-6">
+      
+      <!-- SCHERMATA 1: INTRODUZIONE -->
+      <div id="step-intro" class="flex flex-col items-center text-center space-y-6">
+        <div class="bg-blue-100 p-4 rounded-full">
+          <i data-lucide="brain" class="w-12 h-12 text-blue-600"></i>
+        </div>
+        <h1 class="text-3xl font-bold text-slate-800">NeuroTraining Pro</h1>
+        <p class="text-lg text-slate-600 max-w-md">
+          Esercizio di memoria di lavoro con database dinamico. Memorizza le tappe e risolvi i calcoli personalizzati.
+        </p>
+        <button 
+          id="btn-start"
+          class="px-8 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors flex items-center gap-2 shadow-lg active:scale-95 transform"
+        >
+          Inizia Sessione <i data-lucide="arrow-right" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- SCHERMATA 2: MEMORIZZAZIONE -->
+      <div id="step-memorize" class="hidden space-y-6 text-center">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-2xl font-bold text-slate-800">Memorizza</h2>
+          <div class="flex items-center gap-2 bg-amber-100 px-4 py-2 rounded-full border border-amber-200 shadow-sm">
+            <i data-lucide="clock" class="w-5 h-5 text-amber-600"></i>
+            <span id="memorize-timer" class="font-mono font-bold text-amber-700 text-xl">45s</span>
+          </div>
+        </div>
+        
+        <!-- Lista delle Città generate dinamicamente -->
+        <div id="cities-container" class="grid gap-4 max-w-sm mx-auto text-left">
+          <!-- Inserito da JavaScript -->
+        </div>
+
+        <button 
+          id="btn-ready"
+          class="mt-6 px-10 py-3 bg-slate-800 text-white rounded-xl font-bold hover:bg-slate-900 shadow-md transition-all active:scale-95"
+        >
+          Sono pronto
+        </button>
+      </div>
+
+      <!-- SCHERMATA 3: DISTRAZIONE (CALCOLO MATEMATICO) -->
+      <div id="step-distract" class="hidden flex flex-col items-center text-center space-y-6">
+        <div class="bg-purple-100 p-4 rounded-full">
+          <i data-lucide="calculator" class="w-12 h-12 text-purple-600"></i>
+        </div>
+        <h2 class="text-2xl font-bold text-slate-800">Compito Matematico</h2>
+        <p class="text-slate-500 text-sm italic">Risolvi i calcoli per sbloccare le domande di memoria.</p>
+        
+        <form id="math-form" class="flex flex-col items-center gap-4 w-full">
+          <div id="math-expression" class="text-4xl font-black text-slate-700 mb-2">
+            <!-- Esempio: 95 - 7 = ? -->
+          </div>
+          <input 
+            type="number"
+            id="math-input"
+            class="text-center text-3xl p-3 border-4 rounded-2xl w-40 outline-none transition-all border-purple-200 focus:border-purple-500"
+            required
+          />
+          <p id="math-error-msg" class="hidden text-red-500 font-bold animate-pulse italic">Calcolo errato</p>
+          <button 
+            type="submit" 
+            class="mt-4 px-12 py-4 bg-purple-600 text-white rounded-2xl font-bold shadow-lg hover:bg-purple-700 active:scale-95 transition-all"
+          >
+            Conferma
+          </button>
+        </form>
+      </div>
+
+      <!-- SCHERMATA 4: QUIZ MEMORIA -->
+      <div id="step-quiz" class="hidden space-y-6">
+        <h2 class="text-2xl font-bold text-slate-800 border-b pb-2 flex items-center gap-2">
+          <i data-lucide="brain" class="text-blue-600"></i> Verifica Memoria
+        </h2>
+        
+        <div class="space-y-5">
+          <div class="space-y-1">
+            <label id="label-q1" class="text-xs font-black text-slate-400 uppercase tracking-tighter">1. Qual era la TERZA città?</label>
+            <input 
+              id="ans-q1"
+              type="text"
+              class="w-full p-4 border-2 border-slate-100 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-medium"
+            />
+          </div>
+
+          <div class="space-y-1">
+            <label id="label-q2" class="text-xs font-black text-slate-400 uppercase tracking-tighter">2. A che ora era la visita della SECONDA città?</label>
+            <input 
+              id="ans-q2"
+              type="text"
+              placeholder="es. 11:30"
+              class="w-full p-4 border-2 border-slate-100 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-medium"
+            />
+          </div>
+
+          <div class="space-y-1">
+            <label id="label-q3" class="text-xs font-black text-slate-400 uppercase tracking-tighter">3. Quale monumento visiterai nella PRIMA città?</label>
+            <input 
+              id="ans-q3"
+              type="text"
+              class="w-full p-4 border-2 border-slate-100 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-medium"
+            />
+          </div>
+        </div>
+
+        <button 
+          id="btn-submit-quiz"
+          class="w-full py-4 bg-green-600 text-white rounded-2xl font-bold shadow-xl hover:bg-green-700 active:scale-95 transition-all"
+        >
+          Verifica Risultati
+        </button>
+      </div>
+
+      <!-- SCHERMATA 5: RISULTATI -->
+      <div id="step-result" class="hidden flex flex-col items-center space-y-6">
+        <div class="text-center">
+          <div id="result-score-badge" class="inline-flex items-center justify-center w-20 h-20 rounded-full mb-2 bg-orange-100 text-orange-600 shadow-inner">
+            <span id="result-score-text" class="text-3xl font-black">0/3</span>
+          </div>
+          <h2 id="result-header" class="text-2xl font-bold text-slate-800">Riepilogo Risposte</h2>
+        </div>
+        
+        <!-- Box contenitore dei risultati delle domande -->
+        <div id="results-list" class="w-full overflow-y-auto max-h-[320px] pr-2 custom-scrollbar">
+          <!-- Generato via JS -->
+        </div>
+
+        <button 
+          id="btn-restart"
+          class="w-full py-4 bg-slate-800 text-white rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-slate-900 shadow-lg transition-transform active:scale-95"
+        >
+          <i data-lucide="rotate-ccw" class="w-5 h-5"></i> Nuova Sessione
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // Database dei monumenti e delle tappe
+    const CITIES_DB = [
+      { city: "Venezia", monument: "Basilica di San Marco", time: "09:00" },
+      { city: "Roma", monument: "Colosseo", time: "14:00" },
+      { city: "Palermo", monument: "Cattedrale", time: "19:00" },
+      { city: "Firenze", monument: "Galleria degli Uffizi", time: "11:30" },
+      { city: "Napoli", monument: "Castel dell'Ovo", time: "16:30" },
+      { city: "Milano", monument: "Duomo", time: "08:30" },
+      { city: "Torino", monument: "Mole Antonelliana", time: "15:00" },
+      { city: "Pisa", monument: "Torre Pendente", time: "10:45" },
+      { city: "Genova", monument: "Acquario", time: "12:15" },
+      { city: "Verona", monument: "Arena di Verona", time: "20:30" },
+      { city: "Cagliari", monument: "Bastione di Saint Remy", time: "17:45" },
+      { city: "Bari", monument: "Basilica di San Nicola", time: "09:30" },
+      { city: "Siena", monument: "Piazza del Campo", time: "11:00" },
+      { city: "Matera", monument: "Sassi di Matera", time: "15:30" },
+      { city: "Bologna", monument: "Torre degli Asinelli", time: "14:15" },
+      { city: "Lecce", monument: "Basilica di Santa Croce", time: "18:20" },
+      { city: "Trieste", monument: "Castello di Miramare", time: "10:00" },
+      { city: "Assisi", monument: "Basilica di San Francesco", time: "13:45" }
+    ];
+
+    // Stato dell'applicazione
+    let state = {
+      step: 'intro',
+      sessionData: [],
+      distractionChain: [],
+      timer: 45,
+      timerInterval: null,
+      distractionStep: 0,
+      answers: { q1: '', q2: '', q3: '' },
+      results: { q1: false, q2: false, q3: false },
+      score: 0
+    };
+
+    // Cambia schermata nascondendo le altre e mostrando quella selezionata
+    function setStep(newStep) {
+      state.step = newStep;
+      
+      // Lista di tutti gli ID delle schermate
+      const steps = ['intro', 'memorize', 'distract', 'quiz', 'result'];
+      steps.forEach(s => {
+        const el = document.getElementById(`step-${s}`);
+        if (s === newStep) {
+          el.classList.remove('hidden');
+        } else {
+          el.classList.add('hidden');
+        }
+      });
+
+      // Gestione specifica degli ingressi negli step
+      if (newStep === 'memorize') {
+        startMemorizeTimer();
+      } else {
+        clearInterval(state.timerInterval);
+      }
+
+      if (newStep === 'distract') {
+        renderDistractQuestion();
+      }
+
+      if (newStep === 'quiz') {
+        renderQuizLabels();
+      }
+
+      if (newStep === 'result') {
+        renderResultsScreen();
+      }
+
+      // Re-inizializza le icone Lucide aggiunte dinamicamente
+      lucide.createIcons();
+    }
+
+    // Normalizzazione stringhe per controllo flessibile (ignora maiuscole, spazi multipli e punteggiatura)
+    function normalize(str) {
+      if (!str) return "";
+      return str.toLowerCase().trim().replace(/[.,/#!$%^&*;:{}=\-_`~()]/g, "").replace(/\s+/g, " ");
+    }
+
+    // Mescola un array casualmente
+    function shuffleArray(array) {
+      return array.sort(() => 0.5 - Math.random());
+    }
+
+    // Inizializza l'esercizio con nuove informazioni dinamiche
+    function initializeExercise() {
+      // Sceglie 3 città diverse
+      const shuffled = shuffleArray([...CITIES_DB]);
+      state.sessionData = shuffled.slice(0, 3);
+
+      // Genera una catena di calcolo matematica personalizzata
+      const startNum = Math.floor(Math.random() * (120 - 80 + 1)) + 80;
+      const subValue = Math.floor(Math.random() * (9 - 6 + 1)) + 6; // Sottrae tra 6 e 9
+      
+      state.distractionChain = [
+        { start: startNum, sub: subValue, target: startNum - subValue },
+        { start: startNum - subValue, sub: subValue, target: startNum - (subValue * 2) },
+        { start: startNum - (subValue * 2), sub: subValue, target: startNum - (subValue * 3) }
+      ];
+
+      // Reset stato generale
+      state.timer = 45;
+      state.distractionStep = 0;
+      state.answers = { q1: '', q2: '', q3: '' };
+      state.results = { q1: false, q2: false, q3: false };
+      state.score = 0;
+
+      // Pulisce gli input precedenti
+      document.getElementById('math-input').value = '';
+      document.getElementById('math-error-msg').classList.add('hidden');
+      document.getElementById('math-input').classList.remove('shake-animation');
+      document.getElementById('ans-q1').value = '';
+      document.getElementById('ans-q2').value = '';
+      document.getElementById('ans-q3').value = '';
+
+      // Rendering delle città nella schermata di memorizzazione
+      renderCities();
+
+      setStep('memorize');
+    }
+
+    // Timer decrescente per memorizzare
+    function startMemorizeTimer() {
+      const timerEl = document.getElementById('memorize-timer');
+      timerEl.textContent = `${state.timer}s`;
+
+      state.timerInterval = setInterval(() => {
+        state.timer--;
+        timerEl.textContent = `${state.timer}s`;
+
+        if (state.timer <= 0) {
+          clearInterval(state.timerInterval);
+          setStep('distract');
+        }
+      }, 1000);
+    }
+
+    // Rendering delle tappe di viaggio
+    function renderCities() {
+      const container = document.getElementById('cities-container');
+      container.innerHTML = '';
+
+      state.sessionData.forEach((item, idx) => {
+        const card = document.createElement('div');
+        card.className = "p-4 bg-white border-l-4 border-l-blue-500 border border-slate-200 rounded-xl shadow-sm";
+        card.innerHTML = `
+          <h3 class="font-bold text-xl text-slate-800 flex items-center gap-2">
+            <i data-lucide="map-pin" class="w-5 h-5 text-blue-500"></i> ${item.city}
+          </h3>
+          <p class="text-slate-600 ml-6 italic">${item.monument}</p>
+          <p class="text-slate-500 ml-6 text-sm font-bold mt-1 tracking-tight">Orario Visita: ${item.time}</p>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    // Rendering della formula di distrazione corrente
+    function renderDistractQuestion() {
+      const currentMath = state.distractionChain[state.distractionStep];
+      const mathExpressionEl = document.getElementById('math-expression');
+      mathExpressionEl.textContent = `${currentMath.start} - ${currentMath.sub} = ?`;
+      
+      const mathInput = document.getElementById('math-input');
+      mathInput.value = '';
+      mathInput.focus();
+    }
+
+    // Rendering dei testi delle etichette del quiz in base alle città estratte
+    function renderQuizLabels() {
+      document.getElementById('label-q1').textContent = "1. Qual era la TERZA città?";
+      document.getElementById('label-q2').textContent = "2. A che ora era la visita della SECONDA città?";
+      document.getElementById('label-q3').textContent = `3. Quale monumento visiterai a ${state.sessionData[0].city}?`;
+    }
+
+    // Controllo delle risposte dell'utente
+    function checkAnswers() {
+      state.answers.q1 = document.getElementById('ans-q1').value;
+      state.answers.q2 = document.getElementById('ans-q2').value;
+      state.answers.q3 = document.getElementById('ans-q3').value;
+
+      let currentScore = 0;
+      const newResults = { q1: false, q2: false, q3: false };
+
+      // Q1: Controllo Terza città
+      if (normalize(state.answers.q1).includes(normalize(state.sessionData[2].city))) {
+        currentScore++;
+        newResults.q1 = true;
+      }
+
+      // Q2: Controllo Orario seconda città
+      const userTime = state.answers.q2.replace(':', '').trim();
+      const correctTime = state.sessionData[1].time.replace(':', '').trim();
+      if (userTime === correctTime || state.answers.q2.trim() === state.sessionData[1].time) {
+        currentScore++;
+        newResults.q2 = true;
+      }
+
+      // Q3: Controllo Monumento prima città (flessibile e parziale)
+      const userMon = normalize(state.answers.q3);
+      const correctMon = normalize(state.sessionData[0].monument);
+      if (userMon.length > 2 && (correctMon.includes(userMon) || userMon.includes(correctMon))) {
+        currentScore++;
+        newResults.q3 = true;
+      }
+
+      state.results = newResults;
+      state.score = currentScore;
+      setStep('result');
+    }
+
+    // Rendering della schermata dei risultati storici
+    function renderResultsScreen() {
+      // Badge punteggio
+      const scoreBadge = document.getElementById('result-score-badge');
+      const scoreText = document.getElementById('result-score-text');
+      const headerText = document.getElementById('result-header');
+
+      scoreText.textContent = `${state.score}/3`;
+
+      if (state.score === 3) {
+        scoreBadge.className = "inline-flex items-center justify-center w-20 h-20 rounded-full mb-2 bg-green-100 text-green-600";
+        headerText.textContent = "Eccellente!";
+      } else {
+        scoreBadge.className = "inline-flex items-center justify-center w-20 h-20 rounded-full mb-2 bg-orange-100 text-orange-600 shadow-inner";
+        headerText.textContent = "Riepilogo Risposte";
+      }
+
+      // Generazione dei singoli widget di dettaglio risposta
+      const resultsList = document.getElementById('results-list');
+      resultsList.innerHTML = '';
+
+      const questionsData = [
+        { num: 1, title: "Terza tappa (Città)", user: state.answers.q1, correct: state.sessionData[2].city, ok: state.results.q1 },
+        { num: 2, title: "Seconda tappa (Orario)", user: state.answers.q2, correct: state.sessionData[1].time, ok: state.results.q2 },
+        { num: 3, title: `Prima tappa (Monumento a ${state.sessionData[0].city})`, user: state.answers.q3, correct: state.sessionData[0].monument, ok: state.results.q3 }
+      ];
+
+      questionsData.forEach(item => {
+        const itemDiv = document.createElement('div');
+        itemDiv.className = `p-4 rounded-2xl border-2 mb-3 transition-colors ${item.ok ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`;
+        
+        itemDiv.innerHTML = `
+          <div class="flex justify-between items-start mb-1">
+            <span class="text-xs font-bold uppercase text-slate-500 tracking-wider">Test ${item.num}</span>
+            ${item.ok 
+              ? '<i data-lucide="check" class="text-green-600 w-5 h-5"></i>' 
+              : '<i data-lucide="x-circle" class="text-red-600 w-5 h-5"></i>'
+            }
+          </div>
+          <p class="text-sm font-bold text-slate-800 mb-2">${item.title}</p>
+          <div class="grid grid-cols-2 gap-2 text-xs">
+            <div>
+              <p class="text-slate-400 uppercase font-black tracking-widest mb-1" style="font-size: 0.6rem">Tua risposta</p>
+              <p class="font-bold ${item.ok ? 'text-green-700' : 'text-red-700'}">${item.user || "(vuoto)"}</p>
+            </div>
+            ${!item.ok ? `
+              <div>
+                <p class="text-slate-400 uppercase font-black tracking-widest mb-1" style="font-size: 0.6rem">Risposta esatta</p>
+                <p class="font-bold text-slate-700">${item.correct}</p>
+              </div>
+            ` : ''}
+          </div>
+        `;
+        resultsList.appendChild(itemDiv);
+      });
+    }
+
+    // Listener per i calcoli di distrazione
+    document.getElementById('math-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const mathInput = document.getElementById('math-input');
+      const val = parseInt(mathInput.value);
+      const target = state.distractionChain[state.distractionStep].target;
+
+      if (val === target) {
+        document.getElementById('math-error-msg').classList.add('hidden');
+        mathInput.classList.remove('shake-animation');
+        
+        if (state.distractionStep === state.distractionChain.length - 1) {
+          setStep('quiz');
+        } else {
+          state.distractionStep++;
+          renderDistractQuestion();
+        }
+      } else {
+        // Attiva effetto shake in caso di errore
+        document.getElementById('math-error-msg').classList.remove('hidden');
+        mathInput.classList.add('shake-animation');
+        mathInput.focus();
+        
+        // Rimuove la classe shake dopo l'animazione per poterla riattivare
+        setTimeout(() => {
+          mathInput.classList.remove('shake-animation');
+        }, 200);
+      }
+    });
+
+    // Eventi Pulsanti di transizione
+    document.getElementById('btn-start').addEventListener('click', initializeExercise);
+    document.getElementById('btn-ready').addEventListener('click', () => setStep('distract'));
+    document.getElementById('btn-submit-quiz').addEventListener('click', checkAnswers);
+    document.getElementById('btn-restart').addEventListener('click', initializeExercise);
+
+    // Al caricamento, inizializza le icone della prima pagina
+    window.onload = function() {
+      lucide.createIcons();
+    };
+  </script>
+</body>
+</html>

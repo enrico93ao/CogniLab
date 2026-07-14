@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Il Tempo Esatto - Riabilitazione Cognitiva</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome per icone di supporto terapeutico -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Effetto pulsante del target visivo */
+        @keyframes pulse-ring {
+            0% { transform: scale(0.95); opacity: 0.8; }
+            50% { transform: scale(1.1); opacity: 0.4; }
+            100% { transform: scale(0.95); opacity: 0.8; }
+        }
+        .pulse-element {
+            animation: pulse-ring 2s infinite ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col justify-between">
+
+    <!-- Intestazione superiore pulita e professionale -->
+    <header class="bg-white border-b border-slate-200 py-4 px-6 shadow-sm">
+        <div class="max-w-5xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="bg-indigo-600 text-white p-2.5 rounded-xl shadow-md shadow-indigo-100 flex items-center justify-center">
+                    <i class="fa-solid fa-clock-rotate-left text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-slate-900 tracking-tight">Il Tempo Esatto</h1>
+                    <p class="text-xs text-indigo-600 font-medium tracking-wide uppercase">Neuro-Training &amp; Riabilitazione Cognitiva</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2 bg-indigo-50 text-indigo-700 px-4 py-1.5 rounded-full text-xs font-semibold">
+                <i class="fa-solid fa-brain"></i> Stima Temporale &amp; Attenzione Sostenuta
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-5xl w-full mx-auto px-4 py-8 flex items-center justify-center">
+        <!-- Contenitore unico per la transizione fluida delle schermate -->
+        <div class="w-full bg-white rounded-3xl border border-slate-150 shadow-xl shadow-slate-100/40 p-6 md:p-10 transition-all duration-300">
+
+            <!-- SCHERMATA 1: MENU DI CONFIGURAZIONE INIZIALE -->
+            <div id="screen-setup" class="space-y-8">
+                <div class="text-center max-w-2xl mx-auto space-y-3">
+                    <span class="bg-emerald-100 text-emerald-800 text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider">Nuova Sessione</span>
+                    <h2 class="text-3xl font-extrabold text-slate-900 tracking-tight">Allena il tuo Orologio Interno</h2>
+                    <p class="text-slate-500 leading-relaxed">
+                        Questo esercizio allena la capacità di stimare lo scorrere del tempo in assenza di stimoli esterni, stimolando la focalizzazione continua e riducendo l'impulsività.
+                    </p>
+                </div>
+
+                <!-- Scheda delle istruzioni del test clinico -->
+                <div class="bg-slate-50 rounded-2xl p-5 border border-slate-200/60 max-w-3xl mx-auto flex gap-4 items-start">
+                    <div class="text-indigo-600 mt-1"><i class="fa-solid fa-circle-info text-xl"></i></div>
+                    <div class="text-sm text-slate-600 space-y-1">
+                        <p class="font-bold text-slate-800">Come funziona l'esercizio:</p>
+                        <p>1. Una lancetta inizierà a girare nell'orologio partendo da ore 12.</p>
+                        <p>2. Dopo 1 giro completo, l'orologio e la lancetta <strong>scompariranno completamente</strong>.</p>
+                        <p>3. Continua a seguire mentalmente il ritmo del movimento e premi <strong class="text-indigo-600">STOP</strong> esattamente al completamento del traguardo richiesto.</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto pt-4">
+                    <!-- Configurazione Difficoltà -->
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+                        <label class="block text-sm font-bold text-slate-700 flex items-center gap-2">
+                            <i class="fa-solid fa-gauge-high text-indigo-500"></i> Livello di Difficoltà
+                        </label>
+                        <p class="text-xs text-slate-400">Determina il carico cognitivo richiesto per l'esercizio.</p>
+                        <div class="space-y-2 pt-2">
+                            <label class="flex items-center p-3 rounded-xl border border-slate-150 hover:bg-slate-50 cursor-pointer transition">
+                                <input type="radio" name="difficulty" value="facile" class="w-4 h-4 text-indigo-600 focus:ring-indigo-500" checked>
+                                <div class="ml-3">
+                                    <span class="block text-xs font-bold text-slate-800">Facile</span>
+                                    <span class="block text-[11px] text-slate-500">1 Giro invisibile con metronomo acustico</span>
+                                </div>
+                            </label>
+                            <label class="flex items-center p-3 rounded-xl border border-slate-150 hover:bg-slate-50 cursor-pointer transition">
+                                <input type="radio" name="difficulty" value="intermedio" class="w-4 h-4 text-indigo-600 focus:ring-indigo-500">
+                                <div class="ml-3">
+                                    <span class="block text-xs font-bold text-slate-800">Intermedio</span>
+                                    <span class="block text-[11px] text-slate-500">1 Giro invisibile, silenzio assoluto</span>
+                                </div>
+                            </label>
+                            <label class="flex items-center p-3 rounded-xl border border-slate-150 hover:bg-slate-50 cursor-pointer transition">
+                                <input type="radio" name="difficulty" value="avanzato" class="w-4 h-4 text-indigo-600 focus:ring-indigo-500">
+                                <div class="ml-3">
+                                    <span class="block text-xs font-bold text-slate-800">Avanzato</span>
+                                    <span class="block text-[11px] text-slate-500">2 Giri invisibili (Alta memoria di lavoro)</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Configurazione Velocità Lancetta -->
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+                        <label class="block text-sm font-bold text-slate-700 flex items-center gap-2">
+                            <i class="fa-solid fa-gauge text-indigo-500"></i> Velocità della Lancetta
+                        </label>
+                        <p class="text-xs text-slate-400">Imposta il tempo impiegato per compiere una rotazione intera.</p>
+                        <div class="space-y-2 pt-2">
+                            <label class="flex items-center p-3 rounded-xl border border-slate-150 hover:bg-slate-50 cursor-pointer transition">
+                                <input type="radio" name="speed" value="slow" class="w-4 h-4 text-indigo-600 focus:ring-indigo-500">
+                                <div class="ml-3">
+                                    <span class="block text-xs font-bold text-slate-800">Rallentato (4 sec / giro)</span>
+                                    <span class="block text-[11px] text-slate-500">Ideale per iniziare la riabilitazione</span>
+                                </div>
+                            </label>
+                            <label class="flex items-center p-3 rounded-xl border border-slate-150 hover:bg-slate-50 cursor-pointer transition">
+                                <input type="radio" name="speed" value="standard" class="w-4 h-4 text-indigo-600 focus:ring-indigo-500" checked>
+                                <div class="ml-3">
+                                    <span class="block text-xs font-bold text-slate-800">Standard (3 sec / giro)</span>
+                                    <span class="block text-[11px] text-slate-500">Ritmo bilanciato consigliato</span>
+                                </div>
+                            </label>
+                            <label class="flex items-center p-3 rounded-xl border border-slate-150 hover:bg-slate-50 cursor-pointer transition">
+                                <input type="radio" name="speed" value="fast" class="w-4 h-4 text-indigo-600 focus:ring-indigo-500">
+                                <div class="ml-3">
+                                    <span class="block text-xs font-bold text-slate-800">Rapido (2 sec / giro)</span>
+                                    <span class="block text-[11px] text-slate-500">Sfida complessa ad alta frequenza</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Configurazione Numero Tentativi -->
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3 flex flex-col justify-between">
+                        <div class="space-y-3">
+                            <label class="block text-sm font-bold text-slate-700 flex items-center gap-2">
+                                <i class="fa-solid fa-list-check text-indigo-500"></i> Durata Sessione
+                            </label>
+                            <p class="text-xs text-slate-400">Seleziona il numero di ripetizioni del test prima della valutazione.</p>
+                            <div class="grid grid-cols-2 gap-3 pt-2">
+                                <label class="flex items-center justify-center p-4 rounded-xl border border-slate-150 hover:bg-indigo-50 hover:border-indigo-300 cursor-pointer transition text-center select-none">
+                                    <input type="radio" name="trials" value="5" class="sr-only" checked>
+                                    <span class="text-sm font-bold text-slate-800 block label-trials-text">5 Tentativi</span>
+                                </label>
+                                <label class="flex items-center justify-center p-4 rounded-xl border border-slate-150 hover:bg-indigo-50 hover:border-indigo-300 cursor-pointer transition text-center select-none">
+                                    <input type="radio" name="trials" value="10" class="sr-only">
+                                    <span class="text-sm font-bold text-slate-800 block label-trials-text">10 Tentativi</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="bg-indigo-50/50 rounded-xl p-3 border border-indigo-100 text-center">
+                            <p class="text-[11px] text-indigo-800 font-medium">L'audio verrà attivato per gli aiuti della modalità Facile.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bottone di Avvio -->
+                <div class="text-center pt-4">
+                    <button id="btn-start-training" class="bg-indigo-600 hover:bg-indigo-700 active:transform active:scale-95 text-white text-lg font-bold px-12 py-4 rounded-2xl shadow-lg shadow-indigo-200 transition-all duration-150 inline-flex items-center gap-3">
+                        Inizia Allenamento <i class="fa-solid fa-circle-play text-xl"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- SCHERMATA 2: CONTENITORE DI GIOCO -->
+            <div id="screen-game" class="hidden space-y-8">
+                <!-- Barra superiore dello stato di avanzamento -->
+                <div class="flex flex-col sm:flex-row justify-between items-center bg-slate-50 border border-slate-150 rounded-2xl p-4 gap-3">
+                    <div class="flex items-center gap-3">
+                        <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Progresso:</span>
+                        <div class="flex gap-1.5" id="progress-dots">
+                            <!-- Popolato dinamicamente -->
+                        </div>
+                        <span class="text-xs font-bold text-slate-700" id="txt-trial-counter">1 di 5</span>
+                    </div>
+                    <div class="flex items-center gap-2 text-xs font-bold text-indigo-700 bg-indigo-50 px-3 py-1.5 rounded-lg">
+                        <i class="fa-solid fa-circle-nodes"></i>
+                        <span id="txt-current-difficulty-label">Difficoltà: Intermedio</span>
+                    </div>
+                    <button id="btn-quit-session" class="text-xs font-bold text-rose-500 hover:text-rose-700 hover:underline flex items-center gap-1">
+                        <i class="fa-solid fa-door-open"></i> Abbandona
+                    </button>
+                </div>
+
+                <!-- Istruzione dinamica in tempo reale sullo stato -->
+                <div class="text-center space-y-1">
+                    <h3 id="txt-instruction" class="text-xl font-bold text-slate-800 transition-all duration-200">Preparati ad avviare la lancetta...</h3>
+                    <p id="txt-instruction-detail" class="text-xs text-slate-500">Clicca sul pulsante sottostante quando sei pronto a concentrarti.</p>
+                </div>
+
+                <!-- Quadrante dell'orologio e lancetta (Interfaccia principale) -->
+                <div class="flex justify-center items-center py-6">
+                    <div class="relative w-72 h-72 md:w-80 md:h-80">
+                        <!-- Orologio visualizzato tramite SVG -->
+                        <svg id="svg-clock" viewBox="0 0 200 200" class="w-full h-full drop-shadow-lg transition-opacity duration-300">
+                            <!-- Sfondo del quadrante dell'orologio -->
+                            <circle cx="100" cy="100" r="95" fill="#ffffff" stroke="#e2e8f0" stroke-width="4"/>
+                            <circle cx="100" cy="100" r="88" fill="#f8fafc"/>
+                            
+                            <!-- Tacche dei quadranti (12, 3, 6, 9 principali) -->
+                            <line x1="100" y1="12" x2="100" y2="24" stroke="#475569" stroke-width="3" stroke-linecap="round"/>
+                            <line x1="100" y1="188" x2="100" y2="176" stroke="#475569" stroke-width="3" stroke-linecap="round"/>
+                            <line x1="12" y1="100" x2="24" y2="100" stroke="#475569" stroke-width="3" stroke-linecap="round"/>
+                            <line x1="188" y1="100" x2="176" y2="100" stroke="#475569" stroke-width="3" stroke-linecap="round"/>
+                            
+                            <!-- Tacche secondarie minori -->
+                            <line x1="144" y1="24" x2="138" y2="34" stroke="#94a3b8" stroke-width="1.5" stroke-linecap="round"/>
+                            <line x1="176" y1="56" x2="166" y2="62" stroke="#94a3b8" stroke-width="1.5" stroke-linecap="round"/>
+                            <line x1="176" y1="144" x2="166" y2="138" stroke="#94a3b8" stroke-width="1.5" stroke-linecap="round"/>
+                            <line x1="144" y1="176" x2="138" y2="166" stroke="#94a3b8" stroke-width="1.5" stroke-linecap="round"/>
+                            <line x1="56" y1="176" x2="62" y2="166" stroke="#94a3b8" stroke-width="1.5" stroke-linecap="round"/>
+                            <line x1="24" y1="144" x2="34" y2="138" stroke="#94a3b8" stroke-width="1.5" stroke-linecap="round"/>
+                            <line x1="24" y1="56" x2="34" y2="62" stroke="#94a3b8" stroke-width="1.5" stroke-linecap="round"/>
+                            <line x1="56" y1="24" x2="62" y2="34" stroke="#94a3b8" stroke-width="1.5" stroke-linecap="round"/>
+
+                            <!-- Evidenziatore del traguardo (Ore 12) -->
+                            <g class="pulse-element">
+                                <circle cx="100" cy="12" r="6" fill="#6366f1" opacity="0.4"/>
+                                <circle cx="100" cy="12" r="3" fill="#6366f1"/>
+                            </g>
+                            
+                            <!-- Centro dell'orologio -->
+                            <circle cx="100" cy="100" r="7" fill="#1e293b"/>
+                            
+                            <!-- Lancetta Principale di Animazione -->
+                            <line id="clock-hand" x1="100" y1="100" x2="100" y2="25" stroke="#1e293b" stroke-width="3.5" stroke-linecap="round" transform="rotate(0, 100, 100)"/>
+
+                            <!-- Lancette di feedback (Visualizzate solo a fine tentativo per correzione visiva) -->
+                            <!-- Lancetta Target (Verde) -->
+                            <line id="hand-feedback-target" x1="100" y1="100" x2="100" y2="25" stroke="#10b981" stroke-width="3" stroke-linecap="round" stroke-dasharray="2,2" class="hidden" transform="rotate(0, 100, 100)"/>
+                            <!-- Lancetta Utente (Rossa/Arancione) -->
+                            <line id="hand-feedback-user" x1="100" y1="100" x2="100" y2="30" stroke="#f43f5e" stroke-width="3" stroke-linecap="round" class="hidden" transform="rotate(0, 100, 100)"/>
+                        </svg>
+
+                        <!-- Indicazione testuale "INVISIBILE" sovrapposta quando l'orologio scompare -->
+                        <div id="blindfold-overlay" class="absolute inset-0 bg-slate-900 rounded-full flex flex-col justify-center items-center text-center p-4 border-4 border-slate-700 opacity-0 pointer-events-none transition-all duration-300 transform scale-95">
+                            <i class="fa-solid fa-eye-slash text-4xl text-slate-400 mb-2"></i>
+                            <span class="text-white font-bold text-sm uppercase tracking-widest">Orologio Invisibile</span>
+                            <span class="text-xs text-slate-400 mt-1">Mantieni il tempo a mente!</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Feedback Istantaneo dopo il click di STOP -->
+                <div id="trial-feedback-card" class="hidden max-w-md mx-auto rounded-2xl p-4 text-center border transition-all duration-200">
+                    <p id="feedback-main-text" class="text-base font-bold"></p>
+                    <p id="feedback-sub-text" class="text-xs text-slate-500 mt-1"></p>
+                </div>
+
+                <!-- Bottoni di Azione Principali -->
+                <div class="flex flex-col items-center gap-4 justify-center pt-2">
+                    <!-- Bottone per Avviare il tentativo attuale -->
+                    <button id="btn-start-trial" class="bg-indigo-600 hover:bg-indigo-700 active:transform active:scale-95 text-white font-bold px-10 py-4 rounded-2xl shadow-md transition-all duration-150 flex items-center gap-2">
+                        <i class="fa-solid fa-play"></i> Avvia Lancetta
+                    </button>
+
+                    <!-- Bottone STOP (Gigante, accessibile e chiarissimo) -->
+                    <button id="btn-stop-trial" class="hidden bg-rose-600 hover:bg-rose-700 active:transform active:scale-95 text-white text-2xl font-black px-16 py-6 rounded-3xl shadow-xl shadow-rose-200/50 transition-all duration-150 uppercase tracking-widest disabled:opacity-50 disabled:cursor-not-allowed">
+                        STOP
+                    </button>
+
+                    <!-- Bottone Prossimo Tentativo -->
+                    <button id="btn-next-trial" class="hidden bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-10 py-4 rounded-2xl shadow-md transition-all flex items-center gap-2">
+                        Prossimo Tentativo <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+
+                    <!-- Bottone per vedere i risultati finali della sessione -->
+                    <button id="btn-show-results" class="hidden bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-10 py-4 rounded-2xl shadow-md transition-all flex items-center gap-2">
+                        Vedi Analisi Risultati <i class="fa-solid fa-chart-line"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- SCHERMATA 3: BILANCIO E ANALISI CLINICA FINALE -->
+            <div id="screen-results" class="hidden space-y-8">
+                <div class="text-center max-w-2xl mx-auto space-y-3">
+                    <span class="bg-indigo-100 text-indigo-800 text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider">Sessione Completata</span>
+                    <h2 class="text-3xl font-extrabold text-slate-900 tracking-tight">Analisi della Performance</h2>
+                    <p class="text-slate-500">I dati sottostanti offrono un quadro chiaro sulle attitudini di stima temporale del paziente.</p>
+                </div>
+
+                <!-- Statistiche Chiave Riassuntive -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-3xl mx-auto">
+                    <!-- Errore Medio Assoluto -->
+                    <div class="bg-slate-50 border border-slate-200 rounded-2xl p-5 text-center shadow-sm">
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block">Scarto Medio Assoluto</span>
+                        <span id="stat-avg-error" class="text-3xl font-black text-indigo-600 mt-2 block">120 ms</span>
+                        <p class="text-xs text-slate-500 mt-1">Media complessiva degli errori</p>
+                    </div>
+
+                    <!-- Grado di Precisione -->
+                    <div class="bg-slate-50 border border-slate-200 rounded-2xl p-5 text-center shadow-sm">
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block">Indice di Precisione</span>
+                        <span id="stat-accuracy-score" class="text-3xl font-black text-emerald-600 mt-2 block">92%</span>
+                        <p id="stat-accuracy-label" class="text-xs text-slate-500 mt-1">Calcolato sul tempo ideale</p>
+                    </div>
+
+                    <!-- Tendenza Principale -->
+                    <div class="bg-slate-50 border border-slate-200 rounded-2xl p-5 text-center shadow-sm">
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block">Tendenza Predominante</span>
+                        <span id="stat-bias-type" class="text-2xl font-bold text-rose-600 mt-3 block">Anticipazione</span>
+                        <p class="text-xs text-slate-500 mt-1">Direzione prevalente dello scarto</p>
+                    </div>
+                </div>
+
+                <!-- Grafico Lineare SVG per la visualizzazione dell'anticipo vs ritardo -->
+                <div class="bg-slate-50 border border-slate-200 rounded-2xl p-6 max-w-3xl mx-auto space-y-4">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                        <div>
+                            <h4 class="text-sm font-bold text-slate-800">Andamento Temporale dei Tentativi</h4>
+                            <p class="text-xs text-slate-500">I punti sopra lo zero indicano ritardo, sotto indicano anticipo.</p>
+                        </div>
+                        <div class="flex items-center gap-3 text-xs font-medium">
+                            <span class="flex items-center gap-1"><span class="w-3 h-3 bg-rose-500 rounded-full inline-block"></span> Ritardo (+)</span>
+                            <span class="flex items-center gap-1"><span class="w-3 h-3 bg-amber-500 rounded-full inline-block"></span> Anticipo (-)</span>
+                        </div>
+                    </div>
+
+                    <!-- Contenitore SVG del grafico lineare interattivo -->
+                    <div class="relative w-full overflow-hidden bg-white border border-slate-100 rounded-xl p-2 md:p-4">
+                        <svg id="chart-svg" viewBox="0 0 600 250" class="w-full h-auto">
+                            <!-- Griglia orizzontale e linee di riferimento -->
+                            <!-- Linea zero di precisione perfetta -->
+                            <line x1="40" y1="125" x2="580" y2="125" stroke="#10b981" stroke-width="2" stroke-dasharray="4,4"/>
+                            <text x="540" y="120" fill="#10b981" font-size="10" font-weight="bold">Target Esatto</text>
+                            
+                            <!-- Linee di griglia -->
+                            <line x1="40" y1="50" x2="580" y2="50" stroke="#f1f5f9" stroke-width="1"/>
+                            <text x="12" y="54" fill="#94a3b8" font-size="9">+400ms</text>
+                            
+                            <line x1="40" y1="200" x2="580" y2="200" stroke="#f1f5f9" stroke-width="1"/>
+                            <text x="12" y="204" fill="#94a3b8" font-size="9">-400ms</text>
+
+                            <!-- Linea verticale asse Y -->
+                            <line x1="40" y1="30" x2="40" y2="220" stroke="#cbd5e1" stroke-width="1"/>
+                            
+                            <!-- I dati dinamici del grafico (linea e cerchi) verranno appesi qui via Javascript -->
+                            <g id="chart-elements-group"></g>
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Report Clinico Esplicativo dell'Equilibrio Cognitivo -->
+                <div class="bg-indigo-50/50 rounded-2xl p-6 border border-indigo-100 max-w-3xl mx-auto space-y-3">
+                    <h4 class="text-sm font-bold text-indigo-900 flex items-center gap-2">
+                        <i class="fa-solid fa-clipboard-question text-base"></i> Interpretazione Terapeutica del Profilo
+                    </h4>
+                    <p id="txt-clinical-report" class="text-xs text-indigo-950 leading-relaxed">
+                        In attesa dei dati statistici...
+                    </p>
+                </div>
+
+                <!-- Pulsanti per riavviare o salvare i risultati -->
+                <div class="flex flex-col sm:flex-row justify-center items-center gap-4 pt-4">
+                    <button id="btn-restart-app" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-8 py-3.5 rounded-xl shadow transition-all duration-150 flex items-center gap-2">
+                        <i class="fa-solid fa-rotate-right"></i> Nuova Sessione
+                    </button>
+                    <button id="btn-export-results" class="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 font-bold px-8 py-3.5 rounded-xl shadow-sm transition-all duration-150 flex items-center gap-2">
+                        <i class="fa-solid fa-copy"></i> Copia Report per Terapista
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Footer pulito -->
+    <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-400">
+        <div class="max-w-5xl mx-auto px-4">
+            <p>&copy; 2026 - Il Tempo Esatto. Strumento per la riabilitazione dell'attenzione e delle funzioni esecutive.</p>
+        </div>
+    </footer>
+
+    <!-- Modal di Conferma Abbandono Personalizzato (Sostituisce il confirm() nativo) -->
+    <div id="modal-quit-confirm" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-3xl p-6 max-w-sm w-full border border-slate-150 shadow-2xl space-y-4 transform transition-all scale-95">
+            <div class="text-center space-y-2">
+                <div class="inline-flex items-center justify-center bg-rose-50 text-rose-600 p-3 rounded-full mb-2">
+                    <i class="fa-solid fa-triangle-exclamation text-2xl"></i>
+                </div>
+                <h3 class="text-lg font-bold text-slate-900">Abbandonare la sessione?</h3>
+                <p class="text-xs text-slate-500">I dati e le registrazioni dei tentativi correnti andranno persi definitivamente.</p>
+            </div>
+            <div class="flex gap-3 pt-2">
+                <button id="btn-modal-cancel" class="flex-1 py-2.5 px-4 border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-xs rounded-xl transition">
+                    Annulla
+                </button>
+                <button id="btn-modal-confirm" class="flex-1 py-2.5 px-4 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs rounded-xl shadow-md transition">
+                    Abbandona
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Logica di Controllo Principale -->
+    <script>
+        // --- VARIABILI DI STATO E CONFIGURAZIONE DI GIOCO ---
+        let config = {
+            difficulty: 'facile', // facile, intermedio, avanzato
+            speed: 'standard',     // slow, standard, fast
+            totalTrials: 5         // 5, 10
+        };
+
+        // Parametri temporali derivati dalla configurazione
+        let durationPerRotation = 3000; // in millisecondi per completare 360 gradi
+        let targetRotationsTotal = 2;   // 1 giro visibile + N giri invisibili (1 o 2)
+
+        // Stato della sessione corrente
+        let sessionState = {
+            currentTrial: 1,
+            trialsData: [], // Array di oggetti { trialNum, deviazioneMs, erroreAssoluto, tempoImpiegato, targetIdeale, anticipo }
+            isPlaying: false,
+            isRevealed: false
+        };
+
+        // Gestione temporale e animazione
+        let animationFrameId = null;
+        let timeTrialStart = 0;          // Tempo ad alta precisione di avvio lancetta
+        let timeOfDisappearance = 0;    // Tempo ad alta precisione in cui l'orologio scompare
+        let metronomeIntervalId = null;  // Metronomo per il livello Facile
+
+        // Sintesi Audio Nativi (Web Audio API)
+        let audioCtx = null;
+
+        // Riferimenti agli elementi DOM principali
+        const setupScreen = document.getElementById('screen-setup');
+        const gameScreen = document.getElementById('screen-game');
+        const resultsScreen = document.getElementById('screen-results');
+
+        // Pulsanti
+        const btnStartTraining = document.getElementById('btn-start-training');
+        const btnStartTrial = document.getElementById('btn-start-trial');
+        const btnStopTrial = document.getElementById('btn-stop-trial');
+        const btnNextTrial = document.getElementById('btn-next-trial');
+        const btnShowResults = document.getElementById('btn-show-results');
+        const btnQuitSession = document.getElementById('btn-quit-session');
+        const btnRestartApp = document.getElementById('btn-restart-app');
+        const btnExportResults = document.getElementById('btn-export-results');
+
+        // Riferimenti del modal personalizzato
+        const modalQuitConfirm = document.getElementById('modal-quit-confirm');
+        const btnModalCancel = document.getElementById('btn-modal-cancel');
+        const btnModalConfirm = document.getElementById('btn-modal-confirm');
+
+        // Grafica ed Elementi di visualizzazione orologio
+        const svgClock = document.getElementById('svg-clock');
+        const clockHand = document.getElementById('clock-hand');
+        const handFeedbackTarget = document.getElementById('hand-feedback-target');
+        const handFeedbackUser = document.getElementById('hand-feedback-user');
+        const blindfoldOverlay = document.getElementById('blindfold-overlay');
+
+        // Elementi testuali e feedback
+        const txtInstruction = document.getElementById('txt-instruction');
+        const txtInstructionDetail = document.getElementById('txt-instruction-detail');
+        const txtTrialCounter = document.getElementById('txt-trial-counter');
+        const txtCurrentDifficultyLabel = document.getElementById('txt-current-difficulty-label');
+        const progressDotsContainer = document.getElementById('progress-dots');
+        const trialFeedbackCard = document.getElementById('trial-feedback-card');
+        const feedbackMainText = document.getElementById('feedback-main-text');
+        const feedbackSubText = document.getElementById('feedback-sub-text');
+
+        /**
+         * Genera un impulso acustico piacevole e non fastidioso per aiutare la ritmica (metronomo).
+         */
+        function playMetronomeTick(highPitch = false) {
+            try {
+                if (!audioCtx) {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+                
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                
+                osc.type = 'sine';
+                // Tono acuto a inizio giro, più grave per i quarti
+                osc.frequency.setValueAtTime(highPitch ? 1000 : 500, audioCtx.currentTime);
+                
+                gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.08);
+                
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.08);
+            } catch (e) {
+                console.warn("Audio non disponibile o bloccato dalle policy del browser: ", e);
+            }
+        }
+
+        // --- INIZIALIZZAZIONE DELLA SESSIONE ---
+        btnStartTraining.addEventListener('click', () => {
+            // Raccogli configurazioni selezionate dal menu principale
+            const diffEl = document.querySelector('input[name="difficulty"]:checked');
+            const speedEl = document.querySelector('input[name="speed"]:checked');
+            const trialsEl = document.querySelector('input[name="trials"]:checked');
+
+            config.difficulty = diffEl ? diffEl.value : 'facile';
+            config.speed = speedEl ? speedEl.value : 'standard';
+            config.totalTrials = trialsEl ? parseInt(trialsEl.value) : 5;
+
+            // Applica velocità
+            if (config.speed === 'slow') {
+                durationPerRotation = 4000;
+            } else if (config.speed === 'fast') {
+                durationPerRotation = 2000;
+            } else {
+                durationPerRotation = 3000;
+            }
+
+            // Imposta i giri totali del traguardo
+            // Facile/Intermedio: 1 giro visibile + 1 giro invisibile = 2 giri totali
+            // Avanzato: 1 giro visibile + 2 giri invisibili = 3 giri totali
+            if (config.difficulty === 'avanzato') {
+                targetRotationsTotal = 3;
+            } else {
+                targetRotationsTotal = 2;
+            }
+
+            // Inizializza audio per assicurare il caricamento del contesto al click dell'utente
+            try {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            } catch (e) {}
+
+            // Prepara lo stato della sessione
+            sessionState.currentTrial = 1;
+            sessionState.trialsData = [];
+            sessionState.isPlaying = false;
+            sessionState.isRevealed = false;
+
+            // Passa alla schermata di gioco
+            setupScreen.classList.add('hidden');
+            gameScreen.classList.remove('hidden');
+
+            initProgressDots();
+            setupTrialEnvironment();
+        });
+
+        // --- CREAZIONE DOTS DI AVANZAMENTO NELLO STATO ---
+        function initProgressDots() {
+            progressDotsContainer.innerHTML = '';
+            for (let i = 1; i <= config.totalTrials; i++) {
+                const dot = document.createElement('div');
+                dot.id = `dot-${i}`;
+                dot.className = "w-3 h-3 rounded-full bg-slate-200 border border-slate-300 transition-colors duration-200";
+                progressDotsContainer.appendChild(dot);
+            }
+        }
+
+        function updateProgressDots() {
+            for (let i = 1; i <= config.totalTrials; i++) {
+                const dot = document.getElementById(`dot-${i}`);
+                if (!dot) continue;
+                if (i < sessionState.currentTrial) {
+                    dot.className = "w-3 h-3 rounded-full bg-indigo-500 border border-indigo-600 shadow-sm";
+                } else if (i === sessionState.currentTrial) {
+                    dot.className = "w-3 h-3 rounded-full bg-amber-400 border border-amber-500 animate-pulse";
+                } else {
+                    dot.className = "w-3 h-3 rounded-full bg-slate-200 border border-slate-300";
+                }
+            }
+        }
+
+        // --- PREPARAZIONE AMBIENTE DEL SINGOLO TENTATIVO ---
+        function setupTrialEnvironment() {
+            sessionState.isPlaying = false;
+            sessionState.isRevealed = false;
+
+            updateProgressDots();
+            txtTrialCounter.textContent = `${sessionState.currentTrial} di ${config.totalTrials}`;
+            
+            // Etichetta della difficoltà
+            const diffText = config.difficulty.charAt(0).toUpperCase() + config.difficulty.slice(1);
+            txtCurrentDifficultyLabel.textContent = `Difficoltà: ${diffText}`;
+
+            // Reset orologio e lancette
+            clockHand.setAttribute('transform', 'rotate(0, 100, 100)');
+            clockHand.classList.remove('hidden');
+            handFeedbackTarget.classList.add('hidden');
+            handFeedbackUser.classList.add('hidden');
+            svgClock.style.opacity = "1";
+            blindfoldOverlay.style.opacity = "0";
+
+            // Nascondi elementi di interazione post-tentativo
+            trialFeedbackCard.className = "hidden max-w-md mx-auto rounded-2xl p-4 text-center border transition-all duration-200";
+            btnStopTrial.classList.add('hidden');
+            btnNextTrial.classList.add('hidden');
+            btnShowResults.classList.add('hidden');
+
+            // Mostra pulsante di avvio
+            btnStartTrial.classList.remove('hidden');
+
+            // Aggiorna istruzione descrittiva iniziale
+            txtInstruction.textContent = "Pronto a testare la precisione?";
+            
+            let totalInvisibili = (config.difficulty === 'avanzato') ? 2 : 1;
+            let targetString = (totalInvisibili === 1) ? "1 GIRO COMPLETO" : "2 GIRI COMPLETI";
+            txtInstructionDetail.innerHTML = `La lancetta farà 1 giro visibile. Scomparirà a ore 12. Stoppa esattamente dopo <strong class="text-indigo-600 font-bold">${targetString}</strong> invisibile/i.`;
+        }
+
+        // --- AVVIO DEL FLUSSO DI ROTAZIONE ---
+        btnStartTrial.addEventListener('click', () => {
+            sessionState.isPlaying = true;
+            btnStartTrial.classList.add('hidden');
+            btnStopTrial.classList.remove('hidden');
+            btnStopTrial.disabled = true; // Disattivato fino alla scomparsa per evitare click anticipati errati
+
+            txtInstruction.textContent = "Sincronizzati con il movimento...";
+            txtInstructionDetail.textContent = "Segui visivamente il movimento costante della lancetta.";
+
+            timeTrialStart = performance.now();
+            timeOfDisappearance = timeTrialStart + durationPerRotation; // Scompare esattamente dopo 1 giro completo (360°)
+
+            // Avvia loop di animazione fluida
+            animateClockHand();
+
+            // Configura il metronomo sonoro solo per la modalità Facile
+            if (config.difficulty === 'facile') {
+                startMetronomeAudio();
+            }
+        });
+
+        // --- ANIMAZIONE FLUIDA DELLA LANCETTA ---
+        function animateClockHand() {
+            if (!sessionState.isPlaying) return;
+
+            const now = performance.now();
+            const elapsed = now - timeTrialStart;
+            
+            // Calcola l'angolo di rotazione (360 gradi = 1 giro intero)
+            const angle = (elapsed / durationPerRotation) * 360;
+            clockHand.setAttribute('transform', `rotate(${angle % 360}, 100, 100)`);
+
+            // Fase di Scomparsa Visiva: Esattamente dopo il primo giro (elapsed >= durationPerRotation)
+            if (elapsed >= durationPerRotation) {
+                if (svgClock.style.opacity !== "0" && !sessionState.isRevealed) {
+                    svgClock.style.opacity = "0";
+                    blindfoldOverlay.style.opacity = "1";
+                    btnStopTrial.disabled = false; // Abilita lo STOP da questo momento in poi
+                    txtInstruction.textContent = "STIMA IL TEMPO INTERNAMENTE!";
+                    txtInstructionDetail.innerHTML = `L'orologio è invisibile. Concentrati sul ritmo e premi <strong class="text-rose-600">STOP</strong> al traguardo!`;
+                }
+            }
+
+            animationFrameId = requestAnimationFrame(animateClockHand);
+        }
+
+        // Metronomo acustico: suona a ogni quarto di giro (90 gradi) per guidare il paziente
+        function startMetronomeAudio() {
+            const msPerBeat = durationPerRotation / 4; // Batti a ogni quarto di quadrante
+            let beatCount = 0;
+
+            // Suona il primo battito immediatamente
+            playMetronomeTick(true);
+
+            metronomeIntervalId = setInterval(() => {
+                beatCount++;
+                // Ogni 4 battiti è un giro completo (tono leggermente più acuto sul traguardo del 12)
+                const isStartOfRotation = (beatCount % 4 === 0);
+                playMetronomeTick(isStartOfRotation);
+            }, msPerBeat);
+        }
+
+        function stopMetronomeAudio() {
+            if (metronomeIntervalId) {
+                clearInterval(metronomeIntervalId);
+                metronomeIntervalId = null;
+            }
+        }
+
+        // --- GESTIONE AZIONE STOP: CALCOLO DEVIZIONE IN MS ---
+        btnStopTrial.addEventListener('click', () => {
+            if (!sessionState.isPlaying) return;
+
+            // Cattura il tempo istantaneo esatto dello STOP
+            const stopTime = performance.now();
+            sessionState.isPlaying = false;
+            cancelAnimationFrame(animationFrameId);
+            stopMetronomeAudio();
+
+            // Calcolo del tempo effettivo trascorso
+            const totalElapsedTime = stopTime - timeTrialStart;
+            
+            // Calcolo del tempo ideale atteso
+            // Esempio: TargetRotationsTotal = 2 giri (1 visibile + 1 invisibile)
+            const targetTimeIdeal = targetRotationsTotal * durationPerRotation;
+            
+            // Calcolo scarto ad alta precisione
+            const deviation = totalElapsedTime - targetTimeIdeal; // Negativo = Anticipo, Positivo = Ritardo
+            const absoluteError = Math.abs(deviation);
+
+            // Calcolo gradi reali della lancetta per visualizzare il feedback visivo correttivo
+            const actualAngle = (totalElapsedTime / durationPerRotation) * 360;
+
+            // Salva i dati del tentativo corrente
+            const trialResult = {
+                trialNum: sessionState.currentTrial,
+                deviazioneMs: Math.round(deviation),
+                erroreAssoluto: Math.round(absoluteError),
+                tempoImpiegato: Math.round(totalElapsedTime),
+                tempoIdeale: Math.round(targetTimeIdeal),
+                anticipo: deviation < 0
+            };
+            sessionState.trialsData.push(trialResult);
+
+            // Mostra Feedback visivo di calibrazione sull'orologio
+            revealCalibrationFeedback(actualAngle, trialResult);
+        });
+
+        // --- REVELATION / CORREZIONE DELL'ERRORE (APPRENDIMENTO CEREBELLARE) ---
+        function revealCalibrationFeedback(userAngle, result) {
+            sessionState.isRevealed = true;
+
+            // Fai ricomparire l'orologio per mostrare l'errore commesso in modo nitido
+            svgClock.style.opacity = "1";
+            blindfoldOverlay.style.opacity = "0";
+
+            // Nascondi la lancetta mobile standard e mostra le lancette fisse di calibrazione
+            clockHand.classList.add('hidden');
+
+            // Lancetta Target (Sempre a ore 12 / 0 gradi in quanto i giri richiesti sono completi)
+            handFeedbackTarget.setAttribute('transform', 'rotate(0, 100, 100)');
+            handFeedbackTarget.classList.remove('hidden');
+
+            // Lancetta dell'Utente (Posizionata esattamente dove si trovava quando ha stoppato)
+            handFeedbackUser.setAttribute('transform', `rotate(${userAngle % 360}, 100, 100)`);
+            handFeedbackUser.classList.remove('hidden');
+
+            // Nascondi pulsante stop
+            btnStopTrial.classList.add('hidden');
+
+            // Mostra scheda feedback
+            trialFeedbackCard.classList.remove('hidden');
+            
+            // Definisce stile, colori e messaggi di calibrazione in base all'entità dell'errore
+            let feedbackClass = "";
+            let titleText = "";
+            let descriptionText = "";
+
+            const absErr = result.erroreAssoluto;
+
+            if (absErr <= 150) { // Ottima precisione cognitiva
+                feedbackClass = "bg-emerald-50 border-emerald-200 text-emerald-800";
+                titleText = `<i class="fa-solid fa-circle-check text-xl mr-2"></i> Eccellente Precisione!`;
+                descriptionText = `Scarto di soli <strong>${absErr} ms</strong>. Sincronizzazione ed attenzione ottimali.`;
+            } else if (absErr <= 350) { // Precisione moderata, buona prestazione
+                feedbackClass = "bg-amber-50 border-amber-200 text-amber-800";
+                titleText = `<i class="fa-solid fa-circle-exclamation text-xl mr-2"></i> Buono`;
+                descriptionText = `Scarto di <strong>${absErr} ms</strong> (${result.anticipo ? 'Anticipato' : 'Ritardato'}). Buona sincronizzazione cerebrale.`;
+            } else { // Errore significativo
+                feedbackClass = "bg-rose-50 border-rose-200 text-rose-800";
+                titleText = `<i class="fa-solid fa-circle-xmark text-xl mr-2"></i> Errore Significativo`;
+                descriptionText = `Scarto di <strong>${absErr} ms</strong> (${result.anticipo ? 'Anticipato' : 'Ritardato'}). Cerca di mantenere costante il ritmo interno.`;
+            }
+
+            trialFeedbackCard.className = `max-w-md mx-auto rounded-2xl p-4 text-center border transition-all duration-200 ${feedbackClass}`;
+            feedbackMainText.innerHTML = titleText;
+            feedbackSubText.innerHTML = descriptionText;
+
+            // Determina la gestione del flusso dei turni (prossimo turno vs fine test)
+            if (sessionState.currentTrial < config.totalTrials) {
+                btnNextTrial.classList.remove('hidden');
+                txtInstruction.textContent = "Analizza l'errore commesso";
+                txtInstructionDetail.textContent = "La lancetta verde tratteggiata indica il target ideale. Quella rossa indica la tua fermata reale.";
+            } else {
+                btnShowResults.classList.remove('hidden');
+                txtInstruction.textContent = "Esercizio Terminato!";
+                txtInstructionDetail.textContent = "Hai completato tutti i tentativi previsti per questa sessione di allenamento.";
+            }
+        }
+
+        // --- AVANZAMENTO TENTATIVI ---
+        btnNextTrial.addEventListener('click', () => {
+            sessionState.currentTrial++;
+            setupTrialEnvironment();
+        });
+
+        // --- GESTIONE ABBANDONO CON MODAL DI CONFERMA PERSONALIZZATO ---
+        btnQuitSession.addEventListener('click', () => {
+            // Mostra il modal anziché usare il confirm() nativo
+            modalQuitConfirm.classList.remove('hidden');
+        });
+
+        btnModalCancel.addEventListener('click', () => {
+            // Chiude il modal senza effettuare azioni
+            modalQuitConfirm.classList.add('hidden');
+        });
+
+        btnModalConfirm.addEventListener('click', () => {
+            // Pulisce lo stato e torna alla schermata di configurazione
+            modalQuitConfirm.classList.add('hidden');
+            stopMetronomeAudio();
+            cancelAnimationFrame(animationFrameId);
+            gameScreen.classList.add('hidden');
+            setupScreen.classList.remove('hidden');
+        });
+
+        // --- SCHERMATA FINALE: CALCOLO STATISTICHE E CREAZIONE REPORT ---
+        btnShowResults.addEventListener('click', () => {
+            gameScreen.classList.add('hidden');
+            resultsScreen.classList.remove('hidden');
+
+            renderStatisticsAndGraphs();
+        });
+
+        function renderStatisticsAndGraphs() {
+            const data = sessionState.trialsData;
+            const n = data.length;
+
+            if (n === 0) return;
+
+            // 1. Calcolo Errore Medio Assoluto
+            const sumAbsError = data.reduce((acc, curr) => acc + curr.erroreAssoluto, 0);
+            const avgAbsError = Math.round(sumAbsError / n);
+            document.getElementById('stat-avg-error').textContent = `${avgAbsError} ms`;
+
+            // 2. Calcolo Indice di Precisione Cognitiva (%)
+            // Un errore di 0ms = 100%. Un errore maggiore di una soglia limite (es. 1000ms) = 0%
+            let accuracySum = 0;
+            data.forEach(t => {
+                let acc = Math.max(0, 100 - (t.erroreAssoluto / (durationPerRotation / 3))); // normalizzato sul ritmo di rotazione
+                accuracySum += acc;
+            });
+            const avgAccuracy = Math.round(accuracySum / n);
+            document.getElementById('stat-accuracy-score').textContent = `${avgAccuracy}%`;
+
+            // Testo etichetta precisione
+            let accuracyLabel = "";
+            if (avgAccuracy >= 90) accuracyLabel = "Eccellente sincronia";
+            else if (avgAccuracy >= 75) accuracyLabel = "Buona coordinazione";
+            else if (avgAccuracy >= 60) accuracyLabel = "Controllo moderato";
+            else accuracyLabel = "Richiede allenamento continuo";
+            document.getElementById('stat-accuracy-label').textContent = accuracyLabel;
+
+            // 3. Calcolo Tendenza Predominante (Bias Cognitivo)
+            // Somma degli scarti reali (con segno) per identificare la tendenza (anticipo vs ritardo)
+            const sumRealDeviation = data.reduce((acc, curr) => acc + curr.deviazioneMs, 0);
+            const countAnticipo = data.filter(t => t.anticipo).length;
+            const countRitardo = n - countAnticipo;
+
+            let biasType = "";
+            let biasColorClass = "";
+            
+            if (Math.abs(sumRealDeviation / n) < 70) {
+                biasType = "Equilibrato";
+                biasColorClass = "text-emerald-600";
+            } else if (countAnticipo > countRitardo) {
+                biasType = "Anticipo";
+                biasColorClass = "text-amber-500";
+            } else {
+                biasType = "Ritardo";
+                biasColorClass = "text-rose-500";
+            }
+            
+            const biasElement = document.getElementById('stat-bias-type');
+            biasElement.textContent = biasType;
+            biasElement.className = `text-2xl font-bold mt-3 block ${biasColorClass}`;
+
+            // 4. Generazione del Testo di Report Terapeutico personalizzato
+            generateClinicalReport(avgAbsError, biasType, countAnticipo, countRitardo, n);
+
+            // 5. Rendering del Grafico SVG ad alta risoluzione
+            drawSVGChart(data);
+        }
+
+        function generateClinicalReport(avgAbsError, biasType, countAnticipo, countRitardo, total) {
+            const reportEl = document.getElementById('txt-clinical-report');
+            let text = "";
+
+            if (biasType === "Equilibrato") {
+                text = `Il paziente ha completato la sessione mostrando un eccellente equilibrio temporale complessivo (errore medio di <strong>${avgAbsError} ms</strong>). La distribuzione bilanciata tra anticipazioni (${countAnticipo}) e ritardi (${countRitardo}) indica che non è presente una deviazione cronobiologica strutturale né stati evidenti di impulsività motoria. La capacità di mantenere a mente il ritmo in assenza di indizi visivi riflette ottime capacità di attenzione sostenuta e memoria di lavoro.`;
+            } else if (biasType === "Anticipo") {
+                text = `Il paziente mostra una marcata e prevalente tendenza ad <strong>anticipare</strong> la stima del tempo ideale (${countAnticipo} risposte in anticipo su ${total}). Questo tipo di risposta è comunemente associato a una accelerazione dell'orologio interno o a un'impulsività di natura esecutiva (difficoltà di inibizione del comportamento). Si suggerisce di focalizzarsi su respirazioni rallentate prima dell'avvio e, se possibile, utilizzare la modalità Facile per rafforzare la traccia acustica del tempo prima di progredire.`;
+            } else if (biasType === "Ritardo") {
+                text = `La sessione rileva una propensione sistematica al <strong>ritardo</strong> nella stima temporale (${countRitardo} risposte in ritardo su ${total}). Questo ritardo (scarto medio di <strong>${avgAbsError} ms</strong>) può indicare una lieve tendenza all'affaticamento o cali transitori di attenzione sostenuta durante la fase invisibile della traccia. Il tempo interno del soggetto si muove più lentamente di quello reale. Si consiglia di pianificare sessioni di allenamento brevi ma frequenti, mantenendo impostazioni standard o rapide per stimolare la focalizzazione reattiva.`;
+            }
+
+            reportEl.innerHTML = text;
+        }
+
+        // --- DISEGNO DEL GRAFICO SVG RESPONSIVE ---
+        function drawSVGChart(data) {
+            const group = document.getElementById('chart-elements-group');
+            group.innerHTML = ''; // Svuota grafico precedente
+
+            const n = data.length;
+            if (n === 0) return;
+
+            // Trova l'errore massimo (con segno) per definire l'asse Y dinamico
+            let maxDev = Math.max(...data.map(t => Math.abs(t.deviazioneMs)));
+            // Assicura che l'asse Y copra almeno un range di +/- 300ms per non appiattire la visione
+            if (maxDev < 300) maxDev = 300;
+            // Aggiungi un margine di respiro
+            const yBoundary = maxDev * 1.15;
+
+            // Dimensioni coordinate del grafico
+            const chartLeft = 40;
+            const chartRight = 580;
+            const chartWidth = chartRight - chartLeft;
+            const chartHeight = 250;
+            const chartCenterY = 125; // Rappresenta lo scarto = 0 ms
+
+            // Calcola la distanza tra i punti del grafico lungo l'asse X
+            const xStep = n > 1 ? chartWidth / (n - 1) : chartWidth;
+
+            // Genera le coordinate X, Y per ciascun tentativo
+            const points = data.map((t, idx) => {
+                const x = chartLeft + (idx * xStep);
+                // Mappa il valore deviazioneMs nell'altezza del grafico
+                // Se deviazioneMs è positiva (ritardo) -> Y va verso l'alto (valori Y decrescenti in SVG)
+                // Se deviazioneMs è negativa (anticipo) -> Y va verso il basso (valori Y crescenti in SVG)
+                const yFraction = t.deviazioneMs / yBoundary;
+                const y = chartCenterY - (yFraction * (chartHeight / 2 - 30));
+                return { x, y, value: t.deviazioneMs, trial: t.trialNum };
+            });
+
+            // 1. Disegna la linea di connessione spezzata dei dati
+            let polylinePointsStr = "";
+            points.forEach(p => {
+                polylinePointsStr += `${p.x},${p.y} `;
+            });
+
+            const polyline = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
+            polyline.setAttribute("points", polylinePointsStr.trim());
+            polyline.setAttribute("fill", "none");
+            polyline.setAttribute("stroke", "#6366f1");
+            polyline.setAttribute("stroke-width", "3");
+            polyline.setAttribute("stroke-linecap", "round");
+            polyline.setAttribute("stroke-linejoin", "round");
+            group.appendChild(polyline);
+
+            // 2. Disegna i nodi dei singoli tentativi con etichette e feedback colore
+            points.forEach(p => {
+                // Cerchio di sfondo ombreggiato
+                const bgCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                bgCircle.setAttribute("cx", p.x);
+                bgCircle.setAttribute("cy", p.y);
+                bgCircle.setAttribute("r", "8");
+                bgCircle.setAttribute("fill", "#ffffff");
+                bgCircle.setAttribute("stroke", "#6366f1");
+                bgCircle.setAttribute("stroke-width", "2");
+                group.appendChild(bgCircle);
+
+                // Cerchietto colorato interno per identificare la categoria dell'errore
+                const dotColor = Math.abs(p.value) <= 150 ? "#10b981" : (Math.abs(p.value) <= 350 ? "#f59e0b" : "#f43f5e");
+                const innerCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                innerCircle.setAttribute("cx", p.x);
+                innerCircle.setAttribute("cy", p.y);
+                innerCircle.setAttribute("r", "4");
+                innerCircle.setAttribute("fill", dotColor);
+                group.appendChild(innerCircle);
+
+                // Testo della deviazione sopra/sotto il punto
+                const textVal = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                const formattedVal = p.value > 0 ? `+${p.value}ms` : `${p.value}ms`;
+                textVal.setAttribute("x", p.x);
+                // Posiziona sopra se positivo, sotto se negativo per evitare sovrapposizioni alla linea zero
+                textVal.setAttribute("y", p.value >= 0 ? p.y - 12 : p.y + 18);
+                textVal.setAttribute("text-anchor", "middle");
+                textVal.setAttribute("fill", "#334155");
+                textVal.setAttribute("font-size", "9");
+                textVal.setAttribute("font-weight", "bold");
+                textVal.textContent = formattedVal;
+                group.appendChild(textVal);
+
+                // Etichetta del numero di tentativo in basso sull'asse X
+                const textTrial = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                textTrial.setAttribute("x", p.x);
+                textTrial.setAttribute("y", "238");
+                textTrial.setAttribute("text-anchor", "middle");
+                textTrial.setAttribute("fill", "#64748b");
+                textTrial.setAttribute("font-size", "10");
+                textTrial.setAttribute("font-weight", "500");
+                textTrial.textContent = `T${p.trial}`;
+                group.appendChild(textTrial);
+            });
+        }
+
+        // --- COPIA REPORT PER TERAPISTA ---
+        btnExportResults.addEventListener('click', () => {
+            const data = sessionState.trialsData;
+            const diffText = config.difficulty.charAt(0).toUpperCase() + config.difficulty.slice(1);
+            const speedText = config.speed.charAt(0).toUpperCase() + config.speed.slice(1);
+            
+            const sumAbsError = data.reduce((acc, curr) => acc + curr.erroreAssoluto, 0);
+            const avgAbsError = Math.round(sumAbsError / data.length);
+            
+            let txtReport = `REPORT CLINICO COGNITIVO - IL TEMPO ESATTO\n`;
+            txtReport += `Data Sessione: ${new Date().toLocaleDateString('it-IT')} ${new Date().toLocaleTimeString('it-IT')}\n`;
+            txtReport += `-----------------------------------------------\n`;
+            txtReport += `Difficoltà: ${diffText}\n`;
+            txtReport += `Velocità Impostata: ${speedText}\n`;
+            txtReport += `Scarto Medio Assoluto: ${avgAbsError} ms\n`;
+            txtReport += `Tendenza Predominante: ${document.getElementById('stat-bias-type').textContent}\n`;
+            txtReport += `-----------------------------------------------\n`;
+            txtReport += `Dettaglio dei Tentativi:\n`;
+            
+            data.forEach(t => {
+                const segno = t.deviazioneMs > 0 ? "+" : "";
+                txtReport += `Tentativo ${t.trialNum}: ${segno}${t.deviazioneMs} ms (${t.deviazioneMs < 0 ? 'Anticipato' : 'Ritardato'})\n`;
+            });
+            txtReport += `-----------------------------------------------\n`;
+            txtReport += `Valutazione:\n${document.getElementById('txt-clinical-report').innerText}\n`;
+
+            // Metodo sicuro di copia negli appunti supportato
+            const tempTextArea = document.createElement('textarea');
+            tempTextArea.value = txtReport;
+            document.body.appendChild(tempTextArea);
+            tempTextArea.select();
+            try {
+                document.execCommand('copy');
+                
+                // Feedback momentaneo sul pulsante
+                const origHTML = btnExportResults.innerHTML;
+                btnExportResults.innerHTML = `<i class="fa-solid fa-check text-emerald-500"></i> Copiato con successo!`;
+                btnExportResults.classList.add('bg-emerald-50', 'border-emerald-300');
+                
+                setTimeout(() => {
+                    btnExportResults.innerHTML = origHTML;
+                    btnExportResults.classList.remove('bg-emerald-50', 'border-emerald-300');
+                }, 2000);
+            } catch (err) {
+                console.error('Incapace di copiare', err);
+            }
+            document.body.removeChild(tempTextArea);
+        });
+
+        // --- RIAVVIO DELL'APPLICAZIONE ---
+        btnRestartApp.addEventListener('click', () => {
+            resultsScreen.classList.add('hidden');
+            setupScreen.classList.remove('hidden');
+        });
+
+        // Avvio iniziale sul caricamento della finestra
+        window.onload = function() {
+            // Predisposizione iniziale
+        }
+    </script>
+</body>
+</html>

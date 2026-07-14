@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Caccia all'Intruso Visivo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;600;800&display=swap');
+
+        :root {
+            --bg-cream: #FDFBF7;
+            --text-dark: #2D3436;
+            --accent-blue: #0984E3;
+            --success-green: #00B894;
+            --error-red: #D63031;
+            --star-gold: #F1C40F;
+        }
+
+        body {
+            font-family: 'Lexend', sans-serif;
+            background-color: var(--bg-cream);
+            color: var(--text-dark);
+            margin: 0;
+            overflow: hidden;
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .btn-large {
+            min-height: 54px;
+            font-weight: 600;
+            border-radius: 18px;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .btn-large:active { transform: scale(0.96); }
+
+        .btn-selected {
+            background-color: #DBEAFE !important;
+            border: 3px solid #60A5FA !important;
+            color: #1E40AF !important;
+        }
+
+        .grid-item {
+            aspect-ratio: 1 / 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border-radius: 16px;
+            background: white;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 2px solid transparent;
+            animation: popIn 0.3s ease-out forwards;
+        }
+
+        .grid-item svg {
+            width: 60%;
+            height: 60%;
+            display: block;
+            transition: transform 0.2s ease;
+        }
+
+        /* Stile intruso parzialmente trovato (modalità 2 intrusi) */
+        .found-intruder {
+            border-color: var(--success-green) !important;
+            background-color: #ECFDF5 !important;
+            opacity: 0.6;
+            pointer-events: none;
+        }
+        
+        .found-intruder svg {
+            transform: scale(0.8);
+        }
+
+        @keyframes popIn {
+            from { opacity: 0; transform: scale(0.5); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .shake {
+            animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+            border-color: var(--error-red) !important;
+            background-color: #FEF2F2 !important;
+        }
+
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+
+        .star-rating svg { width: 40px; height: 40px; color: #E2E8F0; }
+        .star-active { color: var(--star-gold) !important; fill: var(--star-gold); }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body class="bg-[#FDFBF7]">
+
+    <div id="menu-screen" class="min-h-screen flex flex-col items-center justify-center p-4 overflow-y-auto">
+        <div class="text-center mb-6">
+            <h1 class="text-4xl font-extrabold text-blue-900 tracking-tight">Caccia all'Intruso</h1>
+            <p class="text-gray-500 font-medium">Sfida la tua vista e la tua attenzione</p>
+        </div>
+        
+        <div class="w-full max-w-md space-y-6">
+            <section class="bg-white p-5 rounded-3xl shadow-sm border border-gray-100">
+                <h2 class="text-xs uppercase tracking-widest font-bold text-gray-400 mb-4 text-center">Configura Sessione</h2>
+                
+                <!-- Selezione Difficoltà -->
+                <div class="mb-4">
+                    <span class="block text-xs font-bold text-gray-400 mb-2 uppercase text-center">Griglia</span>
+                    <div class="grid grid-cols-4 gap-2">
+                        <button onclick="setLevel(3)" id="btn-lvl-3" class="btn-large bg-gray-50 border-2 border-transparent text-gray-600 btn-selected text-sm">3x3</button>
+                        <button onclick="setLevel(4)" id="btn-lvl-4" class="btn-large bg-gray-50 border-2 border-transparent text-gray-600 text-sm">4x4</button>
+                        <button onclick="setLevel(5)" id="btn-lvl-5" class="btn-large bg-gray-50 border-2 border-transparent text-gray-600 text-sm">5x5</button>
+                        <button onclick="setLevel(6)" id="btn-lvl-6" class="btn-large bg-gray-50 border-2 border-transparent text-gray-600 text-sm">6x6</button>
+                    </div>
+                </div>
+
+                <!-- Selezione Modalità (1 o 2 Intrusi) -->
+                <div class="mb-4">
+                    <span class="block text-xs font-bold text-gray-400 mb-2 uppercase text-center">Modalità</span>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="setIntrudersCount(1)" id="btn-intr-1" class="btn-large bg-gray-50 border-2 border-transparent text-gray-600 btn-selected text-sm">1 Intruso</button>
+                        <button onclick="setIntrudersCount(2)" id="btn-intr-2" class="btn-large bg-gray-50 border-2 border-transparent text-gray-600 text-sm">2 Intrusi</button>
+                    </div>
+                </div>
+                
+                <!-- Selezione Durata -->
+                <div>
+                    <span class="block text-xs font-bold text-gray-400 mb-2 uppercase text-center">Tempo</span>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button onclick="setDuration(1)" id="btn-dur-1" class="btn-large bg-gray-50 border-2 border-transparent text-gray-600 btn-selected text-sm">1m</button>
+                        <button onclick="setDuration(3)" id="btn-dur-3" class="btn-large bg-gray-50 border-2 border-transparent text-gray-600 text-sm">3m</button>
+                        <button onclick="setDuration(5)" id="btn-dur-5" class="btn-large bg-gray-50 border-2 border-transparent text-gray-600 text-sm">5m</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Card Istruzioni Dinamiche -->
+            <div class="bg-blue-50/50 border border-blue-100 p-4 rounded-2xl text-center">
+                <p id="instruction-text" class="text-sm text-blue-800 font-medium leading-relaxed">
+                    Trova il simbolo diverso dagli altri e toccalo il più velocemente possibile.
+                </p>
+            </div>
+
+            <button onclick="startGame()" class="w-full btn-large bg-blue-600 text-white font-bold text-xl hover:bg-blue-700 shadow-lg shadow-blue-100">
+                INIZIA ORA
+            </button>
+        </div>
+    </div>
+
+    <div id="game-screen" class="hidden min-h-screen flex flex-col p-4">
+        <header class="flex justify-between items-center mb-4 max-w-4xl mx-auto w-full px-2">
+            <div class="text-blue-900 font-black text-2xl tabular-nums bg-white px-4 py-2 rounded-2xl shadow-sm border border-gray-50" id="session-timer-display">00:00</div>
+            <div class="flex items-center gap-2">
+                <span id="label-counter" class="text-sm font-bold text-gray-400 uppercase">Trovati:</span>
+                <span class="text-xl font-black text-blue-600" id="live-counter">0</span>
+            </div>
+            <button onclick="endGame()" class="px-4 py-2 bg-gray-100 text-gray-500 rounded-xl font-bold hover:bg-gray-200 transition-all">Stop</button>
+        </header>
+        
+        <main class="flex-grow flex items-center justify-center">
+            <div id="game-grid-container" class="w-full max-w-[min(90vw,65vh)] transition-all duration-200 rounded-3xl p-2">
+                <div id="game-grid" class="grid gap-2 w-full"></div>
+            </div>
+        </main>
+    </div>
+
+    <div id="results-screen" class="hidden min-h-screen flex flex-col items-center justify-center p-6 bg-[#F8FAFC]">
+        <div class="bg-white p-8 md:p-10 rounded-[3rem] shadow-2xl max-w-lg w-full text-center relative overflow-hidden">
+            <!-- Badge Record -->
+            <div id="new-record-badge" class="hidden absolute top-4 -right-12 bg-yellow-400 text-yellow-900 font-black text-xs py-2 px-14 transform rotate-45 shadow-sm">NEW RECORD!</div>
+
+            <h2 class="text-2xl font-bold text-gray-400 uppercase tracking-widest mb-2">Riepilogo Sessione</h2>
+            
+            <!-- Stelle Valutazione -->
+            <div class="flex justify-center gap-2 mb-6 star-rating" id="star-container">
+                <svg id="star-1" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
+                <svg id="star-2" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
+                <svg id="star-3" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
+            </div>
+
+            <!-- Griglia Risultati Principali -->
+            <div class="grid grid-cols-2 gap-4 mb-8">
+                <div class="bg-blue-50 p-4 rounded-2xl border border-blue-100">
+                    <p id="res-found-label" class="text-[10px] font-bold text-blue-400 uppercase mb-1">Trovati</p>
+                    <p id="res-found" class="text-3xl font-black text-blue-900">0</p>
+                </div>
+                <div class="bg-purple-50 p-4 rounded-2xl border border-purple-100">
+                    <p class="text-[10px] font-bold text-purple-400 uppercase mb-1">Tempo Medio</p>
+                    <p id="res-avg" class="text-3xl font-black text-purple-900">0.0s</p>
+                </div>
+                <div class="bg-green-50 p-4 rounded-2xl border border-green-100">
+                    <p class="text-[10px] font-bold text-green-400 uppercase mb-1">Precisione</p>
+                    <p id="res-accuracy" class="text-3xl font-black text-green-900">0%</p>
+                </div>
+                <div class="bg-orange-50 p-4 rounded-2xl border border-orange-100">
+                    <p class="text-[10px] font-bold text-orange-400 uppercase mb-1">Record</p>
+                    <p id="res-best" class="text-3xl font-black text-orange-900">0</p>
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-3">
+                <button onclick="startGame()" class="btn-large bg-blue-600 text-white w-full hover:bg-blue-700 font-bold">RIPROVA SESSIONE</button>
+                <button onclick="quitToMenu()" class="btn-large bg-gray-100 text-gray-600 w-full hover:bg-gray-200">MENU PRINCIPALE</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let config = { gridSize: 3, duration: 1, intrudersCount: 1 };
+        let stats = {
+            foundCount: 0, // Conta quanti round/gruppi completi sono stati risolti
+            errorCount: 0,
+            timestamps: [],
+            lastClickTime: 0,
+            startTime: 0,
+            timerIntervalId: null,
+            remainingSeconds: 0,
+            isActive: false
+        };
+
+        // Contatori temporanei della griglia attiva
+        let roundIntrudersToFind = 0;
+        let roundIntrudersFound = 0;
+
+        const shapes = {
+            circle: `<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="38" fill="currentColor" /></svg>`,
+            square: `<svg viewBox="0 0 100 100"><rect x="18" y="18" width="64" height="64" fill="currentColor" /></svg>`,
+            triangle: `<svg viewBox="0 0 100 100"><polygon points="50,15 88,82 12,82" fill="currentColor" /></svg>`,
+            star: `<svg viewBox="0 0 100 100"><polygon points="50,5 63,35 95,35 70,55 80,85 50,65 20,85 30,55 5,35 37,35" fill="currentColor" /></svg>`,
+            diamond: `<svg viewBox="0 0 100 100"><polygon points="50,10 85,50 50,90 15,50" fill="currentColor" /></svg>`
+        };
+
+        let audioCtx = null;
+
+        function setLevel(size) {
+            config.gridSize = size;
+            [3,4,5,6].forEach(s => {
+                const btn = document.getElementById(`btn-lvl-${s}`);
+                if (btn) btn.classList.toggle('btn-selected', s === size);
+            });
+        }
+
+        function setIntrudersCount(count) {
+            config.intrudersCount = count;
+            [1, 2].forEach(c => {
+                const btn = document.getElementById(`btn-intr-${c}`);
+                if (btn) btn.classList.toggle('btn-selected', c === count);
+            });
+            
+            // Aggiorna dinamicamente l'istruzione del menu
+            const instruction = document.getElementById('instruction-text');
+            if (count === 1) {
+                instruction.innerHTML = `Trova il <span class="font-bold text-blue-600">simbolo diverso</span> dagli altri e toccalo il più velocemente possibile.`;
+            } else {
+                instruction.innerHTML = `Trova i <span class="font-bold text-blue-600">2 simboli diversi</span> dagli altri e toccali entrambi il più velocemente possibile.`;
+            }
+        }
+
+        function setDuration(min) {
+            config.duration = min;
+            [1,3,5].forEach(m => {
+                const btn = document.getElementById(`btn-dur-${m}`);
+                if (btn) btn.classList.toggle('btn-selected', m === min);
+            });
+        }
+
+        function initAudio() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+
+        function startGame() {
+            initAudio();
+            stats = {
+                foundCount: 0, errorCount: 0, timestamps: [], isActive: true,
+                remainingSeconds: config.duration * 60,
+                startTime: Date.now(), lastClickTime: Date.now()
+            };
+            
+            document.getElementById('menu-screen').classList.add('hidden');
+            document.getElementById('results-screen').classList.add('hidden');
+            document.getElementById('game-screen').classList.remove('hidden');
+            document.getElementById('live-counter').textContent = "0";
+
+            // Aggiorna l'etichetta del contatore in tempo reale
+            document.getElementById('label-counter').textContent = config.intrudersCount === 1 ? "Trovati:" : "Coppie Trovate:";
+
+            updateTimerDisplay();
+            generateRound();
+
+            stats.timerIntervalId = setInterval(() => {
+                stats.remainingSeconds--;
+                updateTimerDisplay();
+                if (stats.remainingSeconds <= 0) endGame();
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const display = document.getElementById('session-timer-display');
+            const mins = Math.floor(stats.remainingSeconds / 60);
+            const secs = stats.remainingSeconds % 60;
+            display.textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
+            if (stats.remainingSeconds < 10) display.classList.add('text-red-600', 'animate-pulse');
+            else display.classList.remove('text-red-600', 'animate-pulse');
+        }
+
+        function generateRound() {
+            const container = document.getElementById('game-grid');
+            container.innerHTML = '';
+            container.style.gridTemplateColumns = `repeat(${config.gridSize}, 1fr)`;
+
+            const totalCells = config.gridSize * config.gridSize;
+            
+            // Impostiamo quanti intrusi trovare in questa griglia
+            roundIntrudersToFind = config.intrudersCount;
+            roundIntrudersFound = 0;
+
+            // Seleziona indici univoci degli intrusi
+            const intruderIndices = [];
+            while (intruderIndices.length < config.intrudersCount) {
+                const r = Math.floor(Math.random() * totalCells);
+                if (!intruderIndices.includes(r)) {
+                    intruderIndices.push(r);
+                }
+            }
+
+            const shapeKeys = Object.keys(shapes);
+            const baseShapeKey = shapeKeys[Math.floor(Math.random() * shapeKeys.length)];
+            let intruderShapeKey;
+            do { 
+                intruderShapeKey = shapeKeys[Math.floor(Math.random() * shapeKeys.length)]; 
+            } while (intruderShapeKey === baseShapeKey);
+
+            const colors = ['#3B82F6', '#8B5CF6', '#EF4444', '#10B981', '#F59E0B', '#6366F1'];
+            const color = colors[Math.floor(Math.random() * colors.length)];
+
+            for (let i = 0; i < totalCells; i++) {
+                const item = document.createElement('div');
+                item.className = 'grid-item';
+                item.style.color = color;
+                
+                if (config.gridSize >= 5) {
+                    item.style.borderRadius = '12px';
+                }
+
+                const isIntruder = intruderIndices.includes(i);
+                item.innerHTML = isIntruder ? shapes[intruderShapeKey] : shapes[baseShapeKey];
+                
+                // Passiamo l'indice o lo stato per gestire il click singolo
+                item.onclick = (e) => handleSelection(isIntruder, item);
+                container.appendChild(item);
+            }
+        }
+
+        function handleSelection(isIntruder, element) {
+            if (!stats.isActive) return;
+
+            if (isIntruder) {
+                // Se è già stato trovato in questo round, non fare nulla
+                if (element.classList.contains('found-intruder')) return;
+
+                element.classList.add('found-intruder');
+                roundIntrudersFound++;
+
+                if (roundIntrudersFound === roundIntrudersToFind) {
+                    // Trovati tutti gli intrusi di questa griglia!
+                    const now = Date.now();
+                    stats.timestamps.push((now - stats.lastClickTime) / 1000);
+                    stats.foundCount++;
+                    stats.lastClickTime = now;
+                    document.getElementById('live-counter').textContent = stats.foundCount;
+                    
+                    playFeedback(true);
+                    flashGrid();
+                    setTimeout(generateRound, 200);
+                } else {
+                    // Trovato solo il primo di due intrusi
+                    playPartialSuccessFeedback();
+                }
+            } else {
+                stats.errorCount++;
+                element.classList.add('shake');
+                playFeedback(false);
+                setTimeout(() => element.classList.remove('shake'), 400);
+            }
+        }
+
+        function flashGrid() {
+            const container = document.getElementById('game-grid-container');
+            container.style.backgroundColor = 'rgba(0, 184, 148, 0.15)';
+            setTimeout(() => {
+                container.style.backgroundColor = 'transparent';
+            }, 150);
+        }
+
+        function playFeedback(isCorrect) {
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            
+            if (isCorrect) {
+                // Suono squillante di successo pieno
+                osc.frequency.setValueAtTime(660, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.05);
+                gain.gain.setValueAtTime(0.06, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.25);
+            } else {
+                // Suono basso di errore
+                osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.2);
+            }
+            
+            osc.connect(gain); 
+            gain.connect(audioCtx.destination);
+            osc.start(); 
+            osc.stop(audioCtx.currentTime + 0.25);
+        }
+
+        function playPartialSuccessFeedback() {
+            if (!audioCtx) return;
+            // Suono intermedio per l'individuazione di 1 di 2 intrusi
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // Nota Do5
+            gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.1);
+        }
+
+        function endGame() {
+            if (!stats.isActive) return;
+            stats.isActive = false;
+            clearInterval(stats.timerIntervalId);
+            
+            document.getElementById('game-screen').classList.add('hidden');
+            document.getElementById('results-screen').classList.remove('hidden');
+
+            // Calcoli statistiche
+            const avgTime = stats.timestamps.length > 0 
+                ? (stats.timestamps.reduce((a,b) => a+b, 0) / stats.timestamps.length).toFixed(1)
+                : "0.0";
+            
+            const totalAttempts = stats.foundCount + stats.errorCount;
+            const accuracy = totalAttempts > 0 ? Math.round((stats.foundCount / totalAttempts) * 100) : 0;
+
+            // Calcolo stelle in base a prestazioni e difficoltà
+            let starCount = 0;
+            if (stats.foundCount > 0) {
+                starCount = 1;
+                const speedThreshold = config.gridSize >= 5 ? 4.5 : 3.0;
+                const topSpeedThreshold = config.gridSize >= 5 ? 2.8 : 1.8;
+
+                if (accuracy > 80 && avgTime < speedThreshold) starCount = 2;
+                if (accuracy > 90 && avgTime < topSpeedThreshold) starCount = 3;
+            }
+
+            // Aggiorna etichette e valori
+            document.getElementById('res-found-label').textContent = config.intrudersCount === 1 ? "Trovati" : "Coppie Trovate";
+            document.getElementById('res-found').textContent = stats.foundCount;
+            document.getElementById('res-avg').textContent = avgTime + "s";
+            document.getElementById('res-accuracy').textContent = accuracy + "%";
+            
+            // Gestione dei record persistenti salvati in base a griglia e modalità di intruso
+            const recordKey = `best_score_g${config.gridSize}_i${config.intrudersCount}`;
+            const prevBest = parseInt(localStorage.getItem(recordKey)) || 0;
+            const isNewRecord = stats.foundCount > prevBest && stats.foundCount > 0;
+            
+            if (isNewRecord) {
+                localStorage.setItem(recordKey, stats.foundCount);
+                document.getElementById('new-record-badge').classList.remove('hidden');
+            } else {
+                document.getElementById('new-record-badge').classList.add('hidden');
+            }
+            document.getElementById('res-best').textContent = Math.max(prevBest, stats.foundCount);
+
+            // Attivazione visiva stelle di valutazione
+            for(let i=1; i<=3; i++) {
+                document.getElementById(`star-${i}`).classList.toggle('star-active', i <= starCount);
+            }
+        }
+
+        function quitToMenu() {
+            stats.isActive = false;
+            clearInterval(stats.timerIntervalId);
+            document.getElementById('game-screen').classList.add('hidden');
+            document.getElementById('results-screen').classList.add('hidden');
+            document.getElementById('menu-screen').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>

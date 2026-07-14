@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stimolazione Cognitiva - Schermo Intero</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Lexend:wght=300;400;600&display=swap');
+        
+        body {
+            font-family: 'Lexend', sans-serif;
+            background-color: #f0f4f8;
+            touch-action: manipulation;
+            user-select: none;
+            margin: 0;
+            height: 100vh;
+            overflow: hidden; /* Evita lo scroll */
+        }
+
+        .item-card {
+            transition: all 0.2s;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            border: 3px solid #e2e8f0;
+            border-radius: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            height: 100%;
+            width: 100%;
+        }
+
+        .correct {
+            background-color: #c6f6d5 !important;
+            border-color: #38a169 !important;
+            transform: scale(0.95);
+        }
+
+        .wrong {
+            background-color: #fed7d7 !important;
+            border-color: #e53e3e !important;
+            animation: shake 0.3s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .hidden-screen { display: none !important; }
+
+        .stat-card {
+            background: #f8fafc;
+            padding: 1.5rem;
+            border-radius: 1.5rem;
+            border: 1px solid #e2e8f0;
+        }
+
+        /* Gestione dello spazio a schermo intero */
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            padding: 1rem;
+        }
+
+        #game-grid {
+            flex-grow: 1;
+            display: grid;
+            gap: 1.5rem;
+            align-items: center;
+            justify-items: center;
+            padding-bottom: 1rem;
+        }
+
+        .speaker-btn {
+            background: #ebf8ff;
+            border-radius: 50%;
+            padding: 12px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .speaker-btn:active { transform: scale(0.9); }
+    </style>
+</head>
+<body class="flex flex-col">
+
+    <div id="setup-screen" class="m-auto max-w-lg w-full bg-white rounded-3xl shadow-xl p-8 border border-gray-100">
+        <h1 class="text-3xl font-bold text-blue-800 text-center mb-6">Allenamento Cognitivo</h1>
+        
+        <div class="mb-6">
+            <label class="block text-gray-700 font-semibold mb-2">Scegli la Difficoltà:</label>
+            <div class="grid grid-cols-1 gap-3">
+                <button onclick="setDifficulty('semplice')" id="btn-semplice" class="difficulty-btn p-4 rounded-2xl border-2 border-blue-500 bg-blue-50 text-blue-800 font-bold text-left transition-all">
+                    <div class="text-lg">Livello Semplificato</div>
+                    <div class="text-sm font-normal text-blue-600">Scelta tra 2 icone GIGANTI.</div>
+                </button>
+                <button onclick="setDifficulty('base')" id="btn-base" class="difficulty-btn p-4 rounded-2xl border-2 border-gray-200 hover:border-blue-300 text-gray-700 font-bold text-left transition-all">
+                    <div class="text-lg">Livello Base</div>
+                    <div class="text-sm font-normal text-gray-500">Griglia media con oggetti colorati.</div>
+                </button>
+                <button onclick="setDifficulty('intermedio')" id="btn-intermedio" class="difficulty-btn p-4 rounded-2xl border-2 border-gray-200 hover:border-blue-300 text-gray-700 font-bold text-left transition-all">
+                    <div class="text-lg">Livello Intermedio</div>
+                    <div class="text-sm font-normal text-gray-500">Matrici (X/O). Trova tutti i target.</div>
+                </button>
+            </div>
+        </div>
+
+        <div class="mb-8">
+            <label class="block text-gray-700 font-semibold mb-2">Durata Sessione:</label>
+            <select id="session-duration" class="w-full p-3 rounded-xl border-2 border-gray-200 bg-gray-50 outline-none focus:border-blue-500">
+                <option value="60">1 Minuto</option>
+                <option value="120">2 Minuti</option>
+                <option value="300">5 Minuti</option>
+            </select>
+        </div>
+
+        <button onclick="startGame()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl text-xl shadow-lg transition-transform active:scale-95">
+            INIZIA ESERCIZIO
+        </button>
+    </div>
+
+    <div id="game-screen" class="game-container hidden-screen">
+        <!-- Barra superiore compatta -->
+        <div class="flex justify-between items-center mb-2 px-2">
+            <div class="flex space-x-4">
+                <div class="bg-blue-600 text-white px-4 py-1.5 rounded-full font-bold text-lg shadow-sm">
+                    ⏳ <span id="timer-display">00:00</span>
+                </div>
+                <div class="bg-blue-100 text-blue-800 px-4 py-1.5 rounded-full font-bold text-lg border border-blue-200">
+                    Punti: <span id="score-count">0</span>
+                </div>
+            </div>
+            <button onclick="exitGame()" class="text-red-500 font-bold px-4 py-1 bg-white rounded-full border border-red-100 hover:bg-red-50">Esci</button>
+        </div>
+
+        <!-- Area Target Massimizzata e Centrata -->
+        <div id="target-container" class="bg-white rounded-3xl p-4 shadow-md mb-4 text-center border-4 border-blue-400 relative">
+            <div class="flex items-center justify-center space-x-8">
+                <p class="text-2xl font-bold text-gray-600" id="instruction-text">Cerca:</p>
+                <!-- Il target-display riceverà classi CSS dinamiche per essere molto grande -->
+                <div id="target-display" class="font-bold leading-none select-none transition-all duration-300"></div>
+                <div id="target-name" class="text-4xl font-black text-blue-600 uppercase tracking-wide"></div>
+                
+                <!-- Tasto per ripetere l'audio manualmente -->
+                <button onclick="repeatInstruction()" class="speaker-btn border-2 border-blue-200" title="Ripeti parola">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Griglia di Gioco -->
+        <div id="game-grid">
+            <!-- Elementi dinamici -->
+        </div>
+    </div>
+
+    <div id="result-screen" class="m-auto max-w-2xl w-full bg-white rounded-3xl shadow-xl p-10 hidden-screen overflow-y-auto max-h-[90vh]">
+        <div class="text-center mb-8">
+            <div class="text-7xl mb-4">📊</div>
+            <h2 class="text-3xl font-bold text-gray-800">Sessione Terminata</h2>
+        </div>
+        
+        <div class="grid grid-cols-2 gap-4 mb-8">
+            <div class="stat-card text-center">
+                <div class="text-xs text-gray-400 uppercase font-bold tracking-widest">Punteggio</div>
+                <div class="text-4xl font-bold text-blue-600" id="final-score">0</div>
+            </div>
+            <div class="stat-card text-center">
+                <div class="text-xs text-gray-400 uppercase font-bold tracking-widest">Precisione</div>
+                <div class="text-4xl font-bold text-green-600" id="final-accuracy">0%</div>
+            </div>
+            <div class="stat-card text-center">
+                <div class="text-xs text-gray-400 uppercase font-bold tracking-widest">Schemi</div>
+                <div class="text-4xl font-bold text-purple-600" id="final-levels">0</div>
+            </div>
+            <div class="stat-card text-center">
+                <div class="text-xs text-gray-400 uppercase font-bold tracking-widest">Errori</div>
+                <div class="text-4xl font-bold text-red-500" id="final-errors">0</div>
+            </div>
+        </div>
+
+        <button onclick="exitGame()" class="w-full bg-blue-600 text-white font-bold py-5 rounded-2xl text-xl transition-transform active:scale-95">
+            TORNA AL MENU
+        </button>
+    </div>
+
+    <script>
+        const stimoliBase = [
+            { icon: '🍎', name: 'Mela' }, { icon: '🚗', name: 'Auto' },
+            { icon: '🌻', name: 'Fiore' }, { icon: '🐱', name: 'Gatto' },
+            { icon: '🏠', name: 'Casa' }, { icon: '⚽', name: 'Palla' },
+            { icon: '🍦', name: 'Gelato' }, { icon: '🎈', name: 'Palloncino' },
+            { icon: '🐶', name: 'Cane' }, { icon: '🚀', name: 'Razzo' },
+            { icon: '🍕', name: 'Pizza' }, { icon: '🐘', name: 'Elefante' }
+        ];
+
+        let difficulty = 'semplice';
+        let score = 0;
+        let timeLeft = 60;
+        let timerInterval = null;
+        let currentTargetIcon = '';
+        let currentTargetName = '';
+        let targetsFoundInLevel = 0;
+        let totalTargetsInLevel = 0;
+        let stats = { clicksCorrect: 0, clicksWrong: 0, levelsCompleted: 0 };
+
+        const setupScreen = document.getElementById('setup-screen');
+        const gameScreen = document.getElementById('game-screen');
+        const resultScreen = document.getElementById('result-screen');
+        const gridElement = document.getElementById('game-grid');
+        const timerDisplay = document.getElementById('timer-display');
+        const scoreDisplay = document.getElementById('score-count');
+        const instructionText = document.getElementById('instruction-text');
+        const targetDisplay = document.getElementById('target-display');
+        const targetName = document.getElementById('target-name');
+
+        function setDifficulty(level) {
+            difficulty = level;
+            document.querySelectorAll('.difficulty-btn').forEach(btn => {
+                btn.classList.remove('border-blue-500', 'bg-blue-50', 'text-blue-800');
+                btn.classList.add('border-gray-200', 'text-gray-700');
+            });
+            const selected = document.getElementById('btn-' + level);
+            selected.classList.add('border-blue-500', 'bg-blue-50', 'text-blue-800');
+            selected.classList.remove('border-gray-200', 'text-gray-700');
+        }
+
+        function speak(text) {
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'it-IT';
+            utterance.rate = 0.85; // Leggermente più lento per massima comprensibilità
+            window.speechSynthesis.speak(utterance);
+        }
+
+        function repeatInstruction() {
+            speak(currentTargetName);
+        }
+
+        function startGame() {
+            score = 0;
+            if (scoreDisplay) scoreDisplay.textContent = score;
+            const durationSelect = document.getElementById('session-duration');
+            timeLeft = durationSelect ? parseInt(durationSelect.value) : 60;
+            stats = { clicksCorrect: 0, clicksWrong: 0, levelsCompleted: 0 };
+            
+            setupScreen.classList.add('hidden-screen');
+            resultScreen.classList.add('hidden-screen');
+            gameScreen.classList.remove('hidden-screen');
+            
+            updateTimerDisplay();
+            startTimer();
+            initLevel();
+        }
+
+        function startTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                if (timeLeft <= 0) endGame();
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const mins = Math.floor(timeLeft / 60);
+            const secs = timeLeft % 60;
+            timerDisplay.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function initLevel() {
+            gridElement.innerHTML = '';
+            targetsFoundInLevel = 0;
+
+            if (difficulty === 'semplice') {
+                setupSempliceLevel();
+            } else if (difficulty === 'base') {
+                setupBaseLevel();
+            } else {
+                setupIntermediateLevel();
+            }
+            
+            setTimeout(repeatInstruction, 400);
+        }
+
+        function setupSempliceLevel() {
+            gridElement.style.gridTemplateColumns = "repeat(2, 1fr)";
+            gridElement.style.gridTemplateRows = "1fr";
+            instructionText.textContent = "Tocca:";
+            
+            const shuffled = [...stimoliBase].sort(() => 0.5 - Math.random());
+            const selection = shuffled.slice(0, 2);
+            const target = selection[Math.floor(Math.random() * selection.length)];
+            
+            currentTargetIcon = target.icon;
+            currentTargetName = target.name;
+            
+            // Il target nel livello Semplice diventa GIGANTE (text-[11rem] su desktop)
+            targetDisplay.className = "text-[7rem] md:text-[11rem] font-bold leading-none animate-pulse";
+            targetDisplay.textContent = target.icon;
+            targetName.textContent = target.name;
+            totalTargetsInLevel = 1;
+
+            selection.forEach(item => {
+                // Le carte di opzione sono un po' più piccole del target gigante per dare chiara priorità visiva
+                createCard(item.icon, item.icon === currentTargetIcon, "text-[6rem] md:text-[9rem]");
+            });
+        }
+
+        function setupBaseLevel() {
+            const cols = 4;
+            const rows = 2;
+            gridElement.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+            gridElement.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
+            instructionText.textContent = "Cerca:";
+            
+            const count = cols * rows;
+            const shuffled = [...stimoliBase].sort(() => 0.5 - Math.random());
+            const selection = shuffled.slice(0, count);
+            const target = selection[Math.floor(Math.random() * selection.length)];
+            
+            currentTargetIcon = target.icon;
+            currentTargetName = target.name;
+
+            // Target nel livello Base è chiaramente più grande degli elementi della griglia
+            targetDisplay.className = "text-[6rem] md:text-[8rem] font-bold leading-none";
+            targetDisplay.textContent = target.icon;
+            targetName.textContent = target.name;
+            totalTargetsInLevel = 1;
+
+            selection.forEach(item => {
+                createCard(item.icon, item.icon === currentTargetIcon, "text-[4.5rem] md:text-[6rem]");
+            });
+        }
+
+        function setupIntermediateLevel() {
+            const cols = window.innerWidth > 1024 ? 8 : 6;
+            const rows = 4;
+            gridElement.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+            gridElement.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
+            instructionText.textContent = "Tutte le:";
+            
+            const targetSymbol = Math.random() > 0.5 ? 'X' : 'O';
+            const distractorSymbol = targetSymbol === 'X' ? 'O' : 'X';
+            
+            currentTargetIcon = targetSymbol;
+            currentTargetName = targetSymbol;
+
+            // Target nella matrice intermedia è grande ed evidenziato
+            targetDisplay.className = "text-[5rem] md:text-[7rem] font-black text-blue-600 leading-none";
+            targetDisplay.textContent = targetSymbol;
+            targetName.textContent = "";
+
+            const totalCells = cols * rows;
+            totalTargetsInLevel = Math.floor(totalCells * 0.25); 
+            
+            let cells = new Array(totalCells).fill(distractorSymbol);
+            let inserted = 0;
+            while(inserted < totalTargetsInLevel) {
+                let idx = Math.floor(Math.random() * totalCells);
+                if(cells[idx] !== targetSymbol) {
+                    cells[idx] = targetSymbol;
+                    inserted++;
+                }
+            }
+
+            cells.forEach(symbol => {
+                createCard(symbol, symbol === targetSymbol, "text-4xl md:text-5xl");
+            });
+        }
+
+        function createCard(content, isTarget, fontSizeClass) {
+            const card = document.createElement('div');
+            card.className = `item-card ${fontSizeClass} font-bold select-none`;
+            card.textContent = content;
+            
+            card.onclick = () => {
+                if (card.classList.contains('correct') || card.classList.contains('wrong')) return;
+
+                if (isTarget) {
+                    card.classList.add('correct');
+                    score += 10;
+                    stats.clicksCorrect++;
+                    scoreDisplay.textContent = score;
+                    targetsFoundInLevel++;
+
+                    if (targetsFoundInLevel === totalTargetsInLevel) {
+                        stats.levelsCompleted++;
+                        setTimeout(initLevel, 600);
+                    }
+                } else {
+                    card.classList.add('wrong');
+                    stats.clicksWrong++;
+                    score = Math.max(0, score - 5);
+                    scoreDisplay.textContent = score;
+                    
+                    // Ripete solo la parola target per ri-orientare l'attenzione
+                    speak(currentTargetName);
+                    
+                    setTimeout(() => card.classList.remove('wrong'), 500);
+                }
+            };
+            gridElement.appendChild(card);
+        }
+
+        function endGame() {
+            clearInterval(timerInterval);
+            gameScreen.classList.add('hidden-screen');
+            resultScreen.classList.remove('hidden-screen');
+            const totalClicks = stats.clicksCorrect + stats.clicksWrong;
+            const accuracy = totalClicks > 0 ? Math.round((stats.clicksCorrect / totalClicks) * 100) : 0;
+            document.getElementById('final-score').textContent = score;
+            document.getElementById('final-accuracy').textContent = accuracy + '%';
+            document.getElementById('final-levels').textContent = stats.levelsCompleted;
+            document.getElementById('final-errors').textContent = stats.clicksWrong;
+        }
+
+        function exitGame() {
+            clearInterval(timerInterval);
+            resultScreen.classList.add('hidden-screen');
+            gameScreen.classList.add('hidden-screen');
+            setupScreen.classList.remove('hidden-screen');
+        }
+
+        window.onresize = () => {
+            if (gameScreen && !gameScreen.classList.contains('hidden-screen')) {
+                initLevel();
+            }
+        };
+    </script>
+</body>
+</html>

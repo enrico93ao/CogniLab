@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Doppio Binario - Test di Multitasking</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            color: #1e293b;
+            overflow: hidden;
+            margin: 0;
+            user-select: none;
+            touch-action: none;
+            height: 100vh;
+        }
+
+        .word-item {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            white-space: nowrap;
+            font-size: 1.25rem;
+            font-weight: 700;
+            cursor: default;
+            letter-spacing: -0.01em;
+            padding: 8px 18px;
+            background-color: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            z-index: 10;
+            transition: opacity 0.3s ease, filter 0.3s ease, transform 0.1s ease, border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .word-item-bold {
+            border: 2.5px solid #475569 !important;
+            box-shadow: 0 4px 12px -1px rgba(71, 85, 105, 0.15) !important;
+        }
+
+        .word-item-red {
+            border-color: #f43f5e !important;
+            color: #e11d48 !important;
+            background-color: #fff1f2 !important;
+        }
+
+        /* Effetto di evidenziazione clinica quando lo stimolo entra nella fascia attiva */
+        .word-in-active-zone {
+            border-color: #059669 !important; /* emerald-600 */
+            background-color: #f0fdf4 !important; /* emerald-50 */
+            box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.2), 0 4px 6px -4px rgba(16, 185, 129, 0.2) !important;
+        }
+
+        .word-hit {
+            animation: hitShake 0.15s ease-in-out;
+        }
+
+        @keyframes hitShake {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .target-dots {
+            display: flex;
+            gap: 4px;
+            margin-top: 4px;
+            height: 6px;
+        }
+
+        .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #cbd5e1;
+        }
+
+        .dot-active {
+            background: #d97706;
+            box-shadow: 0 0 6px #f59e0b;
+        }
+
+        .feedback-pop {
+            position: absolute;
+            pointer-events: none;
+            animation: popUp 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            font-weight: 800;
+            z-index: 60;
+            font-size: 1.1rem;
+        }
+
+        @keyframes popUp {
+            0% { opacity: 0; transform: translateY(10px) scale(0.8); }
+            20% { opacity: 1; transform: translateY(0) scale(1.1); }
+            100% { opacity: 0; transform: translateY(-45px) scale(1); }
+        }
+
+        .timer-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #d97706, #059669);
+            transition: width 1s linear;
+        }
+
+        /* Tastiera Clinica Bianca e Pulita */
+        .kbd-style {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 0 #cbd5e1;
+            transition: transform 0.05s ease, box-shadow 0.05s ease;
+        }
+
+        .kbd-style:active {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 #cbd5e1;
+        }
+
+        #play-area {
+            position: absolute;
+            top: 110px;
+            bottom: 140px;
+            left: 0;
+            right: 0;
+            overflow: hidden;
+        }
+
+        .combo-counter {
+            font-variant-numeric: tabular-nums;
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen">
+
+    <div id="menu" class="bg-white border border-slate-200 p-8 md:p-10 rounded-3xl shadow-sm w-full max-w-lg z-50 text-center mx-4">
+        <div class="mb-3">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block mr-2 animate-pulse"></span>
+            <span class="text-slate-500 text-xs font-bold tracking-[0.2em] uppercase">Piattaforma di Riabilitazione Cognitiva</span>
+        </div>
+        <h1 class="text-4xl font-extrabold mb-8 text-slate-900 tracking-tight">DOPPIO BINARIO</h1>
+        
+        <div class="space-y-6 text-left">
+            <div>
+                <label class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 block text-center">Difficoltà Esercizio</label>
+                <div class="grid grid-cols-2 gap-4">
+                    <button onclick="setDifficulty(1)" id="btn-diff-1" class="diff-btn p-4 rounded-2xl border-2 border-slate-200 bg-slate-50 text-slate-700 font-bold transition-all hover:bg-slate-100">
+                        <div class="text-lg">Standard</div>
+                        <div class="text-[10px] text-slate-500 uppercase font-semibold">2 REGOLE VARIABILI</div>
+                    </button>
+                    <button onclick="setDifficulty(2)" id="btn-diff-2" class="diff-btn p-4 rounded-2xl border-2 border-slate-200 bg-slate-50 text-slate-700 font-bold transition-all hover:bg-slate-100">
+                        <div class="text-lg">Avanzato</div>
+                        <div class="text-[10px] text-slate-500 uppercase font-semibold">3 REGOLE VARIABILI</div>
+                    </button>
+                </div>
+            </div>
+
+            <div>
+                <label class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 block text-center">Supporti e Aiuti Visivi</label>
+                <div class="flex gap-4">
+                    <button onclick="setShowDots(true)" id="dots-on" class="dots-btn flex-1 p-3 rounded-xl border-2 border-slate-200 bg-slate-50 text-slate-700 font-bold transition-all hover:bg-slate-100">
+                        Puntini Guida Attivi
+                    </button>
+                    <button onclick="setShowDots(false)" id="dots-off" class="dots-btn flex-1 p-3 rounded-xl border-2 border-slate-200 bg-slate-50 text-slate-700 font-bold transition-all hover:bg-slate-100">
+                        Senza Aiuti
+                    </button>
+                </div>
+            </div>
+
+            <div>
+                <label class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 block text-center">Durata Sessione</label>
+                <div class="flex gap-3">
+                    <button onclick="setDuration(120)" id="dur-120" class="dur-btn flex-1 p-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-700 font-bold transition-all hover:bg-slate-100">2 min</button>
+                    <button onclick="setDuration(240)" id="dur-240" class="dur-btn flex-1 p-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-700 font-bold transition-all hover:bg-slate-100">4 min</button>
+                    <button onclick="setDuration(360)" id="dur-360" class="dur-btn flex-1 p-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-700 font-bold transition-all hover:bg-slate-100">6 min</button>
+                </div>
+            </div>
+
+            <button onclick="startGame()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-5 rounded-2xl text-xl shadow-sm transition-all uppercase tracking-tight">
+                Avvia Sessione di Test
+            </button>
+        </div>
+    </div>
+
+    <div id="game-container" class="hidden fixed inset-0">
+        <!-- HUD Glass Clinico -->
+        <div class="absolute top-6 left-1/2 -translate-x-1/2 flex items-center gap-6 px-8 py-3 bg-white/90 backdrop-blur-md border border-slate-200 rounded-2xl z-[100] shadow-sm">
+            <button onclick="location.reload()" class="p-2 hover:bg-slate-100 rounded-lg transition-colors group" title="Ritorna al Menu Principale">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-rose-600 group-hover:text-rose-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                </svg>
+            </button>
+            <div class="h-8 w-px bg-slate-200"></div>
+            <div class="text-center min-w-[60px]">
+                <div class="text-xl font-extrabold text-slate-900" id="score">0</div>
+                <div class="text-[8px] text-slate-400 uppercase font-bold tracking-wider">Punti</div>
+            </div>
+            <div class="h-8 w-px bg-slate-200"></div>
+            <div class="text-center min-w-[80px]">
+                <div class="text-xl font-extrabold tabular-nums text-amber-600" id="timer">0:00</div>
+                <div class="w-full h-1 bg-slate-100 rounded-full mt-1 overflow-hidden">
+                    <div id="timer-progress" class="timer-bar w-full"></div>
+                </div>
+            </div>
+            <div class="h-8 w-px bg-slate-200"></div>
+            <div class="text-center min-w-[70px]">
+                <div class="text-sm font-bold text-slate-700" id="speed-display">1.0x</div>
+                <div class="text-[8px] text-slate-400 uppercase font-bold tracking-wider">Velocità</div>
+            </div>
+            <div class="h-8 w-px bg-slate-200"></div>
+            <div class="text-center min-w-[50px]">
+                <div class="text-sm font-black text-emerald-600 combo-counter" id="combo-display">0</div>
+                <div class="text-[8px] text-slate-400 uppercase font-bold tracking-wider">Combo</div>
+            </div>
+        </div>
+
+        <!-- Area di scorrimento protetta con la nuova Fascia Verde di Risposta integrata -->
+        <div id="play-area">
+            <!-- Fascia Verde di Risposta Attiva -->
+            <div id="active-response-band" class="absolute bottom-4 left-0 right-0 h-28 bg-emerald-500/5 border-y-2 border-dashed border-emerald-500/20 flex items-center justify-between px-6 pointer-events-none z-0">
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span class="text-[10px] font-bold text-emerald-600/60 uppercase tracking-widest">Schiaccia Ora</span>
+                </div>
+                <span class="text-[10px] font-bold text-emerald-600/40 uppercase tracking-[0.2em] hidden sm:inline">Zona di Validazione Esercizio</span>
+                <div class="flex items-center gap-2">
+                    <span class="text-[10px] font-bold text-emerald-600/60 uppercase tracking-widest">Schiaccia Ora</span>
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Controlli inferiori (Pulsanti virtuali per Touch/Click) -->
+        <div class="absolute bottom-8 left-0 right-0 flex justify-center gap-6 px-4 z-[100]">
+            <div id="controls-hint" class="flex gap-6 w-full max-w-xl justify-center"></div>
+        </div>
+    </div>
+
+    <div id="game-over" class="hidden bg-white border border-slate-200 p-10 rounded-3xl shadow-lg w-full max-w-md z-[200] text-center mx-4">
+        <h2 class="text-2xl font-bold text-slate-500 mb-2 uppercase tracking-wide">Analisi Sessione Conclusa</h2>
+        <div class="text-7xl font-black text-slate-900 my-6" id="final-score">0</div>
+        
+        <div class="grid grid-cols-2 gap-3 mb-4">
+            <div class="bg-emerald-50 border border-emerald-100 p-4 rounded-2xl">
+                <div class="text-emerald-600 text-2xl font-bold" id="stats-correct">0</div>
+                <div class="text-[10px] text-slate-400 uppercase font-bold tracking-tight">Successi</div>
+            </div>
+            <div class="bg-rose-50 border border-rose-100 p-4 rounded-2xl">
+                <div class="text-rose-600 text-2xl font-bold" id="stats-missed">0</div>
+                <div class="text-[10px] text-slate-400 uppercase font-bold tracking-tight">Omissioni/Errori</div>
+            </div>
+        </div>
+
+        <div class="bg-amber-50 border border-amber-100 p-4 rounded-2xl mb-8 flex justify-around">
+            <div class="text-center">
+                <div class="text-amber-600 text-2xl font-black" id="stats-max-speed">1.0x</div>
+                <div class="text-[10px] text-slate-400 uppercase font-bold">Velocità Massima</div>
+            </div>
+            <div class="text-center">
+                <div class="text-emerald-600 text-2xl font-black" id="stats-max-combo">0</div>
+                <div class="text-[10px] text-slate-400 uppercase font-bold">Miglior Combo</div>
+            </div>
+        </div>
+
+        <button onclick="location.reload()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-4 rounded-2xl transition-all shadow-sm active:scale-95">
+            Esegui Nuovo Test
+        </button>
+    </div>
+
+    <script>
+        let audioCtx = null;
+        function getAudioContext() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            return audioCtx;
+        }
+
+        function playSound(type) {
+            try {
+                const ctx = getAudioContext();
+                const now = ctx.currentTime;
+                
+                if (type === 'hit') {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(659.25, now);
+                    gain.gain.setValueAtTime(0.1, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+                    osc.start(now);
+                    osc.stop(now + 0.15);
+                } else if (type === 'complete') {
+                    const freqs = [523.25, 659.25, 783.99];
+                    freqs.forEach((freq, idx) => {
+                        const osc = ctx.createOscillator();
+                        const gain = ctx.createGain();
+                        osc.connect(gain);
+                        gain.connect(ctx.destination);
+                        osc.type = 'sine';
+                        osc.frequency.setValueAtTime(freq, now + idx * 0.05);
+                        gain.gain.setValueAtTime(0.08, now + idx * 0.05);
+                        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2 + idx * 0.05);
+                        osc.start(now + idx * 0.05);
+                        osc.stop(now + 0.25 + idx * 0.05);
+                    });
+                } else if (type === 'error') {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(180, now);
+                    osc.frequency.linearRampToValueAtTime(120, now + 0.2);
+                    gain.gain.setValueAtTime(0.12, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+                    osc.start(now);
+                    osc.stop(now + 0.2);
+                }
+            } catch (e) {
+                console.warn("Audio Context non sbloccato o non supportato.", e);
+            }
+        }
+
+        const wordCategories = {
+            animals: { label: "ANIMALE", list: ["LEONE", "GATTO", "CANE", "LUPO", "CERVO", "TIGRE", "ORSO", "AQUILA", "VOLPE", "RANA", "SQUALO", "BALENA", "ORCA", "PANDA", "KOALA", "GORILLA"] },
+            fruit: { label: "FRUTTA", list: ["MELA", "PERA", "BANANA", "KIWI", "PESCA", "ARANCIA", "UVA", "MANGO", "LIMONE", "CILIEGIA", "SUSINA", "ANANAS", "MELONE", "MORA", "LAMPONE", "FICO"] },
+            transport: { label: "TRASPORTO", list: ["AUTO", "TRENO", "AEREO", "NAVE", "BICI", "MOTO", "BUS", "METRO", "TRAM", "RAZZO", "CAMION", "ELICOTTERO"] },
+            colors: { label: "COLORE", list: ["ROSSO", "VERDE", "BLU", "GIALLO", "NERO", "BIANCO", "VIOLA", "ROSA", "GRIGIO", "MARRONE", "AZZURRO", "LILLA"] },
+            generic: { label: "OGGETTO", list: ["TAVOLO", "LIBRO", "CASA", "PORTA", "SOLE", "LUNA", "MARE", "MONTE", "PRATO", "FIUME", "CIELO", "ZAINO", "CHIAVE", "PENNA"] }
+        };
+
+        const availableConditions = [
+            { id: 'bold', label: 'GRASSETTO', check: (cat, text, isBold) => isBold },
+            { id: 'length5', label: '5 LETTERE', check: (cat, text) => text.length === 5 },
+            { id: 'length4', label: '4 LETTERE', check: (cat, text) => text.length === 4 },
+            { id: 'red', label: 'COLORE ROSSO', check: (cat, text, isBold, isRed) => isRed },
+            { id: 'cat_animals', label: 'ANIMALE', check: (cat) => cat === 'animals' },
+            { id: 'cat_fruit', label: 'FRUTTA', check: (cat) => cat === 'fruit' },
+            { id: 'cat_transport', label: 'TRASPORTO', check: (cat) => cat === 'transport' },
+            { id: 'cat_colors', label: 'COLORE', check: (cat) => cat === 'colors' }
+        ];
+
+        let state = {
+            score: 0,
+            correct: 0,
+            missed: 0,
+            combo: 0,
+            maxCombo: 0,
+            difficulty: 1,
+            duration: 120,
+            timeLeft: 120,
+            speed: 2.0,
+            lastSpeedBeforeIncrease: 2.0,
+            maxSpeedReached: 2.0,
+            showDots: true,
+            gameActive: false,
+            words: [],
+            activeRules: [],
+            lastSpawnTime: 0,
+            lastFrameTime: 0
+        };
+
+        const INITIAL_SPEED = 2.0;
+        const MIN_SPACING_X = 180;
+        const COMBO_STEP = 2; // Velocità aumenta ogni 2 risposte corrette consecutive (combo)
+
+        function setDifficulty(lvl) {
+            state.difficulty = lvl;
+            document.querySelectorAll('.diff-btn').forEach(b => {
+                b.classList.remove('border-amber-500', 'bg-amber-50/50', 'text-amber-700');
+                b.classList.add('border-slate-200', 'bg-slate-50', 'text-slate-700');
+            });
+            const activeBtn = document.getElementById(`btn-diff-${lvl}`);
+            activeBtn.classList.add('border-amber-500', 'bg-amber-50/50', 'text-amber-700');
+            activeBtn.classList.remove('border-slate-200', 'bg-slate-50');
+        }
+
+        function setShowDots(val) {
+            state.showDots = val;
+            document.querySelectorAll('.dots-btn').forEach(b => {
+                b.classList.remove('border-amber-500', 'bg-amber-50/50', 'text-amber-700');
+                b.classList.add('border-slate-200', 'bg-slate-50', 'text-slate-700');
+            });
+            const activeId = val ? 'dots-on' : 'dots-off';
+            const activeBtn = document.getElementById(activeId);
+            activeBtn.classList.add('border-amber-500', 'bg-amber-50/50', 'text-amber-700');
+            activeBtn.classList.remove('border-slate-200', 'bg-slate-50');
+        }
+
+        function setDuration(sec) {
+            state.duration = sec;
+            state.timeLeft = sec;
+            document.querySelectorAll('.dur-btn').forEach(b => {
+                b.classList.remove('border-amber-500', 'bg-amber-50/50', 'text-amber-700');
+                b.classList.add('border-slate-200', 'bg-slate-50', 'text-slate-700');
+            });
+            const activeBtn = document.getElementById(`dur-${sec}`);
+            activeBtn.classList.add('border-amber-500', 'bg-amber-50/50', 'text-amber-700');
+            activeBtn.classList.remove('border-slate-200', 'bg-slate-50');
+        }
+
+        // Setup Iniziale Standard
+        setDifficulty(1);
+        setShowDots(true);
+        setDuration(120);
+
+        function generateRandomRules() {
+            const shuffled = [...availableConditions].sort(() => 0.5 - Math.random());
+            const numRules = state.difficulty === 1 ? 2 : 3;
+            const selected = shuffled.slice(0, numRules);
+            
+            const keys = ['A', 'S', 'D'];
+            const colors = [
+                'text-amber-600 border-amber-500/20 bg-amber-50/40',
+                'text-emerald-600 border-emerald-500/20 bg-emerald-50/40',
+                'text-rose-600 border-rose-500/20 bg-rose-50/40'
+            ];
+
+            state.activeRules = selected.map((rule, index) => ({
+                key: keys[index],
+                label: rule.label,
+                check: rule.check,
+                colorClass: colors[index]
+            }));
+        }
+
+        function setupControls() {
+            const container = document.getElementById('controls-hint');
+            container.innerHTML = '';
+            state.activeRules.forEach(rule => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = `kbd-style focus:outline-none select-none px-6 py-4 rounded-2xl flex flex-col items-center min-w-[120px] border ${rule.colorClass}`;
+                btn.innerHTML = `
+                    <span class="text-3xl font-extrabold pointer-events-none">${rule.key}</span>
+                    <span class="text-[9px] font-bold uppercase tracking-wider mt-1 opacity-90 pointer-events-none">${rule.label}</span>
+                `;
+                const handleTrigger = (e) => {
+                    e.preventDefault();
+                    btn.blur();
+                    handleInput(rule.key);
+                };
+                btn.addEventListener('mousedown', handleTrigger);
+                btn.addEventListener('touchstart', handleTrigger);
+                container.appendChild(btn);
+            });
+        }
+
+        function startGame() {
+            getAudioContext();
+            generateRandomRules();
+            document.getElementById('menu').classList.add('hidden');
+            document.getElementById('game-container').classList.remove('hidden');
+            state.gameActive = true;
+            state.score = 0;
+            state.correct = 0;
+            state.missed = 0;
+            state.combo = 0;
+            state.maxCombo = 0;
+            state.speed = INITIAL_SPEED;
+            state.lastSpeedBeforeIncrease = INITIAL_SPEED;
+            state.maxSpeedReached = INITIAL_SPEED;
+            state.words = [];
+            state.lastSpawnTime = performance.now();
+            state.lastFrameTime = performance.now();
+            
+            setupControls();
+            updateHUD();
+            
+            requestAnimationFrame(gameLoop);
+            
+            const timerInt = setInterval(() => {
+                if(!state.gameActive) { clearInterval(timerInt); return; }
+                state.timeLeft--;
+                updateHUD();
+                
+                if(state.timeLeft <= 0) endGame();
+            }, 1000);
+        }
+
+        function updateSpeedDisplay() {
+            const displaySpeed = (state.speed / INITIAL_SPEED).toFixed(1);
+            const speedDisplay = document.getElementById('speed-display');
+            speedDisplay.innerText = `${displaySpeed}x`;
+            
+            if(state.speed > state.maxSpeedReached) state.maxSpeedReached = state.speed;
+        }
+
+        function updateHUD() {
+            const mins = Math.floor(state.timeLeft / 60);
+            const secs = state.timeLeft % 60;
+            document.getElementById('timer').innerText = `${mins}:${secs.toString().padStart(2, '0')}`;
+            document.getElementById('timer-progress').style.width = `${(state.timeLeft / state.duration) * 100}%`;
+            document.getElementById('score').innerText = state.score;
+            document.getElementById('combo-display').innerText = state.combo;
+        }
+
+        function spawnWord() {
+            const area = document.getElementById('play-area');
+            const categories = Object.keys(wordCategories);
+            const categoryKey = categories[Math.floor(Math.random() * categories.length)];
+            const text = wordCategories[categoryKey].list[Math.floor(Math.random() * wordCategories[categoryKey].list.length)];
+            
+            const isBold = Math.random() > 0.75;
+            const hasRedRule = state.activeRules.some(r => r.label.includes("ROSSO"));
+            const isRed = (state.difficulty === 2 || hasRedRule) && Math.random() > 0.8;
+
+            const targets = [];
+            state.activeRules.forEach(rule => {
+                if (rule.check(categoryKey, text, isBold, isRed)) targets.push(rule.key);
+            });
+
+            const el = document.createElement('div');
+            el.className = 'word-item';
+            
+            if (isBold) el.classList.add('word-item-bold');
+            if (isRed) {
+                el.classList.add('word-item-red');
+            } else {
+                el.classList.add('text-slate-700');
+            }
+            
+            el.innerHTML = `<span>${text}</span><div class="target-dots"></div>`;
+            
+            if (state.showDots) {
+                const dotsContainer = el.querySelector('.target-dots');
+                targets.forEach(() => {
+                    const dot = document.createElement('div');
+                    dot.className = 'dot';
+                    dotsContainer.appendChild(dot);
+                });
+            }
+
+            let bestX = 100;
+            let foundSafeSpot = false;
+            let attempts = 0;
+            const areaWidth = area.clientWidth || window.innerWidth;
+
+            while (!foundSafeSpot && attempts < 25) {
+                bestX = Math.random() * (areaWidth - 220) + 40;
+                foundSafeSpot = !state.words.some(w => w.y < 160 && Math.abs(parseFloat(w.el.style.left) - bestX) < MIN_SPACING_X);
+                attempts++;
+            }
+
+            el.style.left = `${bestX}px`;
+            el.style.top = `-50px`;
+
+            const wordData = { el, text, targets: [...targets], totalTargets: targets.length, y: -50, processed: false };
+            area.appendChild(el);
+            state.words.push(wordData);
+        }
+
+        function gameLoop(currentTime) {
+            if(!state.gameActive) return;
+
+            const area = document.getElementById('play-area');
+            const limitY = area.clientHeight;
+            const deltaTime = (currentTime - state.lastFrameTime) / 16.67; 
+            state.lastFrameTime = currentTime;
+
+            const spawnInterval = Math.max(600, 2100 - (state.speed * 180));
+            if (currentTime - state.lastSpawnTime > spawnInterval) {
+                spawnWord();
+                state.lastSpawnTime = currentTime;
+            }
+
+            // Calcolo dinamico della zona di risposta attiva (Fascia Verde)
+            const bandBottom = limitY - 16;
+            const bandTop = limitY - 128;
+
+            // Identificazione dello stimolo non elaborato più in basso
+            const lowestUnprocessed = state.words
+                .filter(w => !w.processed)
+                .sort((a, b) => b.y - a.y)[0];
+
+            for(let i = state.words.length - 1; i >= 0; i--) {
+                const w = state.words[i];
+                w.y += state.speed * (deltaTime || 1);
+                w.el.style.transform = `translateY(${w.y}px)`;
+
+                // Rimuoviamo/Aggiungiamo la classe di attivazione per la fascia verde
+                if (w === lowestUnprocessed && w.y >= bandTop && w.y <= bandBottom) {
+                    w.el.classList.add('word-in-active-zone');
+                } else {
+                    w.el.classList.remove('word-in-active-zone');
+                }
+
+                if (w.y > limitY) {
+                    if (!w.processed && w.targets.length > 0) {
+                        applyFeedback('PERSA!', 'text-rose-600', w.el.offsetLeft, limitY - 30);
+                        state.score = Math.max(0, state.score - 5);
+                        state.missed++;
+                        penalizeSpeed();
+                        resetCombo();
+                        updateHUD();
+                        playSound('error');
+                    }
+                    w.el.remove();
+                    state.words.splice(i, 1);
+                }
+            }
+            requestAnimationFrame(gameLoop);
+        }
+
+        function resetCombo() {
+            if (state.combo > state.maxCombo) state.maxCombo = state.combo;
+            state.combo = 0;
+        }
+
+        function penalizeSpeed() {
+            state.speed = Math.max(1.2, state.speed - 0.15);
+            updateSpeedDisplay();
+            
+            const speedDisplay = document.getElementById('speed-display');
+            speedDisplay.classList.add('text-rose-600');
+            setTimeout(() => speedDisplay.classList.remove('text-rose-600'), 400);
+        }
+
+        function handleInput(key) {
+            if(!state.gameActive) return;
+
+            // Troviamo lo stimolo non completato più vicino al fondo
+            const activeWords = state.words
+                .filter(w => !w.processed && w.y > 0)
+                .sort((a, b) => b.y - a.y);
+
+            const lowestWord = activeWords[0];
+
+            if (lowestWord && lowestWord.targets.includes(key)) {
+                const targetIdx = lowestWord.targets.indexOf(key);
+                state.score += 10;
+                state.correct++;
+                state.combo++;
+                
+                lowestWord.el.classList.add('word-hit');
+                setTimeout(() => lowestWord.el.classList.remove('word-hit'), 150);
+
+                if (state.showDots) {
+                    const dots = lowestWord.el.querySelectorAll('.dot');
+                    const activeCount = lowestWord.totalTargets - lowestWord.targets.length;
+                    if (dots[activeCount]) {
+                        dots[activeCount].classList.add('dot-active');
+                    }
+                }
+
+                lowestWord.targets.splice(targetIdx, 1);
+
+                if (lowestWord.targets.length === 0) {
+                    applyFeedback('+10 COMPLETA!', 'text-emerald-600', lowestWord.el.offsetLeft, lowestWord.y);
+                    lowestWord.processed = true;
+                    lowestWord.el.style.opacity = '0.25';
+                    lowestWord.el.style.filter = 'grayscale(1) blur(1px)';
+                    lowestWord.el.classList.remove('word-in-active-zone');
+                    playSound('complete');
+                } else {
+                    applyFeedback('+10 OK', 'text-amber-600', lowestWord.el.offsetLeft, lowestWord.y);
+                    playSound('hit');
+                }
+
+                // Accelerazione ad ogni progresso di combo (ogni 2 risposte corrette di seguito)
+                if (state.combo > 0 && state.combo % COMBO_STEP === 0) {
+                    state.lastSpeedBeforeIncrease = state.speed;
+                    state.speed += 0.15;
+                    applyFeedback(`PIÙ VELOCE!`, 'text-emerald-600 font-bold', lowestWord.el.offsetLeft, lowestWord.y - 35);
+                    updateSpeedDisplay();
+                    
+                    const speedDisplay = document.getElementById('speed-display');
+                    speedDisplay.classList.add('text-emerald-600');
+                    setTimeout(() => speedDisplay.classList.remove('text-emerald-600'), 400);
+                }
+
+            } else {
+                // Errore: Se non ci sono parole o se la chiave premuta non appartiene allo stimolo attivo più in basso
+                state.score = Math.max(0, state.score - 5);
+                state.missed++;
+                penalizeSpeed();
+                resetCombo();
+                applyFeedback('ERRORE', 'text-rose-600', window.innerWidth/2 - 50, window.innerHeight/2);
+                playSound('error');
+            }
+            updateHUD();
+        }
+
+        function applyFeedback(text, colorClass, x, y) {
+            const area = document.getElementById('play-area');
+            const fb = document.createElement('div');
+            fb.className = `feedback-pop ${colorClass}`;
+            fb.style.left = `${x}px`;
+            fb.style.top = `${y}px`;
+            fb.innerText = text;
+            area.appendChild(fb);
+            setTimeout(() => fb.remove(), 600);
+        }
+
+        function endGame() {
+            state.gameActive = false;
+            resetCombo();
+            document.getElementById('game-container').classList.add('hidden');
+            document.getElementById('game-over').classList.remove('hidden');
+            
+            document.getElementById('final-score').innerText = state.score;
+            document.getElementById('stats-correct').innerText = state.correct;
+            document.getElementById('stats-missed').innerText = state.missed;
+            document.getElementById('stats-max-speed').innerText = `${(state.maxSpeedReached / INITIAL_SPEED).toFixed(1)}x`;
+            document.getElementById('stats-max-combo').innerText = state.maxCombo;
+        }
+
+        // Blocca interazione spaziatrice e intercetta tasti fisici
+        window.addEventListener('keydown', (e) => {
+            if (e.key === ' ' || e.code === 'Space') {
+                e.preventDefault();
+                return;
+            }
+            if(!state.gameActive) return;
+            const key = e.key.toUpperCase();
+            if(['A', 'S', 'D'].includes(key)) {
+                e.preventDefault();
+                handleInput(key);
+            }
+        });
+    </script>
+</body>
+</html>

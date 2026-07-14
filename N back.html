@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eco-Sequenza - Neuro-Training</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+        :root {
+            --bg-blue: #f0f7ff;
+            --primary-blue: #2563eb;
+            --light-blue: #dbeafe;
+            --dark-blue: #1e40af;
+            --success: #10b981;
+            --error: #ef4444;
+            --surface: #ffffff;
+        }
+
+        body {
+            background: radial-gradient(circle at top, #ffffff, var(--bg-blue));
+            font-family: 'Inter', sans-serif;
+            color: #1e293b;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+            touch-action: manipulation;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 32px;
+            box-shadow: 0 20px 50px rgba(37, 99, 235, 0.1);
+            padding: 2.5rem;
+            width: 95%;
+            max-width: 500px;
+            text-align: center;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .icon-container {
+            height: 200px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 2rem 0;
+            background: var(--surface);
+            border: 2px solid var(--light-blue);
+            border-radius: 24px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .icon-svg {
+            width: 100px;
+            height: 100px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            filter: drop-shadow(0 4px 6px rgba(37, 99, 235, 0.15));
+        }
+
+        .pulse-correct {
+            border-color: var(--success);
+            background-color: #ecfdf5;
+            animation: bounce 0.4s ease;
+        }
+
+        .pulse-wrong {
+            border-color: var(--error);
+            background-color: #fef2f2;
+            animation: shake 0.4s ease;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-8px); }
+            75% { transform: translateX(8px); }
+        }
+
+        .btn-blue {
+            background: linear-gradient(135deg, var(--primary-blue), var(--dark-blue));
+            color: white;
+            padding: 1.25rem;
+            border-radius: 20px;
+            font-weight: 700;
+            box-shadow: 0 10px 20px rgba(37, 99, 235, 0.2);
+            transition: all 0.2s ease;
+            width: 100%;
+        }
+
+        .btn-blue:active {
+            transform: scale(0.98);
+            box-shadow: 0 5px 10px rgba(37, 99, 235, 0.2);
+        }
+
+        .option-pill {
+            border: 2px solid var(--light-blue);
+            padding: 0.75rem;
+            border-radius: 16px;
+            transition: all 0.2s ease;
+            font-weight: 600;
+        }
+
+        .option-pill.active {
+            border-color: var(--primary-blue);
+            background: var(--light-blue);
+            color: var(--dark-blue);
+        }
+
+        .hidden { display: none !important; }
+
+        .stat-grid {
+            display: grid;
+            grid-template-cols: repeat(2, 1fr);
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .stat-box {
+            padding: 1rem;
+            background: var(--bg-blue);
+            border-radius: 16px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="start-menu" class="glass-card">
+        <div class="mb-6 flex justify-center">
+            <div class="bg-blue-100 p-4 rounded-3xl">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+            </div>
+        </div>
+        <h1 class="text-3xl font-extrabold text-blue-900 mb-1">Eco-Sequenza</h1>
+        <p class="text-blue-500 mb-8 font-medium">Training Cognitivo Memoria N-Back</p>
+        
+        <div class="space-y-6 text-left">
+            <div>
+                <label class="block text-sm font-bold text-blue-900 mb-3 uppercase tracking-wider">Difficoltà</label>
+                <div class="grid grid-cols-3 gap-2">
+                    <button onclick="setLevel(1)" id="lvl-1" class="option-pill active">1-Back</button>
+                    <button onclick="setLevel(2)" id="lvl-2" class="option-pill">2-Back</button>
+                    <button onclick="setLevel(3)" id="lvl-3" class="option-pill">3-Back</button>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-bold text-blue-900 mb-3 uppercase tracking-wider">Durata Sessione</label>
+                <select id="duration-select" class="w-full p-4 border-2 border-blue-100 rounded-2xl bg-white focus:border-blue-500 outline-none transition-all appearance-none cursor-pointer">
+                    <option value="120">2 Minuti</option>
+                    <option value="300">5 Minuti</option>
+                    <option value="600">10 Minuti</option>
+                </select>
+            </div>
+        </div>
+
+        <button onclick="startGame()" class="btn-blue mt-10">Comincia Sessione</button>
+    </div>
+
+    <div id="game-screen" class="glass-card hidden">
+        <div class="flex justify-between items-center mb-6">
+            <div class="flex items-center gap-2">
+                <div class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
+                <span id="timer-display" class="font-mono text-xl font-bold text-blue-900">00:00</span>
+            </div>
+            <div class="bg-blue-100 px-4 py-1 rounded-full">
+                <span class="text-xs font-bold text-blue-600 uppercase">Punti</span>
+                <span id="score-display" class="ml-2 font-bold text-blue-900">0</span>
+            </div>
+        </div>
+
+        <div id="icon-container" class="icon-container">
+            <p id="placeholder" class="text-blue-300 font-medium">Caricamento...</p>
+        </div>
+
+        <div class="mb-8">
+            <p class="text-sm text-blue-400 font-medium leading-relaxed">
+                Premi <strong>Spazio</strong> se l'icona attuale è uguale a quella vista <span id="n-back-hint" class="font-bold text-blue-600">1</span> posizioni fa.
+            </p>
+        </div>
+
+        <button id="action-btn" class="btn-blue py-6 text-xl tracking-widest mb-4">MATCH!</button>
+        
+        <button onclick="stopGame(false)" class="text-blue-400 text-sm font-semibold hover:text-red-400 transition-colors">Interrompi</button>
+    </div>
+
+    <div id="result-screen" class="glass-card hidden">
+        <div class="mb-4 text-blue-600">
+            <svg class="mx-auto" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        </div>
+        <h2 class="text-2xl font-bold text-blue-900">Sessione Completata</h2>
+        <p class="text-blue-500">Ottimi progressi oggi!</p>
+        
+        <div class="my-8">
+            <div class="text-5xl font-extrabold text-blue-600" id="final-score">0</div>
+            <p class="text-xs font-bold text-blue-300 uppercase tracking-widest mt-1">Punteggio Totale</p>
+        </div>
+
+        <div class="stat-grid">
+            <div class="stat-box">
+                <div class="text-xs font-bold text-blue-400 uppercase">Precisione</div>
+                <div id="stat-accuracy" class="text-xl font-bold text-blue-900">0%</div>
+            </div>
+            <div class="stat-box">
+                <div class="text-xs font-bold text-green-500 uppercase">Corrette</div>
+                <div id="stat-correct" class="text-xl font-bold text-blue-900">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="text-xs font-bold text-red-400 uppercase">Errori</div>
+                <div id="stat-wrong" class="text-xl font-bold text-blue-900">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="text-xs font-bold text-orange-400 uppercase">Omissioni</div>
+                <div id="stat-omitted" class="text-xl font-bold text-blue-900">0</div>
+            </div>
+        </div>
+
+        <button onclick="location.reload()" class="btn-blue mt-8">Ritorna al Menu</button>
+    </div>
+
+    <script>
+        let nBack = 1;
+        let duration = 120;
+        let score = 0;
+        let hits = 0;
+        let falseAlarms = 0;
+        let omissions = 0;
+        let totalTargets = 0;
+        let sequence = [];
+        let gameActive = false;
+        let timeLeft;
+        let timerInterval;
+        let gameStepTimeout;
+        let userResponded = false;
+
+        const iconSets = [
+            `<svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>`,
+            `<svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>`,
+            `<svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>`,
+            `<svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>`,
+            `<svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6M18 9h1.5a2.5 2.5 0 0 0 0-5H18M4 22h16M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22M18 2H6v7a6 6 0 0 0 12 0V2z"/></svg>`
+        ];
+
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playSound(type) {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            
+            if (type === 'correct') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+                osc.frequency.exponentialRampToValueAtTime(659.25, audioCtx.currentTime + 0.1); // E5
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+            } else {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(220, audioCtx.currentTime); // A3
+                osc.frequency.linearRampToValueAtTime(110, audioCtx.currentTime + 0.2);
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+            }
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.3);
+        }
+
+        function setLevel(lvl) {
+            nBack = lvl;
+            document.querySelectorAll('.option-pill').forEach(el => el.classList.remove('active'));
+            document.getElementById(`lvl-${lvl}`).classList.add('active');
+            document.getElementById('n-back-hint').innerText = lvl;
+        }
+
+        function startGame() {
+            duration = parseInt(document.getElementById('duration-select').value);
+            timeLeft = duration;
+            score = 0; hits = 0; falseAlarms = 0; omissions = 0; totalTargets = 0;
+            sequence = [];
+            gameActive = true;
+            
+            document.getElementById('start-menu').classList.add('hidden');
+            document.getElementById('game-screen').classList.remove('hidden');
+            
+            updateDisplay();
+            startTimer();
+            setTimeout(nextStep, 1000);
+        }
+
+        function updateDisplay() {
+            const mins = Math.floor(timeLeft / 60);
+            const secs = timeLeft % 60;
+            document.getElementById('timer-display').innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            document.getElementById('score-display').innerText = score;
+        }
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateDisplay();
+                if (timeLeft <= 0) stopGame(true);
+            }, 1000);
+        }
+
+        function nextStep() {
+            if (!gameActive) return;
+
+            // Controllo omissione turno precedente
+            if (sequence.length > nBack && !userResponded) {
+                if (sequence[sequence.length-1] === sequence[sequence.length-1-nBack]) {
+                    omissions++;
+                }
+            }
+
+            userResponded = false;
+            const container = document.getElementById('icon-container');
+            container.className = "icon-container"; 
+
+            // Generazione icona (33% probabilità di match)
+            let iconIdx;
+            if (sequence.length >= nBack && Math.random() < 0.33) {
+                iconIdx = sequence[sequence.length - nBack];
+                totalTargets++;
+            } else {
+                iconIdx = Math.floor(Math.random() * iconSets.length);
+                if (sequence.length >= nBack && iconIdx === sequence[sequence.length - nBack]) {
+                    iconIdx = (iconIdx + 1) % iconSets.length;
+                }
+            }
+
+            sequence.push(iconIdx);
+            container.innerHTML = iconSets[iconIdx];
+
+            // Fase visualizzazione (2.2s per fluidità)
+            gameStepTimeout = setTimeout(() => {
+                container.innerHTML = ""; // Fase vuota
+                gameStepTimeout = setTimeout(nextStep, 800);
+            }, 2200);
+        }
+
+        function handleAction() {
+            if (!gameActive || userResponded || sequence.length === 0) return;
+            
+            const container = document.getElementById('icon-container');
+            if (container.innerHTML === "") return; // Non rispondere nello spazio vuoto
+
+            userResponded = true;
+            const isMatch = sequence.length > nBack && sequence[sequence.length-1] === sequence[sequence.length-1-nBack];
+
+            if (isMatch) {
+                score += 15;
+                hits++;
+                playSound('correct');
+                container.classList.add('pulse-correct');
+            } else {
+                score = Math.max(0, score - 10);
+                falseAlarms++;
+                playSound('wrong');
+                container.classList.add('pulse-wrong');
+            }
+            updateDisplay();
+        }
+
+        function stopGame(completed) {
+            gameActive = false;
+            clearInterval(timerInterval);
+            clearTimeout(gameStepTimeout);
+            
+            if (completed) {
+                const totalAttempts = hits + falseAlarms + omissions;
+                const accuracy = totalAttempts > 0 ? Math.round((hits / totalAttempts) * 100) : 0;
+                
+                document.getElementById('game-screen').classList.add('hidden');
+                document.getElementById('result-screen').classList.remove('hidden');
+                
+                document.getElementById('final-score').innerText = score;
+                document.getElementById('stat-accuracy').innerText = accuracy + "%";
+                document.getElementById('stat-correct').innerText = hits;
+                document.getElementById('stat-wrong').innerText = falseAlarms;
+                document.getElementById('stat-omitted').innerText = omissions;
+            } else {
+                location.reload();
+            }
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                handleAction();
+            }
+        });
+
+        document.getElementById('action-btn').addEventListener('click', handleAction);
+    </script>
+</body>
+</html>

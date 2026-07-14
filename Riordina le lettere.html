@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Il Vocabolario Strampalato - Sfida 500 Parole</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-color: #f3f4f6;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .letter-slot {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 35px;
+            height: 35px;
+            border: 2px solid #3b82f6;
+            border-radius: 6px;
+            margin: 2px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            background: white;
+            color: #1e40af;
+            text-transform: uppercase;
+        }
+        @media (min-width: 640px) {
+            .letter-slot { width: 45px; height: 45px; font-size: 1.5rem; }
+        }
+        .shake {
+            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+        }
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+        .timer-warning {
+            color: #ef4444;
+            animation: pulse-red 0.5s infinite;
+        }
+        @keyframes pulse-red {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        #validation-toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #059669;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 99px;
+            font-weight: bold;
+            display: none;
+            z-index: 50;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        }
+        .time-option {
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .time-option input:checked + div {
+            border-color: #2563eb;
+            background-color: #eff6ff;
+            color: #1e40af;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center p-4">
+
+    <div id="validation-toast">✅ Database validato con successo!</div>
+
+    <div class="max-w-2xl w-full bg-white rounded-2xl shadow-xl p-6 mt-4">
+        <header class="text-center mb-4 border-b pb-4">
+            <h1 class="text-2xl font-bold text-blue-600 uppercase tracking-wide">Sfida 500 Parole</h1>
+            <p class="text-gray-500 text-sm italic">Esercizio di riordino e memoria semantica</p>
+        </header>
+
+        <!-- Schermata Iniziale -->
+        <div id="start-screen" class="text-center py-6">
+            <div class="mb-6">
+                <div class="text-6xl mb-4">🧠</div>
+                <h2 class="text-xl font-bold text-gray-800">Seleziona la durata della sessione</h2>
+            </div>
+            
+            <div class="grid grid-cols-3 gap-4 mb-8">
+                <label class="time-option">
+                    <input type="radio" name="duration" value="60" class="hidden">
+                    <div class="border-2 border-gray-200 rounded-xl p-4 font-bold text-gray-600 hover:bg-gray-50">1 Min</div>
+                </label>
+                <label class="time-option">
+                    <input type="radio" name="duration" value="120" class="hidden" checked>
+                    <div class="border-2 border-gray-200 rounded-xl p-4 font-bold text-gray-600 hover:bg-gray-50">2 Min</div>
+                </label>
+                <label class="time-option">
+                    <input type="radio" name="duration" value="300" class="hidden">
+                    <div class="border-2 border-gray-200 rounded-xl p-4 font-bold text-gray-600 hover:bg-gray-50">5 Min</div>
+                </label>
+            </div>
+
+            <button id="start-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-12 rounded-xl text-xl transition-transform hover:scale-105 shadow-lg">
+                INIZIA ORA
+            </button>
+        </div>
+
+        <!-- Interfaccia di Gioco -->
+        <div id="game-ui" class="hidden">
+            <div class="flex justify-between items-center mb-6 bg-blue-50 p-4 rounded-xl shadow-inner">
+                <div class="text-center">
+                    <p class="text-xs text-blue-500 uppercase font-bold">Parole</p>
+                    <p id="correct-count" class="text-2xl font-black text-blue-800">0</p>
+                </div>
+                <div id="timer-container" class="text-center border-x border-blue-200 px-6 transition-transform">
+                    <p class="text-xs text-blue-500 uppercase font-bold">Tempo</p>
+                    <p id="timer-display" class="text-3xl font-black text-blue-800">00:00</p>
+                </div>
+                <div class="text-center">
+                    <p class="text-xs text-blue-500 uppercase font-bold">Punti</p>
+                    <p id="score-display" class="text-2xl font-black text-blue-800">0</p>
+                </div>
+            </div>
+
+            <div class="text-center mb-6">
+                <span class="text-xs text-gray-400 uppercase font-bold tracking-widest">Parola da Riordinare</span>
+                <div id="scrambled-word" class="text-4xl font-black text-gray-800 my-2 tracking-widest uppercase">
+                    ----
+                </div>
+            </div>
+
+            <div id="answer-container" class="flex flex-wrap justify-center mb-8 min-h-[50px]"></div>
+
+            <div class="space-y-4">
+                <input type="text" id="user-input" autocomplete="off" 
+                       class="w-full border-2 border-gray-200 rounded-xl px-4 py-4 text-center text-2xl font-bold uppercase focus:border-blue-500 outline-none"
+                       placeholder="SCRIVI QUI...">
+                
+                <div class="flex gap-2">
+                    <button id="check-btn" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-4 rounded-xl shadow-lg">
+                        CONFERMA
+                    </button>
+                    <button id="hint-btn" class="bg-amber-400 hover:bg-amber-500 text-white font-bold px-6 py-4 rounded-xl shadow-lg">
+                        AIUTO (-5pt)
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Schermata Finale -->
+        <div id="end-screen" class="hidden text-center py-4">
+            <h2 class="text-3xl font-black text-blue-600 mb-6">RISULTATI SESSIONE</h2>
+            
+            <div class="bg-gray-50 rounded-3xl p-6 border-2 border-gray-100 shadow-inner mb-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
+                        <p class="text-xs text-gray-400 font-bold uppercase">Punteggio Totale</p>
+                        <p id="final-score" class="text-4xl font-black text-blue-600">0</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
+                        <p class="text-xs text-gray-400 font-bold uppercase">Parole Corrette</p>
+                        <p id="final-correct" class="text-4xl font-black text-green-600">0</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
+                        <p class="text-xs text-gray-400 font-bold uppercase">Precisione</p>
+                        <p id="final-accuracy" class="text-4xl font-black text-amber-500">0%</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
+                        <p class="text-xs text-gray-400 font-bold uppercase">Aiuti Usati</p>
+                        <p id="final-hints" class="text-4xl font-black text-purple-500">0</p>
+                    </div>
+                </div>
+                
+                <div class="mt-6 p-4 bg-blue-600 text-white rounded-2xl">
+                    <p class="text-sm font-bold uppercase opacity-80">Valutazione</p>
+                    <p id="final-evaluation" class="text-xl font-bold">Ottimo lavoro!</p>
+                </div>
+            </div>
+
+            <button onclick="location.reload()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg transition-all active:scale-95">
+                NUOVA SESSIONE
+            </button>
+        </div>
+    </div>
+
+    <footer class="mt-8 text-center text-gray-400 text-xs">
+        ASSOCIAZIONE PARKINSON PADOVA<br>
+        Allenamento cognitivo - Revisione 2.6 (Audio Engine V3)
+    </footer>
+
+    <script>
+        const baseData = [
+            "MARE", "CUCINA", "VITA", "PADOVA", "SERA", "GIOIA", "IDEA", "TELEFONO", "TAVOLO", "SUGO", 
+            "GIOCO", "FIGLIO", "POLTRONA", "VASO", "YOGURT", "COMPUTER", "MATTINA", "VASSOIO", "PENTOLA", 
+            "GINNASTICA", "AMORE", "ROMA", "RISOTTO", "PESCA", "BOTTIGLIA", "PASTIGLIA", "RIDERE", "NIPOTE", 
+            "FORNO", "CAMMINARE", "AMICIZIA", "FUTURO", "CARTA", "INSALATA", "FIDUCIA", "NEGOZIO", "GIORNO", 
+            "NAPOLI", "SPESA", "COLTELLO", "USCIRE", "BICCHIERE", "CURA", "CONTARE", "MONTAGNA", "MEMORIA",
+            "CHIAVE", "SCARPA", "VESTITO", "SPALLA", "FRUTTA", "LIMONE", "SCRIVANIA", "LIBRO", "QUADERNO", 
+            "MAESTRO", "CANDELA", "SPECCHIO", "PULLMAN", "TRENO", "PIZZA", "GELATO", "VACANZA", "MIELE", 
+            "SABATO", "DOMINO", "CANTINA", "SOGGIORNO", "STIVALE", "CAMPANA", "DOTTORE", "FARFALLA", "ARANCIA", 
+            "PENSIERO", "OROLOGIO", "MELONE", "CALZA", "GUANTO", "MOTORE", "MUSICA", "SOLE", "LUNA", "STELLA", 
+            "NUVOLA", "UNIVERSO", "TERRA", "CAVOLO", "ZUCCA", "ERRORE", "VALORE", "DRAGO", "CAVALLO", "GATTA", 
+            "SIRENA", "PIANETA", "STRADA", "LAMPADA", "CUSCINO", "QUADRO", "FINESTRA", "PORTA", "DIVANO", 
+            "TAPPETO", "ZAINO", "MATITA", "PENNA", "FORBICI", "SAPONE", "PETTINE", "VALIGIA", "OMBRELLO", 
+            "GIACCA", "GUANCIALE", "LENZUOLO", "COPERTA", "MENSOLA", "ARMADIO", "CASSETTO", "VESTAGLIA",
+            "PANE", "LATTE", "FORMAGGIO", "CARNE", "UOVO", "PESCE", "MELA", "PERA", "BANANA", "FRAGOLA", 
+            "CILIEGIA", "ANGURIA", "CAROTA", "PATATA", "POMODORO", "CIPOLLA", "AGLIO", "PASTA", "ZUCCHERO", 
+            "SALE", "OLIO", "ACETO", "BURRO", "PROSCIUTTO", "SALAME", "BISCOTTO", "TORTA", "CAFFE", "TE", 
+            "VINO", "BIRRA", "ACQUA", "SUCCO", "MARMELLATA", "UOVA", "PISELLI", "FAGIOLI", "LENTICCHIE",
+            "CANE", "GATTO", "LEONE", "TIGRE", "ELEFANTE", "GIRAFFA", "ZEBRA", "SCIMMIA", "CONIGLIO", 
+            "TOPO", "ORSO", "LUPO", "VOLPE", "CERVO", "CINGHIALE", "MUCCA", "MAIALE", "PECORA", "CAPRA", 
+            "ASINO", "UCCELLO", "AQUILA", "FALCO", "PAPPAGALLO", "GALLINA", "GALLO", "ANATRA", "CIGNO", 
+            "SQUALO", "DELFINO", "BALENA", "TARTARUGA", "SERPENTE", "RANA", "LUMACA", "APE"
+        ];
+
+        let wordList = [];
+        let initialTime = 120;
+        let timeLeft = 120;
+        let score = 0;
+        let correctAnswers = 0;
+        let attempts = 0;
+        let totalHintsUsed = 0;
+        let currentIndex = 0;
+        let timerInterval;
+        let soundInterval;
+        let hintGiven = 0;
+
+        // Audio Engine
+        let audioCtx = null;
+
+        const startBtn = document.getElementById('start-btn');
+        const startScreen = document.getElementById('start-screen');
+        const gameUI = document.getElementById('game-ui');
+        const endScreen = document.getElementById('end-screen');
+        const timerDisplay = document.getElementById('timer-display');
+        const timerContainer = document.getElementById('timer-container');
+        const scoreDisplay = document.getElementById('score-display');
+        const correctDisplay = document.getElementById('correct-count');
+        const scrambledDisplay = document.getElementById('scrambled-word');
+        const userInput = document.getElementById('user-input');
+        const answerContainer = document.getElementById('answer-container');
+        const toast = document.getElementById('validation-toast');
+
+        // Forza inizializzazione ad ogni interazione
+        function wakeAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function playTick(freq = 150, duration = 0.1, type = 'triangle', volume = 0.3) {
+            if (!audioCtx) return;
+            
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                
+                gain.gain.setValueAtTime(volume, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+                
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+
+                // Effetto visivo pulsante
+                timerContainer.style.transform = 'scale(1.15)';
+                setTimeout(() => timerContainer.style.transform = 'scale(1)', 60);
+            } catch(e) { console.warn("Audio Error:", e); }
+        }
+
+        function handleAudioTick() {
+            let interval = 1000;
+            if (timeLeft <= 30) interval = 500;
+            if (timeLeft <= 10) interval = 250;
+            
+            clearInterval(soundInterval);
+            if (timeLeft > 0 && !endScreen.classList.contains('hidden') === false) {
+                soundInterval = setInterval(() => {
+                    // Pitch aumenta se il tempo scarseggia
+                    const pitch = timeLeft <= 10 ? 450 : (timeLeft <= 30 ? 280 : 160);
+                    playTick(pitch, 0.08, 'triangle', 0.25);
+                }, interval);
+            }
+        }
+
+        function scrambleWord(word) {
+            if (word.length <= 1) return word;
+            let arr = word.split('');
+            let scrambled;
+            let attempt = 0;
+            do {
+                scrambled = [...arr].sort(() => Math.random() - 0.5);
+                attempt++;
+                let hasMatch = false;
+                for (let i = 0; i < arr.length; i++) {
+                    if (scrambled[i] === arr[i]) {
+                        hasMatch = true;
+                        break;
+                    }
+                }
+                if (!hasMatch) break;
+            } while (attempt < 100);
+            return scrambled.join('').toUpperCase();
+        }
+
+        function validateDatabase() {
+            wordList = [...new Set(baseData)].map(word => {
+                const cleanWord = word.trim().toUpperCase();
+                return { s: scrambleWord(cleanWord), c: cleanWord };
+            }).sort(() => Math.random() - 0.5);
+            return true;
+        }
+
+        function startGame() {
+            wakeAudio();
+            const selectedDuration = document.querySelector('input[name="duration"]:checked').value;
+            initialTime = parseInt(selectedDuration);
+            timeLeft = initialTime;
+
+            validateDatabase();
+            toast.style.display = "block";
+            setTimeout(() => { toast.style.display = "none"; }, 1500);
+
+            startScreen.classList.add('hidden');
+            gameUI.classList.remove('hidden');
+            loadNextWord();
+            
+            updateTimerDisplay();
+            timerInterval = setInterval(updateTimer, 1000);
+            handleAudioTick();
+            
+            userInput.focus();
+        }
+
+        function updateTimer() {
+            timeLeft--;
+            updateTimerDisplay();
+
+            // Sincronizza suono se cambiano le soglie di velocità
+            if (timeLeft === 30 || timeLeft === 10) {
+                handleAudioTick();
+            }
+
+            if (timeLeft <= 0) endGame();
+            if (timeLeft < 15) timerDisplay.classList.add('timer-warning');
+        }
+
+        function updateTimerDisplay() {
+            const mins = Math.floor(timeLeft / 60);
+            const secs = timeLeft % 60;
+            timerDisplay.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function loadNextWord() {
+            if (currentIndex >= wordList.length) currentIndex = 0;
+            const wordData = wordList[currentIndex];
+            scrambledDisplay.textContent = wordData.s;
+            userInput.value = "";
+            hintGiven = 0;
+            answerContainer.innerHTML = "";
+            for (let i = 0; i < wordData.c.length; i++) {
+                const slot = document.createElement('div');
+                slot.className = 'letter-slot';
+                slot.id = `slot-${i}`;
+                slot.textContent = "?";
+                answerContainer.appendChild(slot);
+            }
+        }
+
+        function checkAnswer() {
+            wakeAudio();
+            const guess = userInput.value.trim().toUpperCase();
+            if (!guess) return;
+            
+            attempts++;
+            const correct = wordList[currentIndex].c;
+            
+            if (guess === correct) {
+                playTick(550, 0.2, 'sine', 0.4); // Successo
+                correctAnswers++;
+                score += Math.max(10, (correct.length * 2) - (hintGiven * 5));
+                correctDisplay.textContent = correctAnswers;
+                scoreDisplay.textContent = score;
+                document.body.style.backgroundColor = "#dcfce7";
+                setTimeout(() => document.body.style.backgroundColor = "#f3f4f6", 200);
+                currentIndex++;
+                loadNextWord();
+            } else {
+                playTick(90, 0.4, 'sawtooth', 0.2); // Errore
+                userInput.classList.add('shake');
+                setTimeout(() => userInput.classList.remove('shake'), 500);
+            }
+        }
+
+        function giveHint() {
+            wakeAudio();
+            const correct = wordList[currentIndex].c;
+            if (hintGiven < correct.length) {
+                const slot = document.getElementById(`slot-${hintGiven}`);
+                slot.textContent = correct[hintGiven];
+                slot.classList.add('bg-amber-100', 'border-amber-400');
+                hintGiven++;
+                totalHintsUsed++;
+                score = Math.max(0, score - 5);
+                scoreDisplay.textContent = score;
+                playTick(330, 0.1, 'sine', 0.2); 
+            }
+        }
+
+        function endGame() {
+            clearInterval(timerInterval);
+            clearInterval(soundInterval);
+            
+            if (audioCtx) {
+                // Sequenza finale trionfale
+                [523.25, 659.25, 783.99].forEach((f, i) => {
+                    setTimeout(() => playTick(f, 0.4, 'sine', 0.3), i * 120);
+                });
+            }
+
+            gameUI.classList.add('hidden');
+            endScreen.classList.remove('hidden');
+            
+            const accuracy = attempts > 0 ? Math.round((correctAnswers / attempts) * 100) : 0;
+            
+            document.getElementById('final-correct').textContent = correctAnswers;
+            document.getElementById('final-score').textContent = score;
+            document.getElementById('final-accuracy').textContent = accuracy + "%";
+            document.getElementById('final-hints').textContent = totalHintsUsed;
+            
+            let evalText = "Continua ad allenarti!";
+            if (correctAnswers > 5) evalText = "Buona prestazione!";
+            if (correctAnswers > 15) evalText = "Ottimo lavoro! Mente brillante.";
+            if (correctAnswers > 30) evalText = "Sei un maestro del linguaggio!";
+            
+            document.getElementById('final-evaluation').textContent = evalText;
+        }
+
+        startBtn.addEventListener('click', startGame);
+        document.getElementById('check-btn').addEventListener('click', checkAnswer);
+        document.getElementById('hint-btn').addEventListener('click', giveHint);
+        userInput.addEventListener('keypress', (e) => { 
+            if (e.key === 'Enter') {
+                wakeAudio();
+                checkAnswer();
+            }
+        });
+    </script>
+</body>
+</html>

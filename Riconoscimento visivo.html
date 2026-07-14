@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mente Attiva PRO - Stimolazione Cognitiva</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+        
+        :root {
+            --bg-gradient: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            --primary: #3b82f6;
+            --success: #10b981;
+            --warning: #facc15; 
+            --danger: #ef4444;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-gradient);
+            min-height: 100vh;
+            color: #1e293b;
+            overflow-x: hidden;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
+        }
+
+        .grid-container {
+            display: grid;
+            gap: 1rem;
+            justify-content: center;
+            perspective: 1000px;
+        }
+
+        .card {
+            width: 85px;
+            height: 85px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.2rem;
+            background: white;
+            border-radius: 1.25rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            border: 4px solid transparent;
+            user-select: none;
+        }
+
+        @media (min-width: 640px) {
+            .card { width: 110px; height: 110px; font-size: 3.2rem; }
+        }
+
+        .card.correct {
+            border-color: var(--success);
+            background-color: #ecfdf5;
+            transform: scale(0.95);
+        }
+
+        .card.wrong {
+            border-color: var(--warning); 
+            background-color: #fefce8;
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), #60a5fa);
+            border-radius: 999px;
+            width: 100%;
+        }
+
+        .btn-primary {
+            background: #1e293b;
+            color: white;
+            padding: 0.8rem 2rem;
+            border-radius: 1rem;
+            font-weight: 700;
+            transition: all 0.3s;
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #1e293b;
+            border: 2px solid #e2e8f0;
+            padding: 0.8rem 2rem;
+            border-radius: 1rem;
+            font-weight: 700;
+            transition: all 0.3s;
+        }
+
+        .btn-primary:hover { transform: translateY(-2px); background: #334155; }
+        .btn-secondary:hover { background: #f8fafc; border-color: #cbd5e1; }
+
+        .summary-stat-box {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 1.5rem;
+            border: 1px solid #f1f5f9;
+            text-align: center;
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center p-4">
+
+    <!-- Area Gioco Principale -->
+    <div id="main-container" class="max-w-4xl w-full glass-card rounded-[2.5rem] p-6 md:p-10 transition-all duration-500">
+        
+        <!-- Dashboard superiore -->
+        <div class="flex flex-wrap justify-between items-center mb-8 gap-4">
+            <div>
+                <h1 class="text-2xl md:text-3xl font-black text-slate-900">Mente Attiva</h1>
+                <p id="instruction-text" class="text-slate-500 font-medium">Osserva con attenzione.</p>
+            </div>
+            
+            <div class="flex gap-3">
+                <div class="bg-white px-4 py-2 rounded-2xl shadow-sm border border-slate-100 text-center min-w-[70px]">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase">Livello</p>
+                    <p id="current-level" class="text-xl font-extrabold text-blue-600">1</p>
+                </div>
+                <div class="bg-white px-4 py-2 rounded-2xl shadow-sm border border-slate-100 text-center min-w-[70px]">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase">Punteggio</p>
+                    <p id="current-score" class="text-xl font-extrabold text-emerald-500">0</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Barra di Progresso -->
+        <div id="progress-container" class="opacity-0 mb-8 transition-opacity duration-300">
+            <div class="flex justify-between items-center mb-2 px-1">
+                <span class="text-xs font-bold text-blue-600 uppercase" id="phase-label">Memorizzazione</span>
+                <span class="text-xs font-bold text-slate-600" id="timer-display">4.0s</span>
+            </div>
+            <div class="h-2.5 w-full bg-slate-200 rounded-full overflow-hidden">
+                <div id="progress-bar" class="progress-fill"></div>
+            </div>
+        </div>
+
+        <!-- Viewport Gioco -->
+        <div id="game-viewport" class="min-h-[350px] flex flex-col items-center justify-center">
+            <div id="grid" class="grid-container">
+                <div class="text-center">
+                    <div class="text-8xl mb-4 animate-bounce">🧠</div>
+                    <p class="text-slate-500 font-semibold">Inizia l'allenamento quotidiano.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Controlli -->
+        <div id="controls" class="mt-8 flex flex-col items-center">
+            <!-- Pannello Impostazioni (Velocità) -->
+            <div id="settings-panel" class="mb-6 flex flex-col sm:flex-row items-center justify-center gap-3 bg-slate-50 p-3 rounded-2xl border border-slate-200/60 w-full max-w-md">
+                <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Esposizione Stimoli:</span>
+                <div class="flex gap-2 w-full sm:w-auto">
+                    <button id="speed-standard-btn" class="flex-1 sm:flex-none px-4 py-2 rounded-xl text-xs font-bold bg-blue-600 text-white shadow-sm transition-all">Standard (1x)</button>
+                    <button id="speed-slow-btn" class="flex-1 sm:flex-none px-4 py-2 rounded-xl text-xs font-bold bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 transition-all">Rallentata (2x)</button>
+                </div>
+            </div>
+
+            <div id="feedback-message" class="hidden mb-6 w-full text-center p-4 rounded-2xl font-bold transition-all"></div>
+            
+            <div id="action-buttons" class="flex gap-4">
+                <button id="action-btn" class="btn-primary">Inizia Esercizio</button>
+                <button id="end-session-btn" class="btn-secondary hidden">Termina Sessione</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Schermata Riepilogativa (Nascosta all'inizio) -->
+    <div id="summary-screen" class="hidden max-w-2xl w-full glass-card rounded-[2.5rem] p-8 md:p-12 animate-in fade-in zoom-in duration-500">
+        <div class="text-center mb-10">
+            <div class="text-6xl mb-4">🏆</div>
+            <h2 class="text-3xl font-black text-slate-900">Sessione Completata</h2>
+            <p class="text-slate-500 font-medium">Ecco i risultati del tuo allenamento odierno.</p>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4 mb-10">
+            <div class="summary-stat-box">
+                <p class="text-xs font-bold text-slate-400 uppercase mb-1">Punteggio</p>
+                <p id="final-score" class="text-3xl font-black text-emerald-500">0</p>
+            </div>
+            <div class="summary-stat-box">
+                <p class="text-xs font-bold text-slate-400 uppercase mb-1">Livello Max</p>
+                <p id="final-level" class="text-3xl font-black text-blue-600">1</p>
+            </div>
+            <div class="summary-stat-box">
+                <p class="text-xs font-bold text-slate-400 uppercase mb-1">Corrette</p>
+                <p id="final-correct" class="text-3xl font-black text-slate-700">0</p>
+            </div>
+            <div class="summary-stat-box">
+                <p class="text-xs font-bold text-slate-400 uppercase mb-1">Precisione</p>
+                <p id="final-accuracy" class="text-3xl font-black text-amber-500">0%</p>
+            </div>
+        </div>
+
+        <button id="restart-btn" class="w-full btn-primary py-5 text-xl">Ricomincia</button>
+    </div>
+
+    <script>
+        const allIcons = ['🍎', '🚗', '🐱', '⚽', '🏠', '🌻', '🍦', '🚲', '🚀', '🔑', '🎸', '⌚', '🐘', '🍕', '🌈', '🚁', '⚓', '🧸', '💡', '🔔', '🏀', '🍄', '🌍', '🦜', '💎', '🎨', '🎲', '🎻', '🍍', '🦩', '🍓', '🧤', '🧢', '🕶️', '🍿', '🧊', '🌋', '⛺'];
+
+        let level = 1;
+        let score = 0;
+        let lives = 2;
+        let targetIcons = [];
+        let selectedCount = 0;
+        let isRecognitionPhase = false;
+        let timerId = null;
+        let isSlowMode = false; // Impostazione velocità di default: Standard (false)
+
+        // Statistiche sessione
+        let stats = {
+            totalCorrect: 0,
+            totalErrors: 0,
+            maxLevel: 1
+        };
+
+        const grid = document.getElementById('grid');
+        const actionBtn = document.getElementById('action-btn');
+        const endBtn = document.getElementById('end-session-btn');
+        const instruction = document.getElementById('instruction-text');
+        const levelDisplay = document.getElementById('current-level');
+        const scoreDisplay = document.getElementById('current-score');
+        const feedback = document.getElementById('feedback-message');
+        const progressContainer = document.getElementById('progress-container');
+        const progressBar = document.getElementById('progress-bar');
+        const timerDisplay = document.getElementById('timer-display');
+        const settingsPanel = document.getElementById('settings-panel');
+        const standardBtn = document.getElementById('speed-standard-btn');
+        const slowBtn = document.getElementById('speed-slow-btn');
+
+        // Configura il cambio velocità tramite bottoni grafici
+        standardBtn.onclick = () => {
+            isSlowMode = false;
+            standardBtn.className = "flex-1 sm:flex-none px-4 py-2 rounded-xl text-xs font-bold bg-blue-600 text-white shadow-sm transition-all";
+            slowBtn.className = "flex-1 sm:flex-none px-4 py-2 rounded-xl text-xs font-bold bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 transition-all";
+        };
+
+        slowBtn.onclick = () => {
+            isSlowMode = true;
+            slowBtn.className = "flex-1 sm:flex-none px-4 py-2 rounded-xl text-xs font-bold bg-blue-600 text-white shadow-sm transition-all";
+            standardBtn.className = "flex-1 sm:flex-none px-4 py-2 rounded-xl text-xs font-bold bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 transition-all";
+        };
+
+        function shuffle(array) {
+            return [...array].sort(() => Math.random() - 0.5);
+        }
+
+        function calculatePresentationTime(numTargets) {
+            let baseTime = 4000; // Tempo base di 4 secondi
+            if (numTargets >= 6) {
+                // Da 6 stimoli, aggiunge progressivamente 1.5 secondi per stimolo
+                baseTime += (numTargets - 5) * 1500;
+            }
+            // Se attiva la versione rallentata, raddoppia l'esposizione
+            if (isSlowMode) {
+                baseTime *= 2;
+            }
+            return baseTime;
+        }
+
+        function startMemorization() {
+            isRecognitionPhase = false;
+            selectedCount = 0;
+            lives = 2;
+            if (timerId) clearTimeout(timerId);
+            
+            feedback.classList.add('hidden');
+            actionBtn.classList.add('hidden');
+            endBtn.classList.add('hidden');
+            settingsPanel.classList.add('hidden'); // Nasconde le impostazioni durante il gioco attivo
+            grid.innerHTML = '';
+            
+            const numTargets = Math.min(level + 1, 10); 
+            targetIcons = shuffle(allIcons).slice(0, numTargets);
+
+            const displayTime = calculatePresentationTime(numTargets);
+            timerDisplay.innerText = (displayTime / 1000).toFixed(1) + "s";
+            instruction.innerText = "Memorizza queste icone.";
+            
+            progressContainer.classList.replace('opacity-0', 'opacity-100');
+            progressBar.style.transition = 'none';
+            progressBar.style.width = '100%';
+            
+            setTimeout(() => {
+                progressBar.style.transition = `width ${displayTime}ms linear`;
+                progressBar.style.width = '0%';
+            }, 50);
+
+            const cols = numTargets > 5 ? 4 : (numTargets > 3 ? 3 : 2);
+            grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+            
+            targetIcons.forEach(icon => {
+                const card = document.createElement('div');
+                card.className = 'card memorize-phase border-blue-100';
+                card.innerText = icon;
+                grid.appendChild(card);
+            });
+
+            timerId = setTimeout(startRecognition, displayTime);
+        }
+
+        function startRecognition() {
+            isRecognitionPhase = true;
+            progressContainer.classList.replace('opacity-100', 'opacity-0');
+            grid.innerHTML = '';
+            instruction.innerText = "Quali icone avevi visto?";
+
+            const numDistractors = Math.min(level + 3, 12);
+            const distractors = shuffle(allIcons.filter(i => !targetIcons.includes(i))).slice(0, numDistractors);
+            const gameIcons = shuffle([...targetIcons, ...distractors]);
+
+            grid.style.gridTemplateColumns = `repeat(${Math.ceil(Math.sqrt(gameIcons.length))}, 1fr)`;
+
+            gameIcons.forEach(icon => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerText = icon;
+                card.onclick = () => handleSelection(card, icon);
+                grid.appendChild(card);
+            });
+        }
+
+        function handleSelection(el, icon) {
+            if (!isRecognitionPhase || el.classList.contains('correct') || el.classList.contains('wrong')) return;
+
+            if (targetIcons.includes(icon)) {
+                el.classList.add('correct');
+                selectedCount++;
+                score += (level * 5);
+                stats.totalCorrect++;
+                scoreDisplay.innerText = score;
+
+                if (selectedCount === targetIcons.length) {
+                    score += (level * 10);
+                    setTimeout(() => finishLevel(true), 400);
+                }
+            } else {
+                lives--;
+                stats.totalErrors++;
+                el.classList.add('wrong');
+                
+                if (lives > 0) {
+                    instruction.innerText = "Attenzione! Prova un'altra carta.";
+                } else {
+                    isRecognitionPhase = false;
+                    setTimeout(() => finishLevel(false), 600);
+                }
+            }
+        }
+
+        function finishLevel(win) {
+            isRecognitionPhase = false;
+            grid.innerHTML = win ? '<div class="text-9xl">🌟</div>' : '<div class="text-9xl">🧩</div>';
+            
+            feedback.classList.remove('hidden');
+            feedback.innerText = win ? "Livello Superato!" : "Livello Terminato.";
+            feedback.className = win ? 
+                "mb-6 w-full text-center p-4 rounded-2xl font-bold bg-emerald-50 text-emerald-600 border border-emerald-100" : 
+                "mb-6 w-full text-center p-4 rounded-2xl font-bold bg-yellow-50 text-yellow-600 border border-yellow-100";
+
+            if (win) {
+                level++;
+                if(level > stats.maxLevel) stats.maxLevel = level;
+            } else {
+                level = Math.max(1, level - 1);
+            }
+
+            levelDisplay.innerText = level;
+            actionBtn.innerText = "Prossimo Livello";
+            actionBtn.classList.remove('hidden');
+            endBtn.classList.remove('hidden');
+            settingsPanel.classList.remove('hidden'); // Rende di nuovo visibili le impostazioni tra i livelli
+        }
+
+        function showSummary() {
+            document.getElementById('main-container').classList.add('hidden');
+            const summary = document.getElementById('summary-screen');
+            summary.classList.remove('hidden');
+
+            document.getElementById('final-score').innerText = score;
+            document.getElementById('final-level').innerText = stats.maxLevel;
+            document.getElementById('final-correct').innerText = stats.totalCorrect;
+            
+            const totalActions = stats.totalCorrect + stats.totalErrors;
+            const accuracy = totalActions > 0 ? Math.round((stats.totalCorrect / totalActions) * 100) : 0;
+            document.getElementById('final-accuracy').innerText = accuracy + "%";
+        }
+
+        // Event Listeners
+        actionBtn.onclick = startMemorization;
+        endBtn.onclick = showSummary;
+        document.getElementById('restart-btn').onclick = () => location.reload();
+
+    </script>
+</body>
+</html>

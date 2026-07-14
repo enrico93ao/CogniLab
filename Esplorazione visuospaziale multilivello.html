@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Esercizio di Stimolazione Cognitiva</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            touch-action: none;
+            overflow: hidden;
+            background-color: #f3f4f6;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        #stimulus {
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+            position: absolute;
+            width: 100px;
+            height: 100px;
+        }
+        .screen {
+            display: none;
+            height: 100vh;
+            width: 100vw;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .active {
+            display: flex;
+        }
+        
+        .target-circle {
+            background-color: #ef4444; /* Rosso */
+            border-radius: 9999px;
+            border: 5px solid white;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.25);
+            width: 100px;
+            height: 100px;
+        }
+        .distractor-square {
+            background-color: #3b82f6; /* Blu */
+            border-radius: 16px;
+            border: 5px solid white;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.25);
+            width: 100px;
+            height: 100px;
+        }
+        .distractor-triangle {
+            width: 0; height: 0;
+            border-left: 50px solid transparent;
+            border-right: 50px solid transparent;
+            border-bottom: 86px solid #eab308; /* Giallo */
+            filter: drop-shadow(0 10px 10px rgba(0, 0, 0, 0.25));
+        }
+        
+        #feedback {
+            pointer-events: none;
+            position: absolute;
+            font-size: 4rem;
+            font-weight: bold;
+            z-index: 60;
+            display: none;
+            animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes pop {
+            0% { transform: scale(0.5); opacity: 0; }
+            50% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(1); opacity: 0; }
+        }
+        
+        /* Barra Lampeggiante Ottimizzata */
+        #flashing-bar {
+            position: absolute;
+            top: 0;
+            width: 40px;
+            height: 100%;
+            background-color: #ef4444;
+            z-index: 10;
+            display: none;
+            opacity: 0.5;
+            animation: blink 0.6s infinite;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 0.1; }
+            50% { opacity: 0.7; }
+        }
+
+        .option-btn {
+            border: 2px solid #e5e7eb;
+            padding: 0.6rem;
+            border-radius: 0.75rem;
+            font-weight: bold;
+            font-size: 0.85rem;
+            color: #4b5563;
+            transition: all 0.2s ease;
+        }
+        .option-btn.selected {
+            background-color: #3b82f6;
+            color: white;
+            border-color: #2563eb;
+            box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2);
+        }
+
+        .switch { position: relative; display: inline-block; width: 44px; height: 22px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #ccc; transition: .4s; border-radius: 22px;
+        }
+        .slider:before {
+            position: absolute; content: ""; height: 14px; width: 14px;
+            left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%;
+        }
+        input:checked + .slider { background-color: #3b82f6; }
+        input:checked + .slider:before { transform: translateX(22px); }
+    </style>
+</head>
+<body>
+
+    <div id="start-screen" class="screen active">
+        <div class="bg-white p-6 rounded-3xl shadow-2xl text-center max-w-md mx-4 border-t-8 border-blue-500 overflow-y-auto max-h-[95vh] w-full">
+            <h1 class="text-2xl font-black text-gray-800 mb-1">Allenamento Cognitivo</h1>
+            <p class="text-gray-500 text-xs mb-5 uppercase tracking-wider">Stimolazione Attenzionale ed Esecutiva</p>
+            
+            <!-- Durata -->
+            <div class="mb-5">
+                <p class="text-[10px] font-bold text-gray-400 uppercase mb-2 tracking-widest text-left ml-1">Durata Sessione</p>
+                <div class="grid grid-cols-4 gap-2">
+                    <button onclick="setDuration(30)" class="option-btn time-btn" data-time="30">30s</button>
+                    <button onclick="setDuration(60)" class="option-btn time-btn" data-time="60">1m</button>
+                    <button onclick="setDuration(90)" class="option-btn time-btn" data-time="90">1.5m</button>
+                    <button onclick="setDuration(120)" class="option-btn time-btn selected" data-time="120">2m</button>
+                </div>
+            </div>
+
+            <!-- Feedback Sonoro -->
+            <div class="mb-5 bg-blue-50 p-4 rounded-2xl border border-blue-100">
+                <p class="text-[10px] font-bold text-blue-500 uppercase mb-3 tracking-widest text-left ml-1">Feedback Sonoro</p>
+                <div class="flex flex-col gap-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-semibold text-gray-600">Suono Successo ✔️</span>
+                        <label class="switch">
+                            <input type="checkbox" id="sound-correct-toggle" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-semibold text-gray-600">Suono Errore ❌</span>
+                        <label class="switch">
+                            <input type="checkbox" id="sound-error-toggle" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Barra Lampeggiante -->
+            <div class="mb-6 bg-gray-50 p-4 rounded-2xl border border-gray-100">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-sm font-bold text-gray-700">Barra Lampeggiante</span>
+                    <label class="switch">
+                        <input type="checkbox" id="distractor-toggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div id="bar-pos-container" class="opacity-50 pointer-events-none transition-opacity">
+                    <p class="text-[10px] font-bold text-gray-400 uppercase mb-2 tracking-widest text-left">Posizione Barra</p>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button onclick="setBarSide('left')" class="option-btn side-btn selected" data-side="left">SX</button>
+                        <button onclick="setBarSide('right')" class="option-btn side-btn" data-side="right">DX</button>
+                        <button onclick="setBarSide('random')" class="option-btn side-btn" data-side="random">RND</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid gap-2">
+                <button onclick="startGame('base')" class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-5 rounded-2xl shadow-md flex justify-between items-center border-b-4 border-green-700 active:scale-95 transition-all text-sm">
+                    <span>Livello Base (Solo Cerchi)</span> 🟢
+                </button>
+                <button onclick="startGame('intermedio')" class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-5 rounded-2xl shadow-md flex justify-between items-center border-b-4 border-orange-700 active:scale-95 transition-all text-sm">
+                    <span>Livello Intermedio</span> 🟡
+                </button>
+                <button onclick="startGame('difficile')" class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-5 rounded-2xl shadow-md flex justify-between items-center border-b-4 border-red-800 active:scale-95 transition-all text-sm">
+                    <span>Livello Difficile</span> 🔴
+                </button>
+                <button onclick="startGame('shifting')" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-5 rounded-2xl shadow-md flex justify-between items-center border-b-4 border-purple-800 active:scale-95 transition-all text-sm">
+                    <span>Livello Flessibilità (Shifting)</span> 🔵🔴
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="game-screen" class="screen relative p-4 bg-gray-100 overflow-hidden">
+        <!-- Barra lampeggiante distrattrice -->
+        <div id="flashing-bar"></div>
+
+        <!-- Banner per le istruzioni del livello shifting -->
+        <div id="instruction-banner" class="absolute top-24 left-1/2 -translate-x-1/2 z-35 bg-purple-100 border-2 border-purple-300 text-purple-800 px-6 py-2.5 rounded-2xl font-black shadow-md hidden text-center text-sm tracking-wider uppercase animate-bounce">
+            PREMI: CERCHIO ROSSO
+        </div>
+
+        <!-- Pannello superiore info -->
+        <div class="absolute top-6 left-6 flex gap-3 z-30 pointer-events-none">
+            <div class="text-lg font-mono font-bold text-gray-600 bg-white/95 backdrop-blur px-4 py-1.5 rounded-full border border-gray-200 shadow-sm">
+                ⏱️ <span id="timer">00:00</span>
+            </div>
+            <div class="text-lg font-mono font-bold text-gray-600 bg-white/95 backdrop-blur px-4 py-1.5 rounded-full border border-gray-200 shadow-sm">
+                🎯 <span id="counter" class="text-green-600">0</span>
+            </div>
+        </div>
+
+        <button id="btn-exit" onclick="resetToMenu()" class="absolute top-6 right-6 z-30 bg-white/95 backdrop-blur text-gray-600 hover:text-red-600 font-bold px-5 py-1.5 rounded-full border border-gray-200 shadow-sm active:scale-95 transition-all">
+            Esci 🚪
+        </button>
+        
+        <!-- Elemento contenitore dello stimolo -->
+        <div id="stimulus"></div>
+        <div id="feedback"></div>
+    </div>
+
+    <!-- Schermata Finale -->
+    <div id="end-screen" class="screen">
+        <div class="bg-white p-8 rounded-3xl shadow-2xl text-center w-full max-w-xl mx-4 border-b-8 border-blue-500">
+            <h2 class="text-3xl font-black text-gray-800 mb-6 uppercase tracking-wider">Sessione Completata</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-8">
+                <div class="bg-green-50 p-4 rounded-2xl border border-green-100">
+                    <p class="text-[10px] text-green-700 uppercase font-bold mb-1">Bersagli Toccati</p>
+                    <p class="text-4xl font-black text-green-600" id="final-score">0</p>
+                </div>
+                <div class="bg-red-50 p-4 rounded-2xl border border-red-100">
+                    <p class="text-[10px] text-red-700 uppercase font-bold mb-1">Errori Commessi</p>
+                    <p class="text-4xl font-black text-red-500" id="final-errors">0</p>
+                </div>
+                <div class="bg-blue-50 p-4 rounded-2xl border border-blue-100">
+                    <p class="text-[10px] text-blue-700 uppercase font-bold mb-1">Reazione Media</p>
+                    <p class="text-3xl font-black text-blue-600" id="final-reaction">0s</p>
+                </div>
+            </div>
+
+            <button onclick="resetToMenu()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-10 rounded-full text-xl active:scale-95 shadow-md w-full transition-transform">
+                Nuova Sessione
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const startScreen = document.getElementById('start-screen');
+        const gameScreen = document.getElementById('game-screen');
+        const endScreen = document.getElementById('end-screen');
+        const stimulus = document.getElementById('stimulus');
+        const feedback = document.getElementById('feedback');
+        const timerDisplay = document.getElementById('timer');
+        const counterDisplay = document.getElementById('counter');
+        const flashingBar = document.getElementById('flashing-bar');
+        const distractorToggle = document.getElementById('distractor-toggle');
+        const barPosContainer = document.getElementById('bar-pos-container');
+        const soundCorrectToggle = document.getElementById('sound-correct-toggle');
+        const soundErrorToggle = document.getElementById('sound-error-toggle');
+        const instructionBanner = document.getElementById('instruction-banner');
+
+        let score = 0, errors = 0;
+        let sessionDuration = 120, timeLeft = 120; 
+        let gameActive = false, isTransitioning = false;
+        let timerInterval, stimulusTimeout; 
+        let currentType = 'circle', difficulty = 'base', barSide = 'left';
+        let stimulusAppearanceTime = 0, reactionTimes = [];
+        
+        // Variabili specifiche per il livello shifting
+        let currentTargetType = 'circle'; // 'circle' o 'square'
+        let consecutiveCorrectHits = 0;   // Ogni 3 risposte corrette cambia obiettivo
+
+        let lastX = -1, lastY = -1;
+        const STIMULUS_SIZE = 100;
+
+        let audioCtx = null;
+        function playSound(type) {
+            try {
+                if (type === 'correct' && !soundCorrectToggle.checked) return;
+                if (type === 'error' && !soundErrorToggle.checked) return;
+                
+                if (!audioCtx) {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+                
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                
+                if (type === 'correct') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // Do5
+                    osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.08); // Mi5
+                    osc.frequency.setValueAtTime(783.99, audioCtx.currentTime + 0.16); // Sol5
+                    
+                    gain.gain.setValueAtTime(0, audioCtx.currentTime);
+                    gain.gain.linearRampToValueAtTime(0.15, audioCtx.currentTime + 0.02);
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.35);
+                    
+                    osc.start(audioCtx.currentTime);
+                    osc.stop(audioCtx.currentTime + 0.4);
+                } else if (type === 'error') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(120, audioCtx.currentTime); 
+                    osc.frequency.linearRampToValueAtTime(80, audioCtx.currentTime + 0.25);
+                    
+                    gain.gain.setValueAtTime(0, audioCtx.currentTime);
+                    gain.gain.linearRampToValueAtTime(0.2, audioCtx.currentTime + 0.02);
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+                    
+                    osc.start(audioCtx.currentTime);
+                    osc.stop(audioCtx.currentTime + 0.3);
+                }
+            } catch (err) {
+                console.log("Audio non supportato o bloccato dalle policy utente", err);
+            }
+        }
+
+        distractorToggle.addEventListener('change', function() {
+            barPosContainer.style.opacity = this.checked ? "1" : "0.5";
+            barPosContainer.style.pointerEvents = this.checked ? "auto" : "none";
+        });
+
+        function setDuration(seconds) {
+            sessionDuration = seconds;
+            document.querySelectorAll('.time-btn').forEach(btn => btn.classList.toggle('selected', parseInt(btn.getAttribute('data-time')) === seconds));
+        }
+
+        function setBarSide(side) {
+            barSide = side;
+            document.querySelectorAll('.side-btn').forEach(btn => btn.classList.toggle('selected', btn.getAttribute('data-side') === side));
+        }
+
+        function updateFlashingBar() {
+            if (!gameActive || !distractorToggle.checked) {
+                flashingBar.style.display = 'none';
+                return;
+            }
+            let side = barSide === 'random' ? (Math.random() > 0.5 ? 'left' : 'right') : barSide;
+            flashingBar.style.left = side === 'left' ? '0' : 'auto';
+            flashingBar.style.right = side === 'right' ? '0' : 'auto';
+            flashingBar.style.display = 'block';
+        }
+
+        function updateInstructionBanner() {
+            if (difficulty === 'shifting') {
+                instructionBanner.textContent = currentTargetType === 'circle' ? "🎯 PREMI: CERCHIO ROSSO 🎯" : "🎯 PREMI: QUADRATO BLU 🎯";
+                instructionBanner.classList.remove('hidden');
+            } else {
+                instructionBanner.classList.add('hidden');
+            }
+        }
+
+        function showFeedback(type, x, y) {
+            feedback.style.left = `${x}px`; feedback.style.top = `${y}px`;
+            feedback.style.display = 'block'; feedback.textContent = type === 'correct' ? '✔️' : '❌';
+            feedback.style.color = type === 'correct' ? '#22c55e' : '#ef4444';
+            playSound(type);
+            setTimeout(() => feedback.style.display = 'none', 400);
+        }
+
+        function moveStimulus() {
+            if (!gameActive) return;
+            isTransitioning = false;
+            if (stimulusTimeout) clearTimeout(stimulusTimeout); 
+            
+            updateFlashingBar(); 
+            updateInstructionBanner();
+
+            const rand = Math.random();
+            if (difficulty === 'base') {
+                currentType = 'circle';
+            } else if (difficulty === 'intermedio') {
+                currentType = rand > 0.4 ? 'circle' : 'square';
+            } else if (difficulty === 'difficile') {
+                currentType = rand > 0.5 ? 'circle' : (rand > 0.25 ? 'square' : 'triangle');
+            } else if (difficulty === 'shifting') {
+                // Nel livello shifting, presentiamo in modo bilanciato le forme
+                if (rand > 0.6) {
+                    currentType = currentTargetType; // 40% probabilità del target attuale
+                } else if (rand > 0.25) {
+                    currentType = currentTargetType === 'circle' ? 'square' : 'circle'; // 35% l'altro stimolo (ora distrattore)
+                } else {
+                    currentType = 'triangle'; // 25% triangolo giallo
+                }
+            }
+
+            stimulus.innerHTML = ''; 
+            stimulus.className = '';
+            stimulus.style.width = '100px';
+            stimulus.style.height = '100px';
+
+            if (currentType === 'circle') {
+                stimulus.className = 'target-circle';
+            } else if (currentType === 'square') {
+                stimulus.className = 'distractor-square';
+            } else {
+                const tri = document.createElement('div'); 
+                tri.className = 'distractor-triangle';
+                stimulus.appendChild(tri); 
+            }
+
+            // Gestione dei timer di sparizione (i distrattori spariscono dopo 4 secondi)
+            let isCurrentTarget = (difficulty === 'shifting') ? (currentType === currentTargetType) : (currentType === 'circle');
+            
+            if (!isCurrentTarget && difficulty !== 'base') {
+                // Se è un distrattore (o non è il bersaglio attuale nel shifting), sposta dopo 4 secondi
+                stimulusTimeout = setTimeout(() => {
+                    if (gameActive && !isTransitioning) moveStimulus();
+                }, 4000);
+            }
+
+            // Calcolo posizionamento sicuro dello stimolo
+            const barPadding = distractorToggle.checked ? 85 : 45;
+            const topPadding = difficulty === 'shifting' ? 180 : 140; // Più spazio se c'è il banner shifting
+            const bottomPadding = 60;
+
+            const availW = window.innerWidth - STIMULUS_SIZE - (barPadding * 2);
+            const availH = window.innerHeight - STIMULUS_SIZE - topPadding - bottomPadding;
+            
+            let newX, newY;
+            const minDistance = 200; 
+            let attempts = 0;
+
+            do {
+                newX = barPadding + Math.random() * availW;
+                newY = topPadding + Math.random() * availH;
+
+                newX = Math.max(barPadding, Math.min(newX, window.innerWidth - STIMULUS_SIZE - barPadding));
+                newY = Math.max(topPadding, Math.min(newY, window.innerHeight - STIMULUS_SIZE - bottomPadding));
+
+                const distance = Math.sqrt(Math.pow(newX - lastX, 2) + Math.pow(newY - lastY, 2));
+                if (distance > minDistance || attempts > 35) break;
+                attempts++;
+            } while (true);
+
+            lastX = newX; 
+            lastY = newY;
+
+            stimulus.style.left = `${newX}px`;
+            stimulus.style.top = `${newY}px`;
+            stimulus.style.opacity = '1';
+            
+            stimulusAppearanceTime = performance.now();
+        }
+
+        function startGame(mode) {
+            difficulty = mode;
+            score = 0; errors = 0; reactionTimes = [];
+            consecutiveCorrectHits = 0;
+            currentTargetType = 'circle'; // Reset del target iniziale dello shifting
+            timeLeft = sessionDuration;
+            gameActive = true;
+            isTransitioning = false;
+            lastX = -1; lastY = -1;
+            
+            startScreen.classList.remove('active'); 
+            endScreen.classList.remove('active');
+            gameScreen.classList.add('active');
+            
+            counterDisplay.textContent = "0";
+            
+            updateInstructionBanner();
+            moveStimulus();
+            
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                const m = Math.floor(timeLeft / 60); 
+                const s = timeLeft % 60;
+                timerDisplay.textContent = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+                if (timeLeft-- <= 0) endGame();
+            }, 1000);
+        }
+
+        function endGame() {
+            gameActive = false; 
+            clearInterval(timerInterval);
+            if (stimulusTimeout) clearTimeout(stimulusTimeout);
+            
+            gameScreen.classList.remove('active'); 
+            endScreen.classList.add('active');
+            flashingBar.style.display = 'none';
+            instructionBanner.classList.add('hidden');
+            
+            document.getElementById('final-score').textContent = score;
+            document.getElementById('final-errors').textContent = errors;
+            
+            if (reactionTimes.length > 0) {
+                const avg = (reactionTimes.reduce((a, b) => a + b, 0) / reactionTimes.length / 1000).toFixed(2);
+                document.getElementById('final-reaction').textContent = `${avg}s`;
+            } else {
+                document.getElementById('final-reaction').textContent = '---';
+            }
+        }
+
+        function resetToMenu() {
+            gameActive = false; 
+            clearInterval(timerInterval);
+            if (stimulusTimeout) clearTimeout(stimulusTimeout);
+            
+            gameScreen.classList.remove('active'); 
+            endScreen.classList.remove('active');
+            startScreen.classList.add('active');
+            flashingBar.style.display = 'none';
+            instructionBanner.classList.add('hidden');
+            stimulus.innerHTML = '';
+        }
+
+        function handleInteraction(e) {
+            if (!gameActive || isTransitioning) return;
+            e.preventDefault();
+            
+            if (stimulusTimeout) clearTimeout(stimulusTimeout);
+            
+            isTransitioning = true;
+            const rect = stimulus.getBoundingClientRect();
+            
+            // Verifica se lo stimolo premuto è corretto in base al livello
+            let isCorrect = false;
+            if (difficulty === 'shifting') {
+                isCorrect = (currentType === currentTargetType);
+            } else {
+                isCorrect = (currentType === 'circle');
+            }
+
+            if (isCorrect) {
+                score++; 
+                counterDisplay.textContent = score;
+                reactionTimes.push(performance.now() - stimulusAppearanceTime);
+                showFeedback('correct', rect.left + 50, rect.top);
+                
+                // Se siamo nel livello shifting, monitoriamo la necessità di cambiare bersaglio
+                if (difficulty === 'shifting') {
+                    consecutiveCorrectHits++;
+                    if (consecutiveCorrectHits >= 3) {
+                        consecutiveCorrectHits = 0;
+                        currentTargetType = currentTargetType === 'circle' ? 'square' : 'circle';
+                    }
+                }
+            } else {
+                errors++; 
+                showFeedback('error', rect.left + 50, rect.top);
+                // Resettiamo le risposte consecutive corrette in caso di errore
+                if (difficulty === 'shifting') {
+                    consecutiveCorrectHits = 0;
+                }
+            }
+            
+            setTimeout(() => { if(gameActive) moveStimulus(); }, 350);
+        }
+
+        stimulus.addEventListener('mousedown', handleInteraction);
+        stimulus.addEventListener('touchstart', handleInteraction, {passive: false});
+
+        window.addEventListener('resize', () => {
+            if (gameActive) moveStimulus();
+        });
+    </script>
+</body>
+</html>

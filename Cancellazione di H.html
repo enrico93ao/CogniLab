@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Cancellazione Selettiva Clinica Avanzato</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background-color: #f8f9fa;
+            color: #212529;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        .screen {
+            display: none;
+            width: 100vw;
+            height: 100vh;
+            padding: 20px;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 5;
+        }
+
+        .screen.active {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #game-screen {
+            padding: 0;
+            background-color: #ffffff;
+            display: none;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: stretch;
+        }
+
+        #game-screen.active {
+            display: flex;
+        }
+
+        .canvas-area {
+            position: relative;
+            flex-grow: 1;
+            width: 100vw;
+            background-color: #ffffff;
+        }
+
+        canvas {
+            display: block;
+            background-color: #ffffff;
+            cursor: crosshair;
+        }
+
+        .bottom-bar {
+            height: 80px;
+            width: 100vw;
+            background-color: #f1f3f5;
+            border-top: 2px solid #dee2e6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0 20px;
+            z-index: 30;
+        }
+
+        /* Barra di ancoraggio interattiva sul bordo destro */
+        .red-cue-bar {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 35px;
+            background-color: #dc3545;
+            z-index: 20;
+            cursor: pointer;
+            box-shadow: -2px 0 10px rgba(220, 53, 69, 0.4);
+        }
+
+        .red-cue-bar.blinking {
+            animation: blinker 1.2s linear infinite;
+        }
+
+        @keyframes blinker {
+            50% { opacity: 0.4; }
+        }
+
+        .config-card {
+            background: #ffffff;
+            border: 1px solid #dee2e6;
+            padding: 25px;
+            border-radius: 6px;
+            margin-top: 15px;
+            max-width: 550px;
+            width: 100%;
+            text-align: left;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        .config-group {
+            margin-bottom: 15px;
+        }
+
+        .config-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 6px;
+        }
+
+        .config-group select {
+            width: 100%;
+            padding: 8px;
+            font-size: 16px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+        }
+
+        .config-group .checkbox-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            margin-bottom: 8px;
+        }
+
+        .btn {
+            font-family: Arial, sans-serif;
+            font-size: 18px;
+            font-weight: bold;
+            color: #ffffff;
+            background-color: #0056b3;
+            border: none;
+            border-radius: 4px;
+            padding: 14px 40px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .btn:hover { background-color: #004085; }
+        .btn-complete { background-color: #6c757d; padding: 12px 40px; font-size: 16px; }
+
+        .results-card {
+            background: #ffffff;
+            border: 1px solid #dee2e6;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .results-table th, .results-table td {
+            padding: 10px;
+            border-bottom: 1px solid #dee2e6;
+            font-size: 16px;
+        }
+
+        .results-table th { background-color: #f1f3f5; }
+
+        .spatial-results {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .spatial-panel {
+            flex: 1;
+            padding: 12px;
+            border-radius: 6px;
+            background-color: #e9ecef;
+            text-align: center;
+        }
+
+        .spatial-panel.left-side { border-left: 5px solid #0056b3; }
+        .spatial-panel.right-side { border-right: 5px solid #0056b3; }
+        .spatial-panel .count { font-size: 26px; font-weight: bold; color: #000000; margin-top: 5px; }
+    </style>
+</head>
+<body>
+
+    <!-- 1. CONFIGURAZIONE -->
+    <div id="welcome-screen" class="screen active">
+        <h1 style="font-size: 26px; text-align: center;">Esercizio di Cancellazione Clinica Modulare</h1>
+        
+        <div class="config-card">
+            <h3 style="margin-bottom: 12px; color: #333; border-bottom: 1px solid #eee; padding-bottom: 5px;">Configurazione:</h3>
+            
+            <div class="config-group">
+                <label for="stimulus-type">Tipo di Stimolo:</label>
+                <select id="stimulus-type">
+                    <option value="letters">Lettere Alfabetiche (Target: H)</option>
+                    <option value="shapes">Figure Geometriche (Target: Cerchio Pieno)</option>
+                </select>
+            </div>
+
+            <div class="config-group">
+                <label for="difficulty-level">Grado di Densità (Livello):</label>
+                <select id="difficulty-level">
+                    <option value="easy">Facile (Semplificato - 30 stimoli)</option>
+                    <option value="medium" selected>Medio (Standard - 70 stimoli)</option>
+                    <option value="hard">Difficile (Alta densità - 130 stimoli)</option>
+                </select>
+            </div>
+
+            <div class="config-group">
+                <label for="disposition-mode">Disposizione:</label>
+                <select id="disposition-mode">
+                    <option value="grid">Griglia Ordinata Rigida</option>
+                    <option value="random">Sparsa / Casuale Libera</option>
+                </select>
+            </div>
+
+            <div class="config-group" style="margin-top: 20px; background: #f1f3f5; padding: 12px; border-radius: 6px;">
+                <strong style="display:block; margin-bottom: 8px; font-size: 14px; color: #495057;">Facilitazioni e Vincoli Neuropsicologici:</strong>
+                
+                <label class="checkbox-container">
+                    <input type="checkbox" id="enable-guide-lines">
+                    Mostra righe guida sullo schermo (Aiuto visivo)
+                </label>
+
+                <label class="checkbox-container">
+                    <input type="checkbox" id="enable-red-bar">
+                    Attiva barra rossa laterale destra
+                </label>
+
+                <label class="checkbox-container">
+                    <input type="checkbox" id="enable-row-constraint" disabled>
+                    <span style="color: #b21f2d; font-weight: bold;">Vincolo di riga obbligatorio (Tocca barra a fine riga)</span>
+                </label>
+            </div>
+        </div>
+
+        <button class="btn" style="margin-top: 20px;" onclick="startExercise()">Avvia Esercizio</button>
+    </div>
+
+    <!-- 2. AREA DEL COMPITO -->
+    <div id="game-screen" class="screen">
+        <div class="canvas-area">
+            <canvas id="cancellationCanvas"></canvas>
+            <div id="rightCueBar" class="red-cue-bar" onclick="handleBarClick()"></div>
+        </div>
+        <div class="bottom-bar">
+            <button class="btn btn-complete" onclick="endExercise()">Termina Anticipatamente</button>
+        </div>
+    </div>
+
+    <!-- 3. REPORT RISULTATI -->
+    <div id="results-screen" class="screen">
+        <div class="results-card">
+            <h1 style="font-size: 22px; text-align: center; margin-bottom: 15px;">Resoconto Esercizio</h1>
+            
+            <table class="results-table">
+                <thead>
+                    <tr>
+                        <th>Indicatore Clinico</th>
+                        <th>Valore</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Accuratezza Risposte</td>
+                        <td id="res-accuracy">-</td>
+                    </tr>
+                    <tr>
+                        <td>Falsi Positivi (Errori di click)</td>
+                        <td id="res-errors">-</td>
+                    </tr>
+                    <tr>
+                        <td>Tempo Totale Impiegato</td>
+                        <td id="res-time">-</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="spatial-results">
+                <div class="spatial-panel left-side">
+                    <strong>Omissioni a SINISTRA</strong>
+                    <div id="res-left-omissions" class="count">-</div>
+                </div>
+                <div class="spatial-panel right-side">
+                    <strong>Omissioni a DESTRA</strong>
+                    <div id="res-right-omissions" class="count">-</div>
+                </div>
+            </div>
+
+            <div style="text-align: center;">
+                <button class="btn" onclick="restartExercise()">Nuova Sessione</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const LETTER_TARGET = "H";
+        const LETTER_DISTRACTORS = ["N", "M", "K", "F", "E"];
+        const SHAPE_TARGET = "circle";
+        const SHAPE_DISTRACTORS = ["square", "triangle", "diamond", "star"];
+
+        const FONT_STYLE = "bold 44px Arial";
+        const HIT_RADIUS = 38; 
+
+        const canvas = document.getElementById('cancellationCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let audioCtx = null;
+        let startTime = 0;
+        let falsePositives = 0;
+        let stimuli = [];
+        
+        let areaW = 0;
+        let areaH = 0;
+        let rowsCount = 1; 
+        let rowHeights = []; 
+
+        let useConstraint = false;
+        let showLines = false;
+        let activeRowIndex = 0; 
+
+        // Gestione abilitazione/disattivazione coerente del vincolo di riga
+        document.getElementById('enable-red-bar').addEventListener('change', function(e) {
+            const constraintCheckbox = document.getElementById('enable-row-constraint');
+            if(!e.target.checked) {
+                constraintCheckbox.checked = false;
+                constraintCheckbox.disabled = true;
+            } else {
+                constraintCheckbox.disabled = false;
+            }
+        });
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playSound(type) {
+            if (!audioCtx) return;
+            let now = audioCtx.currentTime;
+
+            if (type === 'correct') {
+                let osc = audioCtx.createOscillator();
+                let gain = audioCtx.createGain();
+                osc.connect(gain); gain.connect(audioCtx.destination);
+                osc.frequency.setValueAtTime(580, now);
+                gain.gain.setValueAtTime(0.15, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+                osc.start(); osc.stop(now + 0.1);
+            } 
+            else if (type === 'error') {
+                let osc = audioCtx.createOscillator();
+                let gain = audioCtx.createGain();
+                osc.connect(gain); gain.connect(audioCtx.destination);
+                osc.frequency.setValueAtTime(160, now);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.18);
+                osc.start(); osc.stop(now + 0.18);
+            } 
+            else if (type === 'super-positive') {
+                const notes = [440, 554.37, 659.25]; 
+                notes.forEach((freq, index) => {
+                    let osc = audioCtx.createOscillator();
+                    let gain = audioCtx.createGain();
+                    osc.connect(gain); gain.connect(audioCtx.destination);
+                    osc.frequency.setValueAtTime(freq, now + (index * 0.06));
+                    gain.gain.setValueAtTime(0.15, now + (index * 0.06));
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + (index * 0.06) + 0.15);
+                    osc.start(now + (index * 0.06));
+                    osc.stop(now + (index * 0.06) + 0.15);
+                });
+            }
+        }
+
+        function switchScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        function startExercise() {
+            initAudio();
+            resetData();
+            
+            areaW = window.innerWidth;
+            areaH = window.innerHeight - 80; 
+            canvas.width = areaW;
+            canvas.height = areaH;
+
+            // CORRETTO: adesso punta al corretto ID dell'HTML
+            showLines = document.getElementById('enable-guide-lines').checked;
+            const enableRedBar = document.getElementById('enable-red-bar').checked;
+            useConstraint = document.getElementById('enable-row-constraint').checked;
+
+            const cueBar = document.getElementById('rightCueBar');
+            cueBar.style.bottom = "80px"; 
+            cueBar.style.display = enableRedBar ? 'block' : 'none';
+            
+            if (useConstraint) {
+                cueBar.classList.add('blinking');
+            } else {
+                cueBar.classList.remove('blinking');
+            }
+
+            const stimType = document.getElementById('stimulus-type').value;
+            const diffLevel = document.getElementById('difficulty-level').value;
+            const dispMode = document.getElementById('disposition-mode').value;
+
+            rowsCount = 5;
+            if (diffLevel === 'medium') rowsCount = 7;
+            if (diffLevel === 'hard') rowsCount = 10;
+
+            rowHeights = [];
+            for (let i = 0; i <= rowsCount; i++) {
+                rowHeights.push((areaH / rowsCount) * i);
+            }
+
+            let totalCount = 70;
+            if (diffLevel === 'easy') totalCount = 30;
+            if (diffLevel === 'hard') totalCount = 130;
+
+            if (dispMode === 'grid') {
+                generateGridMode(stimType, rowsCount);
+            } else {
+                generateRandomMode(stimType, totalCount, rowsCount);
+            }
+
+            switchScreen('game-screen');
+            drawCanvas();
+            startTime = performance.now();
+        }
+
+        function resetData() {
+            startTime = 0;
+            falsePositives = 0;
+            stimuli = [];
+            activeRowIndex = 0;
+            rowHeights = [];
+        }
+
+        function getRowIndexByY(y) {
+            for (let i = 0; i < rowsCount; i++) {
+                if (y >= rowHeights[i] && y < rowHeights[i+1]) {
+                    return i;
+                }
+            }
+            return rowsCount - 1;
+        }
+
+        function generateGridMode(type, rows) {
+            let cols = 6;
+            if (rows === 7) cols = 10;
+            if (rows === 10) cols = 13;
+
+            const cellW = areaW / cols;
+
+            for (let r = 0; r < rows; r++) {
+                const cellH = areaH / rows;
+                for (let c = 0; c < cols; c++) {
+                    let isTarget = Math.random() < 0.24;
+                    let name = isTarget ? (type === 'letters' ? LETTER_TARGET : SHAPE_TARGET) : (type === 'letters' ? LETTER_DISTRACTORS[Math.floor(Math.random() * LETTER_DISTRACTORS.length)] : SHAPE_DISTRACTORS[Math.floor(Math.random() * SHAPE_DISTRACTORS.length)]);
+                    
+                    stimuli.push({
+                        type: type, name: name, x: c * cellW + (cellW / 2), y: r * cellH + (cellH / 2), isTarget: isTarget, cancelled: false, rowIndex: r
+                    });
+                }
+            }
+            ensureTargetPresence(type);
+        }
+
+        function generateRandomMode(type, count, rows) {
+            const minDistance = count === 130 ? 50 : 66; 
+            let attempts = 0;
+
+            while (stimuli.length < count && attempts < 5000) {
+                attempts++;
+                let x = Math.floor(Math.random() * (areaW - 120)) + 60;
+                let y = Math.floor(Math.random() * (areaH - 60)) + 30;
+
+                let overlapped = false;
+                for (let i = 0; i < stimuli.length; i++) {
+                    if (Math.hypot(x - stimuli[i].x, y - stimuli[i].y) < minDistance) {
+                        overlapped = true;
+                        break;
+                    }
+                }
+
+                if (!overlapped) {
+                    let isTarget = Math.random() < 0.24;
+                    let name = isTarget ? (type === 'letters' ? LETTER_TARGET : SHAPE_TARGET) : (type === 'letters' ? LETTER_DISTRACTORS[Math.floor(Math.random() * LETTER_DISTRACTORS.length)] : SHAPE_DISTRACTORS[Math.floor(Math.random() * SHAPE_DISTRACTORS.length)]);
+                    let rIdx = getRowIndexByY(y);
+
+                    stimuli.push({
+                        type: type, name: name, x: x, y: y, isTarget: isTarget, cancelled: false, rowIndex: rIdx
+                    });
+                }
+            }
+            ensureTargetPresence(type);
+        }
+
+        function ensureTargetPresence(type) {
+            if (!stimuli.some(s => s.isTarget)) {
+                if (stimuli.length > 0) {
+                    stimuli[0].isTarget = true;
+                    stimuli[0].name = (type === 'letters') ? LETTER_TARGET : SHAPE_TARGET;
+                }
+            }
+        }
+
+        function drawCanvas() {
+            ctx.clearRect(0, 0, areaW, areaH);
+
+            if (showLines) {
+                ctx.strokeStyle = "#dee2e6";
+                ctx.lineWidth = 1.5;
+                for (let i = 1; i < rowsCount; i++) {
+                    ctx.beginPath();
+                    ctx.moveTo(0, rowHeights[i]);
+                    ctx.lineTo(areaW, rowHeights[i]);
+                    ctx.stroke();
+                }
+            }
+
+            ctx.textBaseline = 'middle';
+            ctx.textAlign = 'center';
+
+            stimuli.forEach(s => {
+                let color = s.cancelled ? "#ced4da" : "#111111";
+                
+                if (useConstraint && s.rowIndex > activeRowIndex) {
+                    color = "#e2e2e2"; 
+                }
+
+                if (s.type === 'letters') {
+                    ctx.font = FONT_STYLE;
+                    ctx.fillStyle = color;
+                    ctx.fillText(s.name, s.x, s.y);
+                    if (s.cancelled) {
+                        ctx.strokeStyle = "#adb5bd"; ctx.lineWidth = 4;
+                        ctx.beginPath(); ctx.moveTo(s.x - 22, s.y); ctx.lineTo(s.x + 22, s.y); ctx.stroke();
+                    }
+                } else {
+                    ctx.fillStyle = color; ctx.strokeStyle = color; ctx.lineWidth = 4;
+                    if (s.name === 'circle') {
+                        ctx.beginPath(); ctx.arc(s.x, s.y, 18, 0, 2 * Math.PI);
+                        s.cancelled ? ctx.stroke() : ctx.fill();
+                    } 
+                    else if (s.name === 'square') {
+                        ctx.beginPath(); ctx.rect(s.x - 16, s.y - 16, 32, 32); ctx.stroke();
+                    } 
+                    else if (s.name === 'triangle') {
+                        ctx.beginPath(); ctx.moveTo(s.x, s.y - 18); ctx.lineTo(s.x + 18, s.y + 16); ctx.lineTo(s.x - 18, s.y + 16); ctx.closePath(); ctx.stroke();
+                    } 
+                    else if (s.name === 'diamond') {
+                        ctx.beginPath(); ctx.moveTo(s.x, s.y - 18); ctx.lineTo(s.x + 18, s.y); ctx.lineTo(s.x, s.y + 18); ctx.lineTo(s.x - 18, s.y); ctx.closePath(); ctx.stroke();
+                    }
+                    else if (s.name === 'star') {
+                        ctx.beginPath(); ctx.moveTo(s.x - 16, s.y); ctx.lineTo(s.x + 16, s.y); ctx.moveTo(s.x, s.y - 16); ctx.lineTo(s.x, s.y + 16); ctx.stroke();
+                    }
+                    if (s.cancelled) {
+                        ctx.strokeStyle = "#adb5bd"; ctx.beginPath(); ctx.moveTo(s.x - 24, s.y + 24); ctx.lineTo(s.x + 24, s.y - 24); ctx.stroke();
+                    }
+                }
+            });
+        }
+
+        canvas.addEventListener('click', function(event) {
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = (event.clientX - rect.left) * (areaW / rect.width);
+            const mouseY = (event.clientY - rect.top) * (areaH / rect.height);
+
+            let clicked = stimuli.find(s => Math.hypot(mouseX - s.x, mouseY - s.y) < HIT_RADIUS);
+
+            if (clicked) {
+                if (useConstraint && clicked.rowIndex !== activeRowIndex) {
+                    playSound('error'); 
+                    return;
+                }
+
+                if (clicked.isTarget) {
+                    if (!clicked.cancelled) {
+                        clicked.cancelled = true;
+                        playSound('correct');
+                        drawCanvas();
+                        checkAutoCompletion();
+                    }
+                } else {
+                    falsePositives++;
+                    playSound('error');
+                    ctx.fillStyle = "rgba(220, 53, 69, 0.15)"; ctx.beginPath(); ctx.arc(clicked.x, clicked.y, HIT_RADIUS - 5, 0, 2 * Math.PI); ctx.fill();
+                    setTimeout(drawCanvas, 120);
+                }
+            }
+        });
+
+        function handleBarClick() {
+            if (!useConstraint) return; 
+
+            if (activeRowIndex < rowsCount - 1) {
+                activeRowIndex++;
+                playSound('super-positive'); 
+                drawCanvas();
+            } else {
+                playSound('super-positive');
+            }
+        }
+
+        function checkAutoCompletion() {
+            const remainingTargets = stimuli.some(s => s.isTarget && !s.cancelled);
+            if (!remainingTargets) {
+                setTimeout(() => { endExercise(); }, 350);
+            }
+        }
+
+        function endExercise() {
+            const totalTime = ((performance.now() - startTime) / 1000).toFixed(1);
+            let totalTargets = 0, clickedTargets = 0, leftOmissions = 0, rightOmissions = 0;
+            const midX = areaW / 2;
+
+            stimuli.forEach(s => {
+                if (s.isTarget) {
+                    totalTargets++;
+                    if (s.cancelled) clickedTargets++;
+                    else {
+                        if (s.x < midX) leftOmissions++;
+                        else rightOmissions++;
+                    }
+                }
+            });
+
+            const accuracyPercent = totalTargets > 0 ? Math.round((clickedTargets / totalTargets) * 100) : 0;
+
+            document.getElementById('res-accuracy').textContent = `${clickedTargets} / ${totalTargets} (${accuracyPercent}%)`;
+            document.getElementById('res-errors').textContent = `${falsePositives}`;
+            document.getElementById('res-time').textContent = `${totalTime} s`;
+            document.getElementById('res-left-omissions').textContent = leftOmissions;
+            document.getElementById('res-right-omissions').textContent = rightOmissions;
+
+            switchScreen('results-screen');
+        }
+
+        function restartExercise() {
+            switchScreen('welcome-screen');
+        }
+    </script>
+</body>
+</html>

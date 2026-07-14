@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task di Alternanza Regolata (Set-Shifting)</title>
+    <style>
+        :root {
+            --primary-blue: #0284c7;
+            --primary-blue-hover: #0369a1;
+            --bg-blue: #e0f2fe;
+            --bg-gray: #f1f5f9;
+            --text-dark: #1e293b;
+            --text-muted: #64748b;
+            --border-color: #cbd5e1;
+            --white: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f8fafc;
+            color: var(--text-dark);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background-color: var(--white);
+            max-width: 650px;
+            width: 100%;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            text-align: center;
+            position: relative;
+        }
+
+        .screen {
+            display: none;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            color: var(--text-dark);
+        }
+
+        p {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+        }
+
+        /* Istruzioni */
+        .instructions-box {
+            text-align: left;
+            background-color: var(--bg-gray);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            border-left: 4px solid var(--primary-blue);
+        }
+
+        .instructions-box ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .instructions-box li {
+            margin-bottom: 15px;
+            padding-left: 30px;
+            position: relative;
+        }
+
+        .legend-icon {
+            position: absolute;
+            left: 0;
+            top: 2px;
+            width: 18px;
+            height: 18px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+
+        .bg-indicator-blue { background-color: var(--bg-blue); border: 1px solid #bae6fd; }
+        .bg-indicator-gray { background-color: #e2e8f0; border: 1px solid #cbd5e1; }
+
+        /* Area di Gioco */
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .progress-bar-container {
+            flex-grow: 1;
+            height: 6px;
+            background-color: var(--bg-gray);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-right: 20px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background-color: var(--primary-blue);
+            transition: width 0.3s ease;
+        }
+
+        .btn-menu {
+            background-color: transparent;
+            color: var(--text-muted);
+            border: 1px solid var(--border-color);
+            padding: 6px 12px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-menu:hover {
+            background-color: var(--bg-gray);
+            color: var(--text-dark);
+        }
+
+        .timer-container {
+            width: 100%;
+            height: 4px;
+            background-color: transparent;
+            margin-bottom: 40px;
+        }
+
+        .timer-bar {
+            height: 100%;
+            width: 100%;
+            background-color: #ef4444;
+            transform-origin: left;
+        }
+
+        .stimulus-card {
+            font-size: 4rem;
+            font-weight: 700;
+            width: 200px;
+            height: 120px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0 auto 50px auto;
+            border-radius: 16px;
+            box-shadow: inset 0 0 0 2px rgba(0,0,0,0.05);
+            transition: background-color 0.15s ease, color 0.15s ease;
+            letter-spacing: 2px;
+        }
+
+        .stimulus-card.rule-number {
+            background-color: var(--bg-blue);
+            color: #0369a1;
+        }
+
+        .stimulus-card.rule-letter {
+            background-color: #e2e8f0;
+            color: #334155;
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            min-height: 60px;
+        }
+
+        /* Bottoni */
+        .btn {
+            background-color: var(--primary-blue);
+            color: var(--white);
+            border: none;
+            padding: 14px 32px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .btn:hover {
+            background-color: var(--primary-blue-hover);
+            transform: translateY(-1px);
+        }
+
+        .btn:active {
+            transform: translateY(1px);
+        }
+
+        .btn-game {
+            flex: 1;
+            max-width: 200px;
+            font-size: 1.2rem;
+        }
+
+        /* Risultati */
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 30px 0;
+            text-align: left;
+        }
+
+        .results-table th, .results-table td {
+            padding: 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .results-table th {
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .results-table td {
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        .results-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .highlight-val {
+            font-weight: 700;
+            color: var(--primary-blue);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        
+        <div id="start-screen" class="screen active">
+            <h1>Alternanza Regolata</h1>
+            <p>Questo esercizio mappa le tue capacità di <strong>Set-Shifting</strong> (flessibilità cognitiva), misurando la velocità di adattamento della mente di fronte a regole che cambiano repentinamente.</p>
+            
+            <div class="instructions-box">
+                <ul>
+                    <li>
+                        <span class="legend-icon bg-indicator-blue"></span>
+                        <strong>Sfondo BLU: Regola NUMERO</strong><br>
+                        Ignora la lettera. Concentrati sul numero e indica se è <strong>Pari</strong> o <strong>Dispari</strong>.
+                    </li>
+                    <li>
+                        <span class="legend-icon bg-indicator-gray"></span>
+                        <strong>Sfondo GRIGIO: Regola LETTERA</strong><br>
+                        Ignora il numero. Concentrati sulla lettera e indica se è una <strong>Vocale</strong> o una <strong>Consonante</strong>.
+                    </li>
+                    <li>
+                        ⚠️ <strong>Attenzione:</strong> La regola cambia ogni 2 o 3 stimoli. Avrai un tempo massimo di <strong>4 secondi</strong> per rispondere a ciascun trial. Sii il più rapido e accurato possibile.
+                    </li>
+                </ul>
+            </div>
+            
+            <p style="font-size: 0.9rem; font-style: italic;">Il blocco comprende un totale di 30 trial.</p>
+            <button class="btn" id="start-btn">Inizia l'Esercizio</button>
+        </div>
+
+        <div id="game-screen" class="screen">
+            <div class="game-header">
+                <div class="progress-bar-container">
+                    <div id="progress-bar" class="progress-bar"></div>
+                </div>
+                <button class="btn-menu" id="abort-btn">Torna al menu</button>
+            </div>
+            
+            <div class="timer-container">
+                <div id="timer-bar" class="timer-bar"></div>
+            </div>
+
+            <div id="stimulus" class="stimulus-card">--</div>
+
+            <div class="btn-container">
+                <button class="btn btn-game" id="option-1-btn">---</button>
+                <button class="btn btn-game" id="option-2-btn">---</button>
+            </div>
+        </div>
+
+        <div id="result-screen" class="screen">
+            <h1>Analisi delle Performance</h1>
+            <p>Esercizio completato. Di seguito sono riportati i risultati ottenuti nel blocco di trial.</p>
+            
+            <table class="results-table">
+                <thead>
+                    <tr>
+                        <th>Metrica</th>
+                        <th style="text-align: right;">Valore ottenuto</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Accuratezza Generale</td>
+                        <td style="text-align: right;" id="res-accuracy" class="highlight-val">0%</td>
+                    </tr>
+                    <tr>
+                        <td>Tempo Medio di Mantenimento</td>
+                        <td style="text-align: right;" id="res-rt-stay">0 ms</td>
+                    </tr>
+                    <tr>
+                        <td>Tempo Medio di Switch</td>
+                        <td style="text-align: right;" id="res-rt-switch" class="highlight-val">0 ms</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <button class="btn" id="restart-btn" style="margin-right: 10px;">Ripeti l'Esercizio</button>
+            <button class="btn btn-menu" id="home-btn" style="padding: 14px 24px; font-size: 1.1rem; font-weight: 600;">Menu Iniziale</button>
+        </div>
+
+    </div>
+
+    <script>
+        // --- Configurazione Task ---
+        const TOTAL_TRIALS = 30;
+        const TIME_LIMIT = 4000; 
+        
+        const VOCALS = ['A', 'E', 'I', 'O', 'U'];
+        const CONSONANTS = ['B', 'C', 'D', 'F', 'G', 'H', 'L', 'M', 'N', 'P', 'R', 'S', 'T', 'V', 'Z'];
+        const NUMBERS = ['2', '3', '4', '5', '6', '7', '8', '9'];
+
+        // --- Stato dell'Applicazione ---
+        let currentTrial = 0;
+        let trialsHistory = []; 
+        let currentRule = ''; 
+        let runsLeftOfCurrentRule = 0;
+        
+        let stimulusData = {};
+        let trialStartTime = 0;
+        let animationFrameId = null;
+
+        // --- Elementi DOM ---
+        const startScreen = document.getElementById('start-screen');
+        const gameScreen = document.getElementById('game-screen');
+        const resultScreen = document.getElementById('result-screen');
+        
+        const startBtn = document.getElementById('start-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        const abortBtn = document.getElementById('abort-btn');
+        const homeBtn = document.getElementById('home-btn');
+        const option1Btn = document.getElementById('option-1-btn');
+        const option2Btn = document.getElementById('option-2-btn');
+        
+        const stimulusDiv = document.getElementById('stimulus');
+        const progressBar = document.getElementById('progress-bar');
+        const timerBar = document.getElementById('timer-bar');
+
+        const resAccuracy = document.getElementById('res-accuracy');
+        const resRtStay = document.getElementById('res-rt-stay');
+        const resRtSwitch = document.getElementById('res-rt-switch');
+
+        // --- Event Listeners ---
+        startBtn.addEventListener('click', startTask);
+        restartBtn.addEventListener('click', startTask);
+        abortBtn.addEventListener('click', returnToMenu);
+        homeBtn.addEventListener('click', returnToMenu);
+        
+        option1Btn.addEventListener('click', () => handleResponse(option1Btn.textContent));
+        option2Btn.addEventListener('click', () => handleResponse(option2Btn.textContent));
+
+        // --- Logica del Task ---
+        function startTask() {
+            currentTrial = 0;
+            trialsHistory = [];
+            currentRule = Math.random() < 0.5 ? 'NUMBER' : 'LETTER';
+            runsLeftOfCurrentRule = getRandomRunLength();
+            
+            showScreen('game-screen');
+            nextTrial();
+        }
+
+        function returnToMenu() {
+            cancelAnimationFrame(animationFrameId);
+            showScreen('start-screen');
+        }
+
+        function showScreen(screenId) {
+            startScreen.classList.remove('active');
+            gameScreen.classList.remove('active');
+            resultScreen.classList.remove('active');
+            
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        function getRandomRunLength() {
+            return Math.floor(Math.random() * 2) + 2;
+        }
+
+        function generateStimulus() {
+            const letter = Math.random() < 0.5 
+                ? VOCALS[Math.floor(Math.random() * VOCALS.length)]
+                : CONSONANTS[Math.floor(Math.random() * CONSONANTS.length)];
+                
+            const number = NUMBERS[Math.floor(Math.random() * NUMBERS.length)];
+            const text = Math.random() < 0.5 ? `${letter}${number}` : `${number}${letter}`;
+            
+            const isVocal = VOCALS.includes(letter);
+            const isEven = parseInt(number) % 2 === 0;
+
+            return { text, letter, number, isVocal, isEven };
+        }
+
+        function nextTrial() {
+            if (currentTrial >= TOTAL_TRIALS) {
+                endTask();
+                return;
+            }
+
+            let trialType = 'mantenimento';
+            
+            if (runsLeftOfCurrentRule <= 0) {
+                currentRule = currentRule === 'NUMBER' ? 'LETTER' : 'NUMBER';
+                runsLeftOfCurrentRule = getRandomRunLength();
+                if (currentTrial > 0) {
+                    trialType = 'switch';
+                }
+            }
+
+            runsLeftOfCurrentRule--;
+            stimulusData = generateStimulus();
+            stimulusDiv.textContent = stimulusData.text;
+            
+            if (currentRule === 'NUMBER') {
+                stimulusDiv.className = 'stimulus-card rule-number';
+                option1Btn.textContent = 'Pari';
+                option2Btn.textContent = 'Dispari';
+            } else {
+                stimulusDiv.className = 'stimulus-card rule-letter';
+                option1Btn.textContent = 'Vocale';
+                option2Btn.textContent = 'Consonante';
+            }
+
+            progressBar.style.width = `${(currentTrial / TOTAL_TRIALS) * 100}%`;
+            
+            startTimerBar();
+            trialStartTime = window.performance.now();
+            
+            trialsHistory.push({
+                trialIndex: currentTrial,
+                rule: currentRule,
+                trialType: currentTrial === 0 ? 'inizio' : trialType,
+                correct: false,
+                rt: null,
+                timeout: false
+            });
+        }
+
+        function startTimerBar() {
+            if (animationFrameId) cancelAnimationFrame(animationFrameId);
+            
+            const startTime = Date.now();
+            timerBar.style.transform = 'scaleX(1)';
+            
+            function updateBar() {
+                const elapsed = Date.now() - startTime;
+                const remainingRatio = Math.max(0, (TIME_LIMIT - elapsed) / TIME_LIMIT);
+                
+                timerBar.style.transform = `scaleX(${remainingRatio})`;
+                
+                if (elapsed >= TIME_LIMIT) {
+                    handleTimeout();
+                } else {
+                    animationFrameId = requestAnimationFrame(updateBar);
+                }
+            }
+            
+            animationFrameId = requestAnimationFrame(updateBar);
+        }
+
+        function handleResponse(selectedAnswer) {
+            const rt = window.performance.now() - trialStartTime;
+            cancelAnimationFrame(animationFrameId);
+
+            let isCorrect = false;
+            if (currentRule === 'NUMBER') {
+                const target = stimulusData.isEven ? 'Pari' : 'Dispari';
+                isCorrect = (selectedAnswer === target);
+            } else {
+                const target = stimulusData.isVocal ? 'Vocale' : 'Consonante';
+                isCorrect = (selectedAnswer === target);
+            }
+
+            trialsHistory[currentTrial].correct = isCorrect;
+            trialsHistory[currentTrial].rt = rt;
+
+            currentTrial++;
+            nextTrial();
+        }
+
+        function handleTimeout() {
+            cancelAnimationFrame(animationFrameId);
+            
+            trialsHistory[currentTrial].correct = false;
+            trialsHistory[currentTrial].timeout = true;
+            trialsHistory[currentTrial].rt = TIME_LIMIT;
+
+            currentTrial++;
+            nextTrial();
+        }
+
+        function endTask() {
+            cancelAnimationFrame(animationFrameId);
+            showScreen('result-screen');
+            calculateMetrics();
+        }
+
+        function calculateMetrics() {
+            const total = trialsHistory.length;
+            const correctTrials = trialsHistory.filter(t => t.correct);
+            const accuracy = (correctTrials.length / total) * 100;
+
+            const stayTrials = trialsHistory.filter(t => t.trialType === 'mantenimento' && t.correct && !t.timeout);
+            const switchTrials = trialsHistory.filter(t => t.trialType === 'switch' && t.correct && !t.timeout);
+
+            const avgRtStay = stayTrials.length > 0 
+                ? stayTrials.reduce((sum, t) => sum + t.rt, 0) / stayTrials.length 
+                : null;
+
+            const avgRtSwitch = switchTrials.length > 0 
+                ? switchTrials.reduce((sum, t) => sum + t.rt, 0) / switchTrials.length 
+                : null;
+
+            resAccuracy.textContent = `${accuracy.toFixed(1)}%`;
+            resRtStay.textContent = avgRtStay ? `${Math.round(avgRtStay)} ms` : '--';
+            resRtSwitch.textContent = avgRtSwitch ? `${Math.round(avgRtSwitch)} ms` : '--';
+        }
+    </script>
+</body>
+</html>

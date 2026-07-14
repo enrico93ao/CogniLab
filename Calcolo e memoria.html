@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Esercizio di Stimolazione Cognitiva</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f1f5f9;
+            touch-action: manipulation;
+        }
+        .progress-bar {
+            transition: width 1s linear;
+        }
+        .word-timer-ring {
+            transition: stroke-dashoffset 3s linear;
+            stroke-dasharray: 176;
+            stroke-dashoffset: 176;
+        }
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+
+    <div id="game-container" class="w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-200">
+        <!-- Header -->
+        <div class="bg-slate-900 p-6 text-white text-center">
+            <h1 class="text-2xl font-bold tracking-tight">Memoria di Lavoro</h1>
+            <p class="text-slate-400 text-sm mt-1 uppercase tracking-wider font-semibold">Calcolo a Catena</p>
+        </div>
+
+        <!-- Schermata Iniziale -->
+        <div id="screen-start" class="p-8 text-center">
+            <div class="mb-6 flex justify-center">
+                <div class="p-4 bg-amber-50 rounded-full">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                </div>
+            </div>
+            <h2 class="text-xl font-semibold text-slate-800 mb-4">Istruzioni</h2>
+            <div class="text-slate-600 mb-8 text-left space-y-3 bg-slate-50 p-5 rounded-xl border border-slate-100 text-sm">
+                <p>• <b>Calcolo Mentale:</b> Applica l'operazione al risultato precedente (che sparisce).</p>
+                <p>• <b>Memoria:</b> Ogni 4 calcoli apparirà una parola per 3 secondi.</p>
+                <p>• <b>Aiuto:</b> Al secondo errore apparirà un suggerimento sul numero base.</p>
+                <p>• <b>Durata:</b> 60 secondi totali.</p>
+            </div>
+            <button onclick="startGame()" class="w-full py-4 bg-slate-900 hover:bg-black text-white font-bold rounded-2xl transition-all shadow-lg transform active:scale-95">
+                INIZIA ORA
+            </button>
+        </div>
+
+        <div id="screen-game" class="hidden p-6">
+            <div class="flex justify-between items-center mb-6">
+                <div class="px-3 py-1 bg-slate-100 rounded-full text-[10px] font-bold text-slate-500 uppercase tracking-widest">Tempo</div>
+                <div id="timer" class="text-2xl font-mono font-bold text-slate-900">60s</div>
+            </div>
+            
+            <div class="w-full bg-slate-100 rounded-full h-1.5 mb-8 overflow-hidden">
+                <div id="timer-bar" class="progress-bar bg-slate-900 h-full w-full"></div>
+            </div>
+
+            <div id="math-area" class="text-center py-4">
+                <div class="h-14 mb-2 flex flex-col items-center justify-center">
+                    <span id="feedback-msg" class="text-sm font-bold uppercase tracking-wider transition-opacity duration-300 opacity-0 text-green-500">Ottimo!</span>
+                    <span id="hint-msg" class="text-xs font-medium text-amber-700 bg-amber-50 px-3 py-1 rounded-full mt-1 opacity-0 transition-opacity duration-300 border border-amber-100"></span>
+                </div>
+                
+                <div id="operation-display" class="text-6xl font-black text-slate-900 mb-10 tracking-tighter"></div>
+                
+                <input type="number" id="answer-input" class="w-full p-5 text-4xl text-center bg-slate-50 border-2 border-slate-200 rounded-2xl focus:border-slate-900 focus:ring-0 focus:outline-none transition-all placeholder-slate-300" placeholder="?" autocomplete="off" inputmode="numeric">
+                
+                <button id="submit-btn" onclick="checkAnswer()" class="mt-6 w-full py-4 bg-slate-900 text-white font-bold rounded-2xl hover:bg-black transition-all shadow-md">
+                    CONFERMA
+                </button>
+            </div>
+
+            <!-- Overlay Parola -->
+            <div id="word-overlay" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-900 bg-opacity-95 backdrop-blur-md">
+                <div class="text-center p-10">
+                    <p class="text-amber-400 font-bold uppercase tracking-widest text-sm mb-6">Ricorda questa parola</p>
+                    <div id="word-to-remember" class="text-6xl font-black text-white mb-10 tracking-tight">---</div>
+                    <div class="relative inline-flex items-center justify-center">
+                         <svg class="w-20 h-20 transform -rotate-90">
+                            <circle cx="40" cy="40" r="34" stroke="currentColor" stroke-width="4" fill="transparent" class="text-slate-800" />
+                            <circle id="word-timer-circle" cx="40" cy="40" r="34" stroke="currentColor" stroke-width="4" fill="transparent" stroke-dasharray="213.6" stroke-dashoffset="213.6" class="text-white transition-all duration-[3000ms] linear" />
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="screen-recall" class="hidden p-8">
+            <h2 class="text-2xl font-extrabold text-slate-900 mb-2">Rievocazione</h2>
+            <p class="text-slate-500 mb-6 text-sm">Inserisci tutte le parole che ricordi, separate da spazi o virgole.</p>
+            <div id="recall-input-area">
+                <textarea id="recall-text" class="w-full p-4 bg-slate-50 border-2 border-slate-200 rounded-2xl h-40 focus:border-slate-900 focus:outline-none mb-6 resize-none text-lg" placeholder="Es: MELA SOLE LIBRO..."></textarea>
+                <button onclick="showFinalResults()" class="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl transition-all shadow-lg">
+                    CALCOLA PUNTEGGIO
+                </button>
+            </div>
+        </div>
+
+        <div id="screen-results" class="hidden p-6 max-h-[85vh] overflow-y-auto">
+            <h2 class="text-3xl font-black text-slate-900 mb-6 text-center">Analisi Finale</h2>
+            <div class="flex gap-3 mb-8">
+                <div class="flex-1 bg-slate-900 p-4 rounded-2xl text-white text-center shadow-md">
+                    <div class="text-slate-400 text-[10px] uppercase font-bold tracking-widest mb-1">Calcoli</div>
+                    <div id="stat-math" class="text-3xl font-bold">0</div>
+                </div>
+                <div class="flex-1 bg-amber-500 p-4 rounded-2xl text-slate-900 text-center shadow-md">
+                    <div class="text-slate-900 text-[10px] uppercase font-bold tracking-widest mb-1">Parole</div>
+                    <div id="stat-words" class="text-3xl font-bold">0/0</div>
+                </div>
+            </div>
+            <div id="words-comparison" class="space-y-3"></div>
+            <button onclick="resetAndStart()" class="mt-8 w-full py-4 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold rounded-2xl transition-all border border-slate-200">RIPETI SESSIONE</button>
+        </div>
+    </div>
+
+    <script>
+        const masterWordsList = [
+            "CASA", "SOLE", "TRENO", "MELA", "LIBRO", "PANE", "LUNA", "MARE", "FIUME", "ERBA", 
+            "CANTO", "LUCE", "VENTO", "MONTE", "SEDE", "TORTA", "GATTO", "FIOR", "BARCA", "CITTA",
+            "NUBE", "PRATO", "VINO", "SALE", "BENE", "ORSO", "PESCE", "VITA", "ARTE", "CODA",
+            "MANO", "PIEDE", "VOCE", "OBLO", "ISOLA", "PONTE", "PORTA", "QUADRO", "SEDIA", "VETRO"
+        ];
+        
+        let availableWords = [];
+        let currentResult = 0;
+        let operationsCount = 0;
+        let correctAnswers = 0;
+        let consecutiveErrors = 0;
+        let storedWords = [];
+        let timeLeft = 60;
+        let timerInterval;
+        let currentTargetResult = 0;
+        let isWordPhase = false;
+
+        function showScreen(screenId) {
+            document.querySelectorAll('#game-container > div').forEach(div => {
+                if(div.id.startsWith('screen-')) div.classList.add('hidden');
+            });
+            document.getElementById('screen-' + screenId).classList.remove('hidden');
+        }
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function startGame() {
+            availableWords = shuffleArray([...masterWordsList]);
+            currentResult = Math.floor(Math.random() * 10) + 5; 
+            timeLeft = 60;
+            operationsCount = 0;
+            correctAnswers = 0;
+            consecutiveErrors = 0;
+            storedWords = [];
+            isWordPhase = false;
+            
+            showScreen('game');
+            generateOperation(true);
+            
+            if (timerInterval) clearInterval(timerInterval);
+            startTimer();
+            
+            const input = document.getElementById('answer-input');
+            input.onkeydown = (e) => { if (e.key === 'Enter') { e.preventDefault(); checkAnswer(); } };
+            setTimeout(() => input.focus(), 300);
+        }
+
+        function resetAndStart() {
+            startGame();
+        }
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                if (isWordPhase) return;
+                timeLeft--;
+                document.getElementById('timer').innerText = timeLeft + 's';
+                document.getElementById('timer-bar').style.width = (timeLeft / 60 * 100) + '%';
+                if (timeLeft <= 0) { 
+                    clearInterval(timerInterval); 
+                    endGame(); 
+                }
+            }, 1000);
+        }
+
+        function generateOperation(isFirst = false) {
+            const input = document.getElementById('answer-input');
+            input.value = '';
+            consecutiveErrors = 0;
+            hideHint();
+            
+            if (isFirst) {
+                document.getElementById('operation-display').innerText = currentResult;
+                currentTargetResult = currentResult;
+                return;
+            }
+
+            const types = ['+', '-'];
+            let type = types[Math.floor(Math.random() * types.length)];
+            let val = Math.floor(Math.random() * 9) + 1;
+            
+            if (type === '-' && val >= currentResult) val = Math.floor(currentResult / 2) + 1;
+            if (val === 0) val = 1;
+
+            document.getElementById('operation-display').innerText = `${type}${val}`;
+            currentTargetResult = (type === '+') ? currentResult + val : currentResult - val;
+        }
+
+        function checkAnswer() {
+            if (isWordPhase || timeLeft <= 0) return;
+            const input = document.getElementById('answer-input');
+            const userVal = parseInt(input.value);
+
+            if (userVal === currentTargetResult) {
+                correctAnswers++;
+                operationsCount++;
+                currentResult = currentTargetResult;
+                showFeedback(true);
+                if (operationsCount % 4 === 0) showWord(); else generateOperation();
+            } else {
+                consecutiveErrors++;
+                showFeedback(false);
+                if (consecutiveErrors >= 2) showHint();
+                input.value = '';
+            }
+        }
+
+        function showHint() {
+            const hint = document.getElementById('hint-msg');
+            hint.innerText = `💡 Aiuto: il numero precedente era ${currentResult}`;
+            hint.classList.remove('opacity-0');
+        }
+
+        function hideHint() {
+            document.getElementById('hint-msg').classList.add('opacity-0');
+        }
+
+        function showFeedback(correct) {
+            const msg = document.getElementById('feedback-msg');
+            msg.innerText = correct ? "Corretto!" : "Riprova...";
+            msg.className = `text-sm font-bold uppercase tracking-wider transition-opacity duration-300 opacity-100 ${correct ? 'text-green-500' : 'text-red-500'}`;
+            setTimeout(() => msg.classList.add('opacity-0'), 1000);
+        }
+
+        function showWord() {
+            if (availableWords.length === 0) availableWords = shuffleArray([...masterWordsList]);
+
+            isWordPhase = true;
+            const word = availableWords.pop();
+            storedWords.push(word);
+            
+            document.getElementById('word-to-remember').innerText = word;
+            document.getElementById('word-overlay').classList.remove('hidden');
+            
+            const circle = document.getElementById('word-timer-circle');
+            circle.style.transition = 'none';
+            circle.style.strokeDashoffset = '213.6';
+            
+            setTimeout(() => {
+                circle.style.transition = 'stroke-dashoffset 3s linear';
+                circle.style.strokeDashoffset = '0';
+            }, 50);
+            
+            setTimeout(() => { closeWordOverlay(); }, 3050);
+        }
+
+        function closeWordOverlay() {
+            document.getElementById('word-overlay').classList.add('hidden');
+            isWordPhase = false;
+            generateOperation();
+            document.getElementById('answer-input').focus();
+        }
+
+        function endGame() { 
+            showScreen('recall'); 
+            document.getElementById('recall-text').value = '';
+        }
+
+        function showFinalResults() {
+            const recallText = document.getElementById('recall-text').value.toUpperCase();
+            // Regex più robusta per separare le parole
+            const recalledWords = recallText.split(/[\s,.;\n]+/).filter(w => w.length > 1).map(w => w.trim());
+            
+            let foundCount = 0;
+            const comparisonArea = document.getElementById('words-comparison');
+            comparisonArea.innerHTML = '';
+
+            storedWords.forEach(original => {
+                const isFound = recalledWords.includes(original);
+                if (isFound) foundCount++;
+                const div = document.createElement('div');
+                div.className = `flex justify-between p-4 rounded-2xl border ${isFound ? 'bg-green-50 border-green-200 text-green-800' : 'bg-red-50 border-red-100 text-red-800'}`;
+                div.innerHTML = `<span class="font-bold">${original}</span><span class="text-[10px] font-black uppercase">${isFound ? '✓ CORRETTA' : '✕ MANCANTE'}</span>`;
+                comparisonArea.appendChild(div);
+            });
+
+            const intrusions = recalledWords.filter(w => !storedWords.includes(w));
+            if (intrusions.length > 0) {
+                const h = document.createElement('h4');
+                h.className = "text-[10px] font-bold text-slate-400 uppercase mt-6 mb-2 tracking-widest";
+                h.innerText = "Errori o Intrusioni:";
+                comparisonArea.appendChild(h);
+                intrusions.forEach(word => {
+                    const d = document.createElement('div');
+                    d.className = "p-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-400 italic text-sm flex justify-between items-center";
+                    d.innerHTML = `<span>${word}</span><span class="text-[9px] font-bold">NON PRESENTE</span>`;
+                    comparisonArea.appendChild(d);
+                });
+            }
+
+            document.getElementById('stat-math').innerText = correctAnswers;
+            document.getElementById('stat-words').innerText = foundCount + '/' + storedWords.length;
+            showScreen('results');
+        }
+    </script>
+</body>
+</html>

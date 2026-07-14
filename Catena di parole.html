@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Una Tira l'Altra - Riabilitazione Cognitiva</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            overflow-x: hidden;
+        }
+        h1, h2, h3, .font-display {
+            font-family: 'Montserrat', sans-serif;
+        }
+        .container {
+            max-width: 680px;
+        }
+        .word-input {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            border-radius: 0.75rem;
+            border: 2px solid #e2e8f0;
+            background-color: #ffffff;
+            font-size: 1.125rem;
+            text-align: center;
+            transition: all 0.2s ease-in-out;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.02);
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            color: #1e293b;
+        }
+        .word-input:focus {
+            outline: none;
+            border-color: #d97706; /* amber-600 */
+            box-shadow: 0 0 0 4px rgba(217, 119, 6, 0.15);
+        }
+        .message-box {
+            position: fixed;
+            top: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 1rem 2rem;
+            border-radius: 1rem;
+            z-index: 1000;
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            pointer-events: none;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+        }
+        .message-box.show {
+            opacity: 1;
+            transform: translate(-50%, 8px);
+        }
+
+        .button {
+            font-family: 'Montserrat', sans-serif;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .button:hover:not(:disabled) {
+            transform: translateY(-1px);
+            filter: brightness(1.03);
+        }
+        .button:active {
+            transform: translateY(0);
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        #hit-counter {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(8px);
+            padding: 0.4rem 0.8rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #64748b;
+            border: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            z-index: 50;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+        }
+    </style>
+</head>
+<body class="text-slate-800 flex flex-col items-center justify-center min-h-screen p-4">
+
+    <!-- Contatore Accessi -->
+    <div id="hit-counter">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+        <span>Accessi: <span id="access-count" class="font-bold">Offline</span></span>
+    </div>
+
+    <!-- Modal di Conferma Abbandono Personalizzato -->
+    <div id="confirm-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[100] flex items-center justify-center p-4 hidden transition-opacity duration-200">
+        <div class="bg-white p-6 rounded-3xl border border-slate-200 max-w-sm w-full text-center shadow-lg transform scale-95 transition-transform duration-200" id="confirm-modal-card">
+            <h3 class="text-lg font-bold text-slate-900 mb-2">Abbandonare la sessione?</h3>
+            <p class="text-sm text-slate-500 mb-6">I progressi della sessione corrente andranno perduti.</p>
+            <div class="flex gap-3 justify-center">
+                <button onclick="window.closeConfirmModal()" class="button bg-slate-50 border border-slate-200 text-slate-800 px-4 py-2.5 rounded-xl text-sm font-semibold hover:bg-slate-100 transition-all flex-1">
+                    Annulla
+                </button>
+                <button onclick="window.executeExit()" class="button bg-rose-600 hover:bg-rose-700 text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition-all flex-1">
+                    Abbandona
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 1. SETUP MENU -->
+    <div id="setup-container" class="container bg-white p-8 md:p-12 rounded-3xl shadow-sm border border-slate-200 text-center mx-auto fade-in">
+        <div class="inline-flex items-center gap-2 px-3 py-1 bg-amber-50 border border-amber-200 rounded-full text-xs font-bold text-amber-700 mb-6 uppercase tracking-wider">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364.364l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+            Allenamento Cognitivo
+        </div>
+        
+        <h1 class="text-4xl md:text-5xl font-black text-slate-900 mb-2 tracking-tight">
+            Una tira l'altra
+        </h1>
+        <p class="text-slate-500 mb-10 text-base md:text-lg font-medium italic">"Esercita l'elasticità linguistica e l'associazione mentale"</p>
+        
+        <p class="text-slate-400 text-xs font-bold uppercase tracking-widest mb-6">Seleziona un livello per iniziare</p>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- BASE -->
+            <div class="flex flex-col justify-between bg-white border border-slate-200 hover:border-emerald-500 rounded-2xl p-6 text-center transition-all duration-300 shadow-sm hover:shadow-md">
+                <div>
+                    <span class="inline-block px-2.5 py-0.5 bg-emerald-50 text-emerald-700 text-xs font-bold rounded-full uppercase mb-3">Base</span>
+                    <h3 class="text-lg font-bold text-slate-800 mb-2">Riscaldamento</h3>
+                    <p class="text-xs text-slate-500 mb-6">Associazioni immediate e intuitive, perfetto per iniziare.</p>
+                </div>
+                <button onclick="window.startGame('base')" class="button w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-4 rounded-xl text-sm transition-colors shadow-sm shadow-emerald-100">
+                    Avvia
+                </button>
+            </div>
+            <!-- INTERMEDIO -->
+            <div class="flex flex-col justify-between bg-white border border-slate-200 hover:border-amber-500 rounded-2xl p-6 text-center transition-all duration-300 shadow-sm hover:shadow-md">
+                <div>
+                    <span class="inline-block px-2.5 py-0.5 bg-amber-50 text-amber-700 text-xs font-bold rounded-full uppercase mb-3">Intermedio</span>
+                    <h3 class="text-lg font-bold text-slate-800 mb-2">Concentrazione</h3>
+                    <p class="text-xs text-slate-500 mb-6">Collegamenti stimolanti che richiedono maggiore riflessione.</p>
+                </div>
+                <button onclick="window.startGame('intermedio')" class="button w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 px-4 rounded-xl text-sm transition-colors shadow-sm shadow-amber-100">
+                    Avvia
+                </button>
+            </div>
+            <!-- AVANZATO -->
+            <div class="flex flex-col justify-between bg-white border border-slate-200 hover:border-rose-500 rounded-2xl p-6 text-center transition-all duration-300 shadow-sm hover:shadow-md">
+                <div>
+                    <span class="inline-block px-2.5 py-0.5 bg-rose-50 text-rose-700 text-xs font-bold rounded-full uppercase mb-3">Avanzato</span>
+                    <h3 class="text-lg font-bold text-slate-800 mb-2">Sfida Max</h3>
+                    <p class="text-xs text-slate-500 mb-6">Concetti complessi e accostamenti semantici profondi.</p>
+                </div>
+                <button onclick="window.startGame('avanzato')" class="button w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-3 px-4 rounded-xl text-sm transition-colors shadow-sm shadow-rose-100">
+                    Avvia
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. GAME SCREEN -->
+    <div id="game-container" class="container bg-white p-6 md:p-10 rounded-3xl shadow-sm border border-slate-200 hidden mx-auto fade-in">
+        <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-8 pb-6 border-b border-slate-100">
+            <button onclick="window.confirmExit()" class="text-rose-600 hover:text-rose-700 text-xs font-bold tracking-wider transition-colors uppercase">
+                Abbandona
+            </button>
+            <div class="flex items-center gap-3">
+                <div class="bg-amber-50 border border-amber-100 text-amber-700 px-4 py-1.5 rounded-full font-mono font-bold text-lg" id="timer-display">00:00</div>
+            </div>
+            <button onclick="window.finishSession()" class="bg-slate-50 border border-slate-200 text-slate-800 px-4 py-1.5 rounded-full text-xs font-bold hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 transition-all uppercase">
+                Fine Sessione
+            </button>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4 mb-10">
+            <div class="bg-emerald-50/50 p-4 rounded-2xl border border-emerald-100 text-center">
+                <span class="block text-[10px] uppercase font-bold text-emerald-600 tracking-wider mb-1">Corrette</span>
+                <span id="score-correct" class="text-3xl font-black text-emerald-700">0</span>
+            </div>
+            <div class="bg-rose-50/50 p-4 rounded-2xl border border-rose-100 text-center">
+                <span class="block text-[10px] uppercase font-bold text-rose-600 tracking-wider mb-1">Sbagliate</span>
+                <span id="score-wrong" class="text-3xl font-black text-rose-700">0</span>
+            </div>
+        </div>
+
+        <div id="words-container" class="space-y-6"></div>
+
+        <div class="mt-10 flex flex-col items-center">
+            <button id="next-btn" class="button bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 px-12 rounded-xl text-base shadow-sm shadow-emerald-100 hidden uppercase tracking-wider">
+                Prossima Catena
+            </button>
+        </div>
+    </div>
+
+    <!-- 3. REPORT SCREEN -->
+    <div id="report-container" class="container bg-white p-10 rounded-3xl shadow-sm border border-slate-200 hidden mx-auto text-center fade-in">
+        <div class="inline-flex items-center justify-center w-16 h-16 bg-amber-50 border border-amber-100 rounded-full text-amber-600 mb-6">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+        </div>
+        
+        <h2 class="text-3xl md:text-4xl font-black text-slate-900 mb-2">Sessione Conclusa</h2>
+        <p class="text-slate-400 font-medium mb-8 uppercase tracking-widest text-xs">Riepilogo delle tue performance</p>
+
+        <div class="bg-slate-50/50 rounded-3xl p-6 md:p-8 mb-8 grid grid-cols-1 md:grid-cols-3 gap-6 border border-slate-100">
+            <div class="p-4 bg-white border border-slate-200 rounded-2xl shadow-sm">
+                <p class="text-slate-400 text-[10px] font-black mb-1 uppercase tracking-wider">Tempo Totale</p>
+                <p id="final-time" class="text-2xl font-black text-amber-600">--</p>
+            </div>
+            <div class="p-4 bg-white border border-slate-200 rounded-2xl shadow-sm">
+                <p class="text-slate-400 text-[10px] font-black mb-1 uppercase tracking-wider">Risposte Esatte</p>
+                <p id="final-correct" class="text-2xl font-black text-emerald-600">0</p>
+            </div>
+            <div class="p-4 bg-white border border-slate-200 rounded-2xl shadow-sm">
+                <p class="text-slate-400 text-[10px] font-black mb-1 uppercase tracking-wider">Risposte Errate</p>
+                <p id="final-wrong" class="text-2xl font-black text-rose-600">0</p>
+            </div>
+        </div>
+
+        <button onclick="window.showSetup()" class="button bg-emerald-600 hover:bg-emerald-700 text-white font-black py-4 px-10 rounded-2xl text-base w-full md:w-auto shadow-sm shadow-emerald-100 uppercase tracking-widest">
+            Nuova Sessione
+        </button>
+    </div>
+
+    <div id="message-box" class="message-box shadow-2xl"></div>
+
+    <!-- Firebase SDK e Logica -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, increment, onSnapshot } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js';
+
+        // --- Sintesi Audio ---
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playSound(type) {
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            
+            const now = audioCtx.currentTime;
+
+            if (type === 'success') {
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(523.25, now); // C5
+                oscillator.frequency.exponentialRampToValueAtTime(880, now + 0.15); // A5
+                gainNode.gain.setValueAtTime(0.3, now);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                oscillator.start(now);
+                oscillator.stop(now + 0.3);
+            } else if (type === 'error') {
+                oscillator.type = 'triangle';
+                oscillator.frequency.setValueAtTime(220, now); // A3
+                oscillator.frequency.linearRampToValueAtTime(110, now + 0.1); // A2
+                gainNode.gain.setValueAtTime(0.3, now);
+                gainNode.gain.linearRampToValueAtTime(0.01, now + 0.2);
+                oscillator.start(now);
+                oscillator.stop(now + 0.2);
+            }
+        }
+
+        const DB = {
+            base: [
+                ["SOLE", "CALDO", "GHIACCIO", "FREDDO", "INVERNO", "NEVE", "MONTAGNA"],
+                ["PANE", "FRESCO", "ARIA", "PULITO", "SAPONE", "BAGNO", "DOCCIA"],
+                ["GATTO", "PELO", "LANA", "MAGLIONE", "CALDO", "FUOCO", "CAMINO"],
+                ["MARE", "SABBIA", "CASTELLO", "RE", "CORONA", "TESTA", "CAPPELLO"],
+                ["LIBRO", "PAGINA", "SCRITTURA", "PENNA", "INCHIOSTRO", "NERO", "NOTTE"],
+                ["CAFFÈ", "TAZZINA", "ZUCCHERO", "DOLCE", "TORTA", "FESTA", "REGALO"],
+                ["MELA", "ROSSA", "FRUTTO", "ALBERO", "RAMO", "FOGLIA", "VERDE"],
+                ["TRENO", "BINARIO", "STAZIONE", "VIAGGIO", "VALIGIA", "VACANZA", "ESTATE"],
+                ["PALLA", "GIOCO", "BAMBINO", "PARCO", "ERBA", "PRATO", "FIORE"],
+                ["ACQUA", "SETE", "BICCHIERE", "TAVOLA", "CENA", "PIATTO", "CUCINA"],
+                ["CASA", "PORTA", "CHIAVE", "SERRATURA", "FERRO", "METALLO", "ORO"],
+                ["LATTE", "BIANCO", "NUVOLA", "PIOGGIA", "OMBRELLO", "VENTO", "TEMPESTA"],
+                ["SCARPA", "PIEDE", "CAMMINO", "STRADA", "AUTO", "RUOTA", "BICICLETTA"],
+                ["OROLOGIO", "TEMPO", "MINUTO", "SECONDO", "PIATTO", "CENA", "FESTA"],
+                ["MUSICA", "CANZONE", "VOCE", "PAROLA", "LETTERA", "BUSTA", "POSTA"]
+            ],
+            intermedio: [
+                ["LINGUA", "PAROLA", "VOCABOLARIO", "INDICE", "BORSA", "MERCATO", "AFFARI"],
+                ["MISTERO", "OMBRA", "LUCE", "RIFLESSO", "SPECCHIO", "IMMAGINE", "FOTO"],
+                ["TEATRO", "PALCO", "SIPARIO", "ATTREZZO", "CHIAVE", "SERRATURA", "PORTA"],
+                ["STAMPA", "QUOTIDIANO", "NOTIZIA", "ULTIMA", "SPIAGGIA", "MARE", "ONDA"],
+                ["MUSICA", "SPETTACOLO", "PUBBLICO", "RELAZIONE", "COPPIA", "CUORE", "AMORE"],
+                ["MEMORIA", "ELEFANTE", "AVORIO", "BIANCO", "LATTE", "CENTRALE", "POLIZIA"],
+                ["GIUDICE", "LEGGE", "DIRITTO", "ROVESCIO", "TENNIS", "RETE", "SISTEMA"],
+                ["ORIZZONTE", "DISTANZA", "LONTANO", "VICINO", "CASA", "SICUREZZA", "ALLARME"],
+                ["ENERGIA", "CORRENTE", "FIUME", "VALLE", "MONTAGNA", "ALTA", "QUOTA"],
+                ["SCACCHI", "REGINA", "APE", "MIELE", "DOLCE", "ZUCCHERO", "VELENO"],
+                ["VIAGGIO", "METRO", "LINEA", "CONFINE", "STATO", "GOVERNO", "POTERE"],
+                ["NAVIGAZIONE", "PORTA", "ACCESSO", "PASSWORD", "SEGRETO", "CODICE", "FISSA"],
+                ["CIRCO", "PAGLIACCIO", "TRUCCO", "VISAGISTA", "ESTETISTA", "BELEZZA", "GRAZIA"]
+            ],
+            avanzato: [
+                ["ALGORITMO", "LOGICA", "DEDUZIONE", "INVESTIGATORE", "LENTE", "CONTATTO", "OCCHIO"],
+                ["PROSPETTIVA", "PUNTO", "RELAZIONE", "LEGAME", "NODO", "GOLA", "AMARO"],
+                ["METAMORFOSI", "CAMBIAMENTO", "STATO", "CIVILE", "ABITO", "SU MISURA", "PESO"],
+                ["ARCHITETTO", "PROGETTO", "FUTURO", "DESTINO", "CASUALITÀ", "ORDINE", "DISCIPLINA"],
+                ["SOCIETÀ", "CONTRATTO", "FIRMA", "AUTORE", "OPERA", "LIRICA", "VOCE"],
+                ["EVOLUZIONE", "SPECIE", "TIPO", "CARATTERE", "TRATTO", "PENNA", "STILO"],
+                ["LINGUISTICA", "SEMANTICA", "SIGNIFICATO", "PROFONDO", "ROSSO", "SANGUE", "FREDDO"],
+                ["ASTRONOMIA", "COSTELLAZIONE", "ORSA", "MAGGIORE", "ETÀ", "MEDIA", "VOTO"],
+                ["ECONOMIA", "VALUTA", "SCAMBIO", "OPINIONE", "PUBBLICA", "RELAZIONE", "STAMPA"],
+                ["BIOLOGIA", "CELLULA", "NUCLEO", "CENTRALE", "POLIZIA", "ORDINE", "ARCHIVIO"],
+                ["PARADOSSO", "TEMPO", "DIMENSIONE", "GRANDEZZA", "SPIRITO", "GUIDA", "TURISTICA"],
+                ["CHIMICA", "ELEMENTO", "TAVOLA", "PERIODICA", "DOVERE", "CRONACA", "NERA"],
+                ["GEOLOGIA", "STRATO", "ATMOSFERA", "PRESSIONE", "SANGUE", "FREDDO", "MARMO"]
+            ]
+        };
+
+        // Gestione delle variabili d'ambiente per consentire il funzionamento offline/locale
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'una-tira-l-altra-final';
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        let app = null;
+        let auth = null;
+        let db = null;
+        let user = null;
+
+        // Gestione Contatore (Cloud Storage sicuro solo se online)
+        const initHitCounter = async () => {
+            if (!db || !auth || !auth.currentUser) return;
+            const counterRef = doc(db, 'artifacts', appId, 'public', 'data', 'counters', 'access');
+            try {
+                const snap = await getDoc(counterRef);
+                if (!snap.exists()) {
+                    await setDoc(counterRef, { count: 1 });
+                } else {
+                    await updateDoc(counterRef, { count: increment(1) });
+                }
+                onSnapshot(counterRef, s => {
+                    const data = s.data();
+                    if (data) document.getElementById('access-count').textContent = data.count.toLocaleString();
+                }, (error) => {
+                    console.warn("Snapshot error (safe fallback):", error);
+                });
+            } catch (err) {
+                console.warn("Counter disabled locally:", err);
+            }
+        };
+
+        // Flusso di inizializzazione condizionale
+        const initAuthAndApp = async () => {
+            if (firebaseConfig && firebaseConfig.apiKey) {
+                try {
+                    app = initializeApp(firebaseConfig);
+                    auth = getAuth(app);
+                    db = getFirestore(app);
+
+                    if (initialAuthToken) {
+                        await signInWithCustomToken(auth, initialAuthToken);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+
+                    onAuthStateChanged(auth, u => {
+                        user = u;
+                        if (user) {
+                            initHitCounter();
+                        }
+                    });
+                } catch (err) {
+                    console.warn("Firebase config error, fallback to offline:", err);
+                    document.getElementById('access-count').textContent = "Locale";
+                }
+            } else {
+                // Modalità offline locale
+                document.getElementById('access-count').textContent = "Locale";
+            }
+        };
+
+        initAuthAndApp();
+
+        let currentDiff = 'base';
+        let sequence = [];
+        let revealed = [];
+        let hints = [];
+        let stats = { correct: 0, wrong: 0, startTime: 0, timerInterval: null };
+
+        const UI = {
+            setup: document.getElementById('setup-container'),
+            game: document.getElementById('game-container'),
+            report: document.getElementById('report-container'),
+            words: document.getElementById('words-container'),
+            msg: document.getElementById('message-box'),
+            timer: document.getElementById('timer-display'),
+            scoreC: document.getElementById('score-correct'),
+            scoreW: document.getElementById('score-wrong'),
+            nextBtn: document.getElementById('next-btn')
+        };
+
+        window.showSetup = () => {
+            clearInterval(stats.timerInterval);
+            UI.setup.classList.remove('hidden');
+            UI.game.classList.add('hidden');
+            UI.report.classList.add('hidden');
+        };
+
+        window.startGame = (diff) => {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            currentDiff = diff;
+            stats.correct = 0;
+            stats.wrong = 0;
+            stats.startTime = Date.now();
+            updateStatsUI();
+            startTimer();
+            UI.setup.classList.add('hidden');
+            UI.report.classList.add('hidden');
+            UI.game.classList.remove('hidden');
+            loadNewSequence();
+        };
+
+        const startTimer = () => {
+            clearInterval(stats.timerInterval);
+            stats.timerInterval = setInterval(() => {
+                const elapsed = Math.floor((Date.now() - stats.startTime) / 1000);
+                const m = Math.floor(elapsed / 60).toString().padStart(2, '0');
+                const s = (elapsed % 60).toString().padStart(2, '0');
+                UI.timer.textContent = `${m}:${s}`;
+            }, 1000);
+        };
+
+        const loadNewSequence = () => {
+            const pool = DB[currentDiff];
+            sequence = pool[Math.floor(Math.random() * pool.length)].map(s => s.toUpperCase());
+            revealed = [sequence[0], null, null, null, null, null, sequence[6]];
+            hints = new Array(7).fill(0);
+            UI.nextBtn.classList.add('hidden');
+            renderWords();
+        };
+
+        const renderWords = () => {
+            UI.words.innerHTML = '';
+            revealed.forEach((word, i) => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'w-full flex flex-col items-center gap-3 fade-in';
+                
+                if (word) {
+                    itemDiv.innerHTML = `
+                        <div class="w-full p-5 bg-slate-50 border border-slate-100 rounded-2xl text-center shadow-sm">
+                            <span class="text-xl md:text-2xl font-black text-slate-800 font-display tracking-wide">${word}</span>
+                        </div>
+                    `;
+                } else {
+                    const correctWord = sequence[i];
+                    const helpLetters = hints[i] + 1;
+                    const displayHint = correctWord.substring(0, helpLetters).padEnd(correctWord.length, '_');
+                    
+                    itemDiv.innerHTML = `
+                        <div class="w-full bg-white border border-slate-200 p-6 rounded-2xl shadow-sm space-y-4">
+                            <div class="text-center">
+                                <span class="text-2xl md:text-3xl font-black text-slate-300 tracking-[0.4em] font-display uppercase">
+                                    ${displayHint.split('').join(' ')}
+                                </span>
+                            </div>
+                            <div class="max-w-xs mx-auto w-full">
+                                <input type="text" placeholder="Scrivi la parola..." 
+                                    class="word-input" 
+                                    onkeydown="if(event.key === 'Enter') window.checkWord(this.value, ${i})">
+                            </div>
+                        </div>
+                    `;
+                }
+                UI.words.appendChild(itemDiv);
+            });
+        };
+
+        window.checkWord = (val, i) => {
+            const guess = val.trim().toUpperCase();
+            if (guess === sequence[i]) {
+                revealed[i] = sequence[i];
+                stats.correct++;
+                playSound('success');
+                showMessage("ECCELLENTE!", "success");
+                if (revealed.every(w => w !== null)) UI.nextBtn.classList.remove('hidden');
+            } else {
+                stats.wrong++;
+                playSound('error');
+                if (hints[i] < sequence[i].length - 1) hints[i]++;
+                showMessage("NON PROPRIO...", "error");
+            }
+            updateStatsUI();
+            renderWords();
+        };
+
+        const updateStatsUI = () => {
+            UI.scoreC.textContent = stats.correct;
+            UI.scoreW.textContent = stats.wrong;
+        };
+
+        window.finishSession = () => {
+            clearInterval(stats.timerInterval);
+            document.getElementById('final-time').textContent = UI.timer.textContent;
+            document.getElementById('final-correct').textContent = stats.correct;
+            document.getElementById('final-wrong').textContent = stats.wrong;
+            UI.game.classList.add('hidden');
+            UI.report.classList.remove('hidden');
+        };
+
+        window.confirmExit = () => {
+            const modal = document.getElementById('confirm-modal');
+            const card = document.getElementById('confirm-modal-card');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                card.classList.remove('scale-95');
+                card.classList.add('scale-100');
+            }, 10);
+        };
+
+        window.closeConfirmModal = () => {
+            const modal = document.getElementById('confirm-modal');
+            const card = document.getElementById('confirm-modal-card');
+            card.classList.remove('scale-100');
+            card.classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 150);
+        };
+
+        window.executeExit = () => {
+            window.closeConfirmModal();
+            window.showSetup();
+        };
+
+        const showMessage = (txt, type) => {
+            UI.msg.textContent = txt;
+            UI.msg.className = "message-box show";
+            if (type === 'success') {
+                UI.msg.className += " bg-emerald-50 border border-emerald-200 text-emerald-800";
+            } else if (type === 'error') {
+                UI.msg.className += " bg-rose-50 border border-rose-200 text-rose-800";
+            } else {
+                UI.msg.className += " bg-amber-50 border border-amber-200 text-amber-800";
+            }
+            setTimeout(() => { UI.msg.className = `message-box`; }, 2000);
+        };
+
+        UI.nextBtn.onclick = loadNewSequence;
+    </script>
+</body>
+</html>

@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Incastri Logici - Pro Edition</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: #f0f4f8;
+            touch-action: manipulation;
+            overflow-x: hidden;
+        }
+        .tower {
+            min-height: 300px;
+            transition: background-color 0.3s;
+        }
+        .tower.drag-over {
+            background-color: rgba(59, 130, 246, 0.1);
+            border-radius: 12px;
+        }
+        .block {
+            cursor: grab;
+            transition: transform 0.2s, box-shadow 0.2s;
+            user-select: none;
+        }
+        .block:active {
+            cursor: grabbing;
+        }
+        .block.dragging {
+            opacity: 0.5;
+            transform: scale(0.95);
+        }
+        /* Colori per le vocali e consonanti */
+        .letter-a { background-color: #ef4444; }
+        .letter-e { background-color: #f59e0b; }
+        .letter-i { background-color: #10b981; }
+        .letter-o { background-color: #3b82f6; }
+        .letter-u { background-color: #8b5cf6; }
+        .letter-cons { background-color: #64748b; }
+        
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-2 md:p-4">
+
+    <div id="start-menu" class="bg-white p-6 md:p-8 rounded-3xl shadow-2xl max-w-md w-full text-center border-t-8 border-blue-500">
+        <h1 class="text-3xl md:text-4xl font-bold text-blue-600 mb-2">Incastri Logici</h1>
+        <p class="text-gray-500 mb-6 italic">Puzzle di ordinamento logico</p>
+        
+        <div class="space-y-4">
+            <button onclick="startGame('easy')" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-4 rounded-xl transition transform hover:scale-105 shadow-lg text-lg">
+                Gioca (3 Lettere)
+            </button>
+            <button onclick="startGame('hard')" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-4 rounded-xl transition transform hover:scale-105 shadow-lg text-lg">
+                Sfida (4-7 Lettere)
+            </button>
+        </div>
+    </div>
+
+    <div id="game-screen" class="hidden w-full max-w-5xl">
+        <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4 px-2">
+            <div class="bg-white px-4 py-2 rounded-full shadow-md border-2 border-blue-500 flex flex-col items-center min-w-[160px]">
+                <span class="text-gray-400 font-bold text-[9px] uppercase tracking-widest">Parola Obiettivo</span>
+                <div id="target-word-display" class="flex items-center gap-1 text-2xl font-black text-blue-600 uppercase"></div>
+            </div>
+            
+            <div class="flex items-center gap-2 flex-wrap justify-center">
+                <div class="bg-white px-3 py-1 rounded-xl shadow border border-gray-100 text-center">
+                    <p class="text-[9px] text-gray-400 uppercase font-bold tracking-tighter">Mosse</p>
+                    <p id="move-counter" class="text-lg font-bold text-gray-700">0</p>
+                </div>
+                <button onclick="toggleSolution()" class="bg-amber-500 hover:bg-amber-600 text-white font-bold px-3 py-2 rounded-xl transition shadow-lg text-sm">
+                    Aiuto
+                </button>
+                <button onclick="endSession()" class="bg-red-500 hover:bg-red-600 text-white font-bold px-3 py-2 rounded-xl transition shadow-lg text-sm">
+                    Termina Sessione
+                </button>
+            </div>
+        </div>
+
+        <div id="game-board" class="flex flex-row justify-around items-end min-h-[340px] px-2 gap-4"></div>
+
+        <div id="feedback-msg" class="mt-8 text-center h-6 font-bold text-red-500 text-sm italic"></div>
+
+        <!-- Pannello Soluzione -->
+        <div id="solution-panel" class="hidden mt-4 bg-white p-4 rounded-3xl shadow-2xl border-2 border-amber-300 max-w-lg mx-auto">
+            <h4 class="text-xs font-bold text-amber-700 mb-2 uppercase">Percorso Suggerito</h4>
+            <div id="solution-list" class="max-h-32 overflow-y-auto space-y-1 text-xs text-gray-700 custom-scrollbar mb-3"></div>
+        </div>
+    </div>
+
+    <div id="stats-screen" class="hidden bg-white p-6 md:p-8 rounded-3xl shadow-2xl max-w-lg w-full text-center border-t-8 border-purple-500">
+        <h2 class="text-3xl font-bold text-purple-600 mb-2">Sessione Completata!</h2>
+        <p class="text-gray-400 text-sm mb-6">Ecco il riepilogo delle tue performance</p>
+        
+        <div class="grid grid-cols-2 gap-3 mb-6">
+            <div class="bg-purple-50 p-3 rounded-2xl border border-purple-100">
+                <p class="text-[9px] text-purple-400 font-bold uppercase">Parole</p>
+                <p id="stat-total-words" class="text-xl font-black text-purple-700">0</p>
+            </div>
+            <div class="bg-purple-50 p-3 rounded-2xl border border-purple-100">
+                <p class="text-[9px] text-purple-400 font-bold uppercase">Mosse Totali</p>
+                <p id="stat-total-moves" class="text-xl font-black text-purple-700">0</p>
+            </div>
+            <div class="bg-purple-50 p-3 rounded-2xl border border-purple-100">
+                <p class="text-[9px] text-purple-400 font-bold uppercase">Tempo</p>
+                <p id="stat-total-time" class="text-xl font-black text-purple-700">0s</p>
+            </div>
+            <div class="bg-purple-50 p-3 rounded-2xl border border-purple-100">
+                <p class="text-[9px] text-purple-400 font-bold uppercase">Media Mosse</p>
+                <p id="stat-avg-moves" class="text-xl font-black text-purple-700">0</p>
+            </div>
+        </div>
+
+        <div class="text-left mb-6">
+            <h3 class="text-xs font-bold text-gray-400 uppercase mb-2 ml-1 tracking-widest">Registro Parole</h3>
+            <div id="solved-words-list" class="bg-gray-50 rounded-2xl p-2 max-h-48 overflow-y-auto border border-gray-200 custom-scrollbar">
+                <!-- Verrà popolato dinamicamente -->
+            </div>
+        </div>
+
+        <button onclick="location.reload()" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl hover:bg-blue-700 transition shadow-lg">
+            GIOCA ANCORA
+        </button>
+    </div>
+
+    <!-- Modal Vittoria Singola Parola -->
+    <div id="victory-modal" class="fixed inset-0 bg-black/70 hidden flex items-center justify-center p-4 z-50 backdrop-blur-sm">
+        <div class="bg-white rounded-[2rem] p-8 max-w-sm w-full text-center shadow-2xl border-b-8 border-green-500">
+            <div class="text-6xl mb-4 animate-bounce">✨</div>
+            <h2 class="text-2xl font-black text-gray-800 mb-2 uppercase">Ottimo!</h2>
+            <p id="victory-stats" class="text-gray-600 mb-6 font-medium text-sm"></p>
+            <button onclick="nextLevel()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-2xl hover:bg-blue-700 transition">
+                PROSSIMA PAROLA
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const words = {
+            easy: [
+                'BAR', 'APE', 'MIA', 'LUA', 'SOL', 'ORO', 'EST', 'VIS', 'ALI', 'UVA', 
+                'ERA', 'PIO', 'REI', 'ZOO', 'BLU', 'THE', 'BUE', 'AGO', 'ECO', 'IRA',
+                'LUX', 'MAR', 'OVI', 'ALE', 'DUE', 'TRE', 'VIA', 'ZIA', 'MIO', 'NON'
+            ],
+            hard: [
+                'MARE', 'PIANO', 'FIORE', 'LIBRO', 'CORSO', 'TAVOLO', 'MENTE', 'MONTE',
+                'SOLE', 'LUNA', 'VENTO', 'FUOCO', 'ERBA', 'CASA', 'PORTA', 'VETRO',
+                'SOGNO', 'CANTO', 'PANE', 'LATTE', 'ACQUA', 'STREGA', 'BOSCO', 'CAMPO',
+                'PIOGGIA', 'SPADA', 'TEMPO', 'NOTTE', 'STELLA', 'SABBIA', 'STRADA',
+                'PIETRA', 'GIORNO', 'MONDO', 'SGUARDO', 'MUSICA', 'ALBERO', 'FOGLIA',
+                'OMBRA', 'PONTE', 'VILLAGGIO', 'SPIRITO', 'SENTIERO', 'CUORE', 'SFIDA'
+            ]
+        };
+
+        let sessionData = {
+            wordsCompleted: 0,
+            totalMoves: 0,
+            startTime: null,
+            endTime: null,
+            log: [] // Memorizza {word, moves}
+        };
+
+        let currentLevelType = 'easy';
+        let targetWord = "";
+        let moves = 0;
+        let gameState = [];
+        let solutionSteps = [];
+        let selectedTowerIndex = null; // Per lo schema touch Click-to-Move
+
+        const menu = document.getElementById('start-menu');
+        const gameScreen = document.getElementById('game-screen');
+        const statsScreen = document.getElementById('stats-screen');
+        const board = document.getElementById('game-board');
+        const moveCounterDisplay = document.getElementById('move-counter');
+        const targetDisplay = document.getElementById('target-word-display');
+        const feedback = document.getElementById('feedback-msg');
+        const victoryModal = document.getElementById('victory-modal');
+        const solutionPanel = document.getElementById('solution-panel');
+        const solutionList = document.getElementById('solution-list');
+        const solvedWordsList = document.getElementById('solved-words-list');
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function startGame(difficulty) {
+            if (!sessionData.startTime) sessionData.startTime = new Date();
+            currentLevelType = difficulty;
+            nextLevel();
+        }
+
+        function nextLevel() {
+            victoryModal.classList.add('hidden');
+            moves = 0;
+            selectedTowerIndex = null;
+            const levelWords = words[currentLevelType];
+            targetWord = levelWords[Math.floor(Math.random() * levelWords.length)].toUpperCase();
+            
+            const numTowers = (currentLevelType === 'easy') ? 3 : 4;
+            gameState = Array.from({ length: numTowers }, () => []);
+            
+            // Crea oggetti lettera con rango e id univoci
+            let lettersWithRank = targetWord.split('').map((char, index) => ({
+                char: char,
+                rank: index, 
+                id: Math.random().toString(36).substr(2, 9)
+            }));
+
+            // Mescolamento torre di partenza
+            let scrambled = shuffleArray([...lettersWithRank]);
+            while(scrambled.map(l => l.char).join('') === targetWord) {
+                scrambled = shuffleArray([...lettersWithRank]);
+            }
+            
+            gameState[0] = scrambled;
+            generateSolutionSteps();
+
+            menu.classList.add('hidden');
+            gameScreen.classList.remove('hidden');
+            solutionPanel.classList.add('hidden');
+            renderBoard();
+            updateStats();
+        }
+
+        function generateSolutionSteps() {
+            // Risolutore BFS dinamico che si adatta a qualsiasi disordine di partenza!
+            const numTowers = gameState.length;
+            const N = targetWord.length;
+
+            // Rappresentazione stato: lista di ID di rango
+            const startState = gameState.map(tower => tower.map(block => block.rank));
+
+            const queue = [];
+            const visited = new Set();
+
+            function serialize(state) {
+                return state.map(t => t.join(',')).join('|');
+            }
+
+            queue.push({ state: startState, path: [] });
+            visited.add(serialize(startState));
+
+            let stepsFound = [];
+            let iterations = 0;
+            const maxIterations = 8000; // Limite di sicurezza per evitare blocchi
+
+            while (queue.length > 0 && iterations < maxIterations) {
+                iterations++;
+                const { state, path } = queue.shift();
+
+                // Verifica vittoria (tutti i blocchi sull'ultima torre in ordine corretto 0..N-1)
+                const lastTower = state[numTowers - 1];
+                if (lastTower.length === N) {
+                    let win = true;
+                    for (let i = 0; i < N; i++) {
+                        if (lastTower[i] !== i) { win = false; break; }
+                    }
+                    if (win) {
+                        stepsFound = path;
+                        break;
+                    }
+                }
+
+                // Genera mosse successive legali
+                for (let from = 0; from < numTowers; from++) {
+                    if (state[from].length === 0) continue;
+                    const movingRank = state[from][state[from].length - 1];
+
+                    for (let to = 0; to < numTowers; to++) {
+                        if (from === to) continue;
+
+                        const topOnTarget = state[to][state[to].length - 1];
+
+                        // Regola: non puoi mettere una lettera con rango minore sopra una maggiore
+                        if (topOnTarget === undefined || movingRank > topOnTarget) {
+                            const newState = state.map((tower, idx) => {
+                                if (idx === from) return tower.slice(0, -1);
+                                if (idx === to) return [...tower, movingRank];
+                                return tower;
+                            });
+
+                            const serialized = serialize(newState);
+                            if (!visited.has(serialized)) {
+                                visited.add(serialized);
+                                queue.push({
+                                    state: newState,
+                                    path: [...path, { from, to }]
+                                });
+                            }
+                        }
+                    }
+                }
+            }
+
+            solutionSteps = stepsFound;
+        }
+
+        function renderBoard() {
+            board.innerHTML = '';
+            gameState.forEach((tower, index) => {
+                const isTargetTower = index === gameState.length - 1;
+                const isSelected = selectedTowerIndex === index;
+
+                const towerEl = document.createElement('div');
+                towerEl.className = `tower relative flex flex-col-reverse items-center p-2 border-b-8 cursor-pointer transition-all duration-200 ${
+                    isSelected ? 'border-amber-500 bg-amber-50/40 ring-4 ring-amber-300' :
+                    isTargetTower ? 'border-blue-500 bg-blue-50/30' : 'border-gray-300 bg-gray-50/40'
+                } rounded-t-2xl flex-1 max-w-[100px] md:max-w-[140px]`;
+                towerEl.dataset.index = index;
+                
+                // Supporto Click/Tap-to-move alternativo al drag & drop
+                towerEl.addEventListener('click', () => handleTowerClick(index));
+
+                towerEl.addEventListener('dragover', (e) => { e.preventDefault(); towerEl.classList.add('drag-over'); });
+                towerEl.addEventListener('dragleave', () => towerEl.classList.remove('drag-over'));
+                towerEl.addEventListener('drop', handleDrop);
+
+                tower.forEach((letterObj, letterIdx) => {
+                    const block = document.createElement('div');
+                    const isTop = letterIdx === tower.length - 1;
+                    
+                    block.className = `block w-12 h-12 md:w-16 md:h-16 flex items-center justify-center text-white text-xl md:text-2xl font-black rounded-2xl shadow-lg mb-1 transition-all ${
+                        getLetterColor(letterObj.char)
+                    } ${isTop ? 'hover:scale-105' : 'opacity-60 grayscale-[20%]'}`;
+                    
+                    block.innerText = letterObj.char;
+                    
+                    if (isTop) {
+                        block.draggable = true;
+                        block.addEventListener('dragstart', (e) => { 
+                            e.dataTransfer.setData('sourceTower', index); 
+                            block.classList.add('dragging'); 
+                        });
+                        block.addEventListener('dragend', () => block.classList.remove('dragging'));
+                    }
+                    towerEl.appendChild(block);
+                });
+                board.appendChild(towerEl);
+            });
+        }
+
+        function getLetterColor(char) {
+            return 'AEIOU'.includes(char) ? `letter-${char.toLowerCase()}` : 'letter-cons';
+        }
+
+        function handleTowerClick(index) {
+            if (selectedTowerIndex === null) {
+                // Seleziona la colonna di partenza se ha blocchi
+                if (gameState[index].length > 0) {
+                    selectedTowerIndex = index;
+                    renderBoard();
+                }
+            } else {
+                // Esegui lo spostamento se clicchi una colonna diversa
+                if (selectedTowerIndex !== index) {
+                    moveLetter(selectedTowerIndex, index);
+                }
+                selectedTowerIndex = null;
+                renderBoard();
+            }
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            const fromIndex = parseInt(e.dataTransfer.getData('sourceTower'));
+            const toIndex = parseInt(e.currentTarget.dataset.index);
+            if (fromIndex !== toIndex) moveLetter(fromIndex, toIndex);
+            e.currentTarget.classList.remove('drag-over');
+        }
+
+        function moveLetter(from, to) {
+            const towerFrom = gameState[from];
+            const towerTo = gameState[to];
+            const letterObj = towerFrom[towerFrom.length - 1];
+
+            if (!letterObj) return;
+
+            const topOnTarget = towerTo[towerTo.length - 1];
+
+            // LOGICA DI INCASTRO: 
+            // Un pezzo può stare sopra un altro solo se il suo RANGO è MAGGIORE (appare dopo nella parola obiettivo)
+            if (topOnTarget && letterObj.rank < topOnTarget.rank) {
+                showFeedback(`Incastro impossibile! L'ordine non coincide.`);
+                return;
+            }
+
+            gameState[to].push(gameState[from].pop());
+            moves++;
+            
+            // Ricalcola il percorso di aiuto ad ogni mossa
+            generateSolutionSteps();
+            if (!solutionPanel.classList.contains('hidden')) {
+                updateSolutionUI();
+            }
+
+            updateStats();
+            renderBoard();
+            checkWin();
+        }
+
+        function checkWin() {
+            const lastTower = gameState[gameState.length - 1];
+            if (lastTower.length === targetWord.length) {
+                const currentStr = lastTower.map(l => l.char).join('');
+                if (currentStr === targetWord) {
+                    sessionData.log.push({ word: targetWord, moves: moves });
+                    sessionData.wordsCompleted++;
+                    sessionData.totalMoves += moves;
+                    
+                    setTimeout(() => {
+                        document.getElementById('victory-stats').innerText = `Hai composto "${targetWord}" in ${moves} mosse!`;
+                        victoryModal.classList.remove('hidden');
+                    }, 400);
+                }
+            }
+        }
+
+        function endSession() {
+            sessionData.endTime = new Date();
+            const duration = Math.floor((sessionData.endTime - sessionData.startTime) / 1000);
+            
+            gameScreen.classList.add('hidden');
+            statsScreen.classList.remove('hidden');
+            
+            document.getElementById('stat-total-words').innerText = sessionData.wordsCompleted;
+            document.getElementById('stat-total-moves').innerText = sessionData.totalMoves;
+            document.getElementById('stat-total-time').innerText = `${duration}s`;
+            document.getElementById('stat-avg-moves').innerText = sessionData.wordsCompleted > 0 
+                ? (sessionData.totalMoves / sessionData.wordsCompleted).toFixed(1) 
+                : '0';
+
+            // Compila il registro grafico dettagliato
+            if (sessionData.log.length === 0) {
+                solvedWordsList.innerHTML = `<p class="text-xs text-gray-400 p-4 italic text-center">Nessuna parola completata.</p>`;
+            } else {
+                solvedWordsList.innerHTML = sessionData.log.map((item, idx) => `
+                    <div class="flex justify-between items-center p-3 mb-1 bg-white rounded-xl shadow-sm border border-gray-100">
+                        <div class="flex items-center gap-3">
+                            <span class="w-6 h-6 flex items-center justify-center bg-purple-100 text-purple-600 rounded-full text-[10px] font-bold">${idx + 1}</span>
+                            <span class="font-black text-gray-700 uppercase tracking-wider">${item.word}</span>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-[10px] text-gray-400 block uppercase font-bold">Mosse</span>
+                            <span class="font-bold text-blue-600">${item.moves}</span>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function updateStats() {
+            moveCounterDisplay.innerText = moves;
+            targetDisplay.innerHTML = targetWord.split('').map(l => `<span class="px-0.5">${l}</span>`).join('<span class="text-gray-200 text-xs">·</span>');
+        }
+
+        function toggleSolution() {
+            if (solutionPanel.classList.contains('hidden')) {
+                updateSolutionUI();
+                solutionPanel.classList.remove('hidden');
+            } else {
+                solutionPanel.classList.add('hidden');
+            }
+        }
+
+        function updateSolutionUI() {
+            if (solutionSteps.length === 0) {
+                solutionList.innerHTML = `<div class="p-2 text-center text-gray-400 italic">Nessun percorso ottimale disponibile o obiettivo già raggiunto.</div>`;
+                return;
+            }
+            solutionList.innerHTML = solutionSteps.map((s, i) => 
+                `<div class="p-2 border rounded bg-white shadow-sm flex justify-between">
+                    <span>Mossa ${i+1}:</span>
+                    <span>Col. ${s.from+1} → Col. ${s.to+1}</span>
+                </div>`
+            ).join('');
+        }
+
+        function showFeedback(msg) {
+            feedback.innerText = msg;
+            setTimeout(() => feedback.innerText = '', 2000);
+        }
+    </script>
+</body>
+</html>

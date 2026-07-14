@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeuroBoost v2 - Training Cognitivo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #ec4899;
+            --accent: #f59e0b;
+        }
+
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            color: #1e293b;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .canvas-container { 
+            border: 3px solid #e2e8f0; 
+            background: white; 
+            cursor: crosshair; 
+            touch-action: none;
+            transition: border-color 0.3s ease;
+        }
+        
+        .canvas-container:hover { border-color: var(--primary); }
+
+        .symbol-grid { 
+            display: grid; 
+            grid-template-columns: repeat(10, 1fr); 
+            gap: 8px; 
+            background: #0f172a; 
+            padding: 20px; 
+            border-radius: 16px;
+            box-shadow: inset 0 4px 12px rgba(0,0,0,0.5);
+            user-select: none;
+        }
+
+        .symbol { 
+            color: #64748b; 
+            font-size: 24px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            transition: all 0.15s ease; 
+            cursor: pointer; 
+            height: 44px; 
+            border-radius: 8px;
+        }
+
+        .symbol:hover { 
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+
+        .btn-gradient {
+            background: linear-gradient(to right, var(--primary), var(--primary-dark));
+            box-shadow: 0 4px 14px 0 rgba(99, 102, 241, 0.39);
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(to right, #475569, #334155);
+            box-shadow: 0 4px 14px 0 rgba(71, 85, 105, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .step-indicator {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .active-step { background: var(--primary); color: white; }
+        .inactive-step { background: #e2e8f0; color: #94a3b8; }
+        
+        .fade-in { animation: fadeIn 0.5s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-4">
+
+    <div class="mb-8 flex gap-4" id="progress-bar">
+        <div class="step-indicator active-step" id="dot-1">1</div>
+        <div class="step-indicator inactive-step" id="dot-2">2</div>
+        <div class="step-indicator inactive-step" id="dot-3">3</div>
+        <div class="step-indicator inactive-step" id="dot-4">4</div>
+    </div>
+
+    <div id="app" class="max-w-3xl w-full glass-card rounded-[2rem] shadow-2xl overflow-hidden min-h-[650px] flex flex-col border border-white">
+        <!-- Header -->
+        <div class="bg-white px-8 py-6 border-b flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center text-indigo-600 font-bold">NB</div>
+                <h1 class="text-xl font-extrabold tracking-tight text-slate-800" id="stage-title">NeuroBoost v2</h1>
+            </div>
+            <div id="timer-display" class="hidden font-bold bg-slate-100 text-indigo-600 px-4 py-2 rounded-2xl text-lg border border-indigo-100 shadow-sm">00:00</div>
+        </div>
+
+        <div id="content" class="p-8 md:p-12 flex-grow flex flex-col justify-center">
+            
+            <!-- Start Screen -->
+            <div id="start-screen" class="text-center space-y-8 fade-in">
+                <h2 class="text-4xl font-black text-slate-800">Pronti?</h2>
+                <p class="text-slate-500 text-lg">Inizia la tua sessione quotidiana di potenziamento cognitivo. Ogni volta contenuti diversi.</p>
+                <button onclick="setupAndStart()" class="btn-gradient text-white px-10 py-4 rounded-2xl font-bold text-lg tracking-wide uppercase transition hover:scale-105 active:scale-95 animate-pulse">Inizia Sessione</button>
+            </div>
+
+            <!-- 1. Memorizzazione -->
+            <div id="step-1" class="hidden space-y-8 fade-in">
+                <div class="space-y-2">
+                    <span class="text-indigo-600 font-bold uppercase text-xs tracking-widest">Fase 01: Memoria</span>
+                    <h3 class="text-2xl font-bold text-slate-800">Leggi e ricorda</h3>
+                </div>
+                <p class="text-slate-700 leading-relaxed text-xl font-medium bg-indigo-50/50 p-8 rounded-3xl border border-indigo-100" id="reading-text"></p>
+                <div class="flex items-center gap-3 text-slate-400 bg-slate-50 p-4 rounded-2xl">
+                    <p class="text-sm">Il testo sparirà tra poco. Memorizza nomi, numeri, colori e orari.</p>
+                </div>
+                <button onclick="nextStep(2)" class="text-indigo-600 font-bold hover:underline">Ho finito di leggere prima del tempo</button>
+            </div>
+
+            <!-- 2. Distraente -->
+            <div id="step-2" class="hidden space-y-6 fade-in">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <span class="text-pink-600 font-bold uppercase text-xs tracking-widest">Fase 02: Attenzione Visiva</span>
+                        <h3 class="text-2xl font-bold text-slate-800">Trova l'intruso</h3>
+                    </div>
+                    <span id="intruso-counter" class="bg-pink-100 text-pink-600 px-4 py-1 rounded-full font-bold text-xs uppercase"></span>
+                </div>
+                <div id="symbol-grid-container" class="symbol-grid"></div>
+                <p class="text-center text-slate-400 text-xs italic">Clicca il simbolo diverso il più velocemente possibile</p>
+            </div>
+
+            <!-- 3. Ricostruzione Figura -->
+            <div id="step-3" class="hidden space-y-6 fade-in text-center">
+                <div class="text-left space-y-1">
+                    <span class="text-emerald-600 font-bold uppercase text-xs tracking-widest">Fase 03: Visuospaziale</span>
+                    <h3 class="text-2xl font-bold text-slate-800">Copia la figura</h3>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+                    <div class="space-y-4">
+                        <div id="drawing-instructions" class="text-sm text-slate-600 p-4 bg-slate-50 rounded-xl border border-slate-200 text-left italic"></div>
+                        <div class="bg-white p-4 border-2 border-slate-200 rounded-xl shadow-inner flex items-center justify-center">
+                             <div id="target-figure-preview" class="w-40 h-40 border border-slate-100 relative overflow-hidden bg-slate-50 flex items-center justify-center"></div>
+                        </div>
+                    </div>
+                    <div class="space-y-4">
+                        <canvas id="drawing-canvas" width="300" height="300" class="canvas-container mx-auto rounded-2xl shadow-lg"></canvas>
+                        <div class="flex gap-4 justify-center">
+                            <button onclick="clearCanvas()" class="text-slate-400 font-bold px-4 py-2 hover:text-slate-600 transition">Cancella</button>
+                            <button onclick="recordAndNext(4)" class="bg-emerald-600 text-white px-6 py-2 rounded-xl font-bold">Fatto</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="step-correction-reading" class="hidden space-y-8 fade-in">
+                <div class="space-y-2">
+                    <span class="text-amber-600 font-bold uppercase text-xs tracking-widest">Supporto Metacognitivo</span>
+                    <h3 class="text-2xl font-bold text-slate-800">Cerca le informazioni mancanti</h3>
+                </div>
+                <p class="text-slate-700 leading-relaxed text-xl font-medium bg-amber-50/50 p-8 rounded-3xl border border-amber-100" id="correction-reading-text"></p>
+                <div class="flex items-center gap-3 text-slate-400 bg-amber-50/20 p-4 rounded-2xl border border-dashed border-amber-200">
+                    <p class="text-sm text-amber-800">Prenditi il tuo tempo. Rileggi con calma e clicca sul tasto sotto appena sei pronto a riprovare.</p>
+                </div>
+                <button onclick="returnToCorrectionQuiz()" class="w-full btn-gradient text-white py-4 rounded-2xl font-bold text-lg tracking-wider uppercase">Torna alle Domande</button>
+            </div>
+
+            <!-- 4. Rievocazione -->
+            <div id="step-4" class="hidden space-y-6 fade-in">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-2xl font-bold text-slate-800" id="quiz-title">Verifica Memoria</h3>
+                    <span id="correction-badge" class="hidden bg-amber-100 text-amber-700 border border-amber-200 px-3 py-1 rounded-full text-xs font-bold uppercase">Modalità Correzione</span>
+                </div>
+                <div id="quiz-container" class="space-y-4 max-h-[350px] overflow-y-auto pr-2 custom-scrollbar border-b border-slate-100 pb-4"></div>
+                <button type="button" id="submit-quiz-btn" onclick="checkAnswers()" class="w-full btn-gradient text-white py-4 rounded-2xl font-bold text-lg tracking-widest uppercase">Controlla Risposte</button>
+                
+                <div id="feedback-area" class="hidden p-6 rounded-2xl bg-slate-100 border border-slate-200 space-y-4">
+                    <h4 class="font-bold text-slate-800">Analisi Risposte:</h4>
+                    <div id="feedback-list" class="text-sm space-y-2"></div>
+                    
+                    <div class="flex flex-col sm:flex-row gap-4 pt-2">
+                        <button id="btn-re-read" onclick="startCorrectionReading()" class="hidden flex-1 btn-secondary text-white py-3 rounded-xl font-bold shadow-lg">Rileggi il Testo e Correggi</button>
+                        <button id="btn-go-to-stats" onclick="goToStats()" class="flex-1 bg-slate-800 hover:bg-slate-900 text-white py-3 rounded-xl font-bold shadow-lg">Vedi Statistiche Finali</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="stats-screen" class="hidden space-y-8 fade-in text-center">
+                <div class="inline-block p-4 bg-indigo-50 rounded-full mb-2">
+                    <span class="text-5xl">📊</span>
+                </div>
+                <h2 class="text-4xl font-black text-slate-800">Riepilogo Sessione</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-left">
+                    <div class="p-4 bg-white border rounded-2xl shadow-sm">
+                        <p class="text-xs font-bold text-indigo-500 uppercase mb-1">Attenzione</p>
+                        <p class="text-2xl font-black text-slate-800" id="stat-attention">-</p>
+                        <p class="text-xs text-slate-400 mt-1">Velocità media intruso</p>
+                    </div>
+                    <div class="p-4 bg-white border rounded-2xl shadow-sm">
+                        <p class="text-xs font-bold text-emerald-500 uppercase mb-1">Memoria Iniziale</p>
+                        <p class="text-2xl font-black text-slate-800" id="stat-initial-memory">-</p>
+                        <p class="text-xs text-slate-400 mt-1">Senza riletture</p>
+                    </div>
+                    <div class="p-4 bg-white border rounded-2xl shadow-sm" id="card-final-memory">
+                        <p class="text-xs font-bold text-amber-500 uppercase mb-1">Memoria Corretta</p>
+                        <p class="text-2xl font-black text-slate-800" id="stat-final-memory">-</p>
+                        <p class="text-xs text-slate-400 mt-1" id="stat-reread-info">Riletture effettuate</p>
+                    </div>
+                </div>
+
+                <div class="bg-indigo-600 p-6 rounded-3xl text-white">
+                    <h4 class="font-bold text-lg mb-1">Valutazione Globale</h4>
+                    <p class="text-indigo-100 text-sm" id="global-eval">-</p>
+                </div>
+
+                <button onclick="location.reload()" class="bg-slate-800 text-white px-10 py-4 rounded-2xl font-bold hover:bg-slate-900 transition shadow-xl w-full">Nuova Sessione</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const stories = [
+            {
+                text: "L'architetto Luca, 45 anni, giovedì scorso ha visitato un cantiere a Milano alle 10:30. Guidava una berlina grigia e portava un casco giallo e una borsa di cuoio. Doveva incontrare l'ingegner Bianchi per discutere del nuovo ponte in cemento.",
+                questions: [
+                    { q: "Qual è la professione di Luca?", keys: ["architetto"] },
+                    { q: "Quanti anni ha?", keys: ["45"] },
+                    { q: "In quale città era il cantiere?", keys: ["Milano"] },
+                    { q: "Di che colore era il casco?", keys: ["giallo"] },
+                    { q: "Con chi doveva incontrarsi?", keys: ["Bianchi"] }
+                ]
+            },
+            {
+                text: "La signora Anna, una maestra in pensione di 68 anni, venerdì pomeriggio è andata in biblioteca alle 16:15 con la sua borsa a fiori. Ha preso in prestito 4 libri di storia e un DVD sulla natura. Alle 18:00 ha comprato del pane fresco e un litro di latte parzialmente scremato.",
+                questions: [
+                    { q: "Cosa faceva Anna prima di andare in pensione?", keys: ["maestra"] },
+                    { q: "Quanti anni ha?", keys: ["68"] },
+                    { q: "A che ora è andata in biblioteca?", keys: ["16:15", "sedici e un quarto"] },
+                    { q: "Quanti libri ha preso?", keys: ["4", "quattro"] },
+                    { q: "Cosa ha comprato insieme al pane?", keys: ["latte"] }
+                ]
+            },
+            {
+                text: "Il signor Marco ha partecipato a un corso di cucina sabato sera alle 20:30. Ha imparato a fare le tagliatelle al ragù e un tiramisù senza caffè per i suoi 6 nipoti. Ha usato 10 uova fresche e un chilo di farina tipo 00 acquistata al minimarket Sotto Casa.",
+                questions: [
+                    { q: "Cosa ha imparato a cucinare come dolce?", keys: ["tiramisù"] },
+                    { q: "Per chi ha preparato il dolce?", keys: ["nipoti"] },
+                    { q: "Quante uova ha usato?", keys: ["10", "dieci"] },
+                    { q: "Quale tipo di farina ha usato?", keys: ["00"] },
+                    { q: "Come si chiama il negozio?", keys: ["Sotto Casa"] }
+                ]
+            },
+            {
+                text: "Giulia, una fotografa di 33 anni, è partita lunedì mattina per la Sardegna con il volo delle 7:40. Portava una valigia blu da 15 chili e due macchine fotografiche digitali. Alloggerà all'Hotel Miramare per 5 giorni per un servizio sulle spiagge bianche.",
+                questions: [
+                    { q: "Qual è il lavoro di Giulia?", keys: ["fotografa"] },
+                    { q: "In quale regione è andata?", keys: ["Sardegna"] },
+                    { q: "A che ora era il volo?", keys: ["7:40", "sette e quaranta"] },
+                    { q: "Quanto pesava la valigia?", keys: ["15", "quindici"] },
+                    { q: "Qual è il nome dell'hotel?", keys: ["Miramare"] }
+                ]
+            }
+        ];
+
+        const intruderPairs = [
+            { b: '8', i: 'B' }, { b: 'l', i: '1' }, { b: 'C', i: 'G' }, 
+            { b: '3', i: 'E' }, { b: 'O', i: 'D' }, { b: 'X', i: 'K' },
+            { b: '♣', i: '♠' }, { b: '★', i: '☆' }, { b: '🚗', i: '🚑' },
+            { b: '🍇', i: '🫐' }, { b: '⚓', i: '⛵' }, { b: '☁️', i: '⛅' }
+        ];
+
+        const drawingVariants = [
+            {
+                instructions: "Disegna un rettangolo e dividilo in tre parti uguali con due linee verticali.",
+                svg: '<svg viewBox="0 0 100 100" class="w-full h-full stroke-indigo-400 fill-none" stroke-width="2"><rect x="15" y="30" width="70" height="40"/><line x1="38" y1="30" x2="38" y2="70"/><line x1="62" y1="30" x2="62" y2="70"/></svg>'
+            },
+            {
+                instructions: "Disegna una grande lettera L e un piccolo cerchio che tocca l'angolo interno.",
+                svg: '<svg viewBox="0 0 100 100" class="w-full h-full stroke-indigo-400 fill-none" stroke-width="2"><path d="M30 20 L30 80 L70 80"/><circle cx="40" cy="70" r="5"/></svg>'
+            }
+        ];
+
+        let stats = {
+            intrusoTimes: [],
+            initialCorrectAnswers: null,
+            finalCorrectAnswers: null,
+            totalQuestions: 0,
+            startTime: null,
+            timesReread: 0,
+            correctionsAttempted: false
+        };
+
+        let selectedStory, timerInterval, currentIntrusoLevel = 0, activeIntrusoSet = [], levelStartTime;
+        let isCorrectList = []; // Tiene traccia di quali domande sono giuste
+
+        function setupAndStart() {
+            stats.startTime = Date.now();
+            selectedStory = stories[Math.floor(Math.random() * stories.length)];
+            activeIntrusoSet = [...intruderPairs].sort(() => Math.random() - 0.5).slice(0, 4);
+            const selectedDrawing = drawingVariants[Math.floor(Math.random() * drawingVariants.length)];
+            
+            document.getElementById('reading-text').innerText = selectedStory.text;
+            document.getElementById('correction-reading-text').innerText = selectedStory.text;
+            document.getElementById('drawing-instructions').innerHTML = selectedDrawing.instructions;
+            document.getElementById('target-figure-preview').innerHTML = selectedDrawing.svg;
+            
+            const quizContainer = document.getElementById('quiz-container');
+            quizContainer.innerHTML = '';
+            stats.totalQuestions = selectedStory.questions.length;
+            
+            isCorrectList = Array(stats.totalQuestions).fill(false);
+
+            selectedStory.questions.forEach((qObj, i) => {
+                const div = document.createElement('div');
+                div.className = "space-y-1";
+                div.id = `quiz-group-${i}`;
+                div.innerHTML = `<label class="text-sm font-bold text-slate-600">${qObj.q}</label>
+                                 <input type="text" id="ans-${i}" autocomplete="off" class="w-full bg-white border border-slate-200 p-3 rounded-xl outline-none focus:ring-2 focus:ring-indigo-400 transition">`;
+                quizContainer.appendChild(div);
+            });
+
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('step-1').classList.remove('hidden');
+            startTimer(50, () => nextStep(2));
+        }
+
+        function startTimer(seconds, callback) {
+            const display = document.getElementById('timer-display');
+            display.classList.remove('hidden');
+            let timeLeft = seconds;
+            const update = () => {
+                const m = Math.floor(timeLeft / 60);
+                const s = timeLeft % 60;
+                display.innerText = `${m}:${s.toString().padStart(2, '0')}`;
+            };
+            update();
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                update();
+                if (timeLeft <= 0) { clearInterval(timerInterval); callback(); }
+            }, 1000);
+        }
+
+        function nextStep(step) {
+            clearInterval(timerInterval);
+            document.getElementById('timer-display').classList.add('hidden');
+            for (let i = 1; i <= 4; i++) {
+                document.getElementById(`step-${i}`).classList.add('hidden');
+                document.getElementById(`dot-${i}`).className = "step-indicator inactive-step";
+            }
+            document.getElementById('step-correction-reading').classList.add('hidden');
+            document.getElementById(`step-${step}`).classList.remove('hidden');
+            document.getElementById(`dot-${step}`).className = "step-indicator active-step";
+
+            if (step === 2) {
+                currentIntrusoLevel = 0;
+                levelStartTime = Date.now();
+                renderIntruso();
+            }
+            if (step === 3) initCanvas();
+        }
+
+        function renderIntruso() {
+            const container = document.getElementById('symbol-grid-container');
+            if (currentIntrusoLevel >= activeIntrusoSet.length) { 
+                nextStep(3); 
+                return; 
+            }
+            
+            const set = activeIntrusoSet[currentIntrusoLevel];
+            document.getElementById('intruso-counter').innerText = `Livello ${currentIntrusoLevel + 1}/${activeIntrusoSet.length}`;
+            
+            let syms = Array(59).fill(set.b);
+            syms.push(set.i);
+            syms.sort(() => Math.random() - 0.5);
+
+            container.innerHTML = '';
+            syms.forEach(s => {
+                const d = document.createElement('div');
+                d.className = 'symbol';
+                d.innerText = s;
+                d.onclick = () => { 
+                    if(s === set.i) { 
+                        const timeTaken = (Date.now() - levelStartTime) / 1000;
+                        stats.intrusoTimes.push(timeTaken);
+                        d.style.background = "#22c55e";
+                        d.style.color = "white";
+                        setTimeout(() => {
+                            currentIntrusoLevel++; 
+                            levelStartTime = Date.now();
+                            renderIntruso(); 
+                        }, 200);
+                    } else {
+                        d.style.background = "rgba(239, 68, 68, 0.2)";
+                        setTimeout(() => d.style.background = "transparent", 300);
+                    }
+                };
+                container.appendChild(d);
+            });
+        }
+
+        function checkAnswers() {
+            const feedbackList = document.getElementById('feedback-list');
+            feedbackList.innerHTML = '';
+            let currentCorrect = 0;
+            
+            selectedStory.questions.forEach((qObj, i) => {
+                // Controlla solo se non era già stata segnata corretta in precedenza
+                const userAns = document.getElementById(`ans-${i}`).value.toLowerCase().trim();
+                const isCorrect = qObj.keys.some(k => userAns.includes(k.toLowerCase()));
+                
+                isCorrectList[i] = isCorrectList[i] || isCorrect; // Se era già corretta, resta corretta
+                
+                if (isCorrectList[i]) {
+                    currentCorrect++;
+                }
+                
+                const p = document.createElement('div');
+                p.className = "p-3 rounded-xl border flex items-center justify-between " + (isCorrectList[i] ? "bg-green-50 border-green-200" : "bg-red-50 border-red-200");
+                p.innerHTML = `<span class="font-medium text-slate-700">${qObj.q}</span>
+                               <span class="font-bold ${isCorrectList[i] ? 'text-green-600' : 'text-red-600'}">${isCorrectList[i] ? '✓ Risposta Corretta' : '✗ Risposta Incompleta o Errata'}</span>`;
+                feedbackList.appendChild(p);
+            });
+
+            // Salviamo i dati per le statistiche finali
+            if (!stats.correctionsAttempted) {
+                // Primo tentativo di rievocazione in assoluto
+                stats.initialCorrectAnswers = currentCorrect;
+            }
+            stats.finalCorrectAnswers = currentCorrect;
+
+            document.getElementById('submit-quiz-btn').classList.add('hidden');
+            document.getElementById('feedback-area').classList.remove('hidden');
+
+            // Se ci sono errori, mostra l'opzione di tornare a leggere
+            if (currentCorrect < stats.totalQuestions) {
+                document.getElementById('btn-re-read').classList.remove('hidden');
+            } else {
+                document.getElementById('btn-re-read').classList.add('hidden');
+            }
+        }
+
+        function startCorrectionReading() {
+            stats.timesReread++;
+            stats.correctionsAttempted = true;
+            
+            // Nascondiamo il quiz e mostriamo la schermata di supporto rilettura
+            document.getElementById('step-4').classList.add('hidden');
+            document.getElementById('step-correction-reading').classList.remove('hidden');
+        }
+
+        function returnToCorrectionQuiz() {
+            document.getElementById('step-correction-reading').classList.add('hidden');
+            document.getElementById('step-4').classList.remove('hidden');
+            
+            document.getElementById('correction-badge').classList.remove('hidden');
+            document.getElementById('quiz-title').innerText = "Correggi le Risposte Errate";
+
+            // Imposta gli input: blocca quelli corretti, evidenzia quelli da correggere
+            selectedStory.questions.forEach((qObj, i) => {
+                const inputElement = document.getElementById(`ans-${i}`);
+                if (isCorrectList[i]) {
+                    inputElement.disabled = true;
+                    inputElement.className = "w-full bg-green-50 border border-green-300 p-3 rounded-xl outline-none text-green-700 font-medium";
+                } else {
+                    inputElement.disabled = false;
+                    inputElement.className = "w-full bg-white border-2 border-red-300 p-3 rounded-xl outline-none focus:ring-2 focus:ring-indigo-400 transition";
+                    // Non cancelliamo l'input precedente in modo che il paziente possa riflettere sull'errore
+                }
+            });
+
+            // Ripristina lo stato del pulsante di invio
+            document.getElementById('submit-quiz-btn').innerText = "Verifica Correzioni";
+            document.getElementById('submit-quiz-btn').classList.remove('hidden');
+            document.getElementById('feedback-area').classList.add('hidden');
+        }
+
+        function goToStats() {
+            document.getElementById('step-4').classList.add('hidden');
+            document.getElementById('stats-screen').classList.remove('hidden');
+            document.getElementById('progress-bar').style.display = 'none';
+
+            // 1. Calcolo Attenzione
+            const avgTime = stats.intrusoTimes.length > 0 
+                ? (stats.intrusoTimes.reduce((a,b) => a+b, 0) / stats.intrusoTimes.length).toFixed(1) 
+                : 0;
+            document.getElementById('stat-attention').innerText = `${avgTime}s`;
+
+            // 2. Calcolo Memoria Iniziale
+            const initialMemoryPerc = Math.round((stats.initialCorrectAnswers / stats.totalQuestions) * 100);
+            document.getElementById('stat-initial-memory').innerText = `${initialMemoryPerc}% (${stats.initialCorrectAnswers}/${stats.totalQuestions})`;
+
+            // 3. Calcolo Memoria Finale con eventuale correzione
+            const finalMemoryPerc = Math.round((stats.finalCorrectAnswers / stats.totalQuestions) * 100);
+            const cardFinalMemory = document.getElementById('card-final-memory');
+            const statFinalMemory = document.getElementById('stat-final-memory');
+            const statRereadInfo = document.getElementById('stat-reread-info');
+
+            if (stats.correctionsAttempted) {
+                cardFinalMemory.classList.remove('hidden');
+                statFinalMemory.innerText = `${finalMemoryPerc}% (${stats.finalCorrectAnswers}/${stats.totalQuestions})`;
+                statRereadInfo.innerText = `Riletture effettuate: ${stats.timesReread}`;
+            } else {
+                statFinalMemory.innerText = "Non Necessaria";
+                statRereadInfo.innerText = "Tutto corretto al primo colpo!";
+            }
+
+            // 4. Valutazione Clinica Globale
+            let evaluation = "";
+            if (initialMemoryPerc === 100) {
+                evaluation = "Prestazione eccezionale! Memoria a lungo termine intatta e assenza di fallimenti di codifica. Massima focalizzazione.";
+            } else if (finalMemoryPerc === 100 && stats.correctionsAttempted) {
+                evaluation = "Ottima flessibilità cognitiva e capacità di monitoraggio. Il paziente ha sfruttato la rilettura per auto-correggersi efficacemente.";
+            } else if (finalMemoryPerc > initialMemoryPerc) {
+                evaluation = "Il paziente dimostra capacità di apprendimento e miglioramento dopo feedback, anche se alcune informazioni rimangono difficili da rievocare.";
+            } else {
+                evaluation = "Sessione completata. Si raccomanda di continuare l'allenamento per supportare la codifica e il recupero mnestico.";
+            }
+            document.getElementById('global-eval').innerText = evaluation;
+        }
+
+        let canvas, ctx, drawing = false;
+        function initCanvas() {
+            canvas = document.getElementById('drawing-canvas');
+            ctx = canvas.getContext('2d');
+            ctx.lineWidth = 4; ctx.lineCap = 'round'; ctx.strokeStyle = '#6366f1';
+            const start = (e) => { drawing = true; draw(e); };
+            const stop = () => { drawing = false; ctx.beginPath(); };
+            const draw = (e) => {
+                if (!drawing) return;
+                const rect = canvas.getBoundingClientRect();
+                const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+                const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
+                ctx.lineTo(x, y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(x, y);
+            };
+            canvas.onmousedown = start; canvas.onmousemove = draw; window.onmouseup = stop;
+            canvas.ontouchstart = (e) => { e.preventDefault(); start(e); };
+            canvas.ontouchmove = (e) => { e.preventDefault(); draw(e); };
+            canvas.ontouchend = stop;
+        }
+
+        function clearCanvas() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
+        function recordAndNext(step) { nextStep(step); }
+    </script>
+</body>
+</html>

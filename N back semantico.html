@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>N-back Semantico & Classico - Report</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; overflow-x: hidden; }
+        
+        .word-container { perspective: 1000px; }
+        #current-word { transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+
+        .btn-active {
+            background-color: #4f46e5 !important;
+            color: white !important;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+        }
+
+        @keyframes pulse-success {
+            0% { transform: scale(1); filter: drop-shadow(0 0 0 rgba(16, 185, 129, 0)); }
+            50% { transform: scale(1.1); filter: drop-shadow(0 0 15px rgba(16, 185, 129, 0.6)); color: #10b981; }
+            100% { transform: scale(1); filter: drop-shadow(0 0 0 rgba(16, 185, 129, 0)); }
+        }
+        @keyframes shake-error {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); color: #ef4444; }
+            75% { transform: translateX(10px); color: #ef4444; }
+        }
+        .correct-anim { animation: pulse-success 0.5s ease-out; }
+        .error-anim { animation: shake-error 0.4s ease-in-out; }
+
+        .progress-bar { transition: width 0.5s ease-out; }
+        
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-4">
+
+    <div id="start-menu" class="w-full max-w-md bg-white rounded-3xl shadow-2xl p-10 space-y-6">
+        <div class="text-center space-y-2">
+            <div class="inline-block p-3 bg-indigo-100 rounded-2xl mb-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                </svg>
+            </div>
+            <h1 class="text-4xl font-extrabold text-slate-800 tracking-tight">N-back Trainer</h1>
+            <p class="text-slate-500 font-medium italic">Sfidando la tua memoria di lavoro</p>
+        </div>
+
+        <div class="space-y-5">
+            <div class="space-y-2">
+                <label class="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Regola di Match</label>
+                <div class="grid grid-cols-2 gap-3">
+                    <button onclick="setMode('semantic')" id="mode-semantic" class="mode-btn py-3 bg-slate-100 text-slate-600 rounded-2xl font-bold hover:bg-slate-200 transition-all border-2 border-transparent">Semantico</button>
+                    <button onclick="setMode('classic')" id="mode-classic" class="mode-btn py-3 bg-slate-100 text-slate-600 rounded-2xl font-bold hover:bg-slate-200 transition-all border-2 border-transparent">Classico</button>
+                </div>
+                <p id="mode-description" class="text-[10px] text-slate-400 text-center uppercase font-medium mt-1"></p>
+            </div>
+
+            <div class="space-y-2">
+                <label class="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Difficoltà</label>
+                <div class="grid grid-cols-2 gap-3">
+                    <button onclick="setDifficulty(1)" id="btn-1back" class="difficulty-btn py-3 bg-slate-100 text-slate-600 rounded-2xl font-bold hover:bg-slate-200 transition-all border-2 border-transparent">1-Back</button>
+                    <button onclick="setDifficulty(2)" id="btn-2back" class="difficulty-btn py-3 bg-slate-100 text-slate-600 rounded-2xl font-bold hover:bg-slate-200 transition-all border-2 border-transparent">2-Back</button>
+                </div>
+            </div>
+
+            <div class="space-y-2">
+                <label class="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Stimoli Totali</label>
+                <div class="grid grid-cols-3 gap-3">
+                    <button onclick="setDuration(20)" id="dur-20" class="duration-btn py-3 bg-slate-100 text-slate-600 rounded-2xl font-bold hover:bg-slate-200 transition-all border-2 border-transparent">20</button>
+                    <button onclick="setDuration(40)" id="dur-40" class="duration-btn py-3 bg-slate-100 text-slate-600 rounded-2xl font-bold hover:bg-slate-200 transition-all border-2 border-transparent">40</button>
+                    <button onclick="setDuration(60)" id="dur-60" class="duration-btn py-3 bg-slate-100 text-slate-600 rounded-2xl font-bold hover:bg-slate-200 transition-all border-2 border-transparent">60</button>
+                </div>
+            </div>
+
+            <div class="flex items-center space-x-3 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                <input type="checkbox" id="tts-toggle" checked class="w-5 h-5 text-indigo-600 rounded border-slate-300 cursor-pointer">
+                <label for="tts-toggle" class="text-sm font-semibold text-slate-600 cursor-pointer">Sintesi Vocale</label>
+            </div>
+        </div>
+
+        <button onclick="startGame()" class="w-full bg-indigo-600 text-white py-5 rounded-2xl font-black text-xl hover:bg-indigo-700 transition-all shadow-xl active:scale-95">
+            INIZIA ORA
+        </button>
+    </div>
+
+    <div id="game-screen" class="hidden w-full max-w-xl bg-white rounded-3xl shadow-2xl p-10 space-y-10 text-center relative overflow-hidden">
+        <div class="absolute top-0 left-0 w-full h-2 bg-slate-100">
+            <div id="game-progress" class="progress-bar h-full bg-indigo-500 w-0"></div>
+        </div>
+
+        <div class="flex justify-between items-center">
+            <button onclick="goBackToMenu()" class="text-slate-400 hover:text-red-500 flex items-center space-x-1 transition-colors group">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 group-hover:-translate-x-1 transition-transform" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+                </svg>
+                <span class="text-xs font-bold uppercase tracking-widest">Abbandona</span>
+            </button>
+            <div class="flex flex-col items-end">
+                <div class="bg-indigo-50 px-4 py-1 rounded-full mb-1">
+                    <span id="back-info-text" class="text-indigo-600 font-bold text-[10px] uppercase tracking-tighter"></span>
+                </div>
+                <div id="progress-text" class="font-mono text-slate-400 font-bold tracking-widest text-[10px]">01 / 20</div>
+            </div>
+        </div>
+
+        <div class="word-container py-12">
+            <h2 id="current-word" class="text-6xl font-black text-slate-800 tracking-tight opacity-0">---</h2>
+        </div>
+
+        <div class="space-y-6">
+            <button id="match-btn" class="w-full bg-slate-800 text-white py-8 rounded-3xl font-black text-3xl shadow-2xl hover:bg-slate-900 transition-all active:scale-95 disabled:bg-slate-200 disabled:text-slate-400">
+                MATCH
+                <span class="block text-xs font-normal opacity-50 mt-1 uppercase tracking-widest">[Barra Spaziatrice]</span>
+            </button>
+            <p class="text-sm text-slate-400 font-medium uppercase tracking-tighter">Match se: <span id="hint-text" class="text-slate-600 font-bold italic">...</span></p>
+        </div>
+    </div>
+
+    <div id="result-screen" class="hidden w-full max-w-4xl bg-white rounded-3xl shadow-2xl p-8 space-y-6 overflow-y-auto max-h-[90vh] custom-scrollbar">
+        <div class="text-center">
+            <span id="performance-badge" class="px-3 py-1 bg-indigo-100 text-indigo-700 text-[10px] font-black uppercase rounded-full tracking-widest mb-2 inline-block">Sessione Completata</span>
+            <h2 class="text-4xl font-black text-slate-800">Report Sessione</h2>
+            <p id="result-mode-tag" class="text-slate-400 font-bold uppercase text-xs tracking-widest mt-1"></p>
+        </div>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Grafico -->
+            <div class="bg-slate-50 p-6 rounded-3xl border border-slate-100 flex flex-col items-center justify-center">
+                <div class="h-48 w-48 relative">
+                    <canvas id="resultsChart"></canvas>
+                </div>
+                <div class="mt-4 text-center">
+                    <p class="text-indigo-700 font-bold text-[10px] uppercase tracking-widest">Precisione Totale</p>
+                    <p id="stat-accuracy" class="text-4xl font-black text-indigo-800">0%</p>
+                </div>
+            </div>
+            
+            <!-- Statistiche Numeriche -->
+            <div class="lg:col-span-2 grid grid-cols-2 gap-4">
+                <div class="p-5 bg-emerald-50 rounded-2xl border border-emerald-100">
+                    <p class="text-emerald-700 font-bold uppercase text-[10px]">Hit (Corretti)</p>
+                    <p id="stat-hits" class="text-3xl font-black text-emerald-800">0</p>
+                </div>
+                <div class="p-5 bg-red-50 rounded-2xl border border-red-100">
+                    <p class="text-red-700 font-bold uppercase text-[10px]">False Alarms</p>
+                    <p id="stat-falses" class="text-3xl font-black text-red-800">0</p>
+                </div>
+                <div class="p-5 bg-amber-50 rounded-2xl border border-amber-100">
+                    <p class="text-amber-700 font-bold uppercase text-[10px]">Omissioni</p>
+                    <p id="stat-omissions" class="text-3xl font-black text-amber-800">0</p>
+                </div>
+                <div class="p-5 bg-indigo-50 rounded-2xl border border-indigo-100">
+                    <p class="text-indigo-700 font-bold uppercase text-[10px]">Tempo Reazione (Medio)</p>
+                    <p id="stat-rt" class="text-3xl font-black text-indigo-800">0 ms</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cronologia Sessione -->
+        <div class="space-y-3">
+            <h3 class="text-sm font-black text-slate-800 uppercase tracking-widest ml-1">Cronologia Stimoli</h3>
+            <div id="trial-history" class="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-10 gap-2 overflow-y-auto max-h-40 p-2 bg-slate-50 rounded-2xl border border-slate-100 custom-scrollbar">
+                <!-- Generato via JS -->
+            </div>
+        </div>
+
+        <button onclick="goBackToMenu()" class="w-full bg-slate-800 text-white py-5 rounded-2xl font-bold hover:bg-slate-900 transition-all text-xl shadow-lg active:scale-95">
+            RITORNA AL MENU
+        </button>
+    </div>
+
+    <script>
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playTone(freq, type, duration) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.start(); osc.stop(audioCtx.currentTime + duration);
+        }
+
+        const database = {
+            'Trasporti': ['Auto', 'Treno', 'Aereo', 'Bici', 'Bus', 'Nave', 'Moto', 'Tram'],
+            'Professioni': ['Medico', 'Cuoco', 'Pilota', 'Pittore', 'Sarto', 'Attore', 'Docente'],
+            'Cibi': ['Pizza', 'Pasta', 'Mela', 'Pane', 'Carne', 'Pesce', 'Torta', 'Frutta'],
+            'Indumenti': ['Camicia', 'Scarpe', 'Gonna', 'Calze', 'Guanti', 'Giacca', 'Cappotto', 'Sciarpa']
+        };
+
+        let nBack = 2;
+        let totalStimuli = 20;
+        let gameMode = 'semantic';
+        let sequence = [];
+        let currentIndex = 0;
+        let userResponses = []; 
+        let reactionTimes = [];
+        let lastStimulusTime = 0;
+        let timer = null;
+        let canClick = false;
+        let gameActive = false;
+        let chartInstance = null;
+
+        function setMode(m) {
+            gameMode = m;
+            document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('btn-active'));
+            document.getElementById(`mode-${m}`).classList.add('btn-active');
+            const desc = m === 'semantic' ? "Stessa categoria (es. Auto -> Treno)" : "Stessa parola (es. Auto -> Auto)";
+            document.getElementById('mode-description').innerText = desc;
+        }
+
+        function setDifficulty(n) {
+            nBack = n;
+            document.querySelectorAll('.difficulty-btn').forEach(btn => btn.classList.remove('btn-active'));
+            document.getElementById(`btn-${n}back`).classList.add('btn-active');
+        }
+
+        function setDuration(d) {
+            totalStimuli = d;
+            document.querySelectorAll('.duration-btn').forEach(btn => btn.classList.remove('btn-active'));
+            document.getElementById(`dur-${d}`).classList.add('btn-active');
+        }
+
+        function goBackToMenu() {
+            gameActive = false;
+            clearTimeout(timer);
+            window.speechSynthesis.cancel();
+            document.getElementById('game-screen').classList.add('hidden');
+            document.getElementById('result-screen').classList.add('hidden');
+            document.getElementById('start-menu').classList.remove('hidden');
+        }
+
+        function generateSequence() {
+            sequence = [];
+            const cats = Object.keys(database);
+            for (let i = 0; i < totalStimuli; i++) {
+                let cat, word;
+                const isTarget = (i >= nBack && Math.random() < 0.35);
+                if (isTarget) {
+                    cat = sequence[i - nBack].category;
+                    if (gameMode === 'semantic') {
+                        const wordsInCat = database[cat];
+                        word = wordsInCat[Math.floor(Math.random() * wordsInCat.length)];
+                    } else {
+                        word = sequence[i - nBack].word;
+                    }
+                } else {
+                    cat = cats[Math.floor(Math.random() * cats.length)];
+                    word = database[cat][Math.floor(Math.random() * database[cat].length)];
+                    if (i >= nBack && gameMode === 'classic' && word === sequence[i-nBack].word) {
+                        const otherWords = database[cat].filter(w => w !== word);
+                        word = otherWords.length > 0 ? otherWords[0] : word;
+                    }
+                }
+                sequence.push({ word, category: cat });
+            }
+        }
+
+        function checkMatch(idx) {
+            if (idx < nBack) return false;
+            if (gameMode === 'semantic') return sequence[idx].category === sequence[idx - nBack].category;
+            return sequence[idx].word === sequence[idx - nBack].word;
+        }
+
+        function startGame() {
+            gameActive = true;
+            currentIndex = 0;
+            userResponses = new Array(totalStimuli).fill(null); 
+            reactionTimes = new Array(totalStimuli).fill(0);
+            generateSequence();
+            
+            document.getElementById('start-menu').classList.add('hidden');
+            document.getElementById('game-screen').classList.remove('hidden');
+            
+            const modeLabel = gameMode === 'semantic' ? 'SEMANTICO' : 'CLASSICO';
+            document.getElementById('back-info-text').innerText = `${nBack}-BACK | ${modeLabel}`;
+            
+            const hintPrefix = gameMode === 'semantic' ? 'Categoria uguale a' : 'Parola uguale a';
+            const hintPos = nBack === 1 ? 'quella precedente' : `${nBack} posizioni fa`;
+            document.getElementById('hint-text').innerText = `${hintPrefix} ${hintPos}`;
+            
+            showNextWord();
+        }
+
+        function showNextWord() {
+            if (!gameActive) return;
+            if (currentIndex >= totalStimuli) {
+                endGame();
+                return;
+            }
+
+            const wordEl = document.getElementById('current-word');
+            const btn = document.getElementById('match-btn');
+            
+            wordEl.className = "text-6xl font-black text-slate-800 tracking-tight opacity-0 scale-90";
+            btn.disabled = false;
+            btn.classList.replace('bg-indigo-600', 'bg-slate-800');
+            
+            document.getElementById('progress-text').innerText = `${String(currentIndex + 1).padStart(2, '0')} / ${totalStimuli}`;
+            document.getElementById('game-progress').style.width = `${((currentIndex + 1) / totalStimuli) * 100}%`;
+
+            setTimeout(() => {
+                wordEl.innerText = sequence[currentIndex].word;
+                wordEl.classList.remove('opacity-0', 'scale-90');
+                lastStimulusTime = Date.now();
+                if(document.getElementById('tts-toggle').checked) {
+                    const u = new SpeechSynthesisUtterance(sequence[currentIndex].word);
+                    u.lang = 'it-IT';
+                    window.speechSynthesis.speak(u);
+                }
+                canClick = true;
+            }, 100);
+
+            timer = setTimeout(() => {
+                wordEl.classList.add('opacity-0');
+                canClick = false;
+                if (userResponses[currentIndex] === null) userResponses[currentIndex] = false;
+                currentIndex++;
+                setTimeout(showNextWord, 400);
+            }, 2600);
+        }
+
+        function handleMatchAction() {
+            if (!canClick || userResponses[currentIndex] !== null || !gameActive) return;
+            
+            const rt = Date.now() - lastStimulusTime;
+            reactionTimes[currentIndex] = rt;
+            userResponses[currentIndex] = true;
+            
+            const isCorrect = checkMatch(currentIndex);
+            const wordEl = document.getElementById('current-word');
+
+            if (isCorrect) {
+                wordEl.classList.add('correct-anim');
+                playTone(600, 'sine', 0.2);
+            } else {
+                wordEl.classList.add('error-anim');
+                playTone(200, 'square', 0.2);
+            }
+
+            const btn = document.getElementById('match-btn');
+            btn.disabled = true;
+            btn.classList.replace('bg-slate-800', 'bg-indigo-600');
+        }
+
+        document.getElementById('match-btn').addEventListener('click', handleMatchAction);
+        window.addEventListener('keydown', (e) => { if (e.code === 'Space') { e.preventDefault(); handleMatchAction(); } });
+
+        function endGame() {
+            gameActive = false;
+            document.getElementById('game-screen').classList.add('hidden');
+            document.getElementById('result-screen').classList.remove('hidden');
+            
+            let hits = 0, falses = 0, omissions = 0, totalTargets = 0;
+            let sumRT = 0;
+            let hitCountRT = 0;
+
+            const historyContainer = document.getElementById('trial-history');
+            historyContainer.innerHTML = '';
+
+            for (let i = 0; i < totalStimuli; i++) {
+                const isTarget = checkMatch(i);
+                const userClick = userResponses[i];
+                let status = 'neutral'; // base for n-back < n
+
+                if (isTarget) {
+                    totalTargets++;
+                    if (userClick) {
+                        hits++;
+                        status = 'hit';
+                        sumRT += reactionTimes[i];
+                        hitCountRT++;
+                    } else {
+                        omissions++;
+                        status = 'miss';
+                    }
+                } else {
+                    if (userClick) {
+                        falses++;
+                        status = 'false';
+                    } else if (i >= nBack) {
+                        status = 'correct-rejection';
+                    }
+                }
+
+                // Aggiungi elemento alla cronologia
+                const dot = document.createElement('div');
+                dot.className = `flex flex-col items-center p-2 rounded-xl text-[9px] font-bold border ${getStatusClass(status)}`;
+                dot.innerHTML = `<span>${i+1}</span><span class="opacity-70">${sequence[i].word.substring(0,3)}</span>`;
+                dot.title = `Parola: ${sequence[i].word} | Categoria: ${sequence[i].category}`;
+                historyContainer.appendChild(dot);
+            }
+
+            const accuracy = totalTargets > 0 ? Math.round((hits / totalTargets) * 100) : 100;
+            const avgRT = hitCountRT > 0 ? Math.round(sumRT / hitCountRT) : 0;
+
+            document.getElementById('stat-hits').innerText = hits;
+            document.getElementById('stat-falses').innerText = falses;
+            document.getElementById('stat-omissions').innerText = omissions;
+            document.getElementById('stat-accuracy').innerText = `${accuracy}%`;
+            document.getElementById('stat-rt').innerText = `${avgRT} ms`;
+            document.getElementById('result-mode-tag').innerText = `${gameMode.toUpperCase()} (${nBack}-BACK)`;
+            
+            const badge = document.getElementById('performance-badge');
+            if (accuracy === 100) { badge.innerText = "Mente Geniale"; badge.className = "px-3 py-1 bg-yellow-100 text-yellow-700 text-[10px] font-black uppercase rounded-full tracking-widest mb-2 inline-block"; }
+            else if (accuracy >= 80) { badge.innerText = "Ottima Performance"; badge.className = "px-3 py-1 bg-emerald-100 text-emerald-700 text-[10px] font-black uppercase rounded-full tracking-widest mb-2 inline-block"; }
+            else { badge.innerText = "Sessione Completata"; badge.className = "px-3 py-1 bg-indigo-100 text-indigo-700 text-[10px] font-black uppercase rounded-full tracking-widest mb-2 inline-block"; }
+
+            renderChart(hits, falses, omissions);
+        }
+
+        function getStatusClass(s) {
+            switch(s) {
+                case 'hit': return 'bg-emerald-500 border-emerald-600 text-white';
+                case 'miss': return 'bg-amber-100 border-amber-300 text-amber-700';
+                case 'false': return 'bg-red-500 border-red-600 text-white';
+                case 'correct-rejection': return 'bg-slate-100 border-slate-200 text-slate-400';
+                default: return 'bg-white border-slate-100 text-slate-300';
+            }
+        }
+
+        function renderChart(hits, falses, omissions) {
+            const ctx = document.getElementById('resultsChart').getContext('2d');
+            if(chartInstance) chartInstance.destroy();
+            chartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Hit', 'False Alarm', 'Miss'],
+                    datasets: [{
+                        data: [hits, falses, omissions],
+                        backgroundColor: ['#10b981', '#ef4444', '#f59e0b'],
+                        borderWidth: 0,
+                        hoverOffset: 10
+                    }]
+                },
+                options: { 
+                    cutout: '75%', 
+                    plugins: { 
+                        legend: { display: false } 
+                    },
+                    animation: {
+                        animateScale: true,
+                        animateRotate: true
+                    }
+                }
+            });
+        }
+
+        window.onload = () => { 
+            setMode('semantic');
+            setDifficulty(2); 
+            setDuration(20); 
+        };
+    </script>
+</body>
+</html>

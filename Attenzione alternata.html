@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TMT-B Percorso Alternato</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+
+        :root {
+            --node-size: 74px;
+        }
+
+        body {
+            background-color: #ffffff;
+            color: #1e293b;
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+            margin: 0;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: none;
+        }
+
+        #game-canvas {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            background: #ffffff;
+            background-image: radial-gradient(#e2e8f0 1.5px, transparent 1.5px);
+            background-size: 50px 50px;
+        }
+
+        .node {
+            position: absolute;
+            width: var(--node-size);
+            height: var(--node-size);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: calc(var(--node-size) * 0.24);
+            cursor: pointer;
+            transition: transform 0.1s, background-color 0.3s, border-color 0.3s;
+            border: 4px solid rgba(0,0,0,0.1);
+            z-index: 20;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            color: white;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+            will-change: transform, left, top;
+        }
+
+        .node:active { transform: scale(0.9) !important; }
+
+        .node.correct {
+            background-color: #f1f5f9 !important;
+            border-color: #cbd5e1 !important;
+            box-shadow: none;
+            color: #94a3b8;
+            pointer-events: none;
+            text-shadow: none;
+            z-index: 10;
+        }
+
+        .node.error {
+            background-color: #ef4444 !important;
+            animation: shake 0.4s ease-in-out;
+        }
+
+        .line {
+            position: absolute;
+            height: 5px;
+            background: linear-gradient(90deg, #cbd5e1, #94a3b8);
+            border-radius: 10px;
+            transform-origin: left center;
+            z-index: 5;
+            pointer-events: none;
+            opacity: 0.8;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-6px); }
+            75% { transform: translateX(6px); }
+        }
+
+        .hint-pulse {
+            animation: pulse-hint 2s infinite;
+        }
+
+        @keyframes pulse-hint {
+            0% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.5); }
+            70% { box-shadow: 0 0 0 18px rgba(79, 70, 229, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0); }
+        }
+
+        .glass-ui {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .mode-card {
+            transition: all 0.2s ease;
+            border: 2px solid #f1f5f9;
+        }
+
+        .mode-card.active {
+            border-color: #4f46e5;
+            background-color: #f5f3ff;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 26px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #e2e8f0;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #4f46e5;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(24px);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Menu Iniziale -->
+    <div id="main-menu" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-50 overflow-y-auto">
+        <div class="bg-white max-w-4xl w-full p-6 md:p-8 rounded-[2.5rem] shadow-2xl my-auto border border-slate-100">
+            <div class="text-center mb-6 md:mb-8">
+                <h1 class="text-3xl md:text-4xl font-black text-slate-900 tracking-tight">Percorso Alternato</h1>
+                <p class="text-slate-500 mt-2 text-sm md:text-base">Allenamento cognitivo per l'attenzione divisa e flessibilità</p>
+            </div>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 mb-6 md:mb-8">
+                <div onclick="selectType('alpha')" id="type-alpha" class="mode-card active cursor-pointer p-4 rounded-2xl bg-white shadow-sm">
+                    <span class="text-[10px] font-bold text-indigo-600 uppercase">Classico</span>
+                    <p class="font-bold text-base md:text-lg">Numeri + Lettere</p>
+                    <p class="text-xs text-slate-400">1 - A - 2 - B...</p>
+                </div>
+                <div onclick="selectType('reverse')" id="type-reverse" class="mode-card cursor-pointer p-4 rounded-2xl bg-white shadow-sm">
+                    <span class="text-[10px] font-bold text-rose-600 uppercase">Inverso</span>
+                    <p class="font-bold text-base md:text-lg">Alfabeto Inv.</p>
+                    <p class="text-xs text-slate-400">1 - Z - 2 - Y...</p>
+                </div>
+                <div onclick="selectType('romans')" id="type-romans" class="mode-card cursor-pointer p-4 rounded-2xl bg-white shadow-sm">
+                    <span class="text-[10px] font-bold text-amber-600 uppercase">Storico</span>
+                    <p class="font-bold text-base md:text-lg">Num. Romani</p>
+                    <p class="text-xs text-slate-400">1 - I - 2 - II...</p>
+                </div>
+                <div onclick="selectType('months')" id="type-months" class="mode-card cursor-pointer p-4 rounded-2xl bg-white shadow-sm">
+                    <span class="text-[10px] font-bold text-emerald-600 uppercase">Temporale</span>
+                    <p class="font-bold text-base md:text-lg">Num. Mesi</p>
+                    <p class="text-xs text-slate-400">1 - Gen - 2 - Feb...</p>
+                </div>
+                <div onclick="selectType('days')" id="type-days" class="mode-card cursor-pointer p-4 rounded-2xl bg-white shadow-sm">
+                    <span class="text-[10px] font-bold text-sky-600 uppercase">Settimanale</span>
+                    <p class="font-bold text-base md:text-lg">Num. Giorni</p>
+                    <p class="text-xs text-slate-400">1 - Lun - 2 - Mar...</p>
+                </div>
+                <div onclick="selectType('compass')" id="type-compass" class="mode-card cursor-pointer p-4 rounded-2xl bg-white shadow-sm">
+                    <span class="text-[10px] font-bold text-purple-600 uppercase">Spaziale</span>
+                    <p class="font-bold text-base md:text-lg">Bussola</p>
+                    <p class="text-xs text-slate-400">1 - N - 2 - E...</p>
+                </div>
+            </div>
+
+            <div class="bg-slate-50 p-4 md:p-6 rounded-2xl border border-slate-200 mb-6 md:mb-8 flex items-center justify-between">
+                <div>
+                    <h3 class="font-bold text-slate-900 text-sm md:text-base">Suggerimento visivo</h3>
+                    <p class="text-xs md:text-sm text-slate-500">Evidenzia con un'animazione il prossimo cerchio da toccare</p>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="hint-toggle" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-3 md:gap-4">
+                <button onclick="startGame(false)" class="flex-1 py-4 md:py-5 bg-slate-900 text-white font-black rounded-2xl hover:bg-slate-800 transition-all shadow-lg text-sm md:text-base">
+                    MODALITÀ STATICA
+                </button>
+                <button onclick="startGame(true)" class="flex-1 py-4 md:py-5 bg-indigo-600 text-white font-black rounded-2xl hover:bg-indigo-500 transition-all shadow-xl shadow-indigo-100 text-sm md:text-base">
+                    MODALITÀ DINAMICA
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- HUD di gioco superiore -->
+    <div id="game-ui" class="fixed top-6 left-0 right-0 z-40 hidden flex justify-center items-center pointer-events-none">
+        <div class="flex gap-2 p-2 glass-ui rounded-3xl shadow-xl pointer-events-auto">
+            <!-- Pulsante Home -->
+            <button onclick="resetGame()" class="w-12 h-12 flex items-center justify-center bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-2xl transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                </svg>
+            </button>
+
+            <div class="px-6 py-2 flex flex-col items-center bg-white rounded-2xl border border-slate-100 min-w-[100px]">
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Tempo</span>
+                <span id="timer" class="text-xl font-black text-slate-900">0.00s</span>
+            </div>
+            
+            <div class="px-6 py-2 flex flex-col items-center bg-white rounded-2xl border border-slate-100 min-w-[100px]">
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Errori</span>
+                <span id="error-count" class="text-xl font-black text-rose-500">0</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Area dei nodi di gioco -->
+    <div id="game-canvas"></div>
+
+    <!-- Schermata di riepilogo finale -->
+    <div id="results-overlay" class="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm hidden">
+        <div class="bg-white max-w-sm w-full p-8 rounded-[2.5rem] shadow-2xl text-center">
+            <div class="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                </svg>
+            </div>
+            <h2 class="text-3xl font-black text-slate-900 mb-2">Test Completato!</h2>
+            <p class="text-slate-500 text-sm mb-6">Ottima prestazione cognitiva.</p>
+            
+            <div class="grid grid-cols-2 gap-4 my-6">
+                <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Tempo Finale</p>
+                    <p id="res-time" class="text-2xl font-black text-slate-900">--</p>
+                </div>
+                <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Errori Totali</p>
+                    <p id="res-errors" class="text-2xl font-black text-rose-500">--</p>
+                </div>
+            </div>
+            <button onclick="resetGame()" class="w-full py-5 bg-indigo-600 text-white font-bold rounded-2xl shadow-lg hover:bg-indigo-500 transition-all">
+                TORNA AL MENU
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('game-canvas');
+        const timerEl = document.getElementById('timer');
+        const errorEl = document.getElementById('error-count');
+        const mainMenu = document.getElementById('main-menu');
+        const gameUI = document.getElementById('game-ui');
+        const resultsOverlay = document.getElementById('results-overlay');
+
+        const DICTIONARIES = {
+            alpha: "ABCDEFGHIJKLM".split(""),
+            reverse: "ZYXWVUTSRQPON".split(""),
+            months: ["Gen", "Feb", "Mar", "Apr", "Mag", "Giu", "Lug", "Ago", "Set"],
+            days: ["Lun", "Mar", "Mer", "Gio", "Ven", "Sab", "Dom", "Lun", "Mar"],
+            romans: ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX"],
+            compass: ["N", "E", "S", "O", "NE", "SE", "SO", "NO", "N"]
+        };
+
+        const COLORS = ['#4f46e5', '#0ea5e9', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6', '#f43f5e', '#06b6d4', '#14b8a6', '#f97316'];
+
+        let state = {
+            currentType: 'alpha',
+            nodes: [],
+            currentIndex: 0,
+            startTime: null,
+            timerInterval: null,
+            errors: 0,
+            isMoving: false,
+            isPlaying: false,
+            animationId: null,
+            showHint: true
+        };
+
+        window.selectType = (type) => {
+            state.currentType = type;
+            document.querySelectorAll('.mode-card').forEach(el => el.classList.remove('active'));
+            document.getElementById(`type-${type}`).classList.add('active');
+        };
+
+        window.startGame = (moving) => {
+            state.isMoving = moving;
+            state.isPlaying = true;
+            state.showHint = document.getElementById('hint-toggle').checked;
+            state.currentIndex = 0;
+            state.errors = 0;
+            state.startTime = null;
+            state.nodes = [];
+            
+            clearInterval(state.timerInterval);
+            if (state.animationId) cancelAnimationFrame(state.animationId);
+
+            mainMenu.classList.add('hidden');
+            gameUI.classList.remove('hidden');
+            resultsOverlay.classList.add('hidden');
+            
+            errorEl.innerText = '0';
+            timerEl.innerText = '0.00s';
+            canvas.innerHTML = '';
+            
+            initNodes();
+            if (state.isMoving) updateNodesLoop();
+        };
+
+        function initNodes() {
+            const sequence = [];
+            const secondary = DICTIONARIES[state.currentType];
+            const length = secondary.length;
+
+            for (let i = 0; i < length; i++) {
+                sequence.push((i + 1).toString());
+                sequence.push(secondary[i]);
+            }
+
+            const w = window.innerWidth;
+            const h = window.innerHeight;
+
+            // Ridimensionamento adattivo dei nodi per schermi piccoli (mobile-friendly)
+            const minScreen = Math.min(w, h);
+            let size = 74;
+            if (minScreen < 600) {
+                size = 54;
+            } else if (minScreen < 900) {
+                size = 64;
+            }
+            document.documentElement.style.setProperty('--node-size', `${size}px`);
+
+            const radius = size / 2;
+            const pad = radius + 15; // padding dai bordi dinamico
+
+            // Calcolo larghezza/altezza HUD dinamica per evitare collisioni su ogni formato
+            const hudWidth = Math.min(320, w - 20);
+            const hudHeight = 110;
+
+            sequence.forEach((label, index) => {
+                let x, y, tooClose;
+                let attempts = 0;
+
+                do {
+                    tooClose = false;
+                    x = pad + Math.random() * (w - pad * 2);
+                    y = pad + Math.random() * (h - pad * 2);
+                    
+                    // Evita l'area occupata dal pannello di controllo superiore (HUD)
+                    if (y < hudHeight + radius && x > (w/2 - hudWidth/2 - radius) && x < (w/2 + hudWidth/2 + radius)) {
+                        tooClose = true;
+                    }
+
+                    // Evita la sovrapposizione tra cerchi usando la dimensione adattiva
+                    for (let n of state.nodes) {
+                        const d = Math.sqrt((x - n.x)**2 + (y - n.y)**2);
+                        if (d < (size * 1.45)) tooClose = true;
+                    }
+                    attempts++;
+                } while (tooClose && attempts < 400);
+
+                const el = document.createElement('div');
+                el.className = 'node';
+                if (index === 0 && state.showHint) el.classList.add('hint-pulse');
+                el.innerText = label;
+                el.style.backgroundColor = COLORS[index % COLORS.length];
+                el.style.left = `${x - radius}px`;
+                el.style.top = `${y - radius}px`;
+
+                const nodeData = {
+                    el, label, index, x, y,
+                    vx: (Math.random() - 0.5) * (state.isMoving ? 1.6 : 0),
+                    vy: (Math.random() - 0.5) * (state.isMoving ? 1.6 : 0)
+                };
+
+                el.addEventListener('pointerdown', (e) => {
+                    e.preventDefault();
+                    handleNodeClick(nodeData);
+                });
+                
+                canvas.appendChild(el);
+                state.nodes.push(nodeData);
+            });
+        }
+
+        function handleNodeClick(node) {
+            if (!state.isPlaying) return;
+
+            if (state.startTime === null) {
+                state.startTime = Date.now();
+                state.timerInterval = setInterval(updateTimer, 50);
+            }
+
+            if (node.index === state.currentIndex) {
+                node.el.classList.remove('hint-pulse', 'error');
+                node.el.classList.add('correct');
+                
+                if (state.currentIndex > 0) {
+                    drawConnection(state.nodes[state.currentIndex - 1], node);
+                }
+
+                state.currentIndex++;
+                
+                if (state.currentIndex === state.nodes.length) {
+                    endGame();
+                } else {
+                    if (state.showHint) {
+                        state.nodes[state.currentIndex].el.classList.add('hint-pulse');
+                    }
+                }
+            } else if (!node.el.classList.contains('correct')) {
+                triggerError(node.el);
+            }
+        }
+
+        function drawConnection(n1, n2) {
+            const line = document.createElement('div');
+            line.className = 'line';
+            updateLinePos(line, n1, n2);
+            canvas.appendChild(line);
+            n1.line = line;
+            n1.targetNode = n2;
+        }
+
+        function updateLinePos(line, n1, n2) {
+            const dx = n2.x - n1.x;
+            const dy = n2.y - n1.y;
+            const dist = Math.sqrt(dx*dx + dy*dy);
+            const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+            line.style.width = `${dist}px`;
+            line.style.left = `${n1.x}px`;
+            line.style.top = `${n1.y}px`;
+            line.style.transform = `rotate(${angle}deg)`;
+        }
+
+        function updateNodesLoop() {
+            if (!state.isPlaying || !state.isMoving || state.currentIndex === state.nodes.length) return;
+            
+            const w = window.innerWidth;
+            const h = window.innerHeight;
+
+            const sizeAttr = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--node-size')) || 74;
+            const radius = sizeAttr / 2;
+            const borderPad = radius + 8;
+
+            const hudWidth = Math.min(320, w - 20);
+            const hudHeight = 110;
+
+            state.nodes.forEach(n => {
+                if (n.el.classList.contains('correct')) return;
+
+                n.x += n.vx;
+                n.y += n.vy;
+
+                // Rimbalzo dai bordi della finestra con tolleranza raggio
+                if (n.x < borderPad || n.x > w - borderPad) {
+                    n.vx *= -1;
+                    n.x = Math.max(borderPad, Math.min(w - borderPad, n.x));
+                }
+                if (n.y < borderPad || n.y > h - borderPad) {
+                    n.vy *= -1;
+                    n.y = Math.max(borderPad, Math.min(h - borderPad, n.y));
+                }
+                
+                // Rimbalzo per non nascondere i nodi dietro la barra dell'HUD
+                if (n.y < hudHeight + radius && n.x > (w/2 - hudWidth/2 - radius) && n.x < (w/2 + hudWidth/2 + radius)) {
+                    n.vy = Math.abs(n.vy); // Spinge verso il basso
+                }
+
+                n.el.style.left = `${n.x - radius}px`;
+                n.el.style.top = `${n.y - radius}px`;
+
+                if (n.line) updateLinePos(n.line, n, n.targetNode);
+                const prev = state.nodes[n.index - 1];
+                if (prev && prev.line) updateLinePos(prev.line, prev, n);
+            });
+
+            state.animationId = requestAnimationFrame(updateNodesLoop);
+        }
+
+        function updateTimer() {
+            if (!state.isPlaying || !state.startTime) return;
+            const diff = (Date.now() - state.startTime) / 1000;
+            timerEl.innerText = diff.toFixed(2) + 's';
+        }
+
+        function triggerError(el) {
+            state.errors++;
+            errorEl.innerText = state.errors;
+            el.classList.add('error');
+            setTimeout(() => el.classList.remove('error'), 400);
+        }
+
+        function endGame() {
+            state.isPlaying = false;
+            clearInterval(state.timerInterval);
+            if (state.animationId) cancelAnimationFrame(state.animationId);
+            
+            document.getElementById('res-time').innerText = timerEl.innerText;
+            document.getElementById('res-errors').innerText = state.errors;
+            resultsOverlay.classList.remove('hidden');
+        }
+
+        window.resetGame = () => {
+            state.isPlaying = false;
+            clearInterval(state.timerInterval);
+            if (state.animationId) cancelAnimationFrame(state.animationId);
+            state.nodes = [];
+            canvas.innerHTML = '';
+            mainMenu.classList.remove('hidden');
+            gameUI.classList.add('hidden');
+            resultsOverlay.classList.add('hidden');
+        };
+
+        // Gestione del ridimensionamento schermo per mantenere giocabilità senza crash
+        window.addEventListener('resize', () => {
+            if (state.isPlaying) {
+                resetGame();
+            }
+        });
+    </script>
+</body>
+</html>

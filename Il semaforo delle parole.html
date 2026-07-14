@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="it" class="h-full bg-slate-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Il Semaforo delle Parole - Riabilitazione Cognitiva</title>
+    <!-- Tailwind CSS per uno stile moderno e reattivo -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Inter per la massima leggibilità clinica -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Effetto pulsazione per elementi attivi */
+        @keyframes pulse-ring {
+            0% { transform: scale(0.95); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.5; }
+            100% { transform: scale(0.95); opacity: 1; }
+        }
+        .pulse-active {
+            animation: pulse-ring 2s infinite ease-in-out;
+        }
+
+        /* Stili CSS specifici per la stampa del Report Clinico */
+        @media print {
+            body {
+                background: white !important;
+                color: black !important;
+            }
+            header, footer, button, #soundToggleBtn, .no-print, #screen-menu, #screen-playing, #screen-paused {
+                display: none !important;
+            }
+            main {
+                padding: 0 !important;
+                margin: 0 !important;
+                display: block !important;
+            }
+            #screen-results {
+                display: block !important;
+                border: none !important;
+                box-shadow: none !important;
+                padding: 0 !important;
+                max-width: 100% !important;
+                width: 100% !important;
+            }
+            .grid {
+                display: grid !important;
+            }
+            .bg-slate-50, .bg-emerald-50\/50, .bg-rose-50\/50 {
+                background-color: #f8fafc !important;
+                border: 1px solid #e2e8f0 !important;
+            }
+            .bg-gradient-to-br {
+                background: #0f766e !important;
+                color: white !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+        }
+    </style>
+</head>
+<body class="h-full flex flex-col justify-between text-slate-800">
+
+    <script>
+        // Data Set diviso per Livelli e Categorie
+        const DATASET = {
+            facile: {
+                categories: ["CIBI", "ANIMALI", "VESTITI", "VEICOLI"],
+                items: {
+                    "CIBI": {
+                        correct: ["Pizza", "Pasta", "Pane", "Gelato", "Formaggio", "Pollo", "Mela", "Banana", "Zuppa", "Biscotto"],
+                        incorrect: ["Elefante", "Leone", "Giraffa", "Camicia", "Scarpe", "Giacca", "Macchina", "Treno", "Aereo", "Sedia"]
+                    },
+                    "ANIMALI": {
+                        correct: ["Leone", "Tigre", "Elefante", "Gatto", "Cane", "Cavallo", "Uccello", "Scimmia", "Orso", "Coniglio"],
+                        incorrect: ["Pizza", "Pane", "Gelato", "Camicia", "Pantaloni", "Macchina", "Bicicletta", "Treno", "Tavolo", "Penna"]
+                    },
+                    "VESTITI": {
+                        correct: ["Camicia", "Gonna", "Pantaloni", "Scarpa", "Giacca", "Cappotto", "Calzini", "Guanti", "Cappello", "Cintura"],
+                        incorrect: ["Mela", "Pizza", "Pollo", "Leone", "Gatto", "Delfino", "Macchina", "Elicottero", "Barca", "Albero"]
+                    },
+                    "VEICOLI": {
+                        correct: ["Macchina", "Treno", "Aereo", "Camion", "Moto", "Bicicletta", "Autobus", "Barca", "Elicottero", "Trattore"],
+                        incorrect: ["Pasta", "Mela", "Gelato", "Cane", "Elefante", "Cavallo", "Camicia", "Giacca", "Scarpe", "Fiume"]
+                    }
+                }
+            },
+            medio: {
+                categories: ["FRUTTA", "MAMMIFERI", "VEICOLI STRADALI", "INDUMENTI INVERNALI"],
+                items: {
+                    "FRUTTA": {
+                        correct: ["Mela", "Banana", "Arancia", "Fragola", "Pesca", "Pera", "Ciliegia", "Kiwi", "Albicocca", "Uva"],
+                        incorrect: ["Pomodoro", "Melanzana", "Carota", "Zucca", "Cetriolo", "Patata", "Insalata", "Fungo", "Pane", "Uovo"]
+                    },
+                    "MAMMIFERI": {
+                        correct: ["Cane", "Gatto", "Balena", "Delfino", "Pipistrello", "Leone", "Cavallo", "Uomo", "Scimmia", "Elefante"],
+                        incorrect: ["Squalo", "Aquila", "Serpente", "Rana", "Polpo", "Pinguino", "Ragno", "Mosca", "Tartaruga", "Formica"]
+                    },
+                    "VEICOLI STRADALI": {
+                        correct: ["Automobile", "Motocicletta", "Camion", "Autobus", "Bicicletta", "Trattore", "Camper", "Taxi"],
+                        incorrect: ["Treno", "Metropolitana", "Aereo", "Elicottero", "Nave", "Sottomarino", "Funivia", "Traghetto"]
+                    },
+                    "INDUMENTI INVERNALI": {
+                        correct: ["Cappotto", "Sciarpa", "Guanti", "Berretto", "Piumino", "Maglione", "Stivali", "Calzamaglia"],
+                        incorrect: ["Costume", "Infradito", "Pantaloncini", "Canottiera", "Sandali", "T-shirt", "Occhiali da sole", "Camicetta"]
+                    }
+                }
+            }
+        };
+
+        // Stato Globale dell'App
+        let state = {
+            screen: 'MENU', 
+            level: 'facile', 
+            duration: 120, 
+            categoryShifting: 'dynamic', 
+            soundEnabled: true,
+            patientName: 'Paziente Anonimo',
+            exposureStop: 2500, // Tempo limite No-Go (rosso) in ms
+            exposureGo: 3000,   // Tempo limite Go (verde) in ms
+            
+            // Variabili di Gioco Corrente
+            timeLeft: 0,
+            timerInterval: null,
+            trialTimeout: null,
+            currentCategory: '',
+            currentWord: '',
+            currentLight: '', // verde, rosso
+            wordIsCorrectCategory: false, 
+            trialStartTime: 0,
+            trialCount: 0,
+            trialsSinceCategoryChange: 0,
+            isTransitioning: false, 
+
+            // Statistiche per Report Neuropsicologico
+            stats: {
+                totalGo: 0,         
+                correctGo: 0,       
+                omissionGo: 0,      
+                incorrectGo: 0,     
+                
+                totalNoGo: 0,       
+                correctNoGo: 0,     
+                falseAlarmNoGo: 0,  
+                
+                reactionTimes: []   
+            }
+        };
+
+        // Motore Audio con prevenzione del blocco del browser
+        const audioEngine = {
+            ctx: null,
+            
+            init() {
+                if (!this.ctx) {
+                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (this.ctx && this.ctx.state === 'suspended') {
+                    this.ctx.resume();
+                }
+            },
+
+            play(type) {
+                if (!state.soundEnabled) return;
+                try {
+                    this.init();
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+
+                    const now = this.ctx.currentTime;
+
+                    if (type === 'success') {
+                        osc.type = 'sine';
+                        osc.frequency.setValueAtTime(523.25, now); 
+                        osc.frequency.exponentialRampToValueAtTime(783.99, now + 0.1); 
+                        gain.gain.setValueAtTime(0.08, now);
+                        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+                        osc.start(now);
+                        osc.stop(now + 0.15);
+                    } else if (type === 'error') {
+                        osc.type = 'sawtooth';
+                        osc.frequency.setValueAtTime(140, now);
+                        gain.gain.setValueAtTime(0.12, now);
+                        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+                        osc.start(now);
+                        osc.stop(now + 0.25);
+                    } else if (type === 'neutral') {
+                        osc.type = 'triangle';
+                        osc.frequency.setValueAtTime(329.63, now); 
+                        gain.gain.setValueAtTime(0.05, now);
+                        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+                        osc.start(now);
+                        osc.stop(now + 0.1);
+                    }
+                } catch (e) {
+                    console.warn("Audio non ancora sbloccato dall'utente.", e);
+                }
+            }
+        };
+    </script>
+
+    <!-- Header dell'Applicazione -->
+    <header class="bg-white border-b border-slate-200 py-4 px-6 shadow-sm no-print">
+        <div class="max-w-6xl mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="bg-emerald-500 text-white p-2 rounded-xl shadow-md shadow-emerald-200">
+                    <svg class="w-6 h-6 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight text-slate-800">Il Semaforo delle Parole</h1>
+                    <p class="text-xs text-slate-500 font-medium">Rehab Suite - Allenamento delle Funzioni Esecutive</p>
+                </div>
+            </div>
+            
+            <!-- Bottone audio rapido -->
+            <button id="soundToggleBtn" onclick="toggleSound()" class="text-slate-500 hover:text-slate-800 p-2 rounded-xl border border-slate-200 hover:bg-slate-50 transition-all flex items-center space-x-1">
+                <span id="soundIcon">🔊</span>
+                <span class="text-xs font-semibold hidden sm:inline" id="soundStatusLabel">Audio Attivo</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-grow flex items-center justify-center p-4">
+        
+        <!-- MENU DI CONFIGURAZIONE -->
+        <div id="screen-menu" class="bg-white max-w-2xl w-full rounded-2xl border border-slate-200 shadow-xl p-6 md:p-8 space-y-6">
+            <div class="text-center space-y-2">
+                <div class="inline-block bg-teal-50 text-teal-700 text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wider mb-2">
+                    Moduli Clinici di Controllo Motorio e Attenzione
+                </div>
+                <h2 class="text-3xl font-extrabold text-slate-800">Inibizione della Risposta</h2>
+                <p class="text-slate-600 max-w-lg mx-auto text-sm leading-relaxed">
+                    Un esercizio mirato ad allenare la capacità di frenare gli impulsi motori automatici. Rispondi solo in presenza del segnale verde. Rimani fermo col segnale rosso.
+                </p>
+            </div>
+
+            <!-- Box Istruzioni Rapide -->
+            <div class="bg-slate-50 border border-slate-150 rounded-xl p-4 space-y-3">
+                <h3 class="font-bold text-slate-700 text-sm flex items-center space-x-2">
+                    <span>💡</span> <span>Istruzioni per l'Esercizio:</span>
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs text-slate-600">
+                    <div class="bg-emerald-50 border border-emerald-100 p-3 rounded-lg flex space-x-2 items-start">
+                        <div class="bg-emerald-500 text-white rounded-full p-1 font-bold text-[10px] w-5 h-5 flex items-center justify-center shrink-0">GO</div>
+                        <p><strong>SEMAFORO VERDE:</strong> Clicca <strong class="text-emerald-700">Vero [→]</strong> se appartiene alla Categoria Obiettivo, oppure <strong class="text-emerald-700">Falso [←]</strong> se non appartiene.</p>
+                    </div>
+                    <div class="bg-rose-50 border border-rose-100 p-3 rounded-lg flex space-x-2 items-start">
+                        <div class="bg-rose-500 text-white rounded-full p-1 font-bold text-[10px] w-5 h-5 flex items-center justify-center shrink-0">STOP</div>
+                        <p><strong>SEMAFORO ROSSO:</strong> <strong class="text-rose-700">Non premere nulla!</strong> Attendi che la parola cambi automaticamente senza interagire.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form di Configurazione -->
+            <div class="space-y-4 pt-2">
+                <!-- Nome/Codice Paziente -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">ID Paziente / Codice Clinico</label>
+                    <input type="text" id="patientNameInput" placeholder="es. Mario Rossi o Paziente_01" 
+                           onclick="audioEngine.init()"
+                           class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500 text-slate-800 font-medium">
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Selezione Livello -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Livello di Difficoltà</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button onclick="setLevel('facile')" id="btn-level-facile" class="py-2.5 px-4 rounded-xl border-2 font-semibold transition-all text-sm flex flex-col items-center justify-center bg-teal-50 border-teal-500 text-teal-800 shadow-md">
+                                <span>Facile</span>
+                                <span class="text-[10px] font-normal text-teal-600">Categorie distanti</span>
+                            </button>
+                            <button onclick="setLevel('medio')" id="btn-level-medio" class="py-2.5 px-4 rounded-xl border-2 border-slate-200 text-slate-600 hover:bg-slate-50 font-semibold transition-all text-sm flex flex-col items-center justify-center">
+                                <span>Medio</span>
+                                <span class="text-[10px] font-normal text-slate-400">Categorie ambigue</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Durata Sessione -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Durata della Sessione</label>
+                        <select id="durationSelect" onchange="audioEngine.init()" class="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500 text-slate-700 font-semibold text-sm bg-white">
+                            <option value="60">1 Minuto (Rapido)</option>
+                            <option value="120" selected>2 Minuti</option>
+                            <option value="240">4 Minuti</option>
+                            <option value="300">5 Minuti</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Tempo di Esposizione -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Tempo di Esposizione (Stimoli)</label>
+                        <select id="exposureSelect" onchange="audioEngine.init()" class="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500 text-slate-700 font-semibold text-sm bg-white">
+                            <option value="1500-2000">Molto Veloce (1.5s STOP / 2.0s GO)</option>
+                            <option value="2000-2500">Veloce (2.0s STOP / 2.5s GO)</option>
+                            <option value="2500-3000" selected>Standard (2.5s STOP / 3.0s GO)</option>
+                            <option value="3500-4000">Lento (3.5s STOP / 4.0s GO)</option>
+                            <option value="5000-6000">Molto Lento (5.0s STOP / 6.0s GO)</option>
+                        </select>
+                    </div>
+
+                    <!-- Gestione della Flessibilità Cognitiva -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Flessibilità (Shifting della Categoria)</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button onclick="setShifting('dynamic')" id="btn-shift-dynamic" class="py-2 px-3 rounded-xl border-2 font-medium transition-all text-xs flex flex-col items-center justify-center bg-teal-50 border-teal-500 text-teal-800">
+                                <strong>Dinamica (Consigliata)</strong>
+                                <span class="text-[9px] text-center text-teal-600">Cambia categoria ogni 5 prove</span>
+                            </button>
+                            <button onclick="setShifting('static')" id="btn-shift-static" class="py-2 px-3 rounded-xl border-2 border-slate-200 text-slate-600 hover:bg-slate-50 font-medium transition-all text-xs flex flex-col items-center justify-center">
+                                <strong>Fissa</strong>
+                                <span class="text-[9px] text-center text-slate-400">Stessa categoria per tutto il tempo</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Avvia Gioco -->
+            <button onclick="startGame()" class="w-full bg-gradient-to-r from-emerald-500 to-teal-600 text-white py-4 rounded-xl font-bold text-lg hover:brightness-105 shadow-lg shadow-emerald-200 transition-all flex items-center justify-center space-x-2">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <span>Inizia l'Esercizio</span>
+            </button>
+        </div>
+
+        <!-- SCHERMATA DI GIOCO -->
+        <div id="screen-playing" class="hidden bg-white max-w-2xl w-full rounded-2xl border-4 border-slate-200 shadow-xl p-6 md:p-8 flex flex-col items-center space-y-6 relative overflow-hidden transition-all duration-300">
+            
+            <!-- Barra di Stato Gioco -->
+            <div class="w-full flex items-center justify-between border-b border-slate-100 pb-4">
+                <div class="flex items-center space-x-3">
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-widest block">Tempo Rimanente</span>
+                    <span id="gameTimer" class="text-2xl font-black text-slate-800 tracking-tight font-mono">02:00</span>
+                </div>
+                
+                <!-- Barra di Progresso Temporale -->
+                <div class="w-24 md:w-40 bg-slate-100 h-2 rounded-full overflow-hidden">
+                    <div id="timerProgress" class="bg-gradient-to-r from-teal-500 to-emerald-500 h-full w-full transition-all duration-1000"></div>
+                </div>
+
+                <div class="flex space-x-2">
+                    <button onclick="pauseGame()" class="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-bold hover:bg-slate-50 transition-all text-slate-600">
+                        Pausa
+                    </button>
+                </div>
+            </div>
+
+            <!-- Box della Categoria Obiettivo Attiva -->
+            <div class="w-full text-center py-2.5 px-4 rounded-2xl bg-slate-50 border border-slate-200 relative">
+                <span class="text-[10px] font-bold text-slate-400 tracking-widest uppercase block mb-1">CATEGORIA OBIETTIVO</span>
+                <span id="targetCategoryDisplay" class="text-2xl font-black text-teal-600 tracking-wide uppercase">CIBI</span>
+                
+                <!-- Notifica cambio categoria -->
+                <div id="shiftingAlert" class="hidden absolute inset-0 bg-yellow-50 text-yellow-800 text-xs font-bold flex items-center justify-center rounded-2xl border border-yellow-200 animate-pulse">
+                    ⚠️ ATTENZIONE: La Categoria Obiettivo è cambiata!
+                </div>
+            </div>
+
+            <!-- AREA CENTRALE: SEMAFORO E PAROLA -->
+            <div class="w-full flex flex-col items-center py-4 space-y-6">
+                
+                <!-- Semaforo Tridimensionale -->
+                <div class="w-24 bg-slate-900 rounded-3xl p-3 shadow-xl border border-slate-800 flex flex-col space-y-3 items-center">
+                    <!-- Luce Rossa (Inibizione) -->
+                    <div class="relative">
+                        <div id="light-red" class="w-16 h-16 rounded-full bg-red-950 border-4 border-slate-950 transition-all duration-200 shadow-inner flex items-center justify-center">
+                            <div class="absolute top-1 left-3 w-4 h-2 bg-white/20 rounded-full"></div>
+                        </div>
+                    </div>
+                    <!-- Luce Verde (Azione) -->
+                    <div class="relative">
+                        <div id="light-green" class="w-16 h-16 rounded-full bg-emerald-950 border-4 border-slate-950 transition-all duration-200 shadow-inner flex items-center justify-center">
+                            <div class="absolute top-1 left-3 w-4 h-2 bg-white/20 rounded-full"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Parola Corrente -->
+                <div class="text-center min-h-[90px] flex items-center justify-center">
+                    <div id="fixationCross" class="text-6xl font-light text-slate-300 hidden">+</div>
+                    <div id="stimulusWord" class="text-5xl md:text-6xl font-black text-slate-800 tracking-tight transition-all uppercase">
+                        - - -
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feedback Fluttuante temporaneo -->
+            <div class="h-6 flex items-center justify-center">
+                <div id="feedbackText" class="text-xs px-4 py-1.5 rounded-full border font-bold transition-all duration-200 transform scale-0"></div>
+            </div>
+
+            <!-- PULSANTI DI RISPOSTA -->
+            <div class="w-full grid grid-cols-2 gap-4 pt-2">
+                <!-- Pulsante Falso -->
+                <button onclick="handleResponse(false)" id="btn-falso" class="py-4 md:py-6 rounded-2xl bg-rose-50 border-2 border-rose-200 text-rose-700 hover:bg-rose-100 font-bold text-xl md:text-2xl transition-all shadow-md active:scale-95 flex flex-col items-center justify-center relative">
+                    <span class="text-[10px] font-bold text-rose-500 uppercase tracking-widest mb-1">Non appartiene</span>
+                    <span class="flex items-center space-x-1">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                        <span>Falso</span>
+                    </span>
+                    <span class="absolute bottom-1 right-2 text-[9px] text-slate-400 font-mono font-normal hidden md:inline">[←] o [F]</span>
+                </button>
+
+                <!-- Pulsante Vero -->
+                <button onclick="handleResponse(true)" id="btn-vero" class="py-4 md:py-6 rounded-2xl bg-emerald-50 border-2 border-emerald-200 text-emerald-700 hover:bg-emerald-100 font-bold text-xl md:text-2xl transition-all shadow-md active:scale-95 flex flex-col items-center justify-center relative">
+                    <span class="text-[10px] font-bold text-emerald-500 uppercase tracking-widest mb-1">Appartiene</span>
+                    <span class="flex items-center space-x-1">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        <span>Vero</span>
+                    </span>
+                    <span class="absolute bottom-1 right-2 text-[9px] text-slate-400 font-mono font-normal hidden md:inline">[→] o [V]</span>
+                </button>
+            </div>
+
+            <!-- Mini Dashboard real-time -->
+            <div class="w-full grid grid-cols-3 gap-2 pt-4 border-t border-slate-100 text-center text-xs text-slate-500">
+                <div>
+                    <span class="block text-[9px] font-bold uppercase tracking-widest text-slate-400">Precisione</span>
+                    <span id="mini-stat-accuracy" class="font-extrabold text-slate-700 text-sm">-</span>
+                </div>
+                <div>
+                    <span class="block text-[9px] font-bold uppercase tracking-widest text-slate-400">Falsi Allarmi</span>
+                    <span id="mini-stat-fa" class="font-extrabold text-red-600 text-sm">0</span>
+                </div>
+                <div>
+                    <span class="block text-[9px] font-bold uppercase tracking-widest text-slate-400">Tempo Medio</span>
+                    <span id="mini-stat-rt" class="font-extrabold text-slate-700 text-sm">-</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- SCHERMATA PAUSA -->
+        <div id="screen-paused" class="hidden bg-white max-w-md w-full rounded-2xl border border-slate-200 shadow-xl p-8 text-center space-y-6">
+            <h2 class="text-2xl font-extrabold text-slate-800">Esercizio in Pausa</h2>
+            <p class="text-slate-500 text-sm">La sessione riabilitativa è stata temporaneamente sospesa. Riprendi quando sei pronto per mantenere alto il livello di attenzione.</p>
+            <div class="flex flex-col space-y-2">
+                <button onclick="resumeGame()" class="w-full bg-teal-600 text-white py-3 rounded-xl font-bold hover:bg-teal-700 transition-all">
+                    Riprendi Sessione
+                </button>
+                <button onclick="showMenu()" class="w-full bg-slate-100 text-slate-600 py-3 rounded-xl font-bold hover:bg-slate-200 transition-all">
+                    Termina ed Esci
+                </button>
+            </div>
+        </div>
+
+        <!-- SCHERMATA RISULTATI / REPORT -->
+        <div id="screen-results" class="hidden bg-white max-w-3xl w-full rounded-2xl border border-slate-200 shadow-xl p-6 md:p-8 space-y-6">
+            <div class="border-b border-slate-100 pb-4 text-center md:text-left flex flex-col md:flex-row justify-between items-center gap-4">
+                <div>
+                    <div class="inline-block bg-teal-50 text-teal-700 text-[10px] px-2.5 py-1 rounded-full font-bold uppercase tracking-wider mb-1">
+                        Dati di Performance Cognitiva
+                    </div>
+                    <h2 class="text-2xl font-extrabold text-slate-800">Report di Riabilitazione</h2>
+                    <p class="text-xs text-slate-500">
+                        Paziente: <span id="reportPatientName" class="font-bold text-slate-700">Mario Rossi</span> | 
+                        Livello: <span id="reportLevel" class="font-bold text-slate-700">Facile</span> | 
+                        Esposizione: <span id="reportExposure" class="font-bold text-slate-700">Standard</span>
+                    </p>
+                </div>
+                <button onclick="window.print()" class="px-4 py-2 border border-slate-200 text-slate-700 rounded-xl text-xs font-bold hover:bg-slate-50 flex items-center space-x-1.5 transition-all no-print">
+                    <span>🖨️</span> <span>Stampa / Salva PDF</span>
+                </button>
+            </div>
+
+            <!-- KPI e Grafici di Sintesi -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <!-- Accuratezza Totale -->
+                <div class="bg-gradient-to-br from-teal-500 to-emerald-600 text-white p-4 rounded-xl flex flex-col justify-between shadow-md">
+                    <span class="text-xs font-semibold text-teal-100">Precisione Globale</span>
+                    <div class="my-2">
+                        <span id="stat-accuracy" class="text-4xl font-black">94%</span>
+                    </div>
+                    <span class="text-[10px] text-teal-100">Percentuale totale di risposte corrette</span>
+                </div>
+
+                <!-- Tempo Medio di Reazione -->
+                <div class="bg-slate-50 border border-slate-200 p-4 rounded-xl flex flex-col justify-between">
+                    <span class="text-xs font-semibold text-slate-400">Tempo di Reazione</span>
+                    <div class="my-2">
+                        <span id="stat-rt" class="text-3xl font-black text-slate-800">650 ms</span>
+                    </div>
+                    <span class="text-[10px] text-slate-400">Velocità di elaborazione sui Go corretti</span>
+                </div>
+
+                <!-- Falsi Allarmi -->
+                <div id="fa-container" class="border p-4 rounded-xl flex flex-col justify-between transition-all">
+                    <span class="text-xs font-semibold text-slate-400">Falsi Allarmi (Impulsività)</span>
+                    <div class="my-2">
+                        <span id="stat-fa" class="text-3xl font-black">2</span>
+                    </div>
+                    <span class="text-[10px] text-slate-400" id="fa-sub">Fallimenti nell'inibire la risposta al Rosso</span>
+                </div>
+            </div>
+
+            <!-- Analisi Clinica Scomposta -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Dettaglio Prove GO (Verdi) -->
+                <div class="bg-emerald-50/50 border border-emerald-100 p-4 rounded-xl space-y-2">
+                    <h3 class="text-xs font-bold text-emerald-800 uppercase tracking-wider flex items-center space-x-1">
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span>
+                        <span>Analisi GO (Semaforo Verde)</span>
+                    </h3>
+                    <div class="text-sm space-y-1.5 text-slate-600">
+                        <div class="flex justify-between">
+                            <span>Semafori Verdi totali:</span>
+                            <span id="stat-go-total" class="font-bold text-slate-800">0</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Risposte Corrette:</span>
+                            <span id="stat-go-correct" class="font-bold text-emerald-700">0</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Omissioni (Mancate):</span>
+                            <span id="stat-go-omission" class="font-bold text-amber-600">0</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Errori di Scelta (V/F invertiti):</span>
+                            <span id="stat-go-incorrect" class="font-bold text-rose-600">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dettaglio Prove NO-GO (Rosse) -->
+                <div class="bg-rose-50/50 border border-rose-100 p-4 rounded-xl space-y-2">
+                    <h3 class="text-xs font-bold text-rose-800 uppercase tracking-wider flex items-center space-x-1">
+                        <span class="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block"></span>
+                        <span>Analisi NO-GO (Semaforo Rosso)</span>
+                    </h3>
+                    <div class="text-sm space-y-1.5 text-slate-600">
+                        <div class="flex justify-between">
+                            <span>Semafori Rossi totali:</span>
+                            <span id="stat-nogo-total" class="font-bold text-slate-800">0</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Inibizioni Riuscite (Fermi):</span>
+                            <span id="stat-nogo-correct" class="font-bold text-emerald-700">0</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Falsi Allarmi (Click Errati):</span>
+                            <span id="stat-nogo-fa" class="font-bold text-rose-700">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Commento Neuropsicologico Virtuale -->
+            <div class="bg-slate-50 border border-slate-200 p-4 rounded-xl flex items-start space-x-3">
+                <div class="bg-teal-100 text-teal-800 rounded-full p-2 text-xl shrink-0">👩‍⚕️</div>
+                <div>
+                    <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider">Valutazione Clinica Virtuale</h4>
+                    <p id="clinicalFeedbackText" class="text-xs text-slate-600 mt-1 leading-relaxed">
+                        Analizzando i parametri...
+                    </p>
+                </div>
+            </div>
+
+            <!-- Bottoni di Azione Finali -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2 no-print">
+                <button onclick="showMenu()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 py-3.5 rounded-xl font-bold transition-all text-sm">
+                    Torna al Menu Principale
+                </button>
+                <button onclick="startGame()" class="w-full bg-gradient-to-r from-teal-500 to-emerald-600 text-white py-3.5 rounded-xl font-bold hover:brightness-105 transition-all text-sm flex items-center justify-center space-x-2">
+                    <span>🔁</span> <span>Ripeti lo Stesso Esercizio</span>
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 py-3 text-center text-xs text-slate-400 no-print">
+        <p>© 2026 Il Semaforo delle Parole - Strumento Digitale per la Riabilitazione Neuropsicologica dell'Attenzione.</p>
+    </footer>
+
+    <script>
+        // Gestione Configurazione e Navigazione Schermate
+        function setLevel(lvl) {
+            state.level = lvl;
+            document.getElementById('btn-level-facile').className = lvl === 'facile' 
+                ? "py-2.5 px-4 rounded-xl border-2 font-semibold transition-all text-sm flex flex-col items-center justify-center bg-teal-50 border-teal-500 text-teal-800 shadow-md"
+                : "py-2.5 px-4 rounded-xl border-2 border-slate-200 text-slate-600 hover:bg-slate-50 font-semibold transition-all text-sm flex flex-col items-center justify-center";
+            
+            document.getElementById('btn-level-medio').className = lvl === 'medio' 
+                ? "py-2.5 px-4 rounded-xl border-2 font-semibold transition-all text-sm flex flex-col items-center justify-center bg-teal-50 border-teal-500 text-teal-800 shadow-md"
+                : "py-2.5 px-4 rounded-xl border-2 border-slate-200 text-slate-600 hover:bg-slate-50 font-semibold transition-all text-sm flex flex-col items-center justify-center";
+            
+            audioEngine.play('neutral');
+        }
+
+        function setShifting(type) {
+            state.categoryShifting = type;
+            document.getElementById('btn-shift-dynamic').className = type === 'dynamic'
+                ? "py-2 px-3 rounded-xl border-2 font-medium transition-all text-xs flex flex-col items-center justify-center bg-teal-50 border-teal-500 text-teal-800 shadow-sm"
+                : "py-2 px-3 rounded-xl border-2 border-slate-200 text-slate-600 hover:bg-slate-50 font-medium transition-all text-xs flex flex-col items-center justify-center";
+                
+            document.getElementById('btn-shift-static').className = type === 'static'
+                ? "py-2 px-3 rounded-xl border-2 font-medium transition-all text-xs flex flex-col items-center justify-center bg-teal-50 border-teal-500 text-teal-800 shadow-sm"
+                : "py-2 px-3 rounded-xl border-2 border-slate-200 text-slate-600 hover:bg-slate-50 font-medium transition-all text-xs flex flex-col items-center justify-center";
+            
+            audioEngine.play('neutral');
+        }
+
+        function toggleSound() {
+            state.soundEnabled = !state.soundEnabled;
+            const icon = document.getElementById('soundIcon');
+            const label = document.getElementById('soundStatusLabel');
+            if (state.soundEnabled) {
+                icon.innerText = '🔊';
+                label.innerText = 'Audio Attivo';
+                audioEngine.init();
+                audioEngine.play('neutral');
+            } else {
+                icon.innerText = '🔇';
+                label.innerText = 'Audio Disattivato';
+            }
+        }
+
+        function showScreen(screenId) {
+            document.getElementById('screen-menu').classList.add('hidden');
+            document.getElementById('screen-playing').classList.add('hidden');
+            document.getElementById('screen-paused').classList.add('hidden');
+            document.getElementById('screen-results').classList.add('hidden');
+            
+            document.getElementById('screen-' + screenId).classList.remove('hidden');
+            state.screen = screenId.toUpperCase();
+        }
+
+        function showMenu() {
+            clearInterval(state.timerInterval);
+            clearTimeout(state.trialTimeout);
+            showScreen('menu');
+        }
+
+        // Avvio Esercizio
+        function startGame() {
+            audioEngine.init();
+            
+            const name = document.getElementById('patientNameInput').value.trim();
+            state.patientName = name ? name : 'Paziente Anonimo';
+            
+            state.duration = parseInt(document.getElementById('durationSelect').value);
+            state.timeLeft = state.duration;
+            state.isTransitioning = false;
+            
+            const exposureValues = document.getElementById('exposureSelect').value.split('-');
+            state.exposureStop = parseInt(exposureValues[0]);
+            state.exposureGo = parseInt(exposureValues[1]);
+            
+            // Reset statistiche pulito
+            state.stats = {
+                totalGo: 0,
+                correctGo: 0,
+                omissionGo: 0,
+                incorrectGo: 0,
+                totalNoGo: 0,
+                correctNoGo: 0,
+                falseAlarmNoGo: 0,
+                reactionTimes: []
+            };
+
+            const levelData = DATASET[state.level];
+            state.currentCategory = levelData.categories[Math.floor(Math.random() * levelData.categories.length)];
+            state.trialsSinceCategoryChange = 0;
+            state.trialCount = 0;
+
+            showScreen('playing');
+            updateTimerDisplay();
+            updateMiniStats();
+            
+            // Avvio timer globale
+            state.timerInterval = setInterval(() => {
+                state.timeLeft--;
+                updateTimerDisplay();
+                if (state.timeLeft <= 0) {
+                    endSession();
+                }
+            }, 1000);
+
+            nextTrial();
+        }
+
+        // Gestore per una singola prova
+        function nextTrial() {
+            if (state.timeLeft <= 0) return;
+            state.isTransitioning = false;
+            
+            // Ripristina bordo del contenitore neutro
+            document.getElementById('screen-playing').className = "bg-white max-w-2xl w-full rounded-2xl border-4 border-slate-200 shadow-xl p-6 md:p-8 flex flex-col items-center space-y-6 relative overflow-hidden transition-all duration-300";
+
+            // Controllo Shifting della Categoria (Flessibilità)
+            if (state.categoryShifting === 'dynamic' && state.trialsSinceCategoryChange >= 5) {
+                const levelData = DATASET[state.level];
+                const validCategories = levelData.categories.filter(c => c !== state.currentCategory);
+                state.currentCategory = validCategories[Math.floor(Math.random() * validCategories.length)];
+                state.trialsSinceCategoryChange = 0;
+                
+                const alertBox = document.getElementById('shiftingAlert');
+                alertBox.classList.remove('hidden');
+                audioEngine.play('neutral');
+                setTimeout(() => {
+                    alertBox.classList.add('hidden');
+                }, 1200);
+            }
+
+            document.getElementById('targetCategoryDisplay').innerText = state.currentCategory;
+            document.getElementById('fixationCross').classList.add('hidden');
+            document.getElementById('stimulusWord').classList.remove('hidden');
+
+            const levelData = DATASET[state.level];
+            const currentCatItems = levelData.items[state.currentCategory];
+
+            // 1. Coerenza parola-categoria (50% probabilità)
+            state.wordIsCorrectCategory = Math.random() < 0.5;
+
+            if (state.wordIsCorrectCategory) {
+                state.currentWord = currentCatItems.correct[Math.floor(Math.random() * currentCatItems.correct.length)];
+            } else {
+                state.currentWord = currentCatItems.incorrect[Math.floor(Math.random() * currentCatItems.incorrect.length)];
+            }
+
+            // 2. Colore Semaforo (70% Verde / 30% Rosso) per favorire la risposta dominante
+            state.currentLight = Math.random() < 0.70 ? 'verde' : 'rosso';
+
+            const redLight = document.getElementById('light-red');
+            const greenLight = document.getElementById('light-green');
+
+            if (state.currentLight === 'rosso') {
+                state.stats.totalNoGo++;
+                redLight.className = "w-16 h-16 rounded-full bg-red-600 border-4 border-slate-950 shadow-[0_0_35px_rgba(239,68,68,0.9)] flex items-center justify-center transition-all duration-100";
+                greenLight.className = "w-16 h-16 rounded-full bg-emerald-950 border-4 border-slate-950 shadow-inner flex items-center justify-center transition-all duration-100";
+            } else {
+                state.stats.totalGo++;
+                redLight.className = "w-16 h-16 rounded-full bg-red-950 border-4 border-slate-950 shadow-inner flex items-center justify-center transition-all duration-100";
+                greenLight.className = "w-16 h-16 rounded-full bg-emerald-500 border-4 border-slate-950 shadow-[0_0_35px_rgba(16,185,129,0.9)] flex items-center justify-center transition-all duration-100";
+            }
+
+            document.getElementById('stimulusWord').innerText = state.currentWord;
+            
+            state.trialStartTime = performance.now();
+            state.trialCount++;
+            state.trialsSinceCategoryChange++;
+
+            clearTimeout(state.trialTimeout);
+            
+            if (state.currentLight === 'rosso') {
+                // Sotto semaforo rosso l'utente deve attendere il tempo configurato (STOP)
+                state.trialTimeout = setTimeout(() => {
+                    handleNoGoSuccess();
+                }, state.exposureStop);
+            } else {
+                // Sotto semaforo verde, tempo limite configurato per l'azione (GO)
+                state.trialTimeout = setTimeout(() => {
+                    handleGoOmission();
+                }, state.exposureGo);
+            }
+        }
+
+        // Mostra croce di fissazione ad ogni transizione per ripulire la memoria di lavoro
+        function showFixationAndNext() {
+            state.isTransitioning = true;
+            document.getElementById('light-red').className = "w-16 h-16 rounded-full bg-red-950 border-4 border-slate-950 shadow-inner flex items-center justify-center";
+            document.getElementById('light-green').className = "w-16 h-16 rounded-full bg-emerald-950 border-4 border-slate-950 shadow-inner flex items-center justify-center";
+            
+            document.getElementById('stimulusWord').classList.add('hidden');
+            document.getElementById('fixationCross').classList.remove('hidden');
+
+            setTimeout(() => {
+                nextTrial();
+            }, 500);
+        }
+
+        // Gestione Risposte dell'utente
+        function handleResponse(userClickedTrue) {
+            if (state.isTransitioning || state.screen !== 'PLAYING') return; 
+            
+            clearTimeout(state.trialTimeout);
+            const responseTime = Math.round(performance.now() - state.trialStartTime);
+
+            if (state.currentLight === 'rosso') {
+                // ERRORE DI INIBIZIONE (Falso Allarme)
+                state.stats.falseAlarmNoGo++;
+                flashScreenBorder('error');
+                showFeedback("FALSO ALLARME!", "text-red-500 bg-red-50 border-red-200");
+                audioEngine.play('error');
+            } else {
+                // RISPOSTA GO (Semaforo Verde)
+                const isCorrectMatch = state.wordIsCorrectCategory; 
+                const isUserCorrect = (isCorrectMatch && userClickedTrue) || (!isCorrectMatch && !userClickedTrue);
+
+                if (isUserCorrect) {
+                    state.stats.correctGo++;
+                    state.stats.reactionTimes.push(responseTime);
+                    flashScreenBorder('correct');
+                    showFeedback(`CORRETTO! (${responseTime}ms)`, "text-emerald-600 bg-emerald-50 border-emerald-200");
+                    audioEngine.play('success');
+                } else {
+                    state.stats.incorrectGo++;
+                    flashScreenBorder('error');
+                    showFeedback("ERRORE DI SCELTA!", "text-red-500 bg-red-50 border-red-200");
+                    audioEngine.play('error');
+                }
+            }
+
+            updateMiniStats();
+            showFixationAndNext();
+        }
+
+        // Omissione (Semaforo Verde non cliccato)
+        function handleGoOmission() {
+            state.stats.omissionGo++;
+            flashScreenBorder('warning');
+            showFeedback("TEMPO SCADUTO!", "text-amber-500 bg-amber-50 border-amber-200");
+            audioEngine.play('error');
+            updateMiniStats();
+            showFixationAndNext();
+        }
+
+        // Inibizione Riuscita (Semaforo Rosso rispettato)
+        function handleNoGoSuccess() {
+            state.stats.correctNoGo++;
+            flashScreenBorder('correct');
+            showFeedback("OTTIMA INIBIZIONE!", "text-emerald-600 bg-emerald-50 border-emerald-200");
+            audioEngine.play('success');
+            updateMiniStats();
+            showFixationAndNext();
+        }
+
+        // Effetto Flash Visivo sui Bordi della Scheda di Gioco
+        function flashScreenBorder(type) {
+            const el = document.getElementById('screen-playing');
+            if (type === 'correct') {
+                el.className = "bg-white max-w-2xl w-full rounded-2xl border-4 border-emerald-500 shadow-emerald-100 shadow-xl p-6 md:p-8 flex flex-col items-center space-y-6 relative overflow-hidden transition-all duration-150";
+            } else if (type === 'error') {
+                el.className = "bg-white max-w-2xl w-full rounded-2xl border-4 border-red-500 shadow-red-100 shadow-xl p-6 md:p-8 flex flex-col items-center space-y-6 relative overflow-hidden transition-all duration-150";
+            } else if (type === 'warning') {
+                el.className = "bg-white max-w-2xl w-full rounded-2xl border-4 border-amber-500 shadow-amber-100 shadow-xl p-6 md:p-8 flex flex-col items-center space-y-6 relative overflow-hidden transition-all duration-150";
+            }
+        }
+
+        function showFeedback(text, classes) {
+            const el = document.getElementById('feedbackText');
+            el.innerText = text;
+            el.className = `text-xs px-4 py-1.5 rounded-full border font-bold transition-all duration-200 transform scale-100 ${classes}`;
+            
+            setTimeout(() => {
+                el.className = "text-xs px-4 py-1.5 rounded-full border font-bold transition-all duration-200 transform scale-0";
+            }, 1200);
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(state.timeLeft / 60);
+            const seconds = state.timeLeft % 60;
+            const displayStr = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            document.getElementById('gameTimer').innerText = displayStr;
+
+            const progressPercent = (state.timeLeft / state.duration) * 100;
+            document.getElementById('timerProgress').style.width = `${progressPercent}%`;
+        }
+
+        function updateMiniStats() {
+            const accuracy = calculateAccuracy();
+            document.getElementById('mini-stat-accuracy').innerText = isNaN(accuracy) ? '-' : `${accuracy}%`;
+            document.getElementById('mini-stat-fa').innerText = state.stats.falseAlarmNoGo;
+            
+            const avgRt = calculateAvgReactionTime();
+            document.getElementById('mini-stat-rt').innerText = avgRt === 0 ? '-' : `${avgRt}ms`;
+        }
+
+        function calculateAccuracy() {
+            const totalTrials = state.stats.totalGo + state.stats.totalNoGo;
+            if (totalTrials === 0) return 0;
+            const correctTrials = state.stats.correctGo + state.stats.correctNoGo;
+            return Math.round((correctTrials / totalTrials) * 100);
+        }
+
+        function calculateAvgReactionTime() {
+            if (state.stats.reactionTimes.length === 0) return 0;
+            const sum = state.stats.reactionTimes.reduce((a, b) => a + b, 0);
+            return Math.round(sum / state.stats.reactionTimes.length);
+        }
+
+        function pauseGame() {
+            clearInterval(state.timerInterval);
+            clearTimeout(state.trialTimeout);
+            showScreen('paused');
+        }
+
+        function resumeGame() {
+            showScreen('playing');
+            updateTimerDisplay();
+            
+            state.timerInterval = setInterval(() => {
+                state.timeLeft--;
+                updateTimerDisplay();
+                if (state.timeLeft <= 0) {
+                    endSession();
+                }
+            }, 1000);
+
+            nextTrial();
+        }
+
+        // Chiusura Sessione & Generazione Report Clinico
+        function endSession() {
+            clearInterval(state.timerInterval);
+            clearTimeout(state.trialTimeout);
+            audioEngine.play('success');
+
+            document.getElementById('reportPatientName').innerText = state.patientName;
+            document.getElementById('reportLevel').innerText = state.level.toUpperCase();
+
+            const expSelect = document.getElementById('exposureSelect');
+            const expLabel = expSelect.options[expSelect.selectedIndex].text.split(' (')[0];
+            document.getElementById('reportExposure').innerText = expLabel;
+
+            const accuracy = calculateAccuracy();
+            const avgRt = calculateAvgReactionTime();
+            const falseAlarms = state.stats.falseAlarmNoGo;
+
+            document.getElementById('stat-accuracy').innerText = `${accuracy}%`;
+            document.getElementById('stat-rt').innerText = avgRt > 0 ? `${avgRt} ms` : 'N/D';
+            document.getElementById('stat-fa').innerText = falseAlarms;
+
+            const faContainer = document.getElementById('fa-container');
+            const faSub = document.getElementById('fa-sub');
+            if (falseAlarms === 0) {
+                faContainer.className = "bg-emerald-50 border-emerald-200 p-4 rounded-xl flex flex-col justify-between";
+                faSub.innerText = "Eccellente! Nessun errore impulsivo.";
+                faSub.className = "text-[10px] text-emerald-600 font-semibold";
+            } else if (falseAlarms <= 3) {
+                faContainer.className = "bg-yellow-50 border-yellow-200 p-4 rounded-xl flex flex-col justify-between";
+                faSub.innerText = "Controllo dell'inibizione nella norma.";
+                faSub.className = "text-[10px] text-yellow-600 font-semibold";
+            } else {
+                faContainer.className = "bg-rose-50 border-rose-200 p-4 rounded-xl flex flex-col justify-between animate-pulse";
+                faSub.innerText = "Propensione all'impulsività motoria.";
+                faSub.className = "text-[10px] text-rose-600 font-semibold";
+            }
+
+            // Scomposizione dei dati
+            document.getElementById('stat-go-total').innerText = state.stats.totalGo;
+            document.getElementById('stat-go-correct').innerText = state.stats.correctGo;
+            document.getElementById('stat-go-omission').innerText = state.stats.omissionGo;
+            document.getElementById('stat-go-incorrect').innerText = state.stats.incorrectGo;
+
+            document.getElementById('stat-nogo-total').innerText = state.stats.totalNoGo;
+            document.getElementById('stat-nogo-correct').innerText = state.stats.correctNoGo;
+            document.getElementById('stat-nogo-fa').innerText = falseAlarms;
+
+            // Generatore di feedback clinico personalizzato
+            let feedbackText = "";
+            if (accuracy >= 90 && falseAlarms <= 1) {
+                feedbackText = `Straordinaria performance! Il livello di accuratezza è superbo (${accuracy}%) ed il controllo inibitorio è intatto (solo ${falseAlarms} Falsi Allarmi). La velocità di processamento delle informazioni è eccellente (${avgRt}ms). Questo indica eccellenti riserve cognitive di autoregolazione prefrontale.`;
+            } else if (accuracy >= 75 && falseAlarms <= 3) {
+                feedbackText = `Buona performance complessiva. L'inibizione della risposta motoria è controllata ed equilibrata. Il paziente ha commesso ${falseAlarms} falsi allarmi, un valore assolutamente accettabile per questo intervallo di tempo. Per le prossime sessioni si consiglia di impostare il livello 'Medio' con shifting dinamico.`;
+            } else if (falseAlarms > 4) {
+                feedbackText = `La sessione rileva una propensione all'impulsività o risposte anticipate automatiche (Falsi allarmi: ${falseAlarms}). Il paziente fatica ad inibire l'input motorio alla comparsa del semaforo rosso. Si raccomanda di ripetere l'esercizio focalizzandosi sulla precisione più che sulla velocità di esecuzione.`;
+            } else {
+                feedbackText = `Performance discreta, ma con alcune incertezze sia di omissione che di selezione. I tempi di reazione indicano una prudenza elevata che ha però rallentato le risposte utili. Si raccomanda un allenamento costante per fluidificare l'attenzione selettiva.`;
+            }
+
+            document.getElementById('clinicalFeedbackText').innerText = feedbackText;
+            showScreen('results');
+        }
+
+        // GESTORE TASTIERA GLOBALE (Accessibilità)
+        window.addEventListener('keydown', function(e) {
+            // Evita l'intercettazione se l'utente sta scrivendo il proprio nome
+            if (document.activeElement === document.getElementById('patientNameInput')) {
+                return;
+            }
+
+            if (state.screen === 'PLAYING') {
+                if (e.key === 'ArrowRight' || e.key === 'v' || e.key === 'V') {
+                    e.preventDefault();
+                    handleResponse(true);
+                } else if (e.key === 'ArrowLeft' || e.key === 'f' || e.key === 'F') {
+                    e.preventDefault();
+                    handleResponse(false);
+                } else if (e.key === ' ' || e.key === 'p' || e.key === 'P') {
+                    e.preventDefault();
+                    pauseGame();
+                }
+            } else if (state.screen === 'PAUSED') {
+                if (e.key === ' ' || e.key === 'p' || e.key === 'P') {
+                    e.preventDefault();
+                    resumeGame();
+                }
+            }
+        });
+    </script>
+</body>
+</html>

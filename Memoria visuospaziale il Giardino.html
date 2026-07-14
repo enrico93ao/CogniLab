@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Il Percorso nel Giardino - Brain Training</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #1e40af;
+            --accent-blue: #3b82f6;
+            --bg-blue: #f0f7ff;
+            --success-cyan: #06b6d4;
+            --error-rose: #f43f5e;
+        }
+
+        body {
+            background-color: var(--bg-blue);
+            font-family: 'Inter', sans-serif;
+            color: #1e293b;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .main-card {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 2.5rem;
+            box-shadow: 0 25px 50px -12px rgba(30, 64, 175, 0.15);
+            max-width: 550px;
+            width: 95%;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+        }
+
+        .grid-memory {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+            margin: 24px auto;
+            max-width: 360px;
+        }
+
+        .cell {
+            aspect-ratio: 1;
+            background-color: #f8fafc;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 2px solid #e2e8f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .cell:active { transform: scale(0.9); }
+
+        .cell.active {
+            background-color: var(--accent-blue);
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 25px rgba(59, 130, 246, 0.5);
+            transform: scale(1.05);
+        }
+
+        .cell.correct {
+            background-color: #dcfce7;
+            border-color: #22c55e;
+        }
+
+        .cell.wrong {
+            background-color: #fee2e2;
+            border-color: var(--error-rose);
+            animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+        }
+
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 10px;
+            background-color: #e2e8f0;
+            border-radius: 10px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        #progressFill {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-blue), var(--success-cyan));
+            transition: width 1s linear;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #1e40af, #3b82f6);
+            color: white;
+            font-weight: 600;
+            padding: 1rem 2rem;
+            border-radius: 1.25rem;
+            transition: all 0.3s;
+            box-shadow: 0 10px 15px -3px rgba(30, 64, 175, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 25px -5px rgba(30, 64, 175, 0.4);
+        }
+
+        .stat-badge {
+            background: #f1f5f9;
+            padding: 0.5rem 1rem;
+            border-radius: 1rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #475569;
+        }
+
+        .hidden { display: none; }
+
+        .fade-in { animation: fadeIn 0.6s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+    </style>
+</head>
+<body>
+
+    <div class="main-card fade-in">
+        <div id="menu">
+            <div class="flex justify-center mb-6">
+                <div class="p-4 bg-blue-50 rounded-3xl">
+                    <svg class="w-12 h-12 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                    </svg>
+                </div>
+            </div>
+            <h1 class="text-3xl font-extrabold text-blue-900 mb-2">Memory Path</h1>
+            <p class="text-slate-500 mb-8 px-4">Potenzia la tua memoria visuo-spaziale con un allenamento mirato e progressivo.</p>
+            
+            <div class="space-y-4 mb-10 text-left max-w-xs mx-auto">
+                <div class="flex flex-col">
+                    <label class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">Difficoltà Iniziale</label>
+                    <select id="levelSelect" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none">
+                        <option value="3">Principiante (3 steps)</option>
+                        <option value="5">Avanzato (5 steps)</option>
+                    </select>
+                </div>
+
+                <div class="flex flex-col">
+                    <label class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">Tipo di Rievocazione</label>
+                    <select id="orderSelect" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none">
+                        <option value="direct">Diretta (Standard)</option>
+                        <option value="inverse">Inversa (Speculare)</option>
+                    </select>
+                </div>
+            </div>
+
+            <button onclick="startGame()" class="btn-primary w-full py-5 text-lg">
+                Inizia Sessione (2 min)
+            </button>
+        </div>
+
+        <div id="game" class="hidden">
+            <div class="flex justify-between items-end mb-4">
+                <div class="text-left">
+                    <div id="modeTag" class="inline-block px-2 py-1 bg-blue-100 text-blue-700 text-[10px] font-black uppercase rounded mb-1">DIRETTA</div>
+                    <div id="scoreDisplay" class="text-4xl font-black text-blue-900">0</div>
+                    <div class="text-xs text-slate-400 font-bold uppercase tracking-tighter">Punteggio Totale</div>
+                </div>
+                <div class="text-right">
+                    <div id="timerText" class="text-2xl font-mono font-bold text-slate-700">120s</div>
+                    <div class="text-xs text-slate-400 font-bold uppercase tracking-tighter">Tempo Rimanente</div>
+                </div>
+            </div>
+            
+            <div class="progress-bar-container">
+                <div id="progressFill"></div>
+            </div>
+
+            <div id="statusMessage" class="text-sm font-semibold text-blue-500 mb-2 h-5">Pronto?</div>
+
+            <div class="grid-memory" id="grid"></div>
+
+            <div class="mt-6 flex justify-between items-center px-2">
+                <div class="stat-badge" id="lvDisplay">Lv: 3</div>
+                <button onclick="confirmExit()" class="text-xs text-slate-400 hover:text-red-500 font-bold uppercase transition-colors">Interrompi</button>
+            </div>
+        </div>
+
+        <div id="results" class="hidden text-center">
+            <h2 class="text-2xl font-extrabold text-blue-900 mb-6">Sessione Completata!</h2>
+            
+            <div class="grid grid-cols-2 gap-4 mb-8">
+                <div class="bg-blue-50 p-6 rounded-3xl border border-blue-100">
+                    <span class="block text-[10px] font-bold text-blue-400 uppercase mb-1">Punti</span>
+                    <span id="resScore" class="text-3xl font-black text-blue-900">0</span>
+                </div>
+                <div class="bg-blue-50 p-6 rounded-3xl border border-blue-100">
+                    <span class="block text-[10px] font-bold text-blue-400 uppercase mb-1">Max Lv</span>
+                    <span id="resLevel" class="text-3xl font-black text-blue-900">0</span>
+                </div>
+                <div class="bg-slate-50 p-6 rounded-3xl border border-slate-100">
+                    <span class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Sequenze</span>
+                    <span id="resTotal" class="text-3xl font-black text-slate-700">0</span>
+                </div>
+                <div class="bg-slate-50 p-6 rounded-3xl border border-slate-100">
+                    <span class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Precisione</span>
+                    <span id="resAccuracy" class="text-3xl font-black text-slate-700">0%</span>
+                </div>
+            </div>
+
+            <button onclick="location.reload()" class="btn-primary w-full py-4">Nuova Sessione</button>
+        </div>
+    </div>
+
+    <script>
+        const SESSION_TIME = 120;
+        let audioCtx = null;
+        
+        // Stato di Gioco
+        let sequence = [];
+        let validationSequence = [];
+        let userSequence = [];
+        let currentLen = 3;
+        let score = 0;
+        let timeLeft = SESSION_TIME;
+        let timer = null;
+        let isShowing = false;
+        let canClick = false;
+        let mode = 'direct';
+
+        // Statistiche per riepilogo
+        let stats = {
+            totalAttempts: 0,
+            firstTimeCorrect: 0,
+            errorsInCurrentSequence: 0
+        };
+
+        function playSound(f, t='sine', d=0.2, v=0.08) {
+            if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const o = audioCtx.createOscillator();
+            const g = audioCtx.createGain();
+            o.type = t;
+            o.frequency.setValueAtTime(f, audioCtx.currentTime);
+            g.gain.setValueAtTime(v, audioCtx.currentTime);
+            g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + d);
+            o.connect(g); g.connect(audioCtx.destination);
+            o.start(); o.stop(audioCtx.currentTime + d);
+        }
+
+        function createGrid() {
+            const g = document.getElementById('grid');
+            g.innerHTML = '';
+            for(let i=0; i<16; i++) {
+                const c = document.createElement('div');
+                c.className = 'cell';
+                c.onclick = () => handleInput(i);
+                g.appendChild(c);
+            }
+        }
+
+        function startGame() {
+            if(audioCtx?.state === 'suspended') audioCtx.resume();
+            currentLen = parseInt(document.getElementById('levelSelect').value);
+            mode = document.getElementById('orderSelect').value;
+            
+            document.getElementById('menu').classList.add('hidden');
+            document.getElementById('game').classList.remove('hidden');
+            document.getElementById('modeTag').textContent = mode === 'direct' ? 'Diretta' : 'Inversa';
+            
+            score = 0;
+            timeLeft = SESSION_TIME;
+            stats = { totalAttempts: 0, firstTimeCorrect: 0, errorsInCurrentSequence: 0 };
+            
+            createGrid();
+            updateUI();
+            startTimer();
+            startRound(true);
+        }
+
+        function startTimer() {
+            timer = setInterval(() => {
+                timeLeft--;
+                document.getElementById('timerText').textContent = timeLeft + 's';
+                document.getElementById('progressFill').style.width = (timeLeft/SESSION_TIME)*100 + '%';
+                if(timeLeft <= 0) finalize();
+            }, 1000);
+        }
+
+        function updateUI() {
+            document.getElementById('scoreDisplay').textContent = score;
+            document.getElementById('lvDisplay').textContent = 'Lv: ' + currentLen;
+        }
+
+        async function startRound(isNew) {
+            userSequence = [];
+            if(isNew) {
+                sequence = Array.from({length: currentLen}, () => Math.floor(Math.random()*16));
+                stats.totalAttempts++;
+                stats.errorsInCurrentSequence = 0;
+            }
+            validationSequence = mode === 'inverse' ? [...sequence].reverse() : [...sequence];
+            
+            isShowing = true;
+            canClick = false;
+            document.getElementById('statusMessage').textContent = "Memorizza...";
+            
+            const cells = document.querySelectorAll('.cell');
+            cells.forEach(c => c.className = 'cell');
+            await new Promise(r => setTimeout(r, 800));
+
+            for(let i=0; i<sequence.length; i++) {
+                if(timeLeft <= 0) return;
+                const c = cells[sequence[i]];
+                c.classList.add('active');
+                playSound(200 + (i*50), 'triangle');
+                await new Promise(r => setTimeout(r, 600));
+                c.classList.remove('active');
+                await new Promise(r => setTimeout(r, 200));
+            }
+
+            isShowing = false;
+            canClick = true;
+            document.getElementById('statusMessage').textContent = mode === 'direct' ? "Rievocazione DIRETTA" : "Rievocazione INVERSA";
+        }
+
+        function handleInput(idx) {
+            if(!canClick || isShowing || timeLeft <= 0) return;
+            const cells = document.querySelectorAll('.cell');
+            const target = validationSequence[userSequence.length];
+
+            if(idx === target) {
+                userSequence.push(idx);
+                cells[idx].classList.add('correct');
+                playSound(400 + (userSequence.length*100));
+                
+                if(userSequence.length === validationSequence.length) {
+                    canClick = false;
+                    setTimeout(handleSuccess, 500);
+                }
+            } else {
+                canClick = false;
+                cells[idx].classList.add('wrong');
+                playSound(100, 'sawtooth', 0.5);
+                stats.errorsInCurrentSequence++;
+                setTimeout(() => startRound(false), 1000);
+            }
+        }
+
+        function handleSuccess() {
+            score += currentLen * 10;
+            if(stats.errorsInCurrentSequence === 0) stats.firstTimeCorrect++;
+            
+            // Progression ogni 3 successi perfetti
+            if(stats.firstTimeCorrect % 3 === 0 && stats.errorsInCurrentSequence === 0) {
+                currentLen++;
+            }
+            
+            updateUI();
+            startRound(true);
+        }
+
+        function finalize() {
+            clearInterval(timer);
+            document.getElementById('game').classList.add('hidden');
+            document.getElementById('results').classList.remove('hidden');
+            
+            document.getElementById('resScore').textContent = score;
+            document.getElementById('resLevel').textContent = currentLen;
+            document.getElementById('resTotal').textContent = stats.totalAttempts;
+            
+            const acc = stats.totalAttempts > 0 ? Math.round((stats.firstTimeCorrect / stats.totalAttempts) * 100) : 0;
+            document.getElementById('resAccuracy').textContent = acc + '%';
+        }
+
+        function confirmExit() {
+            if(confirm("Terminare la sessione attuale?")) location.reload();
+        }
+    </script>
+</body>
+</html>

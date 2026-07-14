@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inibizione Cognitiva - Il Gioco del Contrario</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap');
+        
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --bg-gradient: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg-gradient);
+            color: #1e293b;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            transition: transform 0.3s ease;
+        }
+
+        .option-button {
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 2px solid #f1f5f9;
+            background: white;
+            cursor: pointer;
+        }
+
+        .option-button:hover {
+            border-color: var(--primary);
+            background: #f5f3ff;
+            transform: scale(1.02);
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.1);
+        }
+
+        .option-button:active {
+            transform: scale(0.98);
+        }
+
+        .progress-bar-container {
+            height: 8px;
+            background: #f1f5f9;
+            border-radius: 999px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4f46e5, #818cf8);
+            transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .hidden-screen { display: none !important; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-fade {
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+
+        .mode-selector {
+            display: flex;
+            background: #f1f5f9;
+            border-radius: 12px;
+            padding: 4px;
+        }
+
+        .mode-tab {
+            flex: 1;
+            padding: 10px;
+            border-radius: 10px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            transition: all 0.2s;
+            color: #64748b;
+        }
+
+        .mode-tab.active {
+            background: white;
+            color: var(--primary);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Start Screen -->
+    <div id="start-screen" class="max-w-md w-full animate-fade">
+        <div class="glass-card p-10 text-center">
+            <div class="w-20 h-20 bg-indigo-100 rounded-2xl flex items-center justify-center mx-auto mb-8 rotate-3">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+            </div>
+            <h1 class="text-3xl font-bold text-slate-900 mb-3 tracking-tight">Il Gioco del Contrario</h1>
+            <p class="text-slate-500 mb-8 leading-relaxed">Allena la tua mente a ignorare l'istinto. Scegli la risposta <strong>illogica</strong>.</p>
+            
+            <div class="mode-selector mb-8">
+                <button id="btn-timed" class="mode-tab active" onclick="setMode(true)">60 Secondi</button>
+                <button id="btn-relax" class="mode-tab" onclick="setMode(false)">Senza Limiti</button>
+            </div>
+
+            <div class="bg-indigo-50 rounded-2xl p-6 mb-8 text-left border border-indigo-100">
+                <h3 class="text-xs font-bold text-indigo-500 uppercase tracking-widest mb-3">Come funziona:</h3>
+                <p class="text-sm text-indigo-900 leading-relaxed italic">
+                    "Se ti chiedo il colore del cielo, devi rispondere Rosso. Se rispondi Azzurro, l'impulso ha vinto e hai perso!"
+                </p>
+            </div>
+            
+            <button onclick="initSession()" class="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg shadow-indigo-200 transition-all flex items-center justify-center gap-2">
+                <span>Inizia Esercizio</span>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Exercise Screen -->
+    <div id="exercise-screen" class="max-w-2xl w-full hidden-screen animate-fade">
+        <div class="glass-card p-8 md:p-12">
+            
+            <div class="flex items-center justify-between mb-8">
+                <div class="bg-slate-100 px-4 py-2 rounded-full">
+                    <span id="timer-display" class="font-mono font-bold text-slate-700">00:00</span>
+                </div>
+                <div class="text-right">
+                    <span id="item-counter" class="text-sm font-bold text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full">Item 01/15</span>
+                </div>
+            </div>
+
+            <div class="progress-bar-container mb-12">
+                <div id="progress-bar" class="progress-bar-fill" style="width: 0%"></div>
+            </div>
+
+            <div id="exercise-content" class="text-center">
+                <h2 id="question-text" class="text-2xl md:text-3xl font-bold text-slate-800 mb-12 leading-tight min-h-[80px]"></h2>
+                <div id="options-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Failure Overlay -->
+    <div id="fail-overlay" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-900/90 backdrop-blur-md p-6">
+        <div class="glass-card max-w-sm w-full p-8 text-center animate-fade">
+            <div class="w-16 h-16 bg-rose-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+            </div>
+            <h2 class="text-2xl font-bold text-slate-900 mb-2">Impulso Rilevato!</h2>
+            <p id="fail-msg" class="text-slate-500 mb-8 leading-relaxed"></p>
+            <div class="flex flex-col gap-3">
+                <button onclick="restoreSession()" class="w-full py-4 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-all">
+                    Riprova Sessione
+                </button>
+                <button onclick="location.reload()" class="text-sm font-semibold text-slate-400 hover:text-indigo-500">
+                    Torna al Menu
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Victory Overlay -->
+    <div id="win-overlay" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-indigo-900/90 backdrop-blur-md p-6">
+        <div class="glass-card max-w-sm w-full p-8 text-center animate-fade">
+            <div class="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+            <h2 class="text-2xl font-bold text-slate-900 mb-2">Mente d'Acciaio!</h2>
+            <p class="text-slate-500 mb-8">Ottimo controllo dell'inibizione. Hai completato tutti i quesiti senza cedere all'istinto.</p>
+            <button onclick="location.reload()" class="w-full py-4 bg-slate-900 text-white font-bold rounded-xl transition-all">
+                Fine Esercizio
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const fullDatabase = [
+            // LOGICA INGANNEVOLE
+            { q: "Quanti compleanni ha un uomo medio?", impulse: "Uno all'anno", target: "Solo uno" },
+            { q: "Il papà di Rosa ha 5 figlie: Fata, Fete, Fiti, Foto. La quinta è?", impulse: "Rosa", target: "Futu" },
+            { q: "Alcuni mesi hanno 31 giorni, altri 30. Quanti ne hanno 28?", impulse: "Tutti e 12", target: "Solo Febbraio" },
+            { q: "Se hai una scatola con un solo fiammifero e entri in una stanza fredda e buia con una stufa, una lampada e un camino, cosa accendi per primo?", impulse: "Il fiammifero", target: "La stufa" },
+            { q: "Quante fette di pane puoi mangiare a stomaco vuoto?", impulse: "Solo la prima", target: "Tutte" },
+            { q: "Un contadino ha 17 pecore. Tutte tranne 9 muoiono. Quante ne rimangono?", impulse: "Nove", target: "Otto" },
+            { q: "Quale parola nel dizionario è scritta sbagliata?", impulse: "Sbagliata", target: "Tutte" },
+            { q: "Se vedi un aereo cadere proprio sul confine tra Italia e Francia, dove seppellisci i superstiti?", impulse: "Non si seppelliscono", target: "In Italia" },
+            { q: "Se tre gatti mangiano tre topi in tre minuti, quanto ci mette un gatto a mangiare un topo?", impulse: "Tre minuti", target: "Un minuto" },
+            { q: "Cosa succede se lanci un sasso blu nel Mar Rosso?", impulse: "Si bagna", target: "Diventa rosso" },
+            
+            // CONCETTI BASE & ISTINTO
+            { q: "Di che colore sono le nuvole?", impulse: "Bianche", target: "Nere" },
+            { q: "Il fuoco è freddo?", impulse: "No", target: "Sì" },
+            { q: "Lo zucchero è salato?", impulse: "No", target: "Sì" },
+            { q: "Qual è il verso del cane?", impulse: "Bau", target: "Miao" },
+            { q: "Dove vivono i pesci?", impulse: "Acqua", target: "Albero" },
+            { q: "Con cosa si taglia la carne?", impulse: "Coltello", target: "Cucchiaio" },
+            { q: "Di che colore è l'erba?", impulse: "Verde", target: "Viola" },
+            { q: "Il sole scalda?", impulse: "Sì", target: "No" },
+            { q: "Qual è la capitale d'Italia?", impulse: "Roma", target: "Parigi" },
+            { q: "Cosa bevono le mucche?", impulse: "Acqua", target: "Latte" },
+            { q: "Cosa metti sui piedi?", impulse: "Scarpe", target: "Guanti" },
+            { q: "L'elefante è piccolo?", impulse: "No", target: "Sì" },
+
+            // GEOMETRIA E NUMERI
+            { q: "Quanti lati ha un triangolo?", impulse: "Tre", target: "Quattro" },
+            { q: "Il cerchio è quadrato?", impulse: "No", target: "Sì" },
+            { q: "Quanto fa 2 + 2?", impulse: "Quattro", target: "Cinque" },
+            { q: "Dopo il lunedì viene...", impulse: "Martedì", target: "Domenica" },
+            { q: "Le ruote della bici sono...", impulse: "Tonde", target: "Triangolari" },
+
+            // PROVERBI (Inibizione verbale)
+            { q: "Chi va piano va sano e va...", impulse: "Lontano", target: "Velocemente" },
+            { q: "Rosso di sera, bel tempo si...", impulse: "Spera", target: "Vede" },
+            { q: "Una mela al giorno toglie il medico di...", impulse: "Torno", target: "Cucina" },
+            { q: "L'abito non fa il...", impulse: "Monaco", target: "Sarto" }
+        ];
+
+        let currentSessionQuestions = [];
+        let currentIndex = 0;
+        let timeLeft = 60;
+        let timer = null;
+        let isTimedMode = true;
+
+        function setMode(timed) {
+            isTimedMode = timed;
+            document.getElementById('btn-timed').classList.toggle('active', timed);
+            document.getElementById('btn-relax').classList.toggle('active', !timed);
+        }
+
+        function initSession() {
+            currentSessionQuestions = [...fullDatabase]
+                .sort(() => Math.random() - 0.5)
+                .slice(0, 15);
+            
+            currentIndex = 0;
+            document.getElementById('start-screen').classList.add('hidden-screen');
+            document.getElementById('exercise-screen').classList.remove('hidden-screen');
+            
+            if (isTimedMode) {
+                timeLeft = 60;
+                runTimer();
+            } else {
+                document.getElementById('timer-display').innerText = "MODALITÀ RELAX";
+            }
+            renderItem();
+        }
+
+        function runTimer() {
+            clearInterval(timer);
+            timer = setInterval(() => {
+                timeLeft--;
+                const disp = document.getElementById('timer-display');
+                const seconds = timeLeft.toString().padStart(2, '0');
+                disp.innerText = `TEMPO: 00:${seconds}`;
+                
+                if (timeLeft <= 10) disp.classList.add('text-rose-500');
+                else disp.classList.remove('text-rose-500');
+
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    showFailure("Tempo scaduto! Ricorda che l'inibizione deve essere anche rapida.");
+                }
+            }, 1000);
+        }
+
+        function renderItem() {
+            const data = currentSessionQuestions[currentIndex];
+            const qEl = document.getElementById('question-text');
+            
+            // Effetto fade sulla domanda
+            qEl.style.opacity = 0;
+            setTimeout(() => {
+                qEl.innerText = data.q;
+                qEl.style.opacity = 1;
+            }, 150);
+
+            document.getElementById('item-counter').innerText = `ITEM ${(currentIndex + 1).toString().padStart(2, '0')}/15`;
+            document.getElementById('progress-bar').style.width = `${(currentIndex / 15) * 100}%`;
+
+            const grid = document.getElementById('options-grid');
+            grid.innerHTML = '';
+            
+            const options = [data.impulse, data.target].sort(() => Math.random() - 0.5);
+            
+            options.forEach((opt, index) => {
+                const b = document.createElement('button');
+                b.className = 'option-button p-5 md:p-6 rounded-2xl font-bold text-lg text-slate-700 shadow-sm outline-none animate-fade';
+                b.style.animationDelay = `${index * 0.1}s`;
+                b.innerText = opt;
+                b.onclick = () => processAnswer(opt);
+                grid.appendChild(b);
+            });
+        }
+
+        function processAnswer(val) {
+            const currentItem = currentSessionQuestions[currentIndex];
+            
+            if (val === currentItem.impulse) {
+                showFailure(`Hai scelto "${val}". Questa è la risposta logica/vera! Devi invece inibire l'istinto e scegliere quella errata.`);
+            } else {
+                currentIndex++;
+                if (currentIndex >= currentSessionQuestions.length) {
+                    clearInterval(timer);
+                    document.getElementById('win-overlay').classList.remove('hidden');
+                } else {
+                    renderItem();
+                }
+            }
+        }
+
+        function showFailure(msg) {
+            clearInterval(timer);
+            document.getElementById('fail-msg').innerText = msg;
+            document.getElementById('fail-overlay').classList.remove('hidden');
+        }
+
+        function restoreSession() {
+            currentIndex = 0;
+            document.getElementById('fail-overlay').classList.add('hidden');
+            if (isTimedMode) {
+                timeLeft = 60;
+                runTimer();
+            }
+            renderItem();
+        }
+    </script>
+</body>
+</html>

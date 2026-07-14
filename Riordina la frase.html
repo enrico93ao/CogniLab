@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Riordina la Frase</title>
+    <!-- Importazione Font Lexend per alta leggibilità -->
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Lexend', sans-serif;
+            background-color: #f0f4f8;
+            color: #334155;
+            user-select: none;
+            transition: background-color 0.3s ease;
+        }
+        .word-card {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+        }
+        .word-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        }
+        .word-card:active {
+            transform: scale(0.95);
+        }
+        .vassoio {
+            min-height: 80px;
+            border: 2px dashed #cbd5e1;
+            background-color: #ffffff;
+            transition: border-color 0.3s;
+        }
+        .btn-primary {
+            background-color: #3b82f6;
+            color: white;
+            transition: background-color 0.2s;
+        }
+        .btn-primary:hover {
+            background-color: #2563eb;
+        }
+        .correct-anim {
+            animation: bounce 0.5s ease;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        .bg-correct { background-color: #dcfce7 !important; }
+        .bg-error { background-color: #fee2e2 !important; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-4">
+
+    <!-- Schermata Menu Iniziale -->
+    <div id="menu-screen" class="w-full max-w-xl bg-white p-8 rounded-3xl shadow-xl">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-blue-600 mb-2">Riordina la Frase</h1>
+            <p class="text-slate-500">Allena la mente ricostruendo la corretta sintassi.</p>
+        </div>
+
+        <div class="space-y-6">
+            <div>
+                <label class="block text-sm font-semibold mb-2">Difficoltà:</label>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <button onclick="setDifficulty('base')" id="btn-base" class="py-3 px-4 rounded-xl border-2 border-blue-500 bg-blue-50 text-blue-700 font-medium hover:bg-blue-100 transition-colors">
+                        Base<br><span class="text-xs font-normal text-slate-500">Semplice (3-6 parole)</span>
+                    </button>
+                    <button onclick="setDifficulty('intermedio')" id="btn-intermedio" class="py-3 px-4 rounded-xl border-2 border-slate-100 bg-slate-50 text-slate-700 font-medium hover:bg-slate-100 transition-colors">
+                        Intermedio<br><span class="text-xs font-normal text-slate-500">Strutturato (6-9 parole)</span>
+                    </button>
+                    <button onclick="setDifficulty('avanzato')" id="btn-avanzato" class="py-3 px-4 rounded-xl border-2 border-slate-100 bg-slate-50 text-slate-700 font-medium hover:bg-slate-100 transition-colors">
+                        Avanzato<br><span class="text-xs font-normal text-slate-500">Proverbi e Sfide (7+ p.)</span>
+                    </button>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-semibold mb-2">Durata Partita:</label>
+                <div class="grid grid-cols-2 gap-3">
+                    <button onclick="setLength(5)" id="btn-len-5" class="py-3 px-4 rounded-xl border-2 border-blue-500 bg-blue-50 text-blue-700 font-medium hover:bg-blue-100 transition-colors">
+                        5 Frasi
+                    </button>
+                    <button onclick="setLength(10)" id="btn-len-10" class="py-3 px-4 rounded-xl border-2 border-slate-100 bg-slate-50 text-slate-700 font-medium hover:bg-slate-100 transition-colors">
+                        10 Frasi
+                    </button>
+                </div>
+            </div>
+
+            <button onclick="startGame()" class="w-full btn-primary py-4 rounded-2xl text-lg font-bold shadow-lg mt-4">
+                Inizia a Giocare
+            </button>
+        </div>
+    </div>
+
+    <!-- Schermata di Gioco -->
+    <div id="game-screen" class="hidden w-full max-w-2xl bg-white p-6 md:p-10 rounded-3xl shadow-xl">
+        <div class="flex justify-between items-center mb-6">
+            <div class="text-sm font-bold text-slate-400 uppercase tracking-widest">
+                Frase <span id="current-index">1</span> di <span id="total-index">5</span>
+            </div>
+            <button onclick="quitToMenu()" class="text-slate-400 hover:text-red-500 transition-colors font-medium">
+                Esci
+            </button>
+        </div>
+
+        <!-- Vassoio Superiore -->
+        <div class="mb-4 text-xs font-semibold text-slate-400 uppercase">La tua frase:</div>
+        <div id="vassoio" class="vassoio w-full p-4 rounded-2xl flex flex-wrap gap-2 items-center content-start mb-8">
+            <!-- Parole selezionate appariranno qui -->
+        </div>
+
+        <div class="flex justify-between items-center mb-8">
+            <div class="text-xs font-semibold text-slate-400 uppercase">Scegli le parole:</div>
+            <button id="undo-btn" onclick="undoLastWord()" class="hidden text-sm font-semibold text-orange-500 hover:text-orange-600 flex items-center gap-1">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+                </svg>
+                Annulla ultima
+            </button>
+        </div>
+
+        <div id="pool-parole" class="flex flex-wrap gap-3 justify-center mb-10 min-h-[120px]">
+            <!-- Parole rimescolate qui -->
+        </div>
+
+        <div id="feedback-area" class="h-12 text-center font-bold text-lg"></div>
+    </div>
+
+    <!-- Schermata Finale Statistiche -->
+    <div id="final-screen" class="hidden w-full max-w-md bg-white p-8 rounded-3xl shadow-xl text-center">
+        <div class="mb-4 text-6xl">🎉</div>
+        <h2 class="text-3xl font-bold mb-6 text-slate-800">Sessione Completata!</h2>
+        
+        <div class="grid grid-cols-2 gap-4 mb-8">
+            <div class="bg-blue-50 p-4 rounded-2xl">
+                <div class="text-2xl font-bold text-blue-600" id="stat-correct">0</div>
+                <div class="text-xs uppercase font-bold text-slate-400">Frasi Corrette</div>
+            </div>
+            <div class="bg-red-50 p-4 rounded-2xl">
+                <div class="text-2xl font-bold text-red-600" id="stat-errors">0</div>
+                <div class="text-xs uppercase font-bold text-slate-400">Errori commessi</div>
+            </div>
+            <div class="bg-green-50 p-4 rounded-2xl col-span-2">
+                <div class="text-2xl font-bold text-green-600" id="stat-speed">0s</div>
+                <div class="text-xs uppercase font-bold text-slate-400">Tempo Medio per Frase</div>
+            </div>
+        </div>
+
+        <button onclick="goToMenu()" class="w-full btn-primary py-4 rounded-2xl text-lg font-bold shadow-lg">
+            Torna al Menu
+        </button>
+    </div>
+
+    <script>
+        const database = {
+            base: [
+                "Il gatto dorme sul divano", "Oggi il tempo è bellissimo", "Mi piace mangiare la pizza", "Il sole sorge al mattino",
+                "La scuola apre alle otto", "Indosso una maglia rossa", "Il cane corre nel prato", "Leggo un libro molto interessante",
+                "Bevo un bicchiere di acqua", "La mamma cucina la torta", "Guardo i cartoni animati", "Il fiore profuma di buono",
+                "Vado al mare in estate", "Prendo l'autobus per andare a casa", "Uso il computer per studiare", "Sorrido quando sono felice",
+                "La matita scrive sul foglio", "Chiudo la finestra per il freddo", "Ascolto la musica con la radio", "Gioco a palla con gli amici",
+                "Mio fratello mangia una mela", "La luna brilla nel cielo", "Il treno parte dal binario", "Pulisco la mia camera oggi",
+                "Il nonno legge il giornale", "Mi lavo i denti sempre", "La pioggia bagna i fiori", "Compro il pane dal fornaio",
+                "Il vento scuote gli alberi", "Il caffè scotta molto ora", "Corro veloce verso la scuola", "La farfalla vola nel giardino",
+                "Porto lo zaino sulla schiena", "Il papà lavora in ufficio", "Il mare è calmo stasera", "Disegno un sole giallo grande",
+                "Mi piace molto questo gioco", "Ho fame e voglio cenare", "Canto una canzone di Natale", "Apro il pacchetto di biscotti",
+                "Il gatto rincorre il topo", "La mela è dolce e rossa", "La sedia è vicino al tavolo", "Indosso le scarpe per uscire",
+                "Il bambino gioca con il trenino", "Mi piace molto il gelato", "Domani vado a fare la spesa", "Il cielo è azzurro oggi",
+                "Ho comprato un regalo per te", "Lavo le mani con il sapone", "La penna è sul quaderno", "Bevo un succo di frutta",
+                "Mi sveglio presto ogni mattina", "La neve cade sulla montagna", "Vado a dormire nel mio letto", "Il bosco è pieno di alberi",
+                "Leggo una storia ai bambini", "Metto il cappotto per uscire", "La torta è nel forno", "Ascolto il rumore del mare"
+            ],
+            intermedio: [
+                "Il vecchio pescatore osserva le onde del mare calmo",
+                "Durante la scorsa notte la forte pioggia ha bagnato le strade",
+                "Gli studenti più diligenti leggono attentamente il libro di storia",
+                "Il treno ad alta velocità attraversa la galleria della montagna",
+                "La zia prepara sempre una crostata con marmellata di ciliegie",
+                "I bambini giocano allegramente nel parco fiorito della scuola",
+                "Ieri sera abbiamo guardato un fantastico documentario sugli animali selvatici",
+                "La vecchia chiave d'argento apre la pesante porta di legno",
+                "Il gatto nero salta agilmente sopra il muretto di mattoni",
+                "Il fotografo naturalista scatta una splendida foto al tramonto sulla spiaggia",
+                "Il medico consiglia caldamente di bere molta acqua ogni giorno",
+                "La pallida luce della luna piena illumina il sentiero nel bosco",
+                "Domenica scorsa abbiamo deciso di fare una lunga passeggiata in bicicletta",
+                "Il giovane cameriere porta un vassoio pieno di bicchieri colorati",
+                "Gli alberi del grande giardino pubblico perdono le foglie in autunno",
+                "Un forte vento di tramontana soffia tra i rami del pino selvatico",
+                "Il famoso pittore dipinge un ritratto realistico con i colori a olio",
+                "La simpatica maestra spiega la nuova lezione di scienze alla lavagna",
+                "Abbiamo trovato una mappa misteriosa nella vecchia soffitta del nonno",
+                "Il cuoco stellato taglia le verdure fresche per la zuppa di oggi",
+                "I turisti stranieri visitano il museo d'arte moderna della nostra città",
+                "La fontana monumentale della piazza spruzza acqua fresca tutto il giorno",
+                "Il mio cane preferito ama correre felice dietro alla pallina rossa",
+                "Un aeroplano bianco vola molto alto sopra le nuvole grigie",
+                "La nuova biblioteca comunale offre molti libri interessanti da leggere",
+                "Il postino del quartiere consegna una lettera importante alla vicina",
+                "Gli scienziati studiano attentamente il comportamento delle stelle nel cielo",
+                "Ieri abbiamo finalmente comprato i biglietti per il concerto di stasera",
+                "Il fiume azzurro scorre lentamente verso la sua foce nel mare",
+                "Un piccolo bruco verde mangia avidamente la foglia di insalata",
+                "I vecchi pescatori riparano pazientemente le reti sulla riva del lago",
+                "La nonna racconta sempre favole bellissime sul nostro lontano passato",
+                "Il giardiniere esperto cura i fiori profumati nel grande parco cittadino",
+                "Per sabato prossimo abbiamo organizzato una divertente festa a sorpresa",
+                "La pioggia estiva rinfresca l'aria pulita dopo una giornata afosa",
+                "Il treno regionale per Milano parte sempre in perfetto orario",
+                "Un irresistibile profumo di pane caldo si diffonde dalla cucina aperta",
+                "Il guardiano notturno chiude il grande cancello del castello medievale",
+                "I ragazzi del liceo studiano la lingua italiana con entusiasmo",
+                "Il vento fresco di montagna muove dolcemente le tende della camera"
+            ],
+            avanzato: [
+                "L'appetito vien mangiando dice un vecchio proverbio", "Tra il dire e il fare c'è di mezzo il mare",
+                "Non rimandare a domani quello che puoi fare oggi", "Chi trova un amico trova un tesoro prezioso",
+                "Nel mezzo del cammin di nostra vita mi ritrovai", "Fatti non foste a viver come bruti ma per seguire virtute",
+                "Sbagliando si impara e si diventa più saggi", "La pazienza è la virtù dei forti e dei saggi",
+                "L'unione fa la forza in ogni situazione difficile", "Tutte le strade portano alla città di Roma",
+                "Chi la dura la vince recita un noto adagio", "Non tutto il male vien per nuocere alla fine",
+                "Vivi e lascia vivere senza giudicare gli altri", "Il silenzio vale più di mille parole inutili",
+                "La bellezza salverà il mondo diceva un grande autore", "Nulla si crea e nulla si distrugge ma tutto si trasforma",
+                "Considerate la vostra semenza fatti non foste a viver come bruti", "A goccia a goccia si scava la pietra più dura",
+                "Ognuno è fabbro della propria fortuna nel mondo", "La calma è la virtù dei forti nei momenti critici",
+                "L'essenziale è invisibile agli occhi dice il piccolo principe", "Non si vede bene che col cuore recita la favola",
+                "Il lupo perde il pelo ma non il vizio mai", "Una rondine non fa primavera diceva la nonna",
+                "Tanto va la gatta al lardo che ci lascia lo zampino", "Meglio un uovo oggi che una gallina domani",
+                "Chi dorme non piglia pesci è un motto famoso", "L'erba del vicino è sempre più verde della nostra",
+                "In un mare di guai si impara a nuotare forte", "La speranza è l'ultima a morire nel cuore umano",
+                "Rosso di sera bel tempo si spera per domani", "Gallina vecchia fa buon brodo dice il contadino",
+                "Impara l'arte e mettila da parte per il futuro", "Ride bene chi ride ultimo alla fine dei giochi",
+                "Chi va piano va sano e va lontano sempre", "Tanto rumore per nulla scrisse il bardo inglese",
+                "Il fine giustifica i mezzi affermò un noto pensatore", "Cogito ergo sum ovvero penso dunque esisto veramente",
+                "Tutto è bene quel che finisce bene per tutti", "La fortuna aiuta gli audaci che osano sempre",
+                "La vita è come una scatola di cioccolatini", "Ogni viaggio inizia con un singolo piccolo passo",
+                "Il segreto per andare avanti è iniziare subito", "Le parole sono finestre oppure sono muri spessi",
+                "Non si può attraversare l'oceano senza coraggio", "Il tempo è la moneta della tua vita",
+                "L'unica costante della vita è il cambiamento continuo", "Sii il cambiamento che vuoi vedere nel mondo",
+                "Il successo è l'abilità di passare da un fallimento", "La curiosità è il motore della vera conoscenza",
+                "Le grandi menti parlano di idee non di persone", "Non contano gli anni ma la vita negli anni",
+                "La vita è quello che accade mentre fai piani", "Agisci come se quello che fai faccia la differenza",
+                "Un giorno senza un sorriso è un giorno perso", "Vivi come se dovessi morire domani impara sempre",
+                "La creatività richiede il coraggio di abbandonare le certezze", "Il modo migliore per predire il futuro è crearlo",
+                "La saggezza inizia con lo stupore davanti al mondo", "Niente è davvero impossibile per un cuore che arde"
+            ]
+        };
+
+        let config = { difficulty: 'base', length: 5 };
+        let gameState = {
+            currentFraseIndex: 0,
+            frasiSelezionate: [],
+            paroleSelezionate: [],
+            fraseOriginale: [],
+            paroleRimanenti: [],
+            stats: {
+                errors: 0,
+                startTime: 0,
+                totalTime: 0
+            }
+        };
+
+        // Audio System (Web Audio API)
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playSound(freq, type, duration) {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + duration);
+        }
+
+        function playCorrectSound() {
+            playSound(523.25, 'sine', 0.2); // C5
+            setTimeout(() => playSound(659.25, 'sine', 0.3), 100); // E5
+        }
+
+        function playErrorSound() {
+            playSound(150, 'sawtooth', 0.3);
+        }
+
+        function setDifficulty(diff) {
+            config.difficulty = diff;
+            updateDifficultyButtons(diff);
+        }
+
+        function setLength(len) {
+            config.length = len;
+            updateMenuButtons('btn-len-5', 'btn-len-10', len === 5);
+        }
+
+        function updateDifficultyButtons(selectedDiff) {
+            const diffs = ['base', 'intermedio', 'avanzato'];
+            diffs.forEach(diff => {
+                const btn = document.getElementById(`btn-${diff}`);
+                if (diff === selectedDiff) {
+                    btn.className = 'py-3 px-4 rounded-xl border-2 border-blue-500 bg-blue-50 text-blue-700 font-medium transition-colors';
+                } else {
+                    btn.className = 'py-3 px-4 rounded-xl border-2 border-slate-100 bg-slate-50 text-slate-700 font-medium hover:bg-slate-100 transition-colors';
+                }
+            });
+        }
+
+        function updateMenuButtons(id1, id2, condition) {
+            const b1 = document.getElementById(id1);
+            const b2 = document.getElementById(id2);
+            b1.className = condition ? 'py-3 px-4 rounded-xl border-2 border-blue-500 bg-blue-50 text-blue-700 font-medium' : 'py-3 px-4 rounded-xl border-2 border-slate-100 bg-slate-50 text-slate-700 font-medium';
+            b2.className = !condition ? 'py-3 px-4 rounded-xl border-2 border-blue-500 bg-blue-50 text-blue-700 font-medium' : 'py-3 px-4 rounded-xl border-2 border-slate-100 bg-slate-50 text-slate-700 font-medium';
+        }
+
+        function startGame() {
+            const source = database[config.difficulty];
+            gameState.frasiSelezionate = [...source].sort(() => Math.random() - 0.5).slice(0, config.length);
+            gameState.currentFraseIndex = 0;
+            gameState.stats.errors = 0;
+            gameState.stats.totalTime = 0;
+            
+            document.getElementById('total-index').innerText = config.length;
+            document.getElementById('menu-screen').classList.add('hidden');
+            document.getElementById('game-screen').classList.remove('hidden');
+            document.getElementById('final-screen').classList.add('hidden');
+            
+            loadFrase();
+        }
+
+        function loadFrase() {
+            const fraseTesto = gameState.frasiSelezionate[gameState.currentFraseIndex];
+            gameState.fraseOriginale = fraseTesto.split(' ');
+            gameState.paroleSelezionate = [];
+            gameState.paroleRimanenti = [...gameState.fraseOriginale].sort(() => Math.random() - 0.5);
+            
+            gameState.stats.startTime = Date.now();
+            document.getElementById('current-index').innerText = gameState.currentFraseIndex + 1;
+            document.getElementById('feedback-area').innerText = '';
+            renderBoard();
+        }
+
+        function renderBoard() {
+            const vassoio = document.getElementById('vassoio');
+            const pool = document.getElementById('pool-parole');
+            const undoBtn = document.getElementById('undo-btn');
+
+            vassoio.innerHTML = '';
+            gameState.paroleSelezionate.forEach(parola => {
+                const el = document.createElement('div');
+                el.className = 'word-card bg-blue-100 text-blue-800 px-4 py-2 rounded-xl border border-blue-200 font-medium';
+                el.innerText = parola;
+                vassoio.appendChild(el);
+            });
+
+            pool.innerHTML = '';
+            gameState.paroleRimanenti.forEach((parola, index) => {
+                const el = document.createElement('div');
+                el.className = 'word-card bg-white text-slate-700 px-4 py-2 rounded-xl border-2 border-slate-100 font-medium hover:border-blue-300';
+                el.innerText = parola;
+                el.onclick = () => selectWord(index);
+                pool.appendChild(el);
+            });
+
+            undoBtn.classList.toggle('hidden', gameState.paroleSelezionate.length === 0);
+        }
+
+        function triggerFlash(type) {
+            document.body.classList.add(type === 'correct' ? 'bg-correct' : 'bg-error');
+            setTimeout(() => {
+                document.body.classList.remove('bg-correct', 'bg-error');
+            }, 200);
+        }
+
+        function selectWord(index) {
+            const parola = gameState.paroleRimanenti[index];
+            const nextExpected = gameState.fraseOriginale[gameState.paroleSelezionate.length];
+
+            if (parola === nextExpected) {
+                // Parola corretta
+                gameState.paroleRimanenti.splice(index, 1);
+                gameState.paroleSelezionate.push(parola);
+                triggerFlash('correct');
+                renderBoard();
+                checkWin();
+            } else {
+                // Errore
+                gameState.stats.errors++;
+                playErrorSound();
+                triggerFlash('error');
+                const feedback = document.getElementById('feedback-area');
+                feedback.innerText = 'Ordine sbagliato!';
+                feedback.className = 'h-12 text-center font-bold text-lg text-red-500';
+                setTimeout(() => feedback.innerText = '', 1000);
+            }
+        }
+
+        function undoLastWord() {
+            if (gameState.paroleSelezionate.length > 0) {
+                const parola = gameState.paroleSelezionate.pop();
+                gameState.paroleRimanenti.push(parola);
+                renderBoard();
+            }
+        }
+
+        function checkWin() {
+            if (gameState.paroleSelezionate.length === gameState.fraseOriginale.length) {
+                const timeTaken = (Date.now() - gameState.stats.startTime) / 1000;
+                gameState.stats.totalTime += timeTaken;
+                
+                playCorrectSound();
+                const feedback = document.getElementById('feedback-area');
+                feedback.innerText = '✨ Bravissimo!';
+                feedback.className = 'h-12 text-center font-bold text-lg text-green-500 correct-anim';
+                
+                setTimeout(() => {
+                    gameState.currentFraseIndex++;
+                    if (gameState.currentFraseIndex < gameState.frasiSelezionate.length) {
+                        loadFrase();
+                    } else {
+                        showFinalScreen();
+                    }
+                }, 1200);
+            }
+        }
+
+        function showFinalScreen() {
+            document.getElementById('game-screen').classList.add('hidden');
+            document.getElementById('final-screen').classList.remove('hidden');
+            
+            document.getElementById('stat-correct').innerText = gameState.frasiSelezionate.length;
+            document.getElementById('stat-errors').innerText = gameState.stats.errors;
+            const avgSpeed = (gameState.stats.totalTime / gameState.frasiSelezionate.length).toFixed(1);
+            document.getElementById('stat-speed').innerText = avgSpeed + 's';
+        }
+
+        function quitToMenu() {
+            const feedback = document.getElementById('feedback-area');
+            feedback.innerText = '';
+            goToMenu();
+        }
+
+        function goToMenu() {
+            document.getElementById('game-screen').classList.add('hidden');
+            document.getElementById('final-screen').classList.add('hidden');
+            document.getElementById('menu-screen').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>

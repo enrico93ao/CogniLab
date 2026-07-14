@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Memoria Visiva - Allenamento Cognitivo</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    @keyframes spin-slow {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    .animate-spin-slow {
+      animation: spin-slow 8s linear infinite;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-neutral-50 p-4 md:p-8 flex flex-col items-center font-sans text-slate-900 transition-all duration-500">
+
+  <div class="max-w-4xl w-full bg-white rounded-[2.5rem] shadow-2xl overflow-hidden border border-slate-200">
+    
+    <!-- Header -->
+    <header class="bg-indigo-600 p-8 text-white text-center relative overflow-hidden">
+      <div class="absolute -top-10 -right-10 opacity-10 rotate-12 pointer-events-none">
+        <i data-lucide="brain-circuit" class="w-32 h-32"></i>
+      </div>
+      <h1 class="text-3xl font-black tracking-tight">MEMORIA FOCUS v2.4</h1>
+      <p class="text-indigo-200 font-bold uppercase tracking-[0.2em] text-[10px] mt-1">Semplificato & Calibrato</p>
+    </header>
+
+    <!-- SCHERMATA: INTRO -->
+    <section id="phase-intro" class="p-8 md:p-12 animate-in fade-in duration-500">
+      <div class="text-center mb-10">
+        <div class="mb-6 flex justify-center text-indigo-600 bg-indigo-50 w-24 h-24 items-center rounded-[2rem] mx-auto shadow-inner border border-indigo-100/50">
+          <i data-lucide="brain" class="w-12 h-12"></i>
+        </div>
+        <h2 class="text-3xl font-black mb-3 text-slate-900 tracking-tight">Pronto alla sfida?</h2>
+        <p class="text-slate-500 max-w-sm mx-auto font-medium">Allena la tua memoria visiva con scene calibrate e compiti di interferenza cognitiva.</p>
+      </div>
+
+      <div class="max-w-md mx-auto space-y-6">
+        <!-- Difficoltà Quiz -->
+        <div class="space-y-4">
+          <div class="flex items-center gap-2 mb-2 ml-2">
+            <i data-lucide="help-circle" class="w-4 h-4 text-indigo-500"></i>
+            <span class="font-black text-slate-400 uppercase text-[10px] tracking-widest">Difficoltà Quiz</span>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <button id="btn-quiz-base" onclick="setQuizDifficulty('base')" class="py-4 rounded-2xl font-black text-xs uppercase tracking-widest border-2 transition-all">
+              Base
+            </button>
+            <button id="btn-quiz-avanzato" onclick="setQuizDifficulty('avanzato')" class="py-4 rounded-2xl font-black text-xs uppercase tracking-widest border-2 transition-all">
+              Avanzato
+            </button>
+          </div>
+        </div>
+
+        <!-- Distrazione -->
+        <div class="bg-slate-50 p-6 rounded-[2rem] border border-slate-100 shadow-sm relative overflow-hidden">
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-3">
+              <div class="p-3 bg-white rounded-2xl text-indigo-500 shadow-sm">
+                <i data-lucide="settings-2" class="w-5 h-5"></i>
+              </div>
+              <div>
+                <span class="block font-black text-slate-800 uppercase text-[10px] tracking-widest">Task Distraente</span>
+                <span class="text-[10px] text-slate-400 font-bold">Interferenza post-studio</span>
+              </div>
+            </div>
+            <button id="toggle-distraction" onclick="toggleDistraction()" class="relative inline-flex h-8 w-14 items-center rounded-full transition-all bg-indigo-600">
+              <span id="toggle-handle" class="inline-block h-6 w-6 transform rounded-full bg-white shadow-lg transition-transform translate-x-7"></span>
+            </button>
+          </div>
+
+          <div id="distraction-diff-container" class="grid grid-cols-2 gap-4 transition-all">
+            <button id="btn-distract-base" onclick="setDistractDifficulty('base')" class="py-3 rounded-xl font-black text-[10px] uppercase tracking-widest border-2 transition-all">
+              Base (Calcoli)
+            </button>
+            <button id="btn-distract-avanzato" onclick="setDistractDifficulty('avanzato')" class="py-3 rounded-xl font-black text-[10px] uppercase tracking-widest border-2 transition-all">
+              Avanzato (+Parole)
+            </button>
+          </div>
+        </div>
+
+        <button onclick="startExercise()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-black py-6 rounded-[2rem] shadow-2xl shadow-indigo-200 transition-all transform hover:scale-[1.02] active:scale-95 text-xl uppercase tracking-widest flex items-center justify-center gap-4">
+          Inizia Esercizio <i data-lucide="image" class="w-6 h-6"></i>
+        </button>
+      </div>
+    </section>
+
+    <!-- SCHERMATA: LOADING -->
+    <section id="phase-loading" class="hidden p-16 md:p-24 text-center animate-in fade-in duration-500">
+      <div class="relative mb-12">
+        <div class="absolute inset-0 flex items-center justify-center">
+          <div class="w-48 h-48 bg-indigo-50 rounded-full animate-ping opacity-20"></div>
+        </div>
+        <i data-lucide="loader-2" class="w-20 h-20 text-indigo-600 animate-spin mx-auto relative z-10"></i>
+      </div>
+      
+      <div class="max-w-sm mx-auto mb-8">
+        <div class="flex justify-between items-end mb-3 px-2">
+          <span class="text-[11px] font-black text-indigo-600 uppercase tracking-widest flex items-center gap-2">
+            <i data-lucide="sparkles" class="w-3 h-3"></i> Elaborazione IA
+          </span>
+          <span id="loading-percent" class="text-3xl font-black text-slate-900 tabular-nums">0%</span>
+        </div>
+        <div class="h-4 w-full bg-slate-100 rounded-full overflow-hidden border border-slate-200 p-1 shadow-inner">
+          <div id="loading-bar" class="h-full bg-gradient-to-r from-indigo-500 to-violet-600 rounded-full transition-all duration-300 shadow-sm" style="width: 0%"></div>
+        </div>
+      </div>
+
+      <h2 id="loading-message" class="text-xl font-black text-slate-800 mb-2 min-h-[3rem] px-8 leading-tight">
+        Inizializzazione test...
+      </h2>
+    </section>
+
+    <!-- SCHERMATA: STUDY -->
+    <section id="phase-study" class="hidden p-8 flex flex-col items-center animate-in fade-in duration-700">
+      <div class="w-full flex justify-between items-center mb-6 bg-indigo-50 p-4 rounded-2xl border border-indigo-100">
+        <div class="flex items-center gap-2 text-indigo-700 font-black uppercase tracking-widest text-xs">
+          <i data-lucide="eye" class="animate-pulse"></i> Osserva con attenzione
+        </div>
+        <div class="flex items-center gap-3 bg-white text-indigo-700 px-6 py-2 rounded-xl shadow-sm border border-indigo-100 font-mono text-2xl font-black">
+          <i data-lucide="timer" class="text-indigo-500 w-5 h-5"></i> <span id="study-timer">35s</span>
+        </div>
+      </div>
+      
+      <div class="rounded-[2rem] overflow-hidden border-[12px] border-white shadow-2xl bg-slate-100 max-h-[50vh] flex justify-center">
+        <img id="study-image" src="" alt="Scena da memorizzare" class="max-h-[48vh] w-auto object-contain block">
+      </div>
+      
+      <button onclick="skipStudy()" class="mt-8 font-black text-indigo-600 hover:text-indigo-800 transition-colors uppercase text-sm tracking-widest">
+        Ho memorizzato tutto →
+      </button>
+    </section>
+
+    <!-- SCHERMATA: DISTRACT -->
+    <section id="phase-distract" class="hidden p-12 text-center flex flex-col items-center animate-in slide-in-from-bottom duration-500">
+      <div class="mb-6 p-6 bg-white rounded-full shadow-lg text-rose-500">
+        <i data-lucide="brain-circuit" class="w-12 h-12 animate-pulse"></i>
+      </div>
+      <h2 class="text-2xl font-black text-slate-900 mb-8 uppercase tracking-tighter">Compito Distraente</h2>
+      
+      <div class="flex items-center gap-4 mb-10 bg-rose-50 text-rose-700 px-8 py-2 rounded-2xl border border-rose-100">
+        <i data-lucide="timer" class="w-6 h-6"></i>
+        <span id="distract-timer" class="font-mono text-3xl font-black">25s</span>
+      </div>
+
+      <div class="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100 flex flex-col items-center gap-6 w-full max-w-md">
+        <!-- Math Task Area -->
+        <div id="distract-math" class="hidden text-6xl font-black text-slate-800 tracking-tighter">
+          <span id="math-a">0</span> <span class="text-indigo-500">+</span> <span id="math-b">0</span>
+        </div>
+        <!-- Word Task Area -->
+        <div id="distract-word" class="hidden">
+          <span class="text-[10px] font-black text-indigo-500 uppercase tracking-[0.3em] block mb-3">Scrivi al contrario:</span>
+          <div id="word-to-reverse" class="text-5xl font-black text-slate-800 tracking-tight break-all uppercase">PAROLA</div>
+          <div id="word-badge" class="hidden mt-3 text-[9px] bg-indigo-100 text-indigo-700 font-bold px-2 py-0.5 rounded-full inline-block uppercase">Parola Lunga</div>
+        </div>
+
+        <input 
+          type="text" 
+          id="distract-input"
+          oninput="onDistractInput(this.value)"
+          class="w-full p-5 text-center text-4xl font-black bg-slate-50 border-b-8 border-slate-200 focus:border-indigo-500 outline-none rounded-2xl uppercase transition-all"
+          placeholder="..."
+          autocomplete="off"
+        >
+      </div>
+    </section>
+
+    <!-- SCHERMATA: QUIZ -->
+    <section id="phase-quiz" class="hidden p-8 md:p-12 animate-in fade-in duration-500">
+      <div class="mb-10 border-b-2 border-slate-100 pb-6 flex justify-between items-center">
+        <div class="flex items-center gap-4">
+          <div class="p-3 bg-indigo-600 text-white rounded-2xl">
+            <i data-lucide="help-circle" class="w-6 h-6"></i>
+          </div>
+          <h2 class="text-3xl font-black">Rievocazione</h2>
+        </div>
+      </div>
+      
+      <div id="quiz-questions-container" class="space-y-10">
+        <!-- Generato Dinamicamente -->
+      </div>
+
+      <button id="btn-submit-quiz" onclick="finishQuiz()" class="mt-12 w-full bg-slate-900 text-white font-black py-7 rounded-[2rem] text-xl uppercase tracking-widest disabled:opacity-30 transition-all">
+        Verifica Risposte
+      </button>
+    </section>
+
+    <!-- SCHERMATA: RESULT -->
+    <section id="phase-result" class="hidden p-8 md:p-12 animate-in zoom-in duration-500">
+      <div class="text-center mb-10">
+        <div id="result-icon-container" class="mb-8 inline-flex p-8 rounded-[3rem] shadow-xl">
+          <i id="result-icon" class="w-20 h-20"></i>
+        </div>
+        <div id="result-score" class="text-7xl font-black mb-4 tracking-tighter text-indigo-600">0 / 5</div>
+        <p id="result-text" class="text-slate-500 font-bold text-lg">Ottimo lavoro!</p>
+      </div>
+
+      <!-- Riepilogo Performance -->
+      <div class="bg-slate-50 rounded-[2rem] p-6 md:p-8 mb-10 border border-slate-200">
+        <h3 class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-6 flex items-center gap-2">
+          <i data-lucide="check-circle" class="w-4 h-4"></i> Riepilogo Risposte
+        </h3>
+        
+        <div id="result-summary-container" class="space-y-6">
+          <!-- Popolato via JS -->
+        </div>
+      </div>
+      
+      <div class="flex flex-col md:flex-row gap-4 justify-center">
+        <button onclick="openImageModal()" class="px-10 py-5 bg-white border-2 border-slate-200 rounded-2xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-slate-50 transition-all">
+          <i data-lucide="image" class="w-5 h-5"></i> Rivedi Immagine
+        </button>
+        <button onclick="resetExercise()" class="px-10 py-5 bg-indigo-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all">
+          <i data-lucide="rotate-ccw" class="w-5 h-5"></i> Nuovo Test
+        </button>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- MODAL: IMAGE REVISION -->
+  <div id="image-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-6 bg-slate-900/90 backdrop-blur-sm animate-in fade-in duration-300">
+    <div class="relative max-w-4xl w-full bg-white rounded-[2.5rem] overflow-hidden p-3 border-8 border-white">
+      <button onclick="closeImageModal()" class="absolute top-6 right-6 p-3 bg-slate-100 rounded-full hover:bg-rose-100 hover:text-rose-600 transition-all z-10">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+      <img id="modal-image" src="" alt="Revisione Scena" class="w-full h-auto max-h-[80vh] object-contain rounded-2xl">
+    </div>
+  </div>
+
+  <!-- Script di Gestione Applicazione -->
+  <script>
+    // Configurazione Stato Globale
+    const apiKey = ""; 
+    const state = {
+      phase: 'intro',
+      timeLeft: 0,
+      score: 0,
+      answers: {},
+      currentImage: null,
+      questions: [],
+      statusMessage: "",
+      loadingProgress: 0,
+      useDistraction: true,
+      distractDifficulty: 'base',
+      quizDifficulty: 'base',
+      distractStep: 0,
+      distractTask: { type: 'math', a: 0, b: 0, word: '', target: '', userVal: '' }
+    };
+
+    const usedTasks = new Set();
+    let globalTimerInterval = null;
+
+    const shortWords = ["CASA", "MARE", "LUNA", "PANE", "GATTO", "LIBRO", "FIORE", "PORTA", "SOLE", "VINO"];
+    const longWords = ["ELEFANTE", "ASTRONAVE", "ORIZZONTE", "QUADRANTE", "COMPUTER", "ARCHITETTO", "DINOSAURO", "SPETTACOLO"];
+
+    const themeCategories = {
+      interni: [
+        "Una scrivania pulita con un solo laptop aperto, una tazza fumante e una lampada",
+        "Una mensola con tre vasi di ceramica di colori diversi e un orologio",
+        "Una cucina moderna con un piatto di frutta, un frullatore e un guanto da forno",
+        "Un angolo lettura con una poltrona singola, un libro aperto e un cuscino"
+      ],
+      esterni: [
+        "Una panchina in legno in un prato verde con un ombrello giallo appoggiato",
+        "Un piccolo balcone con due sedie pieghevoli e una pianta di girasole",
+        "Un vialetto di ghiaia con una bicicletta rossa e una cassetta delle lettere",
+        "Una tenda da campeggio azzurra accanto a uno zaino e una torcia"
+      ],
+      oggetti: [
+        "Un set da pittura: tre pennelli, un barattolo d'acqua e una tavolozza",
+        "Tre giocattoli sul tappeto: una palla, un trenino e un cubo colorato",
+        "Vassoio della colazione: un bicchiere di succo, un cornetto e un tovagliolo",
+        "Una borsa aperta con una macchina fotografica, un cappello e una mappa"
+      ]
+    };
+
+    // Inizializzazione Lucide Icons
+    window.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      updateIntroUI();
+    });
+
+    // Cambia schermata visivamente
+    function setPhase(newPhase) {
+      state.phase = newPhase;
+      document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
+      const activeSection = document.getElementById(`phase-${newPhase}`);
+      if (activeSection) activeSection.classList.remove('hidden');
+    }
+
+    // Configurazione Parametri Iniziali
+    function setQuizDifficulty(diff) {
+      state.quizDifficulty = diff;
+      updateIntroUI();
+    }
+
+    function setDistractDifficulty(diff) {
+      state.distractDifficulty = diff;
+      updateIntroUI();
+    }
+
+    function toggleDistraction() {
+      state.useDistraction = !state.useDistraction;
+      updateIntroUI();
+    }
+
+    function updateIntroUI() {
+      // Toggle
+      const handle = document.getElementById('toggle-handle');
+      const toggle = document.getElementById('toggle-distraction');
+      if (state.useDistraction) {
+        toggle.className = "relative inline-flex h-8 w-14 items-center rounded-full transition-all bg-indigo-600";
+        handle.className = "inline-block h-6 w-6 transform rounded-full bg-white shadow-lg transition-transform translate-x-7";
+        document.getElementById('distraction-diff-container').classList.remove('opacity-30', 'pointer-events-none');
+      } else {
+        toggle.className = "relative inline-flex h-8 w-14 items-center rounded-full transition-all bg-slate-300";
+        handle.className = "inline-block h-6 w-6 transform rounded-full bg-white shadow-lg transition-transform translate-x-1";
+        document.getElementById('distraction-diff-container').classList.add('opacity-30', 'pointer-events-none');
+      }
+
+      // Quiz Buttons
+      document.getElementById('btn-quiz-base').className = state.quizDifficulty === 'base'
+        ? "py-4 rounded-2xl font-black text-xs uppercase tracking-widest border-2 border-indigo-600 bg-indigo-50 text-indigo-700 shadow-inner"
+        : "py-4 rounded-2xl font-black text-xs uppercase tracking-widest border-2 border-slate-200 bg-white text-slate-400 hover:border-slate-300";
+
+      document.getElementById('btn-quiz-avanzato').className = state.quizDifficulty === 'avanzato'
+        ? "py-4 rounded-2xl font-black text-xs uppercase tracking-widest border-2 border-indigo-600 bg-indigo-50 text-indigo-700 shadow-inner"
+        : "py-4 rounded-2xl font-black text-xs uppercase tracking-widest border-2 border-slate-200 bg-white text-slate-400 hover:border-slate-300";
+
+      // Distract Buttons
+      document.getElementById('btn-distract-base').className = state.distractDifficulty === 'base'
+        ? "py-3 rounded-xl font-black text-[10px] uppercase tracking-widest border-2 border-indigo-600 bg-indigo-50 text-indigo-700"
+        : "py-3 rounded-xl font-black text-[10px] uppercase tracking-widest border-2 border-slate-200 bg-white text-slate-400 hover:border-slate-300";
+
+      document.getElementById('btn-distract-avanzato').className = state.distractDifficulty === 'avanzato'
+        ? "py-3 rounded-xl font-black text-[10px] uppercase tracking-widest border-2 border-indigo-600 bg-indigo-50 text-indigo-700"
+        : "py-3 rounded-xl font-black text-[10px] uppercase tracking-widest border-2 border-slate-200 bg-white text-slate-400 hover:border-slate-300";
+    }
+
+    // Exponential Backoff API Fetch
+    async function fetchWithRetry(url, options, retries = 5, delay = 1000) {
+      try {
+        const res = await fetch(url, options);
+        if (!res.ok) throw new Error(`Status: ${res.status}`);
+        return await res.json();
+      } catch (err) {
+        if (retries <= 0) throw err;
+        await new Promise(resolve => setTimeout(resolve, delay));
+        return fetchWithRetry(url, options, retries - 1, delay * 2);
+      }
+    }
+
+    function getRandomTheme() {
+      const categories = Object.keys(themeCategories);
+      const randomCat = categories[Math.floor(Math.random() * categories.length)];
+      const themes = themeCategories[randomCat];
+      return themes[Math.floor(Math.random() * themes.length)];
+    }
+
+    // Inizio Esercizio con Integrazione Modelli Generativi
+    async function startExercise() {
+      setPhase('loading');
+      updateProgress(0, "Inizializzazione del test...");
+      usedTasks.clear();
+
+      const theme = getRandomTheme();
+
+      try {
+        // Step 1: Generazione dell'immagine con Imagen 4.0
+        updateProgress(15, "Inizializzazione motore grafico...");
+        const progressTimer1 = startLoadingInterval(15, 45, 200);
+
+        const imgResult = await fetchWithRetry(
+          `https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${apiKey}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              instances: [{ 
+                prompt: `Clean, minimal 3D render of ${theme}. Simple shapes, solid colors, studio lighting, clear composition, only 5 main objects, educational style.` 
+              }],
+              parameters: { sampleCount: 1 }
+            })
+          }
+        );
+
+        clearInterval(progressTimer1);
+        updateProgress(50, "Caricamento dettagli visivi completato.");
+
+        const base64Image = imgResult.predictions[0].bytesBase64Encoded;
+        state.currentImage = `data:image/png;base64,${base64Image}`;
+
+        // Step 2: Generazione del Quiz con Gemini 2.5
+        updateProgress(55, "Analisi dell'immagine da parte dell'IA...");
+        const progressTimer2 = startLoadingInterval(55, 90, 250);
+
+        const quizPrompt = `Analizza questa immagine. Crea 5 domande a scelta multipla in italiano.
+          Focus: colori primari, conteggio oggetti, posizioni (sopra, sotto, destra, sinistra).
+          Mantieni le domande semplici e dirette.
+          Rispondi ESCLUSIVAMENTE con un oggetto JSON: { "questions": [{ "id": 1, "question": "...", "options": ["...", "...", "...", "..."], "correct": "..." }] }`;
+
+        const genResult = await fetchWithRetry(
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{
+                role: "user",
+                parts: [{ text: quizPrompt }, { inlineData: { mimeType: "image/png", data: base64Image } }]
+              }],
+              generationConfig: { responseMimeType: "application/json" }
+            })
+          }
+        );
+
+        clearInterval(progressTimer2);
+        updateProgress(100, "Si comincia! Preparati...");
+
+        const quizData = JSON.parse(genResult.candidates[0].content.parts[0].text);
+        state.questions = quizData.questions;
+
+        setTimeout(() => {
+          runStudyPhase();
+        }, 800);
+
+      } catch (err) {
+        console.error(err);
+        updateProgress(0, "Si è verificato un errore. Ripristino in corso...");
+        setTimeout(startExercise, 3000);
+      }
+    }
+
+    function startLoadingInterval(start, max, delay) {
+      let current = start;
+      return setInterval(() => {
+        if (current < max) {
+          current += 1;
+          const msg = current >= 88 ? "Preparati... la prova sta per iniziare!" : state.statusMessage;
+          updateProgress(current, msg);
+        }
+      }, delay);
+    }
+
+    function updateProgress(value, message) {
+      state.loadingProgress = value;
+      state.statusMessage = message;
+      document.getElementById('loading-bar').style.width = `${value}%`;
+      document.getElementById('loading-percent').innerText = `${Math.floor(value)}%`;
+      document.getElementById('loading-message').innerText = message;
+    }
+
+    // FASE: STUDIO (Osservazione dell'immagine)
+    function runStudyPhase() {
+      setPhase('study');
+      document.getElementById('study-image').src = state.currentImage;
+      state.timeLeft = 35;
+      document.getElementById('study-timer').innerText = `${state.timeLeft}s`;
+
+      if (globalTimerInterval) clearInterval(globalTimerInterval);
+      globalTimerInterval = setInterval(() => {
+        state.timeLeft -= 1;
+        document.getElementById('study-timer').innerText = `${state.timeLeft}s`;
+        if (state.timeLeft <= 0) {
+          clearInterval(globalTimerInterval);
+          runDistractPhase();
+        }
+      }, 1000);
+    }
+
+    function skipStudy() {
+      clearInterval(globalTimerInterval);
+      runDistractPhase();
+    }
+
+    // FASE: DISTRAZIONE
+    function runDistractPhase() {
+      if (!state.useDistraction) {
+        runQuizPhase();
+        return;
+      }
+
+      setPhase('distract');
+      state.timeLeft = 25;
+      state.distractStep = 0;
+      document.getElementById('distract-timer').innerText = `${state.timeLeft}s`;
+      document.getElementById('distract-input').value = "";
+      document.getElementById('distract-input').focus();
+
+      generateNextDistractTask(0);
+
+      if (globalTimerInterval) clearInterval(globalTimerInterval);
+      globalTimerInterval = setInterval(() => {
+        state.timeLeft -= 1;
+        document.getElementById('distract-timer').innerText = `${state.timeLeft}s`;
+        if (state.timeLeft <= 0) {
+          clearInterval(globalTimerInterval);
+          runQuizPhase();
+        }
+      }, 1000);
+    }
+
+    function generateNextDistractTask(stepIndex) {
+      let newTask = null;
+      let isUnique = false;
+      let attempts = 0;
+
+      while (!isUnique && attempts < 50) {
+        const isMath = state.distractDifficulty === 'base' ? Math.random() > 0.4 : stepIndex % 2 === 0;
+
+        if (isMath) {
+          const a = Math.floor(Math.random() * 20) + 2;
+          const b = Math.floor(Math.random() * 20) + 2;
+          const id = `m-${a}+${b}`;
+          if (!usedTasks.has(id)) {
+            newTask = { type: 'math', a, b, word: '', target: (a + b).toString(), userVal: '' };
+            usedTasks.add(id);
+            isUnique = true;
+          }
+        } else {
+          // Forza parola lunga in step alternati per preservare i vincoli
+          const forceLong = stepIndex === 1 || stepIndex === 3 || (state.distractDifficulty === 'avanzato' && Math.random() > 0.5);
+          const pool = forceLong ? longWords : shortWords;
+          const word = pool[Math.floor(Math.random() * pool.length)];
+
+          if (!usedTasks.has(word)) {
+            newTask = { type: 'word', a: 0, b: 0, word, target: word.split('').reverse().join(''), userVal: '' };
+            usedTasks.add(word);
+            isUnique = true;
+          }
+        }
+        attempts++;
+      }
+
+      state.distractTask = newTask || { type: 'math', a: 1, b: 1, word: '', target: '2', userVal: '' };
+      
+      // Update UI per distract screen
+      const mathArea = document.getElementById('distract-math');
+      const wordArea = document.getElementById('distract-word');
+      const input = document.getElementById('distract-input');
+
+      input.value = "";
+
+      if (state.distractTask.type === 'math') {
+        mathArea.classList.remove('hidden');
+        wordArea.classList.add('hidden');
+        document.getElementById('math-a').innerText = state.distractTask.a;
+        document.getElementById('math-b').innerText = state.distractTask.b;
+      } else {
+        mathArea.classList.add('hidden');
+        wordArea.classList.remove('hidden');
+        document.getElementById('word-to-reverse').innerText = state.distractTask.word;
+        
+        const badge = document.getElementById('word-badge');
+        if (state.distractTask.word.length >= 8) {
+          badge.classList.remove('hidden');
+        } else {
+          badge.classList.add('hidden');
+        }
+      }
+    }
+
+    function onDistractInput(val) {
+      const cleaned = val.toUpperCase().trim();
+      state.distractTask.userVal = val;
+
+      if (cleaned === state.distractTask.target) {
+        setTimeout(() => {
+          state.distractStep += 1;
+          generateNextDistractTask(state.distractStep);
+        }, 200);
+      }
+    }
+
+    // FASE: QUIZ (Rievocazione)
+    function runQuizPhase() {
+      setPhase('quiz');
+      state.answers = {};
+
+      const container = document.getElementById('quiz-questions-container');
+      container.innerHTML = "";
+
+      state.questions.forEach((q, idx) => {
+        const card = document.createElement('div');
+        card.className = "bg-slate-50 p-8 rounded-[2rem] border border-slate-100";
+        
+        const questionText = document.createElement('p');
+        questionText.className = "font-black text-xl mb-6 leading-tight flex gap-4";
+        questionText.innerHTML = `<span class="text-indigo-400 mr-2">0${idx + 1}</span> ${q.question}`;
+        card.appendChild(questionText);
+
+        const optionsGrid = document.createElement('div');
+        optionsGrid.className = "grid grid-cols-1 md:grid-cols-2 gap-3";
+
+        q.options.forEach(opt => {
+          const btn = document.createElement('button');
+          btn.id = `opt-${idx}-${opt.replace(/\s+/g, '-')}`;
+          btn.className = "p-5 rounded-2xl text-left font-bold text-sm border-2 border-slate-100 bg-white text-slate-600 hover:border-indigo-200 transition-all";
+          btn.innerText = opt;
+          btn.onclick = () => selectOption(idx, opt, q.options);
+          optionsGrid.appendChild(btn);
+        });
+
+        card.appendChild(optionsGrid);
+        container.appendChild(card);
+      });
+
+      updateQuizSubmitBtn();
+    }
+
+    function selectOption(qIdx, option, allOptions) {
+      state.answers[qIdx] = option;
+
+      allOptions.forEach(opt => {
+        const btn = document.getElementById(`opt-${qIdx}-${opt.replace(/\s+/g, '-')}`);
+        if (btn) {
+          if (opt === option) {
+            btn.className = "p-5 rounded-2xl text-left font-bold text-sm border-2 border-indigo-600 bg-indigo-50 text-indigo-700 shadow-lg";
+          } else {
+            btn.className = "p-5 rounded-2xl text-left font-bold text-sm border-2 border-slate-100 bg-white text-slate-600 hover:border-indigo-200 transition-all";
+          }
+        }
+      });
+
+      updateQuizSubmitBtn();
+    }
+
+    function updateQuizSubmitBtn() {
+      const btn = document.getElementById('btn-submit-quiz');
+      const answeredCount = Object.keys(state.answers).length;
+      if (answeredCount === state.questions.length) {
+        btn.removeAttribute('disabled');
+        btn.className = "mt-12 w-full bg-slate-900 hover:bg-black text-white font-black py-7 rounded-[2rem] text-xl uppercase tracking-widest transition-all";
+      } else {
+        btn.setAttribute('disabled', 'true');
+        btn.className = "mt-12 w-full bg-slate-200 text-slate-400 font-black py-7 rounded-[2rem] text-xl uppercase tracking-widest disabled:opacity-30 cursor-not-allowed";
+      }
+    }
+
+    // FASE: RISULTATI
+    function finishQuiz() {
+      let finalScore = 0;
+      state.questions.forEach((q, idx) => {
+        if (state.answers[idx] === q.correct) finalScore++;
+      });
+      state.score = finalScore;
+
+      setPhase('result');
+
+      // Update Icon and Score UI
+      const iconContainer = document.getElementById('result-icon-container');
+      const icon = document.getElementById('result-icon');
+      const text = document.getElementById('result-text');
+
+      document.getElementById('result-score').innerHTML = `${finalScore} <span class="text-slate-300 text-3xl">/ 5</span>`;
+
+      if (finalScore === 5) {
+        iconContainer.className = "mb-8 inline-flex p-8 rounded-[3rem] shadow-xl bg-emerald-50 text-emerald-600";
+        icon.setAttribute('data-lucide', 'check-circle');
+        text.innerText = "Incredibile! Memoria perfetta.";
+      } else if (finalScore >= 3) {
+        iconContainer.className = "mb-8 inline-flex p-8 rounded-[3rem] shadow-xl bg-indigo-50 text-indigo-600";
+        icon.setAttribute('data-lucide', 'check-circle');
+        text.innerText = "Ben fatto, sei rimasto concentrato.";
+      } else {
+        iconContainer.className = "mb-8 inline-flex p-8 rounded-[3rem] shadow-xl bg-rose-50 text-rose-600";
+        icon.setAttribute('data-lucide', 'alert-circle');
+        text.innerText = "La distrazione ha vinto. Riprova!";
+      }
+
+      // Riepilogo Risposte
+      const summaryContainer = document.getElementById('result-summary-container');
+      summaryContainer.innerHTML = "";
+
+      state.questions.forEach((q, idx) => {
+        const isCorrect = state.answers[idx] === q.correct;
+        const div = document.createElement('div');
+        div.className = "border-b border-slate-200 last:border-0 pb-4 last:pb-0";
+
+        div.innerHTML = `
+          <p class="text-sm font-black mb-3 text-slate-800">${idx + 1}. ${q.question}</p>
+          <div class="flex flex-col gap-2">
+            <div class="flex items-center gap-2 text-xs p-3 rounded-xl border ${isCorrect ? 'bg-emerald-50 border-emerald-100 text-emerald-700' : 'bg-rose-50 border-rose-100 text-rose-700'}">
+              <i data-lucide="${isCorrect ? 'check-circle' : 'x-circle'}" class="w-4 h-4"></i>
+              <span class="font-bold">Tua risposta:</span> ${state.answers[idx] || "Nessuna"}
+            </div>
+            ${!isCorrect ? `
+              <div class="flex items-center gap-2 text-xs p-3 rounded-xl bg-indigo-50 border border-indigo-100 text-indigo-700">
+                <i data-lucide="check-circle" class="w-4 h-4"></i>
+                <span class="font-bold">Risposta corretta:</span> ${q.correct}
+              </div>
+            ` : ""}
+          </div>
+        `;
+        summaryContainer.appendChild(div);
+      });
+
+      lucide.createIcons();
+    }
+
+    // Modal Control
+    function openImageModal() {
+      document.getElementById('modal-image').src = state.currentImage;
+      document.getElementById('image-modal').classList.remove('hidden');
+    }
+
+    function closeImageModal() {
+      document.getElementById('image-modal').classList.add('hidden');
+    }
+
+    function resetExercise() {
+      setPhase('intro');
+      updateIntroUI();
+    }
+  </script>
+</body>
+</html>

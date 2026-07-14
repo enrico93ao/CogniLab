@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hub di Stimolazione Cognitiva</title>
+    <!-- Libreria per le icone professionali -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: #f8fafc;
+            color: #1e293b;
+            padding-bottom: 60px;
+        }
+
+        /* Header Principale */
+        header {
+            background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin-bottom: 40px;
+        }
+
+        header h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        header p {
+            margin-top: 10px;
+            font-size: 1.1rem;
+            color: #bfdbfe;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Contenitore Griglia */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .grid-esercizi {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+        }
+
+        /* Card dell'Esercizio */
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px 24px;
+            text-align: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transition: transform 0.2s, box-shadow 0.2s;
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border: 1px solid #e2e8f0;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            border-color: #bfdbfe;
+        }
+
+        .card-icon {
+            width: 70px;
+            height: 70px;
+            background-color: #eff6ff;
+            color: #2563eb;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            transition: background-color 0.2s, color 0.2s;
+        }
+
+        .card:hover .card-icon {
+            background-color: #2563eb;
+            color: white;
+        }
+
+        .card h3 {
+            font-size: 1.25rem;
+            color: #0f172a;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .card p {
+            font-size: 0.9rem;
+            color: #64748b;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Hub di Stimolazione Cognitiva</h1>
+        <p>Pannello di controllo clinico per le attività di riabilitazione e potenziamento cognitivo.</p>
+    </header>
+
+    <div class="container">
+        <!-- Iniziamo con una griglia unica, che poi organizzeremo in sezioni per aree -->
+        <div class="grid-esercizi">
+            
+            <!-- ESERCIZIO 1 -->
+            <!-- Usiamo il link verso esercizio.html passando come parametro il nome del file reale -->
+            <a href="esercizio.html?file=catena_vincente.html" class="card">
+                <div class="card-icon">
+                    <i class="fa-solid fa-link"></i>
+                </div>
+                <h3>Catena Vincente</h3>
+                <p>Esercizio di associazione verbale e fluidità lessicale sequenziale.</p>
+            </a>
+
+            <!-- ESERCIZIO 2 -->
+            <a href="esercizio.html?file=semaforo_parole.html" class="card">
+                <div class="card-icon">
+                    <i class="fa-solid fa-traffic-light"></i>
+                </div>
+                <h3>Il Semaforo delle Parole</h3>
+                <p>Inibizione della risposta automatica e controllo dell'attenzione (Effetto Stroop).</p>
+            </a>
+
+            <!-- ESERCIZIO 3 -->
+            <a href="esercizio.html?file=eco_sequenza.html" class="card">
+                <div class="card-icon">
+                    <i class="fa-solid fa-repeat"></i>
+                </div>
+                <h3>Eco-Sequenza</h3>
+                <p>Allenamento della memoria di lavoro visuo-spaziale e ritenzione sequenziale.</p>
+            </a>
+
+        </div>
+    </div>
+
+</body>
+</html>

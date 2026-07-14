@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BrainTrain - Coerenza Linguistica</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .option-card {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .option-card:active {
+            transform: scale(0.92);
+        }
+        .selected-mode {
+            border-color: #4f46e5 !important;
+            background-color: #eef2ff !important;
+        }
+        .correct {
+            border: 8px solid #10b981 !important;
+            background-color: #ecfdf5;
+            animation: pulse-green 0.4s;
+        }
+        .wrong {
+            border: 8px solid #ef4444 !important;
+            background-color: #fef2f2;
+            animation: shake 0.4s;
+        }
+        @keyframes pulse-green {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-8px); }
+            75% { transform: translateX(8px); }
+        }
+        .svg-icon {
+            width: 70%;
+            height: 70%;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen flex flex-col items-center justify-center p-4 font-sans text-slate-800">
+
+    <div id="game-container" class="max-w-md w-full bg-white rounded-[3rem] shadow-2xl p-8 relative overflow-hidden border border-slate-100">
+        
+        <!-- SCHERMATA MENU -->
+        <div id="menu-screen" class="flex flex-col items-center">
+            <div class="w-20 h-20 bg-indigo-600 rounded-3xl flex items-center justify-center mb-6 shadow-xl shadow-indigo-100">
+                <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+            <h1 class="text-3xl font-black mb-2 text-slate-900 tracking-tight">BrainTrain</h1>
+            <p class="text-slate-500 mb-8 text-center text-sm px-6">Esercizi di corrispondenza per il recupero del linguaggio.</p>
+
+            <!-- Livelli -->
+            <div class="w-full mb-6">
+                <label class="block text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 mb-3 ml-1">Scegli il livello</label>
+                <div class="grid grid-cols-3 gap-3">
+                    <button onclick="selectLevel('easy')" id="btn-level-easy" class="option-card p-4 rounded-2xl border-2 border-slate-100 bg-white text-center shadow-sm">
+                        <div class="text-2xl mb-1">🟡</div>
+                        <span class="font-bold block text-xs">Colori</span>
+                    </button>
+                    <button onclick="selectLevel('medium')" id="btn-level-medium" class="option-card p-4 rounded-2xl border-2 border-slate-100 bg-white text-center shadow-sm">
+                        <div class="text-2xl mb-1">📐</div>
+                        <span class="font-bold block text-xs">Forme</span>
+                    </button>
+                    <button onclick="selectLevel('hard')" id="btn-level-hard" class="option-card p-4 rounded-2xl border-2 border-slate-100 bg-white text-center shadow-sm">
+                        <div class="text-2xl mb-1">🍎</div>
+                        <span class="font-bold block text-xs">Oggetti</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tempo -->
+            <div class="w-full mb-10">
+                <label class="block text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 mb-3 ml-1">Durata</label>
+                <div class="grid grid-cols-3 gap-3">
+                    <button onclick="selectDuration(30)" id="btn-time-30" class="option-card py-3 rounded-xl border-2 border-slate-100 bg-white font-bold text-sm">30s</button>
+                    <button onclick="selectDuration(60)" id="btn-time-60" class="option-card py-3 rounded-xl border-2 border-slate-100 bg-white font-bold text-sm">60s</button>
+                    <button onclick="selectDuration(90)" id="btn-time-90" class="option-card py-3 rounded-xl border-2 border-slate-100 bg-white font-bold text-sm">90s</button>
+                </div>
+            </div>
+
+            <button onclick="startGame()" class="w-full py-5 bg-indigo-600 text-white rounded-[2rem] text-xl font-black shadow-2xl shadow-indigo-200 hover:bg-indigo-700 transition-all">
+                INIZIA SESSIONE
+            </button>
+        </div>
+
+        <!-- SCHERMATA GIOCO -->
+        <div id="game-screen" class="hidden">
+            <div class="flex justify-between items-center mb-8">
+                <div class="bg-indigo-50 px-5 py-2 rounded-full border border-indigo-100">
+                    <span id="timer" class="font-mono font-black text-indigo-700 text-lg">60s</span>
+                </div>
+                <div class="bg-emerald-50 px-5 py-2 rounded-full border border-emerald-100">
+                    <span id="score" class="font-black text-emerald-700 text-lg">0</span>
+                </div>
+            </div>
+
+            <div id="target-area" class="mb-8 p-8 bg-slate-50 rounded-[2.5rem] border-2 border-dashed border-slate-200 text-center">
+                <div id="target-visual" class="flex flex-col items-center justify-center min-h-[120px]">
+                    <!-- Target icon/color -->
+                </div>
+                <h2 id="target-text" class="text-3xl font-black uppercase mt-4 text-slate-800 tracking-tight">---</h2>
+            </div>
+
+            <div id="options-container" class="grid grid-cols-2 gap-5">
+                <button id="option-0" class="option-card h-44 flex items-center justify-center bg-white rounded-[2.5rem] shadow-md border-4 border-slate-50 focus:outline-none"></button>
+                <button id="option-1" class="option-card h-44 flex items-center justify-center bg-white rounded-[2.5rem] shadow-md border-4 border-slate-50 focus:outline-none"></button>
+            </div>
+            
+            <button onclick="location.reload()" class="mt-10 text-slate-300 font-bold text-xs hover:text-slate-500 w-full text-center uppercase tracking-[0.3em]">Interrompi</button>
+        </div>
+
+        <!-- SCHERMATA RISULTATI -->
+        <div id="result-screen" class="hidden flex flex-col items-center text-center py-6">
+            <div class="text-7xl mb-6">🎯</div>
+            <h2 class="text-4xl font-black text-slate-900 mb-2">Completato!</h2>
+            <p class="text-slate-400 mb-8 font-medium">Ottimo lavoro di stimolazione.</p>
+            
+            <div class="bg-slate-50 w-full p-8 rounded-[2.5rem] mb-10 border border-slate-100">
+                <p class="text-slate-400 font-bold uppercase text-[10px] tracking-widest mb-2">Risposte Corrette</p>
+                <p id="final-score" class="text-7xl font-black text-indigo-600">0</p>
+            </div>
+
+            <button onclick="location.reload()" class="w-full py-5 bg-slate-900 text-white rounded-[2rem] text-xl font-bold shadow-xl hover:bg-black transition-all">
+                RIFAI ESERCIZIO
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // DATA MODELS - OTTIMIZZATI PER LINGUAGGIO
+        const colors = [
+            { name: 'Giallo', hex: '#facc15' },
+            { name: 'Blu', hex: '#2563eb' },
+            { name: 'Rosso', hex: '#dc2626' },
+            { name: 'Verde', hex: '#16a34a' },
+            { name: 'Nero', hex: '#000000' }
+        ];
+
+        const shapes = [
+            { name: 'Cerchio', color: '#64748b', visual: '<svg class="svg-icon" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="currentColor"/></svg>' },
+            { name: 'Quadrato', color: '#64748b', visual: '<svg class="svg-icon" viewBox="0 0 100 100"><rect x="15" y="15" width="70" height="70" fill="currentColor"/></svg>' },
+            { name: 'Triangolo', color: '#64748b', visual: '<svg class="svg-icon" viewBox="0 0 100 100"><polygon points="50,15 90,85 10,85" fill="currentColor"/></svg>' },
+            { name: 'Stella', color: '#64748b', visual: '<svg class="svg-icon" viewBox="0 0 100 100"><polygon points="50,5 63,35 95,35 69,57 79,91 50,70 21,91 31,57 5,35 37,35" fill="currentColor"/></svg>' }
+        ];
+
+        // LIVELLO DIFFICILE: OGGETTI CON MASSIMA COERENZA
+        const objects = [
+            { name: 'Mela', color: '#ef4444', visual: '<svg class="svg-icon" fill="currentColor" viewBox="0 0 24 24"><path d="M12,2C11.3,2,10.7,2.3,10.3,2.9C9.7,3.6,9.5,4.7,9.7,5.7C10.1,7.2,11.5,8,12,8s1.9-0.8,2.3-2.3c0.2-1-0.1-2.1-0.6-2.8 C13.3,2.3,12.7,2,12,2z M17.5,10c-1.3,0-2.5,0.7-3.2,1.8C13.5,11.3,12.8,11,12,11s-1.5,0.3-2.3,0.8C9,10.7,7.8,10,6.5,10 c-2.5,0-4.5,2.1-4.5,4.7c0,5.2,5.5,8.3,10,8.3s10-3.1,10-8.3C22,12.1,20,10,17.5,10z"/></svg>' },
+            { name: 'Occhiali', color: '#1e293b', visual: '<svg class="svg-icon" fill="currentColor" viewBox="0 0 24 24"><path d="M21,8H3V6h18V8z M21,11H3V9h18V11z M21,17h-7c-0.6,0-1-0.4-1-1v-2h8V17z M10,17H3v-3h8v2C11,16.6,10.6,17,10,17z"/></svg>' },
+            { name: 'Telefono', color: '#334155', visual: '<svg class="svg-icon" fill="currentColor" viewBox="0 0 24 24"><path d="M17,1H7C5.9,1,5,1.9,5,3v18c0,1.1,0.9,2,2,2h10c1.1,0,2-0.9,2-2V3C19,1.9,18.1,1,17,1z M12,21c-1.1,0-2-0.9-2-2s0.9-2,2-2 s2,0.9,2,2S13.1,21,12,21z M17,15H7V5h10V15z"/></svg>' },
+            { name: 'Chiave', color: '#94a3b8', visual: '<svg class="svg-icon" fill="currentColor" viewBox="0 0 24 24"><path d="M12.7,2.8c-3.1,0-5.6,2.5-5.6,5.6c0,1.8,0.9,3.5,2.3,4.5L7.3,15H5v2h2v2h2v-2h2.2l2.3-2.3c0.4,0.1,0.8,0.2,1.2,0.2 c3.1,0,5.6-2.5,5.6-5.6S15.8,2.8,12.7,2.8z M12.7,10.3c-1.1,0-2-0.9-2-2s0.9-2,2-2s2,0.9,2,2S13.8,10.3,12.7,10.3z"/></svg>' },
+            { name: 'Scarpa', color: '#7c2d12', visual: '<svg class="svg-icon" fill="currentColor" viewBox="0 0 24 24"><path d="M21,15h-1c-2,0-4-1-4-1l-2-3H9L5,13H3l-1,4h17l2-2L21,15z"/></svg>' },
+            { name: 'Sedia', color: '#451a03', visual: '<svg class="svg-icon" fill="currentColor" viewBox="0 0 24 24"><path d="M7,13h10V7c0-2.2-1.8-4-4-4h-2C8.8,3,7,4.8,7,7V13z M19,15H5v-2h14V15z M7,15v6h2v-6H7z M15,15v6h2v-6H15z"/></svg>' }
+        ];
+
+        // STATE
+        let selectedLevel = 'easy';
+        let selectedDuration = 60;
+        let score = 0;
+        let timeLeft = 60;
+        let gameTimer;
+        let currentTargetIndex;
+
+        // UI ELEMENTS
+        const menuScreen = document.getElementById('menu-screen');
+        const gameScreen = document.getElementById('game-screen');
+        const resultScreen = document.getElementById('result-screen');
+        const timerDisplay = document.getElementById('timer');
+        const scoreDisplay = document.getElementById('score');
+
+        // SELECTION
+        function selectLevel(level) {
+            selectedLevel = level;
+            ['easy', 'medium', 'hard'].forEach(l => document.getElementById(`btn-level-${l}`).classList.remove('selected-mode'));
+            document.getElementById(`btn-level-${level}`).classList.add('selected-mode');
+        }
+
+        function selectDuration(seconds) {
+            selectedDuration = seconds;
+            [30, 60, 90].forEach(s => document.getElementById(`btn-time-${s}`).classList.remove('selected-mode'));
+            document.getElementById(`btn-time-${seconds}`).classList.add('selected-mode');
+        }
+
+        // Init defaults
+        selectLevel('easy');
+        selectDuration(60);
+
+        function startGame() {
+            menuScreen.classList.add('hidden');
+            gameScreen.classList.remove('hidden');
+            score = 0;
+            timeLeft = selectedDuration;
+            scoreDisplay.innerText = score;
+            timerDisplay.innerText = `${timeLeft}s`;
+            generateRound();
+            gameTimer = setInterval(() => {
+                timeLeft--;
+                timerDisplay.innerText = `${timeLeft}s`;
+                if (timeLeft <= 0) endGame();
+            }, 1000);
+        }
+
+        function generateRound() {
+            let pool;
+            switch(selectedLevel) {
+                case 'easy': pool = colors; break;
+                case 'medium': pool = shapes; break;
+                case 'hard': pool = objects; break;
+            }
+
+            currentTargetIndex = Math.floor(Math.random() * pool.length);
+            const target = pool[currentTargetIndex];
+
+            const visualContainer = document.getElementById('target-visual');
+            const textContainer = document.getElementById('target-text');
+            
+            // Render Target
+            if (selectedLevel === 'easy') {
+                visualContainer.innerHTML = `<div class="w-28 h-28 rounded-3xl shadow-lg border-4 border-white" style="background-color: ${target.hex}"></div>`;
+                textContainer.innerText = target.name;
+                textContainer.style.color = target.hex;
+            } else {
+                visualContainer.innerHTML = `<div class="w-28 h-28 flex items-center justify-center" style="color: ${target.color}">${target.visual}</div>`;
+                textContainer.innerText = target.name;
+                textContainer.style.color = 'inherit';
+            }
+
+            // Options
+            let wrongIndex;
+            do { wrongIndex = Math.floor(Math.random() * pool.length); } while (wrongIndex === currentTargetIndex);
+
+            const options = [currentTargetIndex, wrongIndex].sort(() => Math.random() - 0.5);
+            
+            options.forEach((idx, btnIdx) => {
+                const btn = document.getElementById(`option-${btnIdx}`);
+                const opt = pool[idx];
+                btn.className = "option-card h-44 flex items-center justify-center bg-white rounded-[2.5rem] shadow-md border-4 border-slate-50 focus:outline-none";
+                
+                if (selectedLevel === 'easy') {
+                    btn.innerHTML = '';
+                    btn.style.backgroundColor = opt.hex;
+                } else {
+                    btn.innerHTML = opt.visual;
+                    btn.style.color = opt.color;
+                    btn.style.backgroundColor = 'white';
+                }
+                btn.onclick = () => checkAnswer(idx, btn);
+            });
+        }
+
+        function checkAnswer(idx, btn) {
+            if (idx === currentTargetIndex) {
+                score++;
+                scoreDisplay.innerText = score;
+                btn.classList.add('correct');
+                setTimeout(generateRound, 400);
+            } else {
+                btn.classList.add('wrong');
+                setTimeout(() => btn.classList.remove('wrong'), 400);
+            }
+        }
+
+        function endGame() {
+            clearInterval(gameTimer);
+            gameScreen.classList.add('hidden');
+            resultScreen.classList.remove('hidden');
+            document.getElementById('final-score').innerText = score;
+        }
+    </script>
+</body>
+</html>

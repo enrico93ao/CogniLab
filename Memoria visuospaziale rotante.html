@@ -1,0 +1,1225 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Specchio Rotante - Stimolazione Cognitiva</title>
+    <!-- Tailwind CSS per uno styling moderno e pulito -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts per una tipografia elegante e leggibile -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome per icone moderne e pulite -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
+        }
+        
+        /* Transizioni fluide per gli elementi di gioco */
+        .grid-transition {
+            transition: transform 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        
+        .cell-transition {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Effetti speciali di pulsazione */
+        @keyframes pulse-ring {
+            0% { transform: scale(0.95); opacity: 0.5; }
+            50% { transform: scale(1.05); opacity: 0.8; }
+            100% { transform: scale(0.95); opacity: 0.5; }
+        }
+        .pulse-active {
+            animation: pulse-ring 2s infinite ease-in-out;
+        }
+
+        /* Nascondi scrollbar per design pulito */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+    </style>
+</head>
+<body class="min-h-screen text-slate-100 flex flex-col justify-between overflow-x-hidden select-none">
+
+    <!-- HEADER -->
+    <header class="w-full bg-slate-900/60 backdrop-blur-md border-b border-slate-800 px-6 py-4 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                    <i class="fa-solid fa-arrows-spin text-lg text-white"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-extrabold tracking-tight bg-gradient-to-r from-white via-indigo-200 to-indigo-400 bg-clip-text text-transparent">
+                        SPECCHIO ROTANTE
+                    </h1>
+                    <p class="text-xs text-slate-400 font-medium">Allenamento Neurocognitivo Visuo-Spaziale</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-4">
+                <!-- Selettore Audio -->
+                <button id="toggle-audio-btn" class="p-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700/50 text-slate-300 transition-colors" title="Attiva/Disattiva Audio">
+                    <i id="audio-icon" class="fa-solid fa-volume-high"></i>
+                </button>
+                <!-- Pulsante Guida/Istruzioni -->
+                <button id="guide-btn" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600/10 hover:bg-indigo-600/20 border border-indigo-500/30 text-indigo-300 text-sm font-semibold transition-all">
+                    <i class="fa-regular fa-compass"></i> Come Giocare
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTAINER -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 py-6 flex flex-col justify-center items-center">
+        
+        <!-- SEZIONE 1: MENU INIZIALE -->
+        <section id="menu-section" class="w-full max-w-2xl bg-slate-900/40 border border-slate-800/80 rounded-2xl p-6 sm:p-8 backdrop-blur-lg shadow-2xl flex flex-col gap-6">
+            <div class="text-center space-y-2">
+                <span class="px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 text-xs font-semibold tracking-wide uppercase">
+                    Nuovo Test d'Efficienza Cognitiva
+                </span>
+                <h2 class="text-3xl font-extrabold text-white tracking-tight">Sfida la tua Rotazione Mentale</h2>
+                <p class="text-slate-400 text-sm max-w-lg mx-auto">
+                    Un esercizio avanzato di memoria di lavoro spaziale progettato per stimolare i lobi parietali, responsabili dell'elaborazione spaziale 3D e della flessibilità cognitiva.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-2">
+                <!-- Card Difficoltà: Difficile -->
+                <button id="select-hard" class="group text-left p-5 rounded-xl border border-indigo-500 bg-indigo-950/20 hover:bg-indigo-950/40 transition-all flex flex-col gap-2 relative overflow-hidden">
+                    <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-indigo-500/5 rounded-full group-hover:scale-125 transition-transform"></div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-indigo-400 uppercase tracking-wider">Livello 1</span>
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">CONSIGLIATO</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-white group-hover:text-indigo-300 transition-colors">Difficile</h3>
+                    <p class="text-xs text-slate-400 leading-relaxed">
+                        Griglia <strong>4x4</strong> con <strong>4 cells</strong> da ricordare. La griglia ruoterà esattamente di <strong>90° in senso orario</strong>.
+                    </p>
+                </button>
+
+                <!-- Card Difficoltà: Estremo -->
+                <button id="select-extreme" class="group text-left p-5 rounded-xl border border-slate-800 hover:border-purple-500/60 bg-slate-950/20 hover:bg-purple-950/10 transition-all flex flex-col gap-2 relative overflow-hidden">
+                    <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-purple-500/5 rounded-full group-hover:scale-125 transition-transform"></div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-purple-400 uppercase tracking-wider">Livello 2</span>
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30">MENTAL BENDER</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-white group-hover:text-purple-300 transition-colors">Estremo</h3>
+                    <p class="text-xs text-slate-400 leading-relaxed">
+                        Griglia <strong>5x5</strong> con <strong>5 cells</strong> da ricordare. La griglia subirà una rotazione casuale (<strong>90°, 180° o speculare</strong>).
+                    </p>
+                </button>
+            </div>
+
+            <!-- Pannello Statistiche Storiche Veloci -->
+            <div id="stats-panel-shortcut" class="p-4 bg-slate-950/40 rounded-xl border border-slate-800 flex flex-col sm:flex-row justify-between items-center gap-4 text-center sm:text-left">
+                <div>
+                    <span class="text-xs text-slate-500 uppercase font-bold">Ultimo Punteggio</span>
+                    <p id="last-score-text" class="text-sm font-semibold text-slate-300">Nessuna sessione completata oggi</p>
+                </div>
+                <button id="btn-reset-scores" class="text-xs text-rose-400 hover:text-rose-300 font-medium hidden transition-colors">
+                    <i class="fa-solid fa-trash-can mr-1"></i> Cancella Storico
+                </button>
+            </div>
+
+            <button id="start-game-btn" class="w-full py-4 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-bold text-lg shadow-xl shadow-indigo-500/10 hover:shadow-indigo-500/20 transform hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2">
+                Inizia l'Esercitazione <i class="fa-solid fa-play"></i>
+            </button>
+        </section>
+
+        <!-- SEZIONE 2: AREA DI GIOCO -->
+        <section id="game-section" class="w-full max-w-5xl hidden grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            
+            <!-- Pannello Sinistro: Pannello di Controllo & Info -->
+            <div class="lg:col-span-4 bg-slate-900/40 border border-slate-800 rounded-2xl p-5 backdrop-blur-lg flex flex-col gap-5">
+                <!-- Info Status Corrente -->
+                <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+                    <div>
+                        <span class="text-xs font-bold text-indigo-400 uppercase tracking-widest">ROUND</span>
+                        <div class="text-2xl font-black text-white" id="round-counter">1 <span class="text-sm text-slate-500">/ 10</span></div>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-xs font-bold text-purple-400 uppercase tracking-widest">DIFFICOLTÀ</span>
+                        <div class="text-md font-bold text-slate-200" id="current-difficulty-tag">Difficile</div>
+                    </div>
+                </div>
+
+                <!-- Istruzioni in Tempo Reale -->
+                <div class="p-4 bg-slate-950/50 border border-slate-800/80 rounded-xl space-y-1.5" id="instruction-card">
+                    <span class="text-xs font-semibold uppercase text-amber-400 flex items-center gap-1.5">
+                        <i class="fa-solid fa-triangle-exclamation"></i> FASE 1: MEMORIZZA
+                    </span>
+                    <p class="text-sm text-slate-300" id="game-instruction-text">
+                        Ricorda la posizione delle celle rosse nella griglia. Hai 4 secondi.
+                    </p>
+                </div>
+
+                <!-- Barra di Progresso / Timer Memorizzazione -->
+                <div class="space-y-1">
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="text-slate-400" id="timer-label">Tempo Rimasto</span>
+                        <span class="font-semibold text-slate-200" id="timer-value">4.0s</span>
+                    </div>
+                    <div class="w-full bg-slate-800 h-2.5 rounded-full overflow-hidden">
+                        <div id="timer-progress" class="bg-gradient-to-r from-indigo-500 to-purple-500 h-full w-full transition-all duration-100 ease-linear"></div>
+                    </div>
+                </div>
+
+                <!-- Indicatore di Trasformazione (Dinamico) -->
+                <div id="transformation-indicator" class="p-4 bg-slate-950/20 border border-slate-800/80 rounded-xl hidden flex-col items-center justify-center gap-2 text-center">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">MODIFICATORE DI ORIENTAMENTO</span>
+                    <div id="transformation-badge" class="px-3 py-1.5 rounded-lg bg-indigo-500/10 text-indigo-300 text-sm font-bold border border-indigo-500/20 flex items-center gap-2">
+                        <!-- Icona e testo inseriti da JS -->
+                    </div>
+                </div>
+
+                <!-- Statistiche Parziali Sessione -->
+                <div class="grid grid-cols-2 gap-3 pt-2">
+                    <div class="p-3 bg-slate-950/20 border border-slate-800/60 rounded-xl text-center">
+                        <span class="text-[10px] text-slate-500 uppercase font-bold">ACCURATEZZA</span>
+                        <p class="text-lg font-extrabold text-indigo-300" id="session-accuracy">0%</p>
+                    </div>
+                    <div class="p-3 bg-slate-950/20 border border-slate-800/60 rounded-xl text-center">
+                        <span class="text-[10px] text-slate-500 uppercase font-bold">PUNTI TOT</span>
+                        <p class="text-lg font-extrabold text-purple-300" id="session-score">0</p>
+                    </div>
+                </div>
+
+                <!-- Azioni di Emergenza / Esci -->
+                <button id="abort-btn" class="w-full mt-2 py-2.5 rounded-xl border border-rose-500/20 bg-rose-500/5 hover:bg-rose-500/10 text-rose-300 hover:text-rose-200 text-xs font-semibold transition-all">
+                    <i class="fa-solid fa-right-from-bracket mr-1.5"></i> Abbandona Esercitazione
+                </button>
+            </div>
+
+            <!-- Pannello Destro: La Griglia Rotante -->
+            <div class="lg:col-span-8 flex flex-col items-center justify-center gap-6">
+                <!-- Contenitore della Griglia con bussola di orientamento -->
+                <div class="relative w-full max-w-[420px] aspect-square p-6 bg-slate-900/50 border border-slate-800 rounded-3xl backdrop-blur-md flex items-center justify-center shadow-2xl">
+                    
+                    <!-- Indicatore di Orientamento Originale (Bussola Nord) -->
+                    <div id="compass-north" class="absolute top-1.5 left-1/2 -translate-x-1/2 flex flex-col items-center gap-0.5 text-[9px] font-bold text-slate-400 transition-all z-20">
+                        <i class="fa-solid fa-circle-chevron-up text-indigo-400 text-xs pulse-active"></i>
+                        <span>NORD ORIGINALE</span>
+                    </div>
+
+                    <!-- Contenitore Griglia Principale (Subisce le trasformazioni fisiche CSS) -->
+                    <div id="grid-container" class="grid-transition w-full h-full grid gap-2.5 relative z-10">
+                        <!-- Le celle vengono inserite dinamicamente da JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Pulsanti d'Azione Sotto la Griglia -->
+                <div class="w-full max-w-[420px] flex flex-col gap-3">
+                    <div class="flex gap-3">
+                        <!-- Bottone per iniziare il round / confermare risposta -->
+                        <button id="primary-action-btn" class="flex-grow py-4 rounded-xl text-white font-bold text-md shadow-xl transition-all flex items-center justify-center gap-2">
+                            <!-- Popolato dinamicamente -->
+                        </button>
+                    </div>
+                    <p id="selection-status-subtext" class="text-center text-xs text-slate-400 italic">
+                        In attesa dell'inizio del round...
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SEZIONE 3: SCHERMATA RISULTATI FINALI -->
+        <section id="result-section" class="w-full max-w-2xl bg-slate-900/40 border border-slate-800 rounded-2xl p-6 sm:p-8 backdrop-blur-lg shadow-2xl hidden flex flex-col gap-6">
+            <div class="text-center space-y-1.5">
+                <div class="w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center mx-auto mb-2 text-2xl text-emerald-400">
+                    <i class="fa-solid fa-trophy"></i>
+                </div>
+                <h2 class="text-3xl font-extrabold text-white">Esercitazione Completata!</h2>
+                <p class="text-slate-400 text-sm">
+                    Analisi dei parametri di efficienza per la Memoria Spaziale e la Capacità di Rotazione.
+                </p>
+            </div>
+
+            <!-- Griglia dei Risultati -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="p-4 bg-slate-950/40 border border-slate-800 rounded-xl text-center">
+                    <span class="text-xs text-slate-500 font-bold uppercase tracking-wider">Celle Corrette</span>
+                    <p class="text-3xl font-black text-indigo-400 mt-1" id="res-correct-cells">0/40</p>
+                </div>
+                <div class="p-4 bg-slate-950/40 border border-slate-800 rounded-xl text-center">
+                    <span class="text-xs text-slate-500 font-bold uppercase tracking-wider">Accuratezza Media</span>
+                    <p class="text-3xl font-black text-emerald-400 mt-1" id="res-accuracy">0%</p>
+                </div>
+                <div class="p-4 bg-slate-950/40 border border-slate-800 rounded-xl text-center">
+                    <span class="text-xs text-slate-500 font-bold uppercase tracking-wider">Tempo di Risposta</span>
+                    <p class="text-3xl font-black text-amber-400 mt-1" id="res-speed">0.0s</p>
+                </div>
+            </div>
+
+            <!-- Valutazione Dettagliata -->
+            <div class="p-5 bg-indigo-950/20 border border-indigo-500/20 rounded-xl flex items-start gap-4">
+                <div class="p-2.5 rounded-lg bg-indigo-500/10 text-indigo-400 text-lg">
+                    <i class="fa-solid fa-brain"></i>
+                </div>
+                <div>
+                    <h4 class="font-bold text-white text-md">Valutazione Clinico-Cognitiva</h4>
+                    <p class="text-sm text-slate-300 mt-1 leading-relaxed" id="clinical-feedback-text">
+                        Caricamento valutazione...
+                    </p>
+                </div>
+            </div>
+
+            <!-- Azioni Finali -->
+            <div class="flex flex-col sm:flex-row gap-3 pt-2">
+                <button id="restart-game-btn" class="flex-grow py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold transition-all flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/15">
+                    <i class="fa-solid fa-rotate-left"></i> Esegui Nuovo Test
+                </button>
+                <button id="back-to-menu-btn" class="sm:w-1/3 py-3.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold border border-slate-700 transition-all">
+                    Menu Principale
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- MODAL GUIDA / ISTRUZIONI -->
+    <div id="guide-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden opacity-0 transition-opacity duration-300">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center gap-2 text-indigo-400">
+                    <i class="fa-solid fa-circle-info text-lg"></i>
+                    <h3 class="font-extrabold text-white text-lg">Guida a Specchio Rotante</h3>
+                </div>
+                <button id="close-guide-btn" class="p-1 rounded-md text-slate-400 hover:text-white transition-colors">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            
+            <div class="space-y-3.5 text-sm text-slate-300 leading-relaxed">
+                <p>
+                    Benvenuto nel protocollo di potenziamento della memoria di lavoro spaziale. Ecco gli step per completare con successo ciascun round:
+                </p>
+                <ol class="list-decimal list-inside space-y-2">
+                    <li>
+                        <strong class="text-indigo-300">Fase 1 (Memorizzazione):</strong> All'avvio del round, alcune celle si accendono di rosso. Memorizza la loro posizione spaziale entro 4 secondi.
+                    </li>
+                    <li>
+                        <strong class="text-indigo-300">Fase 2 (Rotazione Visibile):</strong> Le celle rosse scompaiono e l'intera griglia ruota o si riflette fisicamente.
+                    </li>
+                    <li>
+                        <strong class="text-indigo-300">Fase 3 (Ricostruzione):</strong> Clicca sulle celle corrispondenti alla loro <strong class="text-amber-300">nuova posizione</strong>, tenendo conto della rotazione avvenuta.
+                    </li>
+                    <li>
+                        <strong class="text-indigo-300">Fase 4 (Verifica):</strong> Conferma per vedere il feedback di accuratezza con indicatori grafici.
+                    </li>
+                </ol>
+                <p class="text-xs text-slate-400 bg-slate-950/50 p-3 rounded-lg border border-slate-800">
+                    💡 <strong>Suggerimento Clinico:</strong> Cerca di non concentrarti solo sulle singole celle, ma sulla "forma" geometrica complessiva formata dalle celle illuminate per facilitare la rotazione mentale.
+                </p>
+            </div>
+            
+            <button id="close-guide-accent-btn" class="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm transition-all">
+                Ho Capito, Cominciamo!
+            </button>
+        </div>
+    </div>
+
+    <!-- MODAL CONFERMA ABBANDONO -->
+    <div id="abort-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden opacity-0 transition-opacity duration-300">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-sm w-full p-6 shadow-2xl space-y-4 text-center">
+            <div class="w-12 h-12 rounded-full bg-rose-500/10 border border-rose-500/30 flex items-center justify-center mx-auto text-rose-400 text-xl">
+                <i class="fa-solid fa-triangle-exclamation animate-pulse"></i>
+            </div>
+            <div class="space-y-2">
+                <h3 class="font-extrabold text-white text-lg">Abbandonare la sessione?</h3>
+                <p class="text-sm text-slate-400">
+                    Sei sicuro di voler interrompere l'esercitazione? Tutti i progressi di questa sessione andranno perduti.
+                </p>
+            </div>
+            <div class="flex gap-3 pt-2">
+                <button id="confirm-abort-btn" class="flex-grow py-3 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-sm transition-all">
+                    Sì, Abbandona
+                </button>
+                <button id="cancel-abort-btn" class="flex-grow py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold border border-slate-700 text-sm transition-all">
+                    Annulla
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="w-full bg-slate-950/60 border-t border-slate-900/80 py-4 px-6 text-center text-xs text-slate-500">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-2">
+            <span>&copy; 2026 Specchio Rotante App. Tutti i diritti riservati. Clinically Inspired.</span>
+            <div class="flex items-center gap-3">
+                <span class="flex items-center gap-1"><i class="fa-solid fa-shield-halved text-indigo-500/70"></i> Conforme HIPAA & GDPR</span>
+                <span>•</span>
+                <span>Versione 1.4.0 (Stabile)</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- TOAST NOTIFICATIONS (MESSAGGI POPUP) -->
+    <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <script>
+        /******************************************************************
+         * SINTETIZZATORE AUDIO NATIVO (Senza librerie esterne instabili)
+         ******************************************************************/
+        let audioEnabled = true;
+        let audioCtx = null;
+
+        function initAudioContext() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        // Suoni personalizzati sintetizzati al volo
+        const Synth = {
+            playTick() {
+                if (!audioEnabled) return;
+                initAudioContext();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(880, audioCtx.currentTime); // High pitch tick
+                gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.1);
+            },
+            playWhoosh() {
+                if (!audioEnabled) return;
+                initAudioContext();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'triangle';
+                // Scivolamento di frequenza per dare senso di rotazione
+                osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(350, audioCtx.currentTime + 1.2);
+                gain.gain.setValueAtTime(0.0, audioCtx.currentTime);
+                gain.gain.linearRampToValueAtTime(0.12, audioCtx.currentTime + 0.3);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.2);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 1.25);
+            },
+            playSuccess() {
+                if (!audioEnabled) return;
+                initAudioContext();
+                const now = audioCtx.currentTime;
+                // Arpeggio Maggiore Ascendente
+                const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+                notes.forEach((freq, index) => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, now + index * 0.08);
+                    gain.gain.setValueAtTime(0.08, now + index * 0.08);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + index * 0.08 + 0.3);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(now + index * 0.08);
+                    osc.stop(now + index * 0.08 + 0.35);
+                });
+            },
+            playFail() {
+                if (!audioEnabled) return;
+                initAudioContext();
+                const now = audioCtx.currentTime;
+                // Accordo dissonante calante
+                const freqs = [180, 175];
+                freqs.forEach(freq => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(freq, now);
+                    osc.frequency.linearRampToValueAtTime(100, now + 0.5);
+                    gain.gain.setValueAtTime(0.1, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start();
+                    osc.stop(now + 0.55);
+                });
+            },
+            playClick() {
+                if (!audioEnabled) return;
+                initAudioContext();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(440, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.06);
+            },
+            playGameComplete() {
+                if (!audioEnabled) return;
+                initAudioContext();
+                const now = audioCtx.currentTime;
+                // Accordo finale trionfante
+                const notes = [261.63, 329.63, 392.00, 523.25, 659.25]; // C4, E4, G4, C5, E5
+                notes.forEach((freq, idx) => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, now + idx * 0.05);
+                    gain.gain.setValueAtTime(0.1, now + idx * 0.05);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.05 + 1.5);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(now + idx * 0.05);
+                    osc.stop(now + idx * 0.05 + 1.6);
+                });
+            }
+        };
+
+        /******************************************************************
+         * LOGICA DI GIOCO & STATI DELL'APPLICAZIONE
+         ******************************************************************/
+        const CONFIG = {
+            'difficile': { size: 4, targets: 4 },
+            'estremo': { size: 5, targets: 5 }
+        };
+
+        let gameState = {
+            mode: 'difficile', // 'difficile' | 'estremo'
+            currentRound: 0,
+            totalRounds: 10,
+            score: 0,
+            roundStartTime: 0,
+            responseTimes: [],
+            totalCorrectAnswersCount: 0,
+            totalPossibleTargetsCount: 0,
+            
+            // Dettagli round corrente
+            targets: [],       // Indici dei target illuminati originariamente
+            selected: [],      // Indici delle celle selezionate dall'utente
+            rotation: 0,       // Gradi di rotazione (0, 90, 180, 270)
+            scaleX: 1,         // Moltiplicatore di riflessione orizzontale
+            scaleY: 1,         // Moltiplicatore di riflessione verticale
+            phase: 'IDLE',     // 'IDLE' | 'MEMORIZE' | 'TRANSITION' | 'RECALL' | 'FEEDBACK'
+            timerId: null,
+            timeLimit: 4000,   // 4 secondi memorizzazione
+            timeLeft: 4000
+        };
+
+        // Elementi DOM principali
+        const menuSection = document.getElementById('menu-section');
+        const gameSection = document.getElementById('game-section');
+        const resultSection = document.getElementById('result-section');
+        const gridContainer = document.getElementById('grid-container');
+        
+        const btnSelectHard = document.getElementById('select-hard');
+        const btnSelectExtreme = document.getElementById('select-extreme');
+        const btnStartGame = document.getElementById('start-game-btn');
+        const btnPrimaryAction = document.getElementById('primary-action-btn');
+        const btnAbort = document.getElementById('abort-btn');
+        const btnRestart = document.getElementById('restart-game-btn');
+        const btnBackToMenu = document.getElementById('back-to-menu-btn');
+        const btnResetScores = document.getElementById('btn-reset-scores');
+        
+        const roundCounter = document.getElementById('round-counter');
+        const currentDifficultyTag = document.getElementById('current-difficulty-tag');
+        const gameInstructionText = document.getElementById('game-instruction-text');
+        const instructionCard = document.getElementById('instruction-card');
+        const timerLabel = document.getElementById('timer-label');
+        const timerValue = document.getElementById('timer-value');
+        const timerProgress = document.getElementById('timer-progress');
+        const transIndicator = document.getElementById('transformation-indicator');
+        const transBadge = document.getElementById('transformation-badge');
+        const compassNorth = document.getElementById('compass-north');
+        const selectionSubtext = document.getElementById('selection-status-subtext');
+        
+        const sessionAccuracyText = document.getElementById('session-accuracy');
+        const sessionScoreText = document.getElementById('session-score');
+        
+        // Elementi Risultati Finali
+        const resCorrectCells = document.getElementById('res-correct-cells');
+        const resAccuracy = document.getElementById('res-accuracy');
+        const resSpeed = document.getElementById('res-speed');
+        const clinicalFeedbackText = document.getElementById('clinical-feedback-text');
+        
+        // Modale Istruzioni
+        const guideModal = document.getElementById('guide-modal');
+        const guideBtn = document.getElementById('guide-btn');
+        const closeGuideBtn = document.getElementById('close-guide-btn');
+        const closeGuideAccentBtn = document.getElementById('close-guide-accent-btn');
+
+        // Modale Abbandono Personalizzato
+        const abortModal = document.getElementById('abort-modal');
+        const btnConfirmAbort = document.getElementById('confirm-abort-btn');
+        const btnCancelAbort = document.getElementById('cancel-abort-btn');
+        
+        // Toast Container
+        const toastContainer = document.getElementById('toast-container');
+
+        // AUDIO TOGGLE
+        const toggleAudioBtn = document.getElementById('toggle-audio-btn');
+        const audioIcon = document.getElementById('audio-icon');
+
+        toggleAudioBtn.addEventListener('click', () => {
+            audioEnabled = !audioEnabled;
+            if (audioEnabled) {
+                audioIcon.className = "fa-solid fa-volume-high";
+                showToast("Volume attivo", "success");
+                Synth.playClick();
+            } else {
+                audioIcon.className = "fa-solid fa-volume-xmark";
+                showToast("Volume disattivato", "info");
+            }
+        });
+
+        // INIZIALIZZAZIONE & EVENTI DI SELEZIONE DIFFICOLTÀ
+        btnSelectHard.addEventListener('click', () => {
+            gameState.mode = 'difficile';
+            btnSelectHard.className = "group text-left p-5 rounded-xl border border-indigo-500 bg-indigo-950/20 hover:bg-indigo-950/40 transition-all flex flex-col gap-2 relative overflow-hidden";
+            btnSelectExtreme.className = "group text-left p-5 rounded-xl border border-slate-800 hover:border-purple-500/60 bg-slate-950/20 hover:bg-purple-950/10 transition-all flex flex-col gap-2 relative overflow-hidden";
+            Synth.playClick();
+        });
+
+        btnSelectExtreme.addEventListener('click', () => {
+            gameState.mode = 'estremo';
+            btnSelectExtreme.className = "group text-left p-5 rounded-xl border border-purple-500 bg-purple-950/20 hover:bg-purple-950/40 transition-all flex flex-col gap-2 relative overflow-hidden";
+            btnSelectHard.className = "group text-left p-5 rounded-xl border border-slate-800 hover:border-indigo-500/60 bg-slate-950/20 hover:bg-indigo-950/10 transition-all flex flex-col gap-2 relative overflow-hidden";
+            Synth.playClick();
+        });
+
+        // GESTIONE DEL MODALE DI CONFERMA ABBANDONO
+        function openAbortModal() {
+            initAudioContext();
+            abortModal.classList.remove('hidden');
+            setTimeout(() => abortModal.classList.remove('opacity-0'), 10);
+            Synth.playClick();
+        }
+
+        function closeAbortModal() {
+            abortModal.classList.add('opacity-0');
+            setTimeout(() => abortModal.classList.add('hidden'), 300);
+            Synth.playClick();
+        }
+
+        btnConfirmAbort.addEventListener('click', () => {
+            clearInterval(gameState.timerId);
+            closeAbortModal();
+            showMenu();
+        });
+
+        btnCancelAbort.addEventListener('click', closeAbortModal);
+
+        // GESTIONE DEL MODALE GUIDA
+        function openGuide() {
+            guideModal.classList.remove('hidden');
+            setTimeout(() => guideModal.classList.remove('opacity-0'), 10);
+            Synth.playClick();
+        }
+
+        function closeGuide() {
+            guideModal.classList.add('opacity-0');
+            setTimeout(() => guideModal.classList.add('hidden'), 300);
+            Synth.playClick();
+        }
+
+        guideBtn.addEventListener('click', openGuide);
+        closeGuideBtn.addEventListener('click', closeGuide);
+        closeGuideAccentBtn.addEventListener('click', closeGuide);
+
+        // GESTIONE TOAST
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `flex items-center gap-2 px-4 py-3 rounded-xl shadow-lg border text-sm transition-all duration-300 transform translate-y-2 opacity-0 text-white`;
+            
+            if (type === 'success') {
+                toast.classList.add('bg-emerald-950/90', 'border-emerald-500/30', 'text-emerald-300');
+                toast.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400"></i> ${message}`;
+            } else if (type === 'error') {
+                toast.classList.add('bg-rose-950/90', 'border-rose-500/30', 'text-rose-300');
+                toast.innerHTML = `<i class="fa-solid fa-circle-xmark text-rose-400"></i> ${message}`;
+            } else {
+                toast.classList.add('bg-indigo-950/90', 'border-indigo-500/30', 'text-indigo-300');
+                toast.innerHTML = `<i class="fa-solid fa-circle-info text-indigo-400"></i> ${message}`;
+            }
+
+            toastContainer.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.remove('opacity-0', 'translate-y-2');
+            }, 50);
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // STORICO PUNTEGGI SU LOCALSTORAGE
+        function loadHistory() {
+            const lastScore = localStorage.getItem('specchio_last_score');
+            const lastAccuracy = localStorage.getItem('specchio_last_accuracy');
+            const lastMode = localStorage.getItem('specchio_last_mode');
+            
+            if (lastScore && lastAccuracy) {
+                const modeLabel = lastMode === 'difficile' ? 'Difficile' : 'Estremo';
+                document.getElementById('last-score-text').innerHTML = `Ultimo Test (${modeLabel}): <strong class="text-indigo-400">${lastScore} Punti</strong> (${lastAccuracy}%)`;
+                btnResetScores.classList.remove('hidden');
+            } else {
+                document.getElementById('last-score-text').innerText = "Nessun test registrato di recente.";
+                btnResetScores.classList.add('hidden');
+            }
+        }
+
+        btnResetScores.addEventListener('click', () => {
+            localStorage.removeItem('specchio_last_score');
+            localStorage.removeItem('specchio_last_accuracy');
+            localStorage.removeItem('specchio_last_mode');
+            loadHistory();
+            showToast("Storico cancellato correttamente", "info");
+            Synth.playClick();
+        });
+
+        // Caricamento iniziale
+        loadHistory();
+
+        /******************************************************************
+         * AVVIO SESSIONE E GESTIONE FLOW DI ROUND
+         ******************************************************************/
+        btnStartGame.addEventListener('click', startSession);
+        btnAbort.addEventListener('click', openAbortModal);
+        btnRestart.addEventListener('click', startSession);
+        btnBackToMenu.addEventListener('click', showMenu);
+
+        function showMenu() {
+            menuSection.classList.remove('hidden');
+            gameSection.classList.add('hidden');
+            resultSection.classList.add('hidden');
+            loadHistory();
+            Synth.playClick();
+        }
+
+        function startSession() {
+            initAudioContext();
+            gameState.currentRound = 1;
+            gameState.score = 0;
+            gameState.responseTimes = [];
+            gameState.totalCorrectAnswersCount = 0;
+            gameState.totalPossibleTargetsCount = 0;
+            
+            menuSection.classList.add('hidden');
+            resultSection.classList.add('hidden');
+            gameSection.classList.remove('hidden');
+            
+            // Imposta etichetta della difficoltà
+            currentDifficultyTag.innerText = gameState.mode === 'difficile' ? 'Difficile (4x4)' : 'Estremo (5x5)';
+            if (gameState.mode === 'difficile') {
+                currentDifficultyTag.className = "text-md font-bold text-indigo-400";
+            } else {
+                currentDifficultyTag.className = "text-md font-bold text-purple-400";
+            }
+            
+            startRound();
+        }
+
+        function startRound() {
+            gameState.phase = 'MEMORIZE';
+            gameState.selected = [];
+            
+            // Aggiorna contatore di round a schermo
+            roundCounter.innerHTML = `${gameState.currentRound} <span class="text-sm text-slate-500">/ 10</span>`;
+            
+            // Genera la griglia
+            buildGrid();
+            
+            // Genera target casuali
+            generateTargets();
+            
+            // Mostra i target originari (in ROSSO brillante)
+            highlightTargets();
+            
+            // Nascondi il badge di rotazione della griglia finché memorizza
+            transIndicator.classList.add('hidden');
+            
+            // Imposta indicazioni
+            instructionCard.className = "p-4 bg-slate-950/50 border border-red-500/20 rounded-xl space-y-1.5";
+            gameInstructionText.innerText = `Memorizza la disposizione delle ${CONFIG[gameState.mode].targets} celle evidenziate in ROSSO. Evita distrazioni.`;
+            document.querySelector('#instruction-card span').innerHTML = `<i class="fa-solid fa-eye text-red-400"></i> FASE 1: MEMORIZZA`;
+            document.querySelector('#instruction-card span').className = "text-xs font-bold uppercase text-red-400 flex items-center gap-1.5";
+            
+            selectionSubtext.innerText = "Fase di Memorizzazione in corso...";
+            
+            // Aggiorna pulsante primario in stato disabilitato
+            btnPrimaryAction.disabled = true;
+            btnPrimaryAction.className = "flex-grow py-4 rounded-xl bg-slate-800 text-slate-500 font-bold text-md cursor-not-allowed transition-all flex items-center justify-center gap-2";
+            btnPrimaryAction.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Memorizzazione...`;
+            
+            // Avvia timer per 4 secondi
+            gameState.timeLeft = gameState.timeLimit;
+            timerLabel.innerText = "Tempo Rimasto";
+            timerProgress.className = "bg-gradient-to-r from-red-500 to-rose-600 h-full w-full transition-all duration-100 ease-linear";
+            
+            updateTimerUI();
+            
+            clearInterval(gameState.timerId);
+            const intervalStep = 50; // Controlli ogni 50ms
+            gameState.timerId = setInterval(() => {
+                gameState.timeLeft -= intervalStep;
+                updateTimerUI();
+                
+                if (gameState.timeLeft <= 0) {
+                    clearInterval(gameState.timerId);
+                    triggerRotationPhase();
+                }
+            }, intervalStep);
+            
+            Synth.playClick();
+        }
+
+        /******************************************************************
+         * DISEGNO E RENDERING DELLA GRIGLIA DINAMICA
+         ******************************************************************/
+        function buildGrid() {
+            const size = CONFIG[gameState.mode].size;
+            gridContainer.innerHTML = '';
+            
+            // Applica il layout della griglia corretto
+            if (size === 4) {
+                gridContainer.className = 'grid-transition w-full h-full grid grid-cols-4 gap-2.5 relative z-10';
+            } else {
+                gridContainer.className = 'grid-transition w-full h-full grid grid-cols-5 gap-2.5 relative z-10';
+            }
+
+            const totalCells = size * size;
+
+            for (let i = 0; i < totalCells; i++) {
+                const cell = document.createElement('button');
+                cell.dataset.index = i;
+                cell.className = "cell-transition bg-slate-950/50 hover:bg-slate-800 border border-slate-800 rounded-xl relative overflow-hidden flex items-center justify-center aspect-square shadow-inner";
+                
+                // Disabilita lo zoom e trascinamento per facilitare il tap mobile
+                cell.setAttribute('type', 'button');
+                
+                // Icona interna per l'overlay dei risultati (mantiene l'orientamento corretto annullando la rotazione)
+                const symbolContainer = document.createElement('div');
+                symbolContainer.className = "symbol-container flex items-center justify-center transition-all duration-300 pointer-events-none w-full h-full text-lg sm:text-2xl";
+                cell.appendChild(symbolContainer);
+
+                // Evento click sulla cella
+                cell.addEventListener('click', () => handleCellClick(i));
+                gridContainer.appendChild(cell);
+            }
+            
+            resetGridRotation();
+        }
+
+        function resetGridRotation() {
+            gameState.rotation = 0;
+            gameState.scaleX = 1;
+            gameState.scaleY = 1;
+            applyVisualTransform();
+        }
+
+        // Applica l'orientamento fisico alla griglia
+        function applyVisualTransform() {
+            // Applica la rotazione e la specularità al contenitore della griglia
+            gridContainer.style.transform = `rotate(${gameState.rotation}deg) scaleX(${gameState.scaleX}) scaleY(${gameState.scaleY})`;
+            
+            // Sincronizza l'orientamento dell'indicatore "NORD ORIGINALE" per aiutare il tracking visivo
+            compassNorth.style.transform = `translateX(-50%) rotate(${-gameState.rotation}deg) scaleX(${gameState.scaleX}) scaleY(${gameState.scaleY})`;
+            
+            // Fondamentale: annulla la deformazione visiva degli elementi grafici/iconcine interni alle celle
+            updateSymbolCounters();
+        }
+
+        // Annulla rotazione e mirroring delle icone interne per farle restare sempre visivamente "dritte"
+        function updateSymbolCounters() {
+            const containers = document.querySelectorAll('.symbol-container');
+            containers.forEach(container => {
+                container.style.transform = `rotate(${-gameState.rotation}deg) scaleX(${gameState.scaleX}) scaleY(${gameState.scaleY})`;
+            });
+        }
+
+        function generateTargets() {
+            const size = CONFIG[gameState.mode].size;
+            const totalCells = size * size;
+            const targetCount = CONFIG[gameState.mode].targets;
+            
+            gameState.targets = [];
+            while (gameState.targets.length < targetCount) {
+                const randIndex = Math.floor(Math.random() * totalCells);
+                if (!gameState.targets.includes(randIndex)) {
+                    gameState.targets.push(randIndex);
+                }
+            }
+        }
+
+        function highlightTargets() {
+            const cells = gridContainer.children;
+            // Pulisce le classi di hover per evitare segnali visivi superflui durante l'apprendimento
+            for (let i = 0; i < cells.length; i++) {
+                cells[i].className = "cell-transition bg-slate-950/50 border border-slate-800/80 rounded-xl flex items-center justify-center aspect-square pointer-events-none";
+            }
+            
+            // Illumina i target in rosso
+            gameState.targets.forEach(idx => {
+                if (cells[idx]) {
+                    cells[idx].className = "cell-transition bg-red-500 border-red-400 rounded-xl shadow-[0_0_20px_rgba(239,68,68,0.7)] flex items-center justify-center aspect-square pointer-events-none";
+                }
+            });
+        }
+
+        function updateTimerUI() {
+            const pct = (gameState.timeLeft / gameState.timeLimit) * 100;
+            timerProgress.style.width = `${pct}%`;
+            timerValue.innerText = `${(Math.max(0, gameState.timeLeft) / 1000).toFixed(1)}s`;
+        }
+
+        /******************************************************************
+         * TRASFORMAZIONE E ROTAZIONE FISICA DELLA GRIGLIA
+         ******************************************************************/
+        function triggerRotationPhase() {
+            gameState.phase = 'TRANSITION';
+            
+            // 1. Spegni tutte le celle immediatamente prima del movimento
+            const cells = gridContainer.children;
+            for (let i = 0; i < cells.length; i++) {
+                cells[i].className = "cell-transition bg-slate-950/50 border border-slate-800/80 rounded-xl flex items-center justify-center aspect-square pointer-events-none";
+                cells[i].querySelector('.symbol-container').innerHTML = ''; // Assicura che la cella sia vuota internamente
+            }
+
+            // 2. Determina la rotazione/trasformazione spaziale
+            let label = "";
+            let icon = "";
+            
+            if (gameState.mode === 'difficile') {
+                gameState.rotation = 90; // Sempre 90° orario
+                gameState.scaleX = 1;
+                gameState.scaleY = 1;
+                label = "Rotazione +90° Orario";
+                icon = '<i class="fa-solid fa-rotate-right"></i>';
+            } else {
+                // Modalità Estremo: Scelta Casuale tra rotazione 90°, 180° o Specchi
+                const transformations = [
+                    { rot: 90, sx: 1, sy: 1, lbl: "Rotazione 90° Orario", ico: '<i class="fa-solid fa-rotate-right"></i>' },
+                    { rot: 180, sx: 1, sy: 1, lbl: "Rotazione 180°", ico: '<i class="fa-solid fa-arrow-rotate-left"></i>' },
+                    { rot: 0, sx: -1, sy: 1, lbl: "Specchio Orizzontale", ico: '<i class="fa-solid fa-arrows-left-right"></i>' },
+                    { rot: 0, sx: 1, sy: -1, lbl: "Specchio Verticale", ico: '<i class="fa-solid fa-arrows-up-down"></i>' }
+                ];
+                const choice = transformations[Math.floor(Math.random() * transformations.length)];
+                gameState.rotation = choice.rot;
+                gameState.scaleX = choice.sx;
+                gameState.scaleY = choice.sy;
+                label = choice.lbl;
+                icon = choice.ico;
+            }
+
+            // 3. Mostra l'indicatore della trasformazione applicata
+            transIndicator.classList.remove('hidden');
+            transBadge.innerHTML = `${icon} <span>${label}</span>`;
+            
+            // Aggiorna istruzioni
+            instructionCard.className = "p-4 bg-slate-950/50 border border-indigo-500/20 rounded-xl space-y-1.5 animate-pulse";
+            gameInstructionText.innerText = `La griglia si sta riorientando. Mantieni la concentrazione spaziale attiva!`;
+            document.querySelector('#instruction-card span').innerHTML = `<i class="fa-solid fa-arrows-spin text-indigo-400"></i> FASE 2: ROTAZIONE`;
+            document.querySelector('#instruction-card span').className = "text-xs font-bold uppercase text-indigo-400 flex items-center gap-1.5";
+            
+            timerLabel.innerText = "Stato Movimento";
+            timerValue.innerText = "In corso...";
+            timerProgress.style.width = '100%';
+            timerProgress.className = "bg-indigo-500 h-full w-full";
+
+            selectionSubtext.innerText = "Ricalcolo delle coordinate in corso...";
+
+            // 4. Riproduci effetto sonoro Whoosh di rotazione
+            Synth.playWhoosh();
+
+            // 5. Applica la trasformazione tramite CSS
+            setTimeout(() => {
+                applyVisualTransform();
+            }, 100);
+
+            // 6. Finita l'animazione (1.4s di attesa per sicurezza), avvia la fase di ricostruzione
+            setTimeout(() => {
+                triggerRecallPhase();
+            }, 1400);
+        }
+
+        /******************************************************************
+         * FASE DI RECALL (Selezione Risposta dell'Utente)
+         ******************************************************************/
+        function triggerRecallPhase() {
+            gameState.phase = 'RECALL';
+            gameState.roundStartTime = Date.now();
+            
+            // Riabilita il click sulle celle e attiva gli stati hover
+            const cells = gridContainer.children;
+            for (let i = 0; i < cells.length; i++) {
+                cells[i].className = "cell-transition bg-slate-950/50 hover:bg-slate-800/80 border border-slate-800 rounded-xl flex items-center justify-center aspect-square cursor-pointer active:scale-95";
+            }
+
+            // Aggiorna istruzioni
+            instructionCard.className = "p-4 bg-indigo-950/40 border border-indigo-500/20 rounded-xl space-y-1.5";
+            gameInstructionText.innerText = `Clicca sulle celle che si erano illuminate inizialmente, considerando la trasformazione avvenuta!`;
+            document.querySelector('#instruction-card span').innerHTML = `<i class="fa-regular fa-lightbulb text-indigo-400"></i> FASE 3: RICOSTRUISCI`;
+            document.querySelector('#instruction-card span').className = "text-xs font-bold uppercase text-indigo-400 flex items-center gap-1.5";
+            
+            timerLabel.innerText = "Tempo Risposta";
+            timerProgress.className = "bg-indigo-500 h-full w-full";
+            
+            updateRecallTimer();
+
+            // Sincronizza lo stato del pulsante d'azione primario (Verifica)
+            updatePrimaryButton();
+        }
+
+        function updateRecallTimer() {
+            if (gameState.phase !== 'RECALL') return;
+            const elapsed = ((Date.now() - gameState.roundStartTime) / 1000).toFixed(1);
+            timerValue.innerText = `${elapsed}s`;
+            
+            // Continua ad aggiornare visivamente
+            requestAnimationFrame(updateRecallTimer);
+        }
+
+        function handleCellClick(index) {
+            if (gameState.phase !== 'RECALL') return;
+            
+            const cell = gridContainer.children[index];
+            const selIndex = gameState.selected.indexOf(index);
+            const targetCount = CONFIG[gameState.mode].targets;
+
+            Synth.playClick();
+
+            if (selIndex > -1) {
+                // Rimuovi selezione
+                gameState.selected.splice(selIndex, 1);
+                cell.className = "cell-transition bg-slate-950/50 hover:bg-slate-800/80 border border-slate-800 rounded-xl flex items-center justify-center aspect-square cursor-pointer active:scale-95";
+                cell.querySelector('.symbol-container').innerHTML = '';
+            } else {
+                // Aggiungi selezione se non abbiamo superato la capienza massima
+                if (gameState.selected.length < targetCount) {
+                    gameState.selected.push(index);
+                    cell.className = "cell-transition bg-blue-500 border-blue-400 rounded-xl shadow-[0_0_15px_rgba(59,130,246,0.6)] flex items-center justify-center aspect-square cursor-pointer active:scale-95";
+                    
+                    // Mostra un pallino blu indicatore di selezione interna
+                    cell.querySelector('.symbol-container').innerHTML = `<div class="w-3.5 h-3.5 rounded-full bg-white shadow-md"></div>`;
+                } else {
+                    // Feedback d'errore: rimpiazza l'elemento più vecchio (FIFO)
+                    const firstSel = gameState.selected.shift();
+                    const oldCell = gridContainer.children[firstSel];
+                    oldCell.className = "cell-transition bg-slate-950/50 hover:bg-slate-800/80 border border-slate-800 rounded-xl flex items-center justify-center aspect-square cursor-pointer active:scale-95";
+                    oldCell.querySelector('.symbol-container').innerHTML = '';
+                    
+                    gameState.selected.push(index);
+                    cell.className = "cell-transition bg-blue-500 border-blue-400 rounded-xl shadow-[0_0_15px_rgba(59,130,246,0.6)] flex items-center justify-center aspect-square cursor-pointer active:scale-95";
+                    cell.querySelector('.symbol-container').innerHTML = `<div class="w-3.5 h-3.5 rounded-full bg-white shadow-md"></div>`;
+                }
+            }
+
+            updatePrimaryButton();
+        }
+
+        function updatePrimaryButton() {
+            const currentSelected = gameState.selected.length;
+            const targetCount = CONFIG[gameState.mode].targets;
+            
+            if (currentSelected === targetCount) {
+                // Stato pronto per essere verificato
+                btnPrimaryAction.disabled = false;
+                btnPrimaryAction.className = "flex-grow py-4 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold text-md shadow-xl hover:shadow-emerald-500/10 hover:-translate-y-0.5 cursor-pointer transition-all flex items-center justify-center gap-2";
+                btnPrimaryAction.innerHTML = `Verifica Risposta <i class="fa-solid fa-circle-check"></i>`;
+                selectionSubtext.className = "text-center text-xs text-emerald-400 font-semibold animate-pulse";
+                selectionSubtext.innerText = "Configurazione completata! Clicca su Verifica.";
+            } else {
+                // Incompleto
+                btnPrimaryAction.disabled = true;
+                btnPrimaryAction.className = "flex-grow py-4 rounded-xl bg-slate-800 text-slate-500 border border-slate-700/50 font-bold text-md cursor-not-allowed transition-all flex items-center justify-center gap-2";
+                btnPrimaryAction.innerHTML = `Seleziona ${targetCount} celle (${currentSelected}/${targetCount})`;
+                selectionSubtext.className = "text-center text-xs text-slate-400 italic";
+                selectionSubtext.innerText = `Seleziona esattamente altre ${targetCount - currentSelected} celle.`;
+            }
+        }
+
+        /******************************************************************
+         * VERIFICA E CALCOLO DEL FEEDBACK SULLA RISPOSTA
+         ******************************************************************/
+        btnPrimaryAction.addEventListener('click', () => {
+            if (gameState.phase === 'RECALL') {
+                verifyAnswers();
+            } else if (gameState.phase === 'FEEDBACK') {
+                advanceRound();
+            }
+        });
+
+        function verifyAnswers() {
+            gameState.phase = 'FEEDBACK';
+            
+            const elapsedSeconds = parseFloat(((Date.now() - gameState.roundStartTime) / 1000).toFixed(1));
+            gameState.responseTimes.push(elapsedSeconds);
+            
+            // Spegne l'animazione di aggiornamento del timer di risposta
+            timerLabel.innerText = "Risposta Verificata";
+            
+            // Disabilita l'interazione dei click con le celle
+            const cells = gridContainer.children;
+            for (let i = 0; i < cells.length; i++) {
+                cells[i].classList.add('pointer-events-none');
+            }
+
+            // Calcola correttezza:
+            let correctCount = 0;
+            const targetCount = CONFIG[gameState.mode].targets;
+            
+            gameState.targets.forEach(targetIdx => {
+                if (gameState.selected.includes(targetIdx)) {
+                    correctCount++;
+                }
+            });
+
+            // Calcolo punteggio dinamico
+            const difficultyMultiplier = gameState.mode === 'estremo' ? 1.5 : 1.0;
+            const speedMultiplier = Math.max(0.5, 2.0 - (elapsedSeconds / 10)); // premia i tempi rapidi
+            const roundScore = Math.round(correctCount * 100 * difficultyMultiplier * speedMultiplier);
+            
+            gameState.score += roundScore;
+            gameState.totalCorrectAnswersCount += correctCount;
+            gameState.totalPossibleTargetsCount += targetCount;
+            
+            // Aggiorna interfaccia statistiche istantanee
+            const pctAccuracy = Math.round((gameState.totalCorrectAnswersCount / gameState.totalPossibleTargetsCount) * 100);
+            sessionAccuracyText.innerText = `${pctAccuracy}%`;
+            sessionScoreText.innerText = gameState.score;
+
+            // RENDERING DEL FEEDBACK VISIVO DETTAGLIATO
+            for (let i = 0; i < cells.length; i++) {
+                const isTarget = gameState.targets.includes(i);
+                const isSelected = gameState.selected.includes(i);
+                const cell = cells[i];
+                const symb = cell.querySelector('.symbol-container');
+                
+                if (isTarget && isSelected) {
+                    // Risposta esatta! (VERDE)
+                    cell.className = "cell-transition bg-emerald-500 border-emerald-400 rounded-xl shadow-[0_0_15px_rgba(16,185,129,0.7)] flex items-center justify-center aspect-square";
+                    symb.innerHTML = `<i class="fa-solid fa-check text-white text-xl sm:text-2xl drop-shadow-md"></i>`;
+                } else if (!isTarget && isSelected) {
+                    // Risposta errata dell'utente (ROSSO)
+                    cell.className = "cell-transition bg-rose-500 border-rose-400 rounded-xl shadow-[0_0_15px_rgba(244,63,94,0.7)] flex items-center justify-center aspect-square";
+                    symb.innerHTML = `<i class="fa-solid fa-xmark text-white text-xl sm:text-2xl drop-shadow-md"></i>`;
+                } else if (isTarget && !isSelected) {
+                    // Target mancato (GIALLO TRATTEGGIATO)
+                    cell.className = "cell-transition border-2 border-dashed border-amber-500 bg-amber-500/10 rounded-xl flex items-center justify-center aspect-square shadow-[0_0_12px_rgba(245,158,11,0.4)] animate-pulse";
+                    symb.innerHTML = `<i class="fa-regular fa-bell text-amber-400 text-lg sm:text-xl"></i>`;
+                } else {
+                    // Neutra
+                    cell.className = "cell-transition bg-slate-950/20 border border-slate-900/40 rounded-xl flex items-center justify-center aspect-square opacity-40";
+                    symb.innerHTML = '';
+                }
+            }
+
+            // Feedback Audio & Toast
+            if (correctCount === targetCount) {
+                Synth.playSuccess();
+                showToast(`Eccellente! ${correctCount}/${targetCount} risposte corrette.`, "success");
+            } else if (correctCount > 0) {
+                Synth.playClick();
+                showToast(`Punteggio parziale: ${correctCount}/${targetCount} corrette.`, "info");
+            } else {
+                Synth.playFail();
+                showToast(`Nessuna cella ricordata in questo round!`, "error");
+            }
+
+            // Aggiorna istruzioni di feedback
+            instructionCard.className = "p-4 bg-slate-950/60 border border-slate-800 rounded-xl space-y-1.5";
+            document.querySelector('#instruction-card span').innerHTML = `<i class="fa-solid fa-square-poll-vertical text-indigo-400"></i> FASE 4: VERIFICA`;
+            document.querySelector('#instruction-card span').className = "text-xs font-bold uppercase text-slate-400 flex items-center gap-1.5";
+            
+            gameInstructionText.innerHTML = `Risultato Round: <strong class="text-white">${correctCount}/${targetCount}</strong> celle corrette.<br>Tempo: <strong class="text-white">${elapsedSeconds}s</strong> • Punti Guadagnati: <strong class="text-indigo-300">+${roundScore}</strong>`;
+
+            // Configura il bottone per procedere
+            btnPrimaryAction.disabled = false;
+            btnPrimaryAction.className = "flex-grow py-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-md shadow-xl transition-all cursor-pointer flex items-center justify-center gap-2";
+            
+            if (gameState.currentRound < gameState.totalRounds) {
+                btnPrimaryAction.innerHTML = `Prossimo Round <i class="fa-solid fa-arrow-right"></i>`;
+                selectionSubtext.innerText = "Clicca per procedere al round successivo.";
+            } else {
+                btnPrimaryAction.innerHTML = `Visualizza Risultati Finali <i class="fa-solid fa-chart-pie"></i>`;
+                selectionSubtext.innerText = "Hai completato tutti i round del test.";
+            }
+        }
+
+        function advanceRound() {
+            if (gameState.currentRound < gameState.totalRounds) {
+                gameState.currentRound++;
+                startRound();
+            } else {
+                endSession();
+            }
+        }
+
+        /******************************************************************
+         * CONCLUSIONE DELLA SESSIONE DI STIMOLAZIONE COGNITIVA
+         ******************************************************************/
+        function endSession() {
+            gameState.phase = 'IDLE';
+            gameSection.classList.add('hidden');
+            resultSection.classList.remove('hidden');
+            
+            // Calcolo parametri finali
+            const totalTargets = gameState.totalPossibleTargetsCount;
+            const totalCorrect = gameState.totalCorrectAnswersCount;
+            const finalAccuracy = Math.round((totalCorrect / totalTargets) * 100);
+            
+            const totalTime = gameState.responseTimes.reduce((acc, curr) => acc + curr, 0);
+            const avgTime = (totalTime / gameState.responseTimes.length).toFixed(1);
+            
+            // Salvataggio nel LocalStorage
+            localStorage.setItem('specchio_last_score', gameState.score);
+            localStorage.setItem('specchio_last_accuracy', finalAccuracy);
+            localStorage.setItem('specchio_last_mode', gameState.mode);
+            
+            // Aggiorna valori a schermo
+            resCorrectCells.innerText = `${totalCorrect} / ${totalTargets}`;
+            resAccuracy.innerText = `${finalAccuracy}%`;
+            resSpeed.innerText = `${avgTime}s`;
+            
+            // Genera la diagnosi di feedback neurocognitivo
+            let clinicalFeedback = "";
+            if (finalAccuracy >= 90) {
+                clinicalFeedback = `La tua capacità di <strong>Rotazione Mentale</strong> ed efficienza spaziale è <strong>Superiore alla Media</strong>. Mostri eccellenti capacità di codifica della memoria di lavoro visuo-spaziale a livello di memoria di transito temporanea nel lobo parietale superiore. Ottimo controllo cognitivo.`;
+                resAccuracy.className = "text-3xl font-black text-emerald-400 mt-1";
+            } else if (finalAccuracy >= 70) {
+                clinicalFeedback = `La tua efficienza visuo-spaziale è <strong>Buona ed in Linea con i parametri normali</strong>. Mostri un'adeguata stabilità di memorizzazione. Per migliorare ulteriormente la flessibilità, prova a velocizzare i tuoi tempi di elaborazione visuale mantenendo lo schema complessivo a blocchi integrati.`;
+                resAccuracy.className = "text-3xl font-black text-indigo-400 mt-1";
+            } else if (finalAccuracy >= 50) {
+                clinicalFeedback = `La tua precisione di memorizzazione è <strong>Moderata</strong>. Mostri una leggera fatica nel calcolare le rotazioni mentali complesse dei pattern visuali. Ti consigliamo di allenarti costantemente per rafforzare le mappe cognitive visuo-spaziali e la memoria di lavoro di transizione.`;
+                resAccuracy.className = "text-3xl font-black text-amber-400 mt-1";
+            } else {
+                clinicalFeedback = `Esercitazione completata con <strong>Basso livello di precisione</strong>. Le operazioni mentali spaziali complesse necessitano di ulteriore pratica e potenziamento. Ripeti regolarmente l'esercizio al livello 'Difficile' per stabilizzare i meccanismi di focalizzazione visiva.`;
+                resAccuracy.className = "text-3xl font-black text-rose-400 mt-1";
+            }
+            
+            clinicalFeedbackText.innerHTML = clinicalFeedback;
+            
+            Synth.playGameComplete();
+        }
+    </script>
+</body>
+</html>

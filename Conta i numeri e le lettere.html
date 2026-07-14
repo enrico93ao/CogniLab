@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visual Memory Trainer Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
+        
+        :root {
+            --bg-dark: #020617;
+            --accent-blue: #3b82f6;
+            --accent-purple: #a855f7;
+            --success: #10b981;
+            --error: #ef4444;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-dark);
+            color: #f8fafc;
+            overflow: hidden;
+            margin: 0;
+            height: 100vh;
+            background: radial-gradient(circle at center, #0f172a 0%, #020617 100%);
+        }
+
+        .bg-mesh {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(59, 130, 246, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(168, 85, 247, 0.08) 0%, transparent 40%);
+            pointer-events: none;
+        }
+
+        .glass {
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1), transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .screen-hidden {
+            opacity: 0;
+            pointer-events: none;
+            transform: scale(0.95);
+            display: none !important;
+        }
+
+        .stimulus {
+            position: absolute;
+            user-select: none;
+            font-weight: 800;
+            filter: drop-shadow(0 0 20px currentColor);
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .btn-glow {
+            position: relative;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn-glow:hover {
+            box-shadow: 0 0 25px rgba(59, 130, 246, 0.4);
+            transform: translateY(-2px);
+            filter: brightness(1.1);
+        }
+
+        .level-badge {
+            padding: 8px 16px;
+            border-radius: 12px;
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(12px);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .heart {
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .heart.lost {
+            transform: scale(0) rotate(-45deg);
+            opacity: 0;
+        }
+
+        .custom-range::-webkit-slider-thumb {
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            background: #3b82f6;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center p-6">
+
+    <div class="bg-mesh"></div>
+
+    <!-- HUD -->
+    <div id="hud" class="fixed top-0 left-0 w-full p-6 flex justify-between items-start z-[100] opacity-0 transition-opacity duration-500 pointer-events-none">
+        <div class="flex flex-col gap-2">
+            <div class="level-badge">
+                <div class="relative flex h-3 w-3">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-3 w-3 bg-blue-500"></span>
+                </div>
+                <span id="level-text" class="text-xs font-bold tracking-widest uppercase text-blue-100">LIVELLO 1</span>
+            </div>
+            <button onclick="showFinalSummary()" class="pointer-events-auto text-[10px] font-bold text-slate-500 hover:text-red-400 transition-colors uppercase tracking-[0.2em] flex items-center gap-2 px-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                Termina Sessione
+            </button>
+        </div>
+        <div class="lives-container flex gap-2" id="lives-display"></div>
+    </div>
+
+    <!-- Schermata Iniziale -->
+    <div id="start-screen" class="glass p-10 rounded-[32px] text-center max-w-lg w-full z-50">
+        <div class="mb-8 flex justify-center">
+            <div class="p-5 bg-gradient-to-br from-blue-600/20 to-purple-600/20 rounded-2xl border border-white/10">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+            </div>
+        </div>
+        <h1 class="text-5xl font-extrabold mb-3 tracking-tight text-white">Memory <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">Pro</span></h1>
+        <p class="text-slate-400 mb-10 font-medium">Testa la tua memoria e percezione visiva.</p>
+        
+        <div class="space-y-5 text-left mb-10">
+            <div class="flex items-center justify-between p-5 bg-white/5 rounded-2xl border border-white/5 hover:bg-white/10 transition-colors">
+                <div>
+                    <span class="block text-sm font-bold text-slate-200">Modalità Cromatica</span>
+                    <span class="text-xs text-slate-500">Colori distinti per tipologia</span>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="use-colors" class="sr-only peer" checked>
+                    <div class="w-11 h-6 bg-slate-700 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                </label>
+            </div>
+
+            <div>
+                <div class="flex justify-between mb-3 px-1">
+                    <label class="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">Esposizione Iniziale</label>
+                    <span class="text-sm font-black text-blue-400 tracking-tighter"><span id="time-val">4.0</span>s</span>
+                </div>
+                <input type="range" id="exposure-time" min="1" max="10" value="4" step="0.5" class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer custom-range" oninput="document.getElementById('time-val').innerText = parseFloat(this.value).toFixed(1)">
+            </div>
+        </div>
+
+        <button onclick="initGame()" class="btn-glow bg-gradient-to-r from-blue-600 to-blue-500 text-white w-full py-5 rounded-2xl font-bold text-lg shadow-lg shadow-blue-500/20">
+            Inizia Allenamento
+        </button>
+    </div>
+
+    <!-- Area di Gioco -->
+    <div id="game-area" class="fixed inset-0 pointer-events-none hidden opacity-0 transition-opacity duration-300"></div>
+
+    <!-- Schermata Risposte -->
+    <div id="answer-screen" class="glass p-10 rounded-[32px] text-center max-w-md w-full z-50 screen-hidden">
+        <h2 class="text-xs font-black mb-8 tracking-[0.3em] text-slate-500 uppercase">Inserimento Dati</h2>
+        <div class="space-y-6 text-left">
+            <div>
+                <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2">Quanti NUMERI?</label>
+                <input type="number" id="input-numbers" class="w-full bg-blue-500/5 border border-blue-500/20 rounded-2xl p-5 text-4xl font-black text-blue-400 outline-none focus:border-blue-500/50 transition-all text-center" placeholder="0">
+            </div>
+            <div>
+                <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2">Quante LETTERE?</label>
+                <input type="number" id="input-letters" class="w-full bg-purple-500/5 border border-purple-500/20 rounded-2xl p-5 text-4xl font-black text-purple-400 outline-none focus:border-purple-500/50 transition-all text-center" placeholder="0">
+            </div>
+        </div>
+        <button onclick="checkAnswers()" class="mt-10 btn-glow bg-white text-slate-950 w-full py-5 rounded-2xl font-black uppercase tracking-widest text-sm">
+            Verifica Risultati
+        </button>
+    </div>
+
+    <!-- Schermata Risultati (Livello Singolo) -->
+    <div id="result-screen" class="glass p-10 rounded-[32px] text-center max-w-md w-full z-50 screen-hidden">
+        <div id="result-icon" class="mb-6 flex justify-center"></div>
+        <h2 class="text-3xl font-black mb-2 tracking-tight text-white" id="result-title">Analisi</h2>
+        <div id="result-details" class="mb-8 space-y-3"></div>
+        <div class="grid grid-cols-1 gap-3">
+            <button id="next-btn" onclick="nextLevel()" class="btn-glow bg-emerald-600 hover:bg-emerald-500 text-white py-5 rounded-2xl font-bold transition-all shadow-lg shadow-emerald-500/20">
+                Prossimo Livello
+            </button>
+            <button id="retry-btn" onclick="startGame()" class="btn-glow bg-blue-600 hover:bg-blue-500 text-white py-5 rounded-2xl font-bold transition-all shadow-lg shadow-blue-500/20 hidden">
+                Riprova Livello
+            </button>
+            <button id="final-stats-btn" onclick="showFinalSummary()" class="btn-glow bg-slate-800 hover:bg-slate-700 text-white py-5 rounded-2xl font-bold transition-all hidden">
+                Vedi Riepilogo Finale
+            </button>
+        </div>
+    </div>
+
+    <!-- Schermata Finale (Riepilogo) -->
+    <div id="summary-screen" class="glass p-10 rounded-[32px] text-center max-w-lg w-full z-[60] screen-hidden">
+        <div class="mb-6 flex justify-center relative">
+            <svg class="w-32 h-32 transform -rotate-90">
+                <circle cx="64" cy="64" r="58" stroke="currentColor" stroke-width="8" fill="transparent" class="text-slate-800" />
+                <circle id="accuracy-circle" cx="64" cy="64" r="58" stroke="currentColor" stroke-width="8" fill="transparent" 
+                    stroke-dasharray="364.4" stroke-dashoffset="364.4"
+                    class="text-blue-500 transition-all duration-1000 ease-out" />
+            </svg>
+            <div class="absolute inset-0 flex flex-col items-center justify-center">
+                <span id="stat-accuracy" class="text-3xl font-black text-white">0%</span>
+                <span class="text-[8px] font-bold text-slate-500 uppercase">Precisione</span>
+            </div>
+        </div>
+        <h2 class="text-3xl font-black mb-1 text-white">Sessione Conclusa</h2>
+        <p id="performance-msg" class="text-blue-400 text-sm font-bold uppercase tracking-widest mb-8 italic">Ottimo lavoro</p>
+        <div class="grid grid-cols-2 gap-4 mb-6 text-white">
+            <div class="p-5 bg-white/5 rounded-3xl border border-white/5">
+                <span class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Livello Max</span>
+                <span id="stat-level" class="text-3xl font-black">1</span>
+            </div>
+            <div class="p-5 bg-white/5 rounded-3xl border border-white/5">
+                <span class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Stimoli Totali</span>
+                <span id="stat-total" class="text-3xl font-black">0</span>
+            </div>
+        </div>
+        <div class="space-y-3 p-6 bg-slate-900/50 rounded-3xl border border-white/5 text-left mb-10">
+            <div class="flex justify-between items-center text-xs">
+                <span class="text-slate-400 font-bold uppercase tracking-tighter">Corrette (Numeri)</span>
+                <span id="stat-num-accuracy" class="font-mono text-blue-400 font-bold">0 / 0</span>
+            </div>
+            <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden mb-2">
+                <div id="bar-num" class="bg-blue-500 h-full transition-all duration-1000" style="width: 0%"></div>
+            </div>
+            <div class="flex justify-between items-center text-xs">
+                <span class="text-slate-400 font-bold uppercase tracking-tighter">Corrette (Lettere)</span>
+                <span id="stat-let-accuracy" class="font-mono text-purple-400 font-bold">0 / 0</span>
+            </div>
+            <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                <div id="bar-let" class="bg-purple-500 h-full transition-all duration-1000" style="width: 0%"></div>
+            </div>
+        </div>
+        <button onclick="resetToHome()" class="btn-glow bg-white text-slate-950 w-full py-5 rounded-2xl font-black uppercase tracking-widest text-sm">
+            Torna alla Home
+        </button>
+    </div>
+
+    <script>
+        let currentLevel = 1;
+        let lives = 3;
+        let countNumbers = 0;
+        let countLetters = 0;
+        let config = { useColors: true, baseTime: 4000 };
+        let stats = {
+            maxLevel: 1, totalStimuli: 0, correctResponses: 0, totalAttempts: 0, 
+            errors: 0, correctNums: 0, totalNums: 0, correctLets: 0, totalLets: 0
+        };
+
+        function updateLivesUI() {
+            const container = document.getElementById('lives-display');
+            container.innerHTML = '';
+            for (let i = 0; i < 3; i++) {
+                const heart = document.createElement('div');
+                heart.className = `heart ${i >= lives ? 'lost' : 'text-red-500'}`;
+                heart.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" /></svg>`;
+                container.appendChild(heart);
+            }
+        }
+
+        function switchScreen(fromId, toId) {
+            if(fromId) document.getElementById(fromId).classList.add('screen-hidden');
+            const to = document.getElementById(toId);
+            if(to) {
+                to.classList.remove('hidden');
+                setTimeout(() => to.classList.remove('screen-hidden'), 20);
+            }
+        }
+
+        function initGame() {
+            config.useColors = document.getElementById('use-colors').checked;
+            config.baseTime = parseFloat(document.getElementById('exposure-time').value) * 1000;
+            currentLevel = 1;
+            lives = 3;
+            stats = { maxLevel: 1, totalStimuli: 0, correctResponses: 0, totalAttempts: 0, errors: 0, correctNums: 0, totalNums: 0, correctLets: 0, totalLets: 0 };
+            switchScreen('start-screen', null);
+            startGame();
+        }
+
+        function startGame() {
+            countNumbers = 0;
+            countLetters = 0;
+            document.getElementById('input-numbers').value = '';
+            document.getElementById('input-letters').value = '';
+            
+            document.querySelectorAll('.glass').forEach(s => s.classList.add('screen-hidden'));
+            document.getElementById('hud').style.opacity = '1';
+            
+            const gameArea = document.getElementById('game-area');
+            gameArea.classList.remove('hidden');
+            gameArea.innerHTML = '';
+            setTimeout(() => gameArea.style.opacity = '1', 50);
+            
+            updateLivesUI();
+            document.getElementById('level-text').innerText = `LIVELLO ${currentLevel}`;
+
+            const totalStimuli = Math.floor(Math.random() * 2) + 2 + currentLevel;
+            const displayTime = Math.max(800, config.baseTime - (currentLevel - 1) * 350); 
+
+            const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            for (let i = 0; i < totalStimuli; i++) {
+                const char = chars[Math.floor(Math.random() * chars.length)];
+                const isLetter = isNaN(char);
+                if (isLetter) countLetters++; else countNumbers++;
+                stats.totalStimuli++;
+
+                const el = document.createElement('div');
+                el.className = 'stimulus text-6xl md:text-8xl animate-float text-white';
+                el.innerText = char;
+                if(config.useColors) el.style.color = isLetter ? '#a855f7' : '#3b82f6';
+                
+                el.style.left = (Math.random() * (window.innerWidth - 180) + 90) + 'px';
+                el.style.top = (Math.random() * (window.innerHeight - 180) + 90) + 'px';
+                el.style.transform = 'scale(0)';
+                gameArea.appendChild(el);
+                setTimeout(() => el.style.transform = 'scale(1)', i * 50);
+            }
+
+            setTimeout(() => {
+                gameArea.style.opacity = '0';
+                setTimeout(() => {
+                    gameArea.classList.add('hidden');
+                    switchScreen(null, 'answer-screen');
+                    document.getElementById('input-numbers').focus();
+                }, 400);
+            }, displayTime);
+        }
+
+        function checkAnswers() {
+            const userNum = parseInt(document.getElementById('input-numbers').value) || 0;
+            const userLet = parseInt(document.getElementById('input-letters').value) || 0;
+            const numCorrect = userNum === countNumbers;
+            const letCorrect = userLet === countLetters;
+            const isWin = numCorrect && letCorrect;
+
+            stats.totalAttempts++;
+            stats.totalNums += countNumbers;
+            stats.totalLets += countLetters;
+            if (numCorrect) stats.correctNums += countNumbers;
+            if (letCorrect) stats.correctLets += countLetters;
+            if (isWin) stats.correctResponses++; else stats.errors++;
+
+            const resTitle = document.getElementById('result-title');
+            const resDetails = document.getElementById('result-details');
+            const resIcon = document.getElementById('result-icon');
+            const nextBtn = document.getElementById('next-btn');
+            const retryBtn = document.getElementById('retry-btn');
+            const finalStatsBtn = document.getElementById('final-stats-btn');
+
+            [nextBtn, retryBtn, finalStatsBtn].forEach(b => b.classList.add('hidden'));
+
+            if (isWin) {
+                resIcon.innerHTML = `<div class="p-6 bg-emerald-500/10 rounded-full text-emerald-500"><svg class="h-14 w-14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" /></svg></div>`;
+                resTitle.innerText = "Analisi Corretta!";
+                resTitle.className = "text-3xl font-black mb-2 text-emerald-400";
+                nextBtn.classList.remove('hidden');
+                stats.maxLevel = Math.max(stats.maxLevel, currentLevel);
+            } else {
+                lives--;
+                updateLivesUI();
+                if (lives > 0) {
+                    resIcon.innerHTML = `<div class="p-6 bg-amber-500/10 rounded-full text-amber-500"><svg class="h-14 w-14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg></div>`;
+                    resTitle.innerText = "Dati Errati";
+                    resTitle.className = "text-3xl font-black mb-2 text-amber-400";
+                    retryBtn.classList.remove('hidden');
+                } else {
+                    resIcon.innerHTML = `<div class="p-6 bg-red-500/10 rounded-full text-red-500"><svg class="h-14 w-14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 115.636 5.636m12.728 12.728L5.636 5.636" /></svg></div>`;
+                    resTitle.innerText = "Game Over";
+                    resTitle.className = "text-3xl font-black mb-2 text-red-500";
+                    finalStatsBtn.classList.remove('hidden');
+                }
+            }
+
+            resDetails.innerHTML = `
+                <div class="flex items-center justify-between p-5 bg-slate-900/50 rounded-2xl border border-white/5">
+                    <span class="text-xs font-bold text-slate-500 uppercase tracking-widest text-white">Numeri</span> 
+                    <span class="font-black text-2xl ${numCorrect ? 'text-emerald-400' : 'text-red-400'}">${userNum} / ${countNumbers}</span>
+                </div>
+                <div class="flex items-center justify-between p-5 bg-slate-900/50 rounded-2xl border border-white/5 text-white">
+                    <span class="text-xs font-bold text-slate-500 uppercase tracking-widest">Lettere</span> 
+                    <span class="font-black text-2xl ${letCorrect ? 'text-emerald-400' : 'text-red-400'}">${userLet} / ${countLetters}</span>
+                </div>
+            `;
+            switchScreen('answer-screen', 'result-screen');
+        }
+
+        function showFinalSummary() {
+            document.getElementById('hud').style.opacity = '0';
+            document.querySelectorAll('.glass').forEach(s => s.classList.add('screen-hidden'));
+            
+            const accuracy = stats.totalAttempts > 0 ? Math.round((stats.correctResponses / stats.totalAttempts) * 100) : 0;
+            const circle = document.getElementById('accuracy-circle');
+            circle.style.strokeDashoffset = 364.4 - (accuracy / 100) * 364.4;
+
+            document.getElementById('stat-level').innerText = stats.maxLevel;
+            document.getElementById('stat-accuracy').innerText = accuracy + '%';
+            document.getElementById('stat-total').innerText = stats.totalStimuli;
+            
+            const nP = stats.totalNums > 0 ? (stats.correctNums / stats.totalNums) * 100 : 0;
+            const lP = stats.totalLets > 0 ? (stats.correctLets / stats.totalLets) * 100 : 0;
+            document.getElementById('stat-num-accuracy').innerText = `${stats.correctNums} / ${stats.totalNums}`;
+            document.getElementById('stat-let-accuracy').innerText = `${stats.correctLets} / ${stats.totalLets}`;
+            document.getElementById('bar-num').style.width = nP + '%';
+            document.getElementById('bar-let').style.width = lP + '%';
+
+            switchScreen(null, 'summary-screen');
+        }
+
+        function nextLevel() { currentLevel++; startGame(); }
+        function resetToHome() {
+            document.getElementById('hud').style.opacity = '0';
+            document.querySelectorAll('.glass').forEach(s => s.classList.add('screen-hidden'));
+            switchScreen(null, 'start-screen');
+        }
+    </script>
+</body>
+</html>
