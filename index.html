@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hub di Stimolazione Cognitiva</title>
-    <!-- Icone professionali FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -15,30 +14,29 @@
         }
 
         body {
-            background-color: #f1f5f9;
+            background-color: #f8fafc;
             color: #0f172a;
             padding-bottom: 80px;
         }
 
-        /* Header Principale */
         header {
             background: linear-gradient(135deg, #1e3a8a, #0284c7);
             color: white;
-            padding: 50px 20px;
+            padding: 60px 20px;
             text-align: center;
-            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.15);
+            box-shadow: 0 4px 20px rgba(30, 58, 138, 0.15);
             margin-bottom: 40px;
         }
 
         header h1 {
-            font-size: 2.5rem;
+            font-size: 2.6rem;
             font-weight: 700;
             letter-spacing: -0.5px;
         }
 
         header p {
             margin-top: 12px;
-            font-size: 1.15rem;
+            font-size: 1.2rem;
             color: #e0f2fe;
             max-width: 700px;
             margin-left: auto;
@@ -46,18 +44,17 @@
         }
 
         .container {
-            max-width: 1300px;
+            max-width: 1400px;
             margin: 0 auto;
             padding: 0 20px;
         }
 
-        /* Sezione Area Cognitiva */
         .area-sezione {
             margin-bottom: 50px;
             background: white;
-            padding: 30px;
-            border-radius: 20px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            padding: 35px;
+            border-radius: 24px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
             border: 1px solid #e2e8f0;
         }
 
@@ -65,22 +62,15 @@
             display: flex;
             align-items: center;
             gap: 15px;
-            margin-bottom: 25px;
+            margin-bottom: 30px;
             padding-bottom: 15px;
             border-bottom: 2px solid #f1f5f9;
         }
 
-        .area-header i {
-            font-size: 1.8rem;
-        }
+        .area-header i { font-size: 2rem; }
+        .area-header h2 { font-size: 1.6rem; font-weight: 600; color: #1e293b; }
 
-        .area-header h2 {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: #1e293b;
-        }
-
-        /* Colore specifico per ogni Area */
+        /* Palette di Colori delle Aree */
         .area-attenzione .area-header i { color: #ef4444; }
         .area-memoria .area-header i { color: #3b82f6; }
         .area-funzioni .area-header i { color: #10b981; }
@@ -88,54 +78,93 @@
         .area-visuo .area-header i { color: #8b5cf6; }
         .area-orientamento .area-header i { color: #06b6d4; }
 
-        /* Griglia delle Card */
+        /* Griglia adattiva avanzata */
         .grid-esercizi {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 24px;
         }
 
-        /* Card Singola */
+        /* Card Elegante */
         .card {
             background: #f8fafc;
-            border-radius: 12px;
-            padding: 20px;
-            text-align: left;
+            border-radius: 16px;
+            padding: 24px;
             text-decoration: none;
             color: inherit;
             display: flex;
             flex-direction: column;
+            justify-content: space-between;
             border: 1px solid #e2e8f0;
-            transition: all 0.2s ease;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
         }
 
-        .card:hover {
-            transform: translateY(-3px);
-            background: white;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+        .card-body {
+            flex-grow: 1;
+            margin-bottom: 16px;
         }
-
-        /* Hover dinamico in base all'area */
-        .area-attenzione .card:hover { border-color: #fca5a5; }
-        .area-memoria .card:hover { border-color: #93c5fd; }
-        .area-funzioni .card:hover { border-color: #6ee7b7; }
-        .area-linguaggio .card:hover { border-color: #fde047; }
-        .area-visuo .card:hover { border-color: #c4b5fd; }
-        .area-orientamento .card:hover { border-color: #67e8f9; }
 
         .card h3 {
-            font-size: 1.05rem;
+            font-size: 1.15rem;
             color: #0f172a;
             font-weight: 600;
             line-height: 1.4;
+            margin-bottom: 8px;
         }
+
+        .card p {
+            font-size: 0.88rem;
+            color: #64748b;
+            line-height: 1.5;
+        }
+
+        /* Micro-tag per i sotto-domini */
+        .tag {
+            display: inline-block;
+            align-self: flex-start;
+            padding: 4px 10px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-radius: 8px;
+            background: #e2e8f0;
+            color: #475569;
+        }
+
+        /* Effetti di Hover Dinamici in base all'Area Cognitiva */
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 20px -5px rgba(0,0,0,0.08);
+            background: white;
+        }
+
+        .area-attenzione .card:hover { border-color: #fca5a5; }
+        .area-attenzione .card:hover .tag { background: #fee2e2; color: #ef4444; }
+
+        .area-memoria .card:hover { border-color: #93c5fd; }
+        .area-memoria .card:hover .tag { background: #dbeafe; color: #3b82f6; }
+
+        .area-funzioni .card:hover { border-color: #6ee7b7; }
+        .area-funzioni .card:hover .tag { background: #d1fae5; color: #10b981; }
+
+        .area-linguaggio .card:hover { border-color: #fde047; }
+        .area-linguaggio .card:hover .tag { background: #fef3c7; color: #d97706; }
+
+        .area-visuo .card:hover { border-color: #c4b5fd; }
+        .area-visuo .card:hover .tag { background: #ede9fe; color: #8b5cf6; }
+
+        .area-orientamento .card:hover { border-color: #67e8f9; }
+        .area-orientamento .card:hover .tag { background: #ecfeff; color: #0891b2; }
     </style>
 </head>
 <body>
 
     <header>
         <h1>Hub di Stimolazione Cognitiva</h1>
-        <p>Piattaforma centralizzata per il potenziamento e la riabilitazione neuropsicologica.</p>
+        <p>Piattaforma centralizzata per il potenziamento, lo screening e la riabilitazione neuropsicologica.</p>
     </header>
 
     <div class="container">
@@ -147,12 +176,48 @@
                 <h2>Attenzione e Velocità di Elaborazione</h2>
             </div>
             <div class="grid-esercizi">
-                <a href="esercizio.html?file=Attenzione%20alternata.html" class="card"><h3>Attenzione Alternata</h3></a>
-                <a href="esercizio.html?file=Cancellazione%20di%20H.html" class="card"><h3>Cancellazione di H</h3></a>
-                <a href="esercizio.html?file=Conta%20i%20numeri%20e%20le%20lettere.html" class="card"><h3>Conta Numeri e Lettere</h3></a>
-                <a href="esercizio.html?file=Doppio%20compito%20e%20velocità.html" class="card"><h3>Doppio Compito e Velocità</h3></a>
-                <a href="esercizio.html?file=Il%20semaforo%20delle%20parole.html" class="card"><h3>Il Semaforo delle Parole</h3></a>
-                <a href="esercizio.html?file=Stroop.html" class="card"><h3>Stroop Base</h3></a>
+                <a href="esercizio.html?file=Attenzione%20alternata.html" class="card">
+                    <div class="card-body">
+                        <h3>Attenzione Alternata</h3>
+                        <p>Allena la capacità di spostare tempestivamente il focus attenzionale tra compiti e stimoli diversi.</p>
+                    </div>
+                    <span class="tag">Shift Attenzionale</span>
+                </a>
+                <a href="esercizio.html?file=Cancellazione%20di%20H.html" class="card">
+                    <div class="card-body">
+                        <h3>Cancellazione di H</h3>
+                        <p>Test di sbarramento classico per valutare e potenziare l'attenzione selettiva visiva e l'accuratezza.</p>
+                    </div>
+                    <span class="tag">Attenzione Selettiva</span>
+                </a>
+                <a href="esercizio.html?file=Conta%20i%20numeri%20e%20le%20lettere.html" class="card">
+                    <div class="card-body">
+                        <h3>Conta Numeri e Lettere</h3>
+                        <p>Esercizio di conteggio simultaneo e monitoraggio per stimolare l'attenzione divisa e sostenuta.</p>
+                    </div>
+                    <span class="tag">Attenzione Divisa</span>
+                </a>
+                <a href="esercizio.html?file=Doppio%20compito%20e%20velocità.html" class="card">
+                    <div class="card-body">
+                        <h3>Doppio Compito e Velocità</h3>
+                        <p>Simulazione di dual-task per incrementare la velocità di elaborazione e la gestione delle interferenze.</p>
+                    </div>
+                    <span class="tag">Dual Task</span>
+                </a>
+                <a href="esercizio.html?file=Il%20semaforo%20delle%20parole.html" class="card">
+                    <div class="card-body">
+                        <h3>Il Semaforo delle Parole</h3>
+                        <p>Esercizio interattivo basato sul controllo della risposta impulsiva e l'inibizione cognitiva.</p>
+                    </div>
+                    <span class="tag">Inibizione</span>
+                </a>
+                <a href="esercizio.html?file=Stroop.html" class="card">
+                    <div class="card-body">
+                        <h3>Stroop Base</h3>
+                        <p>Il classico compito di incongruenza colore-parola per testare la suscettibilità alla distrazione.</p>
+                    </div>
+                    <span class="tag">Effetto Stroop</span>
+                </a>
             </div>
         </section>
 
@@ -163,14 +228,62 @@
                 <h2>Memoria e Memoria di Lavoro</h2>
             </div>
             <div class="grid-esercizi">
-                <a href="esercizio.html?file=Calcolo%20e%20memoria.html" class="card"><h3>Calcolo e Memoria</h3></a>
-                <a href="esercizio.html?file=Inibizione%20e%20memoria%20di%20lavoro.html" class="card"><h3>Inibizione e Memoria di Lavoro</h3></a>
-                <a href="esercizio.html?file=Memoria%20di%20lavoro%20avanzato.html" class="card"><h3>Memoria di Lavoro Avanzata</h3></a>
-                <a href="esercizio.html?file=Memoria%20di%20prosa%20con%20distrattori.html" class="card"><h3>Memoria di Prosa con Distrattori</h3></a>
-                <a href="esercizio.html?file=Memoria%20visuospaziale%20con%20domande.html" class="card"><h3>Memoria Visuospaziale con Domande</h3></a>
-                <a href="esercizio.html?file=Memoria%20visuospaziale%20con%20numeri.html" class="card"><h3>Memoria Visuospaziale con Numeri</h3></a>
-                <a href="esercizio.html?file=Memoria%20visuospaziale%20il%20Giardino.html" class="card"><h3>Memoria Visuospaziale: Il Giardino</h3></a>
-                <a href="esercizio.html?file=Rispondi%20al%20contrario%20e%20ricorda%20la%20parola.html" class="card"><h3>Rispondi al Contrario e Ricorda</h3></a>
+                <a href="esercizio.html?file=Calcolo%20e%20memoria.html" class="card">
+                    <div class="card-body">
+                        <h3>Calcolo e Memoria</h3>
+                        <p>Unisci operazioni aritmetiche mentali alla necessità di mantenere a mente i risultati parziali.</p>
+                    </div>
+                    <span class="tag">Working Memory</span>
+                </a>
+                <a href="esercizio.html?file=Inibizione%20e%20memoria%20di%20lavoro.html" class="card">
+                    <div class="card-body">
+                        <h3>Inibizione e Memoria di Lavoro</h3>
+                        <p>Inibisci le informazioni non rilevanti aggiornando continuamente il contenuto della memoria a breve termine.</p>
+                    </div>
+                    <span class="tag">Aggiornamento MBT</span>
+                </a>
+                <a href="esercizio.html?file=Memoria%20di%20lavoro%20avanzato.html" class="card">
+                    <div class="card-body">
+                        <h3>Memoria di Lavoro Avanzata</h3>
+                        <p>Sfide ad alto carico cognitivo per potenziare la manipolazione attiva di sequenze di informazioni complesse.</p>
+                    </div>
+                    <span class="tag">Esecutivo Centrale</span>
+                </a>
+                <a href="esercizio.html?file=Memoria%20di%20prosa%20con%20distrattori.html" class="card">
+                    <div class="card-body">
+                        <h3>Memoria di Prosa con Distrattori</h3>
+                        <p>Ascolto o lettura di brevi racconti logici con inserimento di elementi di disturbo acustici o visivi.</p>
+                    </div>
+                    <span class="tag">Memoria Logica</span>
+                </a>
+                <a href="esercizio.html?file=Memoria%20visuospaziale%20con%20domande.html" class="card">
+                    <div class="card-body">
+                        <h3>Memoria Visuospaziale con Domande</h3>
+                        <p>Osservazione di scene strutturate e successivo richiamo di dettagli specifici tramite quesiti mirati.</p>
+                    </div>
+                    <span class="tag">Richiamo Visivo</span>
+                </a>
+                <a href="esercizio.html?file=Memoria%20visuospaziale%20con%20numeri.html" class="card">
+                    <div class="card-body">
+                        <h3>Memoria Visuospaziale con Numeri</h3>
+                        <p>Memorizzazione della posizione spaziale di cifre numeriche crescenti sul pattern dello span di Corsi.</p>
+                    </div>
+                    <span class="tag">Span Spaziale</span>
+                </a>
+                <a href="esercizio.html?file=Memoria%20visuospaziale%20il%20Giardino.html" class="card">
+                    <div class="card-body">
+                        <h3>Memoria Visuospaziale: Il Giardino</h3>
+                        <p>Esercizio ecologico e contestualizzato per il riposizionamento di elementi in un ambiente grafico definito.</p>
+                    </div>
+                    <span class="tag">Memoria Ecologica</span>
+                </a>
+                <a href="esercizio.html?file=Rispondi%20al%20contrario%20e%20ricorda%20la%20parola.html" class="card">
+                    <div class="card-body">
+                        <h3>Rispondi al Contrario e Ricorda</h3>
+                        <p>Inversione logica della risposta immediata associata alla ritenzione a lungo termine di uno stimolo ancora attivo.</p>
+                    </div>
+                    <span class="tag">Doppio Task MBT</span>
+                </a>
             </div>
         </section>
 
@@ -181,13 +294,55 @@
                 <h2>Funzioni Esecutive e Logica</h2>
             </div>
             <div class="grid-esercizi">
-                <a href="esercizio.html?file=Il%20cifrario.html" class="card"><h3>Il Cifrario</h3></a>
-                <a href="esercizio.html?file=N%20back.html" class="card"><h3>N-Back Standard</h3></a>
-                <a href="esercizio.html?file=N%20back%20semantico.html" class="card"><h3>N-Back Semantico</h3></a>
-                <a href="esercizio.html?file=Relazioni%20logiche.html" class="card"><h3>Relazioni Logiche</h3></a>
-                <a href="esercizio.html?file=Rispondi%20il%20contrario.html" class="card"><h3>Rispondi il Contrario</h3></a>
-                <a href="esercizio.html?file=Set%20shifting.html" class="card"><h3>Set Shifting</h3></a>
-                <a href="esercizio.html?file=Trova%20l'intruso.html" class="card"><h3>Trova l'Intruso</h3></a>
+                <a href="esercizio.html?file=Il%20cifrario.html" class="card">
+                    <div class="card-body">
+                        <h3>Il Cifrario</h3>
+                        <p>Associazione di simboli e lettere basata su regole rigide per stimolare la velocità di codifica astratta.</p>
+                    </div>
+                    <span class="tag">Codifica</span>
+                </a>
+                <a href="esercizio.html?file=N%20back.html" class="card">
+                    <div class="card-body">
+                        <h3>N-Back Standard</h3>
+                        <p>Confronta lo stimolo attuale con quello apparso 'N' passaggi fa. Il pilastro del potenziamento esecutivo.</p>
+                    </div>
+                    <span class="tag">N-Back</span>
+                </a>
+                <a href="esercizio.html?file=N%20back%20semantico.html" class="card">
+                    <div class="card-body">
+                        <h3>N-Back Semantico</h3>
+                        <p>Variante avanzata dell'N-back che richiede la categorizzazione logica e concettuale dello stimolo precedente.</p>
+                    </div>
+                    <span class="tag">Working Memory Critica</span>
+                </a>
+                <a href="esercizio.html?file=Relazioni%20logiche.html" class="card">
+                    <div class="card-body">
+                        <h3>Relazioni Logiche</h3>
+                        <p>Risoluzione di sillogismi, matrici e deduzioni per allenare il pensiero fluido e il problem solving strutturato.</p>
+                    </div>
+                    <span class="tag">Ragionamento Fluido</span>
+                </a>
+                <a href="esercizio.html?file=Rispondi%20il%20contrario.html" class="card">
+                    <div class="card-body">
+                        <h3>Rispondi il Contrario</h3>
+                        <p>Inibizione della risposta automatica predominante a favore di un criterio logico opposto.</p>
+                    </div>
+                    <span class="tag">Flessibilità</span>
+                </a>
+                <a href="esercizio.html?file=Set%20shifting.html" class="card">
+                    <div class="card-body">
+                        <h3>Set Shifting</h3>
+                        <p>Esercizio mirato ad allenare la flessibilità cognitiva passando repentinamente da una regola di classificazione all'altra.</p>
+                    </div>
+                    <span class="tag">Flessibilità Cognitiva</span>
+                </a>
+                <a href="esercizio.html?file=Trova%20l'intruso.html" class="card">
+                    <div class="card-body">
+                        <h3>Trova l'Intruso</h3>
+                        <p>Analisi visiva o concettuale per individuare l'elemento discordante all'interno di un set omogeneo.</p>
+                    </div>
+                    <span class="tag">Categorizzazione</span>
+                </a>
             </div>
         </section>
 
@@ -198,12 +353,48 @@
                 <h2>Linguaggio e Abilità Verbali</h2>
             </div>
             <div class="grid-esercizi">
-                <a href="esercizio.html?file=Catena%20di%20parole.html" class="card"><h3>Catena di Parole</h3></a>
-                <a href="esercizio.html?file=Intruso%20semantico.html" class="card"><h3>Intruso Semantico</h3></a>
-                <a href="esercizio.html?file=La%20torre%20delle%20lettere.html" class="card"><h3>La Torre delle Lettere</h3></a>
-                <a href="esercizio.html?file=Riordina%20la%20frase.html" class="card"><h3>Riordina la Frase</h3></a>
-                <a href="esercizio.html?file=Riordina%20le%20lettere.html" class="card"><h3>Riordina le Lettere</h3></a>
-                <a href="esercizio.html?file=Riordina%20le%20parole%20in%20ordine%20alfabetico.html" class="card"><h3>Ordine Alfabetico Parole</h3></a>
+                <a href="esercizio.html?file=Catena%20di%20parole.html" class="card">
+                    <div class="card-body">
+                        <h3>Catena di Parole</h3>
+                        <p>Generazione di parole in sequenza basata sulle sillabe finali per incrementare il recupero lessicale.</p>
+                    </div>
+                    <span class="tag">Fluenza Lessicale</span>
+                </a>
+                <a href="esercizio.html?file=Intruso%20semantico.html" class="card">
+                    <div class="card-body">
+                        <h3>Intruso Semantico</h3>
+                        <p>Trova la parola non legata da vincoli di significato all'interno di un campo semantico ristretto.</p>
+                    </div>
+                    <span class="tag">Semantica</span>
+                </a>
+                <a href="esercizio.html?file=La%20torre%20delle%20lettere.html" class="card">
+                    <div class="card-body">
+                        <h3>La Torre delle Lettere</h3>
+                        <p>Esercizio di anagrammi e composizione lessicale partendo da un set di grafemi disposti in verticale.</p>
+                    </div>
+                    <span class="tag">Compito Fonologico</span>
+                </a>
+                <a href="esercizio.html?file=Riordina%20la%20frase.html" class="card">
+                    <div class="card-body">
+                        <h3>Riordina la Frase</h3>
+                        <p>Ricostruzione della corretta sintassi di una frase i cui costituenti linguistici sono stati rimescolati.</p>
+                    </div>
+                    <span class="tag">Sintassi e Grammatica</span>
+                </a>
+                <a href="esercizio.html?file=Riordina%20le%20lettere.html" class="card">
+                    <div class="card-body">
+                        <h3>Riordina le Lettere</h3>
+                        <p>Riordina un set di lettere confuse per scoprire la parola nascosta (lavoro sulla working memory fonologica).</p>
+                    </div>
+                    <span class="tag">Sintesi Fonemica</span>
+                </a>
+                <a href="esercizio.html?file=Riordina%20le%20parole%20in%20ordine%20alfabetico.html" class="card">
+                    <div class="card-body">
+                        <h3>Ordine Alfabetico Parole</h3>
+                        <p>Classificazione automatica e controllo seriale alfabetico applicato a stringhe lessicali.</p>
+                    </div>
+                    <span class="tag">Inibizione Lessicale</span>
+                </a>
             </div>
         </section>
 
@@ -214,12 +405,48 @@
                 <h2>Gnosie e Abilità Visuospaziali</h2>
             </div>
             <div class="grid-esercizi">
-                <a href="esercizio.html?file=Esplorazione%20visuospaziale%20multilivello.html" class="card"><h3>Esplorazione Visuospaziale</h3></a>
-                <a href="esercizio.html?file=Memoria%20visuospaziale%20rotante.html" class="card"><h3>Memoria Visuospaziale Rotante</h3></a>
-                <a href="esercizio.html?file=Riconoscimento%20visivo%20base.html" class="card"><h3>Riconoscimento Visivo Base</h3></a>
-                <a href="esercizio.html?file=Riconoscimento%20visivo.html" class="card"><h3>Riconoscimento Visivo Avanzato</h3></a>
-                <a href="esercizio.html?file=Silhoutte.html" class="card"><h3>Silhouette</h3></a>
-                <a href="esercizio.html?file=Trova%20l'immagine%20corrispondente.html" class="card"><h3>Trova Immagine Corrispondente</h3></a>
+                <a href="esercizio.html?file=Esplorazione%20visuospaziale%20multilivello.html" class="card">
+                    <div class="card-body">
+                        <h3>Esplorazione Visuospaziale</h3>
+                        <p>Allena l'esplorazione emicampale e contrasta i fenomeni di disattenzione spaziale unilaterale o neglect.</p>
+                    </div>
+                    <span class="tag">Scanning Visivo</span>
+                </a>
+                <a href="esercizio.html?file=Memoria%20visuospaziale%20rotante.html" class="card">
+                    <div class="card-body">
+                        <h3>Memoria Visuospaziale Rotante</h3>
+                        <p>Memorizza elementi geometrici complessi che subiscono rotazioni spaziali mentali nell'asse geometrico.</p>
+                    </div>
+                    <span class="tag">Rotazione Mentale</span>
+                </a>
+                <a href="esercizio.html?file=Riconoscimento%20visivo%20base.html" class="card">
+                    <div class="card-body">
+                        <h3>Riconoscimento Visivo Base</h3>
+                        <p>Compito di identificazione di oggetti e forme note per stimolare la via visiva ventrale del 'What'.</p>
+                    </div>
+                    <span class="tag">Gnosie Visive</span>
+                </a>
+                <a href="esercizio.html?file=Riconoscimento%20visivo.html" class="card">
+                    <div class="card-body">
+                        <h3>Riconoscimento Visivo Avanzato</h3>
+                        <p>Identificazione di dettagli micro-strutturali occultati o sovrapposti in tavole visive ad alta densità.</p>
+                    </div>
+                    <span class="tag">Discriminazione Visiva</span>
+                </a>
+                <a href="esercizio.html?file=Silhoutte.html" class="card">
+                    <div class="card-body">
+                        <h3>Silhouette</h3>
+                        <p>Identificazione dell'oggetto corrispondente partendo esclusivamente dal suo contorno o ombra scura oscurata.</p>
+                    </div>
+                    <span class="tag">Chiusura Percettiva</span>
+                </a>
+                <a href="esercizio.html?file=Trova%20l'immagine%20corrispondente.html" class="card">
+                    <div class="card-body">
+                        <h3>Trova Immagine Corrispondente</h3>
+                        <p>Esercizio di confronto simultaneo tra target e distruttori per affinare la precisione e il match geometrico.</p>
+                    </div>
+                    <span class="tag">Matching Visivo</span>
+                </a>
             </div>
         </section>
 
@@ -230,8 +457,20 @@
                 <h2>Orientamento e Cognizione Temporale</h2>
             </div>
             <div class="grid-esercizi">
-                <a href="esercizio.html?file=L'orologio%20invisibile.html" class="card"><h3>L'Orologio Invisibile</h3></a>
-                <a href="esercizio.html?file=Orientamento%20temporale-spaziale.html" class="card"><h3>Orientamento Temporale-Spaziale</h3></a>
+                <a href="esercizio.html?file=L'orologio%20invisibile.html" class="card">
+                    <div class="card-body">
+                        <h3>L'Orologio Invisibile</h3>
+                        <p>Calcolo e stima del tempo basati sulla posizione delle lancette mentali in un quadrante privo di numeri.</p>
+                    </div>
+                    <span class="tag">Stima Temporale</span>
+                </a>
+                <a href="esercizio.html?file=Orientamento%20temporale-spaziale.html" class="card">
+                    <div class="card-body">
+                        <h3>Orientamento Temporale-Spaziale</h3>
+                        <p>Quesiti interattivi di ancoraggio alla realtà quotidiana per datazione, stagione, coordinate geografiche ed eventi.</p>
+                    </div>
+                    <span class="tag">Ancoraggio Clinico</span>
+                </a>
             </div>
         </section>
 
