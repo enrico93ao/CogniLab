@@ -105,8 +105,8 @@
         <span>Accessi: <span id="access-count" class="font-bold">Offline</span></span>
     </div>
 
-    <!-- Modal di Conferma Abbandono Personalizzato -->
-    <div id="confirm-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[100] flex items-center justify-center p-4 hidden transition-opacity duration-200">
+    <!-- Finestra Modale di Conferma Abbandono Personalizzata -->
+    <div id="confirm-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[200] hidden items-center justify-center p-4">
         <div class="bg-white p-6 rounded-3xl border border-slate-200 max-w-sm w-full text-center shadow-lg transform scale-95 transition-transform duration-200" id="confirm-modal-card">
             <h3 class="text-lg font-bold text-slate-900 mb-2">Abbandonare la sessione?</h3>
             <p class="text-sm text-slate-500 mb-6">I progressi della sessione corrente andranno perduti.</p>
@@ -118,6 +118,15 @@
                     Abbandona
                 </button>
             </div>
+        </div>
+    </div>
+
+    <!-- Finestra Modale Salvataggio in Corso -->
+    <div id="saving-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[200] hidden items-center justify-center p-4">
+        <div class="bg-white p-6 rounded-3xl border border-slate-200 max-w-sm w-full text-center shadow-lg transform scale-95 transition-transform duration-200" id="saving-modal-card">
+            <div class="animate-spin rounded-full h-10 w-10 border-4 border-indigo-600 border-t-transparent mx-auto mb-4"></div>
+            <h3 class="text-lg font-bold text-slate-900 mb-2">Salvataggio in corso...</h3>
+            <p class="text-sm text-slate-500">I risultati vengono registrati nella cartella clinica.</p>
         </div>
     </div>
 
@@ -229,9 +238,14 @@
             </div>
         </div>
 
-        <button onclick="window.showSetup()" class="button bg-emerald-600 hover:bg-emerald-700 text-white font-black py-4 px-10 rounded-2xl text-base w-full md:w-auto shadow-sm shadow-emerald-100 uppercase tracking-widest">
-            Nuova Sessione
-        </button>
+        <div class="flex flex-col sm:flex-row gap-3 justify-center">
+            <button onclick="window.showSetup()" class="button bg-emerald-600 hover:bg-emerald-700 text-white font-black py-4 px-10 rounded-2xl text-base shadow-sm shadow-emerald-100 uppercase tracking-widest flex-1">
+                Nuova Sessione
+            </button>
+            <button id="back-to-dashboard-btn" class="button bg-slate-50 border border-slate-200 text-slate-800 hover:bg-slate-100 font-black py-4 px-10 rounded-2xl text-base shadow-sm uppercase tracking-widest flex-1 hidden">
+                Torna alla Dashboard
+            </button>
+        </div>
     </div>
 
     <div id="message-box" class="message-box shadow-2xl"></div>
@@ -240,7 +254,7 @@
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';
-        import { getFirestore, doc, getDoc, setDoc, updateDoc, increment, onSnapshot } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js';
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, increment, onSnapshot, collection, getDocs } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js';
 
         // --- Sintesi Audio ---
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -323,17 +337,24 @@
             ]
         };
 
-        // Gestione delle variabili d'ambiente per consentire il funzionamento offline/locale
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'una-tira-l-altra-final';
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        // Recupero dei parametri di sessione dall'URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const isSession = urlParams.get('sessione') === 'true';
+        const pazienteId = urlParams.get('pazienteId');
+        const sessioneId = urlParams.get('sessioneId') || urlParams.get('sessionId');
+        const indiceEsercizio = parseInt(urlParams.get('indiceEsercizio') || urlParams.get('exerciseIndex') || '0', 10);
+        const tipoSessione = urlParams.get('tipoSessione') || urlParams.get('tipo') || 'libera'; // pianificata / libera
 
         let app = null;
         let auth = null;
         let db = null;
         let user = null;
+        let firebaseInitialized = false;
 
-        // Gestione Contatore (Cloud Storage sicuro solo se online)
         const initHitCounter = async () => {
             if (!db || !auth || !auth.currentUser) return;
             const counterRef = doc(db, 'artifacts', appId, 'public', 'data', 'counters', 'access');
@@ -355,7 +376,6 @@
             }
         };
 
-        // Flusso di inizializzazione condizionale
         const initAuthAndApp = async () => {
             if (firebaseConfig && firebaseConfig.apiKey) {
                 try {
@@ -364,11 +384,14 @@
                     db = getFirestore(app);
 
                     if (initialAuthToken) {
-                        await signInWithCustomToken(auth, initialAuthToken);
+                        const credential = await signInWithCustomToken(auth, initialAuthToken);
+                        user = credential.user;
                     } else {
-                        await signInAnonymously(auth);
+                        const credential = await signInAnonymously(auth);
+                        user = credential.user;
                     }
 
+                    firebaseInitialized = true;
                     onAuthStateChanged(auth, u => {
                         user = u;
                         if (user) {
@@ -376,11 +399,10 @@
                         }
                     });
                 } catch (err) {
-                    console.warn("Firebase config error, fallback to offline:", err);
+                    console.warn("Firebase initialization failed, running in local mode:", err);
                     document.getElementById('access-count').textContent = "Locale";
                 }
             } else {
-                // Modalità offline locale
                 document.getElementById('access-count').textContent = "Locale";
             }
         };
@@ -402,9 +424,15 @@
             timer: document.getElementById('timer-display'),
             scoreC: document.getElementById('score-correct'),
             scoreW: document.getElementById('score-wrong'),
-            nextBtn: document.getElementById('next-btn')
+            nextBtn: document.getElementById('next-btn'),
+            confirmModal: document.getElementById('confirm-modal'),
+            confirmCard: document.getElementById('confirm-modal-card'),
+            savingModal: document.getElementById('saving-modal'),
+            savingCard: document.getElementById('saving-modal-card'),
+            backDashboardBtn: document.getElementById('back-to-dashboard-btn')
         };
 
+        // Rendi disponibili a livello globale per i button onclick
         window.showSetup = () => {
             clearInterval(stats.timerInterval);
             UI.setup.classList.remove('hidden');
@@ -504,38 +532,151 @@
             UI.scoreW.textContent = stats.wrong;
         };
 
-        window.finishSession = () => {
+        const salvaRisultatiSuFirebase = async () => {
+            if (!firebaseInitialized || !user) {
+                console.warn("Salvataggio saltato: Firebase offline o non autenticato.");
+                return;
+            }
+
+            const currentUserId = user.uid;
+            const tempoImpiegatoInSecondi = Math.floor((Date.now() - stats.startTime) / 1000);
+            const numeroRisposteCorrette = stats.correct;
+            const numeroTotaleDomande = stats.correct + stats.wrong;
+            const calcoloAccuratezzaPercentuale = numeroTotaleDomande > 0 ? Math.round((numeroRisposteCorrette / numeroTotaleDomande) * 100) : 0;
+            const punteggioGrezzoGenerale = Math.max(0, (numeroRisposteCorrette * 15) - (stats.wrong * 5));
+
+            // STRUTTURA STANDARD DI SALVATAGGIO DEI DATI DELL'ESERCIZIO
+            const datiEsercizio = {
+                titolo: "Una tira l'altra", // Corrisponde al data-title nell'index.html della dashboard
+                risultati: {
+                    risposteCorrette: numeroRisposteCorrette,
+                    totaleDomande: numeroTotaleDomande,
+                    percentualeAccuratezza: calcoloAccuratezzaPercentuale,
+                    tempoMedioS: tempoImpiegatoInSecondi,
+                    punteggio: punteggioGrezzoGenerale
+                }
+            };
+
+            // Mostriamo la modale di salvataggio
+            UI.savingModal.classList.remove('hidden');
+            UI.savingModal.classList.add('flex');
+            setTimeout(() => {
+                UI.savingCard.classList.remove('scale-95');
+                UI.savingCard.classList.add('scale-100');
+            }, 10);
+
+            try {
+                if (tipoSessione === 'pianificata' && sessioneId) {
+                    // REGOLA 1: Percorso privato standardizzato per sessione pianificata
+                    const sessionDocRef = doc(db, 'artifacts', appId, 'users', currentUserId, 'sessioni', sessioneId);
+                    const sessionDocSnap = await getDoc(sessionDocRef);
+                    if (sessionDocSnap.exists()) {
+                        const sessionData = sessionDocSnap.data();
+                        const esercizi = sessionData.esercizi || [];
+                        if (esercizi[indiceEsercizio]) {
+                            esercizi[indiceEsercizio].risultati = datiEsercizio.risultati;
+                            esercizi[indiceEsercizio].completato = true;
+                            esercizi[indiceEsercizio].dataCompletamento = new Date().toISOString();
+                        }
+                        await updateDoc(sessionDocRef, { esercizi: esercizi });
+                    }
+                } else if (pazienteId) {
+                    // REGOLA 1 e REGOLA 2 (no complex query): Percorso privato per sessione libera
+                    const storicoCollectionRef = collection(db, 'artifacts', appId, 'users', currentUserId, 'storico_pazienti', pazienteId, 'sessioni');
+                    const querySnapshot = await getDocs(storicoCollectionRef);
+                    let sessionsList = [];
+                    querySnapshot.forEach(docSnap => {
+                        sessionsList.push({ id: docSnap.id, ...docSnap.data() });
+                    });
+
+                    // Ordinamento sicuro in memoria (Rule 2 compliant)
+                    sessionsList.sort((a, b) => new Date(b.dataInizio || b.data || 0) - new Date(a.dataInizio || a.data || 0));
+
+                    if (sessionsList.length > 0) {
+                        const targetSession = sessionsList[0];
+                        const lastSessionDocRef = doc(db, 'artifacts', appId, 'users', currentUserId, 'storico_pazienti', pazienteId, 'sessioni', targetSession.id);
+                        const eserciziSvolti = targetSession.eserciziSvolti || [];
+                        eserciziSvolti.push(datiEsercizio);
+                        await updateDoc(lastSessionDocRef, { eserciziSvolti: eserciziSvolti });
+                    } else {
+                        // Crea un nuovo blocco di sessione vuoto se inesistente
+                        const newSessionId = crypto.randomUUID();
+                        const newSessionDocRef = doc(db, 'artifacts', appId, 'users', currentUserId, 'storico_pazienti', pazienteId, 'sessioni', newSessionId);
+                        await setDoc(newSessionDocRef, {
+                            dataInizio: new Date().toISOString(),
+                            eserciziSvolti: [datiEsercizio]
+                        });
+                    }
+                }
+                showMessage("Salvataggio completato!", "success");
+            } catch (err) {
+                console.error("Errore durante il salvataggio dei dati clinici:", err);
+                showMessage("Errore salvataggio dati.", "error");
+            } finally {
+                // Nascondiamo la modale di salvataggio
+                UI.savingCard.classList.remove('scale-100');
+                UI.savingCard.classList.add('scale-95');
+                setTimeout(() => {
+                    UI.savingModal.classList.add('hidden');
+                    UI.savingModal.classList.remove('flex');
+                    
+                    // Se la sessione è pianificata, reindirizziamo subito all'Hub della dashboard principale
+                    if (tipoSessione === 'pianificata') {
+                        goToDashboard();
+                    }
+                }, 300);
+            }
+        };
+
+        // Reindirizza mantenendo tutti i parametri di query intatti
+        const goToDashboard = () => {
+            window.location.href = `index.html${window.location.search}`;
+        };
+
+        window.finishSession = async () => {
             clearInterval(stats.timerInterval);
             document.getElementById('final-time').textContent = UI.timer.textContent;
             document.getElementById('final-correct').textContent = stats.correct;
             document.getElementById('final-wrong').textContent = stats.wrong;
+            
+            // Se siamo in un flusso di sessione attiva, salviamo i risultati su Firebase
+            if (isSession) {
+                await salvaRisultatiSuFirebase();
+                UI.backDashboardBtn.classList.remove('hidden');
+                UI.backDashboardBtn.onclick = goToDashboard;
+            } else {
+                UI.backDashboardBtn.classList.add('hidden');
+            }
+
             UI.game.classList.add('hidden');
             UI.report.classList.remove('hidden');
         };
 
         window.confirmExit = () => {
-            const modal = document.getElementById('confirm-modal');
-            const card = document.getElementById('confirm-modal-card');
-            modal.classList.remove('hidden');
+            UI.confirmModal.classList.remove('hidden');
+            UI.confirmModal.classList.add('flex');
             setTimeout(() => {
-                card.classList.remove('scale-95');
-                card.classList.add('scale-100');
+                UI.confirmCard.classList.remove('scale-95');
+                UI.confirmCard.classList.add('scale-100');
             }, 10);
         };
 
         window.closeConfirmModal = () => {
-            const modal = document.getElementById('confirm-modal');
-            const card = document.getElementById('confirm-modal-card');
-            card.classList.remove('scale-100');
-            card.classList.add('scale-95');
+            UI.confirmCard.classList.remove('scale-100');
+            UI.confirmCard.classList.add('scale-95');
             setTimeout(() => {
-                modal.classList.add('hidden');
+                UI.confirmModal.classList.add('hidden');
+                UI.confirmModal.classList.remove('flex');
             }, 150);
         };
 
         window.executeExit = () => {
             window.closeConfirmModal();
-            window.showSetup();
+            if (isSession) {
+                goToDashboard();
+            } else {
+                window.showSetup();
+            }
         };
 
         const showMessage = (txt, type) => {
