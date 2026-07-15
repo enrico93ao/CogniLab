@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Caccia all'Intruso Visivo</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- SDK Firebase Compatibili -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;600;800&display=swap');
 
@@ -127,7 +132,7 @@
                     </div>
                 </div>
 
-                <!-- Selezione Modalità (1 o 2 Intrusi) -->
+                <!-- Selezione Modalità -->
                 <div class="mb-4">
                     <span class="block text-xs font-bold text-gray-400 mb-2 uppercase text-center">Modalità</span>
                     <div class="grid grid-cols-2 gap-2">
@@ -211,9 +216,10 @@
                 </div>
             </div>
 
+            <!-- Area d'azione dinamica -->
             <div class="flex flex-col gap-3">
-                <button onclick="startGame()" class="btn-large bg-blue-600 text-white w-full hover:bg-blue-700 font-bold">RIPROVA SESSIONE</button>
-                <button onclick="quitToMenu()" class="btn-large bg-gray-100 text-gray-600 w-full hover:bg-gray-200">MENU PRINCIPALE</button>
+                <button id="btn-main-action" onclick="startGame()" class="btn-large bg-blue-600 text-white w-full hover:bg-blue-700 font-bold">RIPROVA SESSIONE</button>
+                <button id="btn-secondary-action" onclick="quitToMenu()" class="btn-large bg-gray-100 text-gray-600 w-full hover:bg-gray-200">MENU PRINCIPALE</button>
             </div>
         </div>
     </div>
@@ -221,7 +227,7 @@
     <script>
         let config = { gridSize: 3, duration: 1, intrudersCount: 1 };
         let stats = {
-            foundCount: 0, // Conta quanti round/gruppi completi sono stati risolti
+            foundCount: 0, 
             errorCount: 0,
             timestamps: [],
             lastClickTime: 0,
@@ -230,6 +236,14 @@
             remainingSeconds: 0,
             isActive: false
         };
+
+        // Parametri per integrazione Firebase Dashboard
+        const urlParams = new URLSearchParams(window.location.search);
+        const isSessione = urlParams.get('sessione') === 'true';
+        const pazienteId = urlParams.get('pazienteId') || localStorage.getItem('currentPazienteId') || localStorage.getItem('pazienteId');
+        const sessioneId = urlParams.get('sessioneId') || localStorage.getItem('currentSessioneId');
+        const tipoSessione = urlParams.get('tipoSessione') || localStorage.getItem('tipoSessione') || 'libera';
+        const indiceEsercizio = parseInt(urlParams.get('indiceEsercizio') || localStorage.getItem('indiceEsercizio') || '0', 10);
 
         // Contatori temporanei della griglia attiva
         let roundIntrudersToFind = 0;
@@ -244,6 +258,23 @@
         };
 
         let audioCtx = null;
+        let database = null;
+
+        // Tenta l'inizializzazione di Firebase usando i dati memorizzati
+        try {
+            const fbConfigStr = localStorage.getItem('firebaseConfig');
+            if (fbConfigStr) {
+                const firebaseConfig = JSON.parse(fbConfigStr);
+                if (!firebase.apps.length) {
+                    firebase.initializeApp(firebaseConfig);
+                }
+                database = firebase.database();
+            } else if (firebase.apps.length) {
+                database = firebase.database();
+            }
+        } catch (e) {
+            console.error("Inizializzazione Firebase saltata o non riuscita:", e);
+        }
 
         function setLevel(size) {
             config.gridSize = size;
@@ -260,7 +291,6 @@
                 if (btn) btn.classList.toggle('btn-selected', c === count);
             });
             
-            // Aggiorna dinamicamente l'istruzione del menu
             const instruction = document.getElementById('instruction-text');
             if (count === 1) {
                 instruction.innerHTML = `Trova il <span class="font-bold text-blue-600">simbolo diverso</span> dagli altri e toccalo il più velocemente possibile.`;
@@ -294,7 +324,6 @@
             document.getElementById('game-screen').classList.remove('hidden');
             document.getElementById('live-counter').textContent = "0";
 
-            // Aggiorna l'etichetta del contatore in tempo reale
             document.getElementById('label-counter').textContent = config.intrudersCount === 1 ? "Trovati:" : "Coppie Trovate:";
 
             updateTimerDisplay();
@@ -323,11 +352,9 @@
 
             const totalCells = config.gridSize * config.gridSize;
             
-            // Impostiamo quanti intrusi trovare in questa griglia
             roundIntrudersToFind = config.intrudersCount;
             roundIntrudersFound = 0;
 
-            // Seleziona indici univoci degli intrusi
             const intruderIndices = [];
             while (intruderIndices.length < config.intrudersCount) {
                 const r = Math.floor(Math.random() * totalCells);
@@ -358,7 +385,6 @@
                 const isIntruder = intruderIndices.includes(i);
                 item.innerHTML = isIntruder ? shapes[intruderShapeKey] : shapes[baseShapeKey];
                 
-                // Passiamo l'indice o lo stato per gestire il click singolo
                 item.onclick = (e) => handleSelection(isIntruder, item);
                 container.appendChild(item);
             }
@@ -368,14 +394,12 @@
             if (!stats.isActive) return;
 
             if (isIntruder) {
-                // Se è già stato trovato in questo round, non fare nulla
                 if (element.classList.contains('found-intruder')) return;
 
                 element.classList.add('found-intruder');
                 roundIntrudersFound++;
 
                 if (roundIntrudersFound === roundIntrudersToFind) {
-                    // Trovati tutti gli intrusi di questa griglia!
                     const now = Date.now();
                     stats.timestamps.push((now - stats.lastClickTime) / 1000);
                     stats.foundCount++;
@@ -386,7 +410,6 @@
                     flashGrid();
                     setTimeout(generateRound, 200);
                 } else {
-                    // Trovato solo il primo di due intrusi
                     playPartialSuccessFeedback();
                 }
             } else {
@@ -411,13 +434,11 @@
             const gain = audioCtx.createGain();
             
             if (isCorrect) {
-                // Suono squillante di successo pieno
                 osc.frequency.setValueAtTime(660, audioCtx.currentTime);
                 osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.05);
                 gain.gain.setValueAtTime(0.06, audioCtx.currentTime);
                 gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.25);
             } else {
-                // Suono basso di errore
                 osc.frequency.setValueAtTime(150, audioCtx.currentTime);
                 gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
                 gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.2);
@@ -431,10 +452,9 @@
 
         function playPartialSuccessFeedback() {
             if (!audioCtx) return;
-            // Suono intermedio per l'individuazione di 1 di 2 intrusi
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
-            osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // Nota Do5
+            osc.frequency.setValueAtTime(523.25, audioCtx.currentTime);
             gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
             gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
             osc.connect(gain);
@@ -443,7 +463,7 @@
             osc.stop(audioCtx.currentTime + 0.1);
         }
 
-        function endGame() {
+        async function endGame() {
             if (!stats.isActive) return;
             stats.isActive = false;
             clearInterval(stats.timerIntervalId);
@@ -451,7 +471,6 @@
             document.getElementById('game-screen').classList.add('hidden');
             document.getElementById('results-screen').classList.remove('hidden');
 
-            // Calcoli statistiche
             const avgTime = stats.timestamps.length > 0 
                 ? (stats.timestamps.reduce((a,b) => a+b, 0) / stats.timestamps.length).toFixed(1)
                 : "0.0";
@@ -459,7 +478,6 @@
             const totalAttempts = stats.foundCount + stats.errorCount;
             const accuracy = totalAttempts > 0 ? Math.round((stats.foundCount / totalAttempts) * 100) : 0;
 
-            // Calcolo stelle in base a prestazioni e difficoltà
             let starCount = 0;
             if (stats.foundCount > 0) {
                 starCount = 1;
@@ -470,13 +488,11 @@
                 if (accuracy > 90 && avgTime < topSpeedThreshold) starCount = 3;
             }
 
-            // Aggiorna etichette e valori
             document.getElementById('res-found-label').textContent = config.intrudersCount === 1 ? "Trovati" : "Coppie Trovate";
             document.getElementById('res-found').textContent = stats.foundCount;
             document.getElementById('res-avg').textContent = avgTime + "s";
             document.getElementById('res-accuracy').textContent = accuracy + "%";
             
-            // Gestione dei record persistenti salvati in base a griglia e modalità di intruso
             const recordKey = `best_score_g${config.gridSize}_i${config.intrudersCount}`;
             const prevBest = parseInt(localStorage.getItem(recordKey)) || 0;
             const isNewRecord = stats.foundCount > prevBest && stats.foundCount > 0;
@@ -489,9 +505,81 @@
             }
             document.getElementById('res-best').textContent = Math.max(prevBest, stats.foundCount);
 
-            // Attivazione visiva stelle di valutazione
             for(let i=1; i<=3; i++) {
                 document.getElementById(`star-${i}`).classList.toggle('star-active', i <= starCount);
+            }
+
+            // Normalizzazione dati e integrazione database
+            const totaleTempoAttivitaS = Math.round((Date.now() - stats.startTime) / 1000);
+            
+            const datiEsercizio = {
+                titolo: "Caccia all'Intruso Visivo",
+                risultati: {
+                    risposteCorrette: stats.foundCount,
+                    totaleDomande: totalAttempts,
+                    percentualeAccuratezza: accuracy,
+                    tempoMedioS: parseFloat(avgTime),
+                    punteggio: stats.foundCount
+                }
+            };
+
+            const btnMain = document.getElementById('btn-main-action');
+            const btnSec = document.getElementById('btn-secondary-action');
+
+            if (isSessione) {
+                btnMain.textContent = "Salvataggio in corso...";
+                btnMain.disabled = true;
+                btnSec.style.display = 'none';
+
+                try {
+                    if (database) {
+                        if (tipoSessione === 'pianificata') {
+                            // Salva dentro l'array dei risultati della sessione corrente pianificata
+                            await database.ref(`sessioni_attive/${pazienteId}/risultati/${indiceEsercizio}`).set(datiEsercizio);
+                            if (sessioneId) {
+                                await database.ref(`storico_pazienti/${pazienteId}/sessioni/${sessioneId}/risultati/${indiceEsercizio}`).set(datiEsercizio);
+                            }
+                        } else {
+                            // Salva nella sessione Libera (aggiunge a eserciziSvolti dell'ultimo blocco di sessione)
+                            const refSessioni = database.ref(`storico_pazienti/${pazienteId}/sessioni`);
+                            const snap = await refSessioni.limitToLast(1).once('value');
+                            if (snap.exists()) {
+                                let lastKey = null;
+                                snap.forEach(child => { lastKey = child.key; });
+                                if (lastKey) {
+                                    await database.ref(`storico_pazienti/${pazienteId}/sessioni/${lastKey}/eserciziSvolti`).push(datiEsercizio);
+                                }
+                            } else {
+                                // Se non ci sono sessioni registrate, creane una nuova sul momento
+                                const nuovaSessioneRef = refSessioni.push();
+                                await nuovaSessioneRef.set({
+                                    data: new Date().toISOString().split('T')[0],
+                                    tipo: "libera",
+                                    eserciziSvolti: [datiEsercizio]
+                                });
+                            }
+                        }
+                    }
+                    
+                    btnMain.textContent = "PROSEGUI";
+                    btnMain.disabled = false;
+                    btnMain.onclick = () => {
+                        const redirectUrl = urlParams.get('redirectUrl') || localStorage.getItem('redirectUrl') || '../index.html';
+                        window.location.href = redirectUrl;
+                    };
+                } catch (err) {
+                    console.error("Errore salvataggio Firebase:", err);
+                    btnMain.textContent = "PROSEGUI (SENZA SALVATAGGIO)";
+                    btnMain.disabled = false;
+                    btnMain.onclick = () => {
+                        const redirectUrl = urlParams.get('redirectUrl') || localStorage.getItem('redirectUrl') || '../index.html';
+                        window.location.href = redirectUrl;
+                    };
+                }
+            } else {
+                btnMain.textContent = "RIPROVA SESSIONE";
+                btnMain.onclick = startGame;
+                btnSec.style.display = 'block';
             }
         }
 
