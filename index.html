@@ -110,12 +110,15 @@
         }
 
         input, select {
-            flex-grow: 1;
             padding: 10px 14px;
             border-radius: 8px;
             border: 1px solid #cbd5e1;
             font-size: 0.95rem;
             outline: none;
+        }
+
+        input[type="text"] {
+            flex-grow: 1;
         }
 
         input:focus, select:focus {
@@ -145,6 +148,7 @@
         .btn-warning:hover { background: #d97706; }
         .btn-danger { background: #ef4444; color: white; }
         .btn-danger:hover { background: #dc2626; }
+        .btn-sm { padding: 6px 12px; font-size: 0.85rem; border-radius: 6px; }
 
         /* Stato della sessione attiva */
         #active-status-bar {
@@ -167,6 +171,35 @@
             color: #64748b;
         }
 
+        /* --- SEZIONE GESTIONE ANAGRAFICA --- */
+        .patient-mgmt-container {
+            margin-top: 15px;
+            max-height: 180px;
+            overflow-y: auto;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            background: white;
+        }
+
+        .mgmt-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        .mgmt-table th, .mgmt-table td {
+            padding: 10px;
+            border-bottom: 1px solid #f1f5f9;
+            text-align: left;
+        }
+
+        .mgmt-table th {
+            background: #f1f5f9;
+            position: sticky;
+            top: 0;
+            font-weight: 600;
+        }
+
         /* --- SEZIONE DOSSIER / CLINICAL REPORT --- */
         #patient-report-section {
             grid-column: 1 / -1;
@@ -175,33 +208,31 @@
             border-radius: 16px;
             padding: 20px;
             margin-top: 20px;
-            display: none; /* Si mostra solo quando si seleziona un paziente */
+            display: none;
         }
 
         .report-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1.2fr 0.8fr;
             gap: 24px;
             margin-top: 20px;
         }
 
-        @media (max-width: 768px) {
+        @media (max-width: 900px) {
             .report-grid { grid-template-columns: 1fr; }
         }
 
         .chart-container {
             background: #f8fafc;
-            padding: 15px;
+            padding: 20px;
             border-radius: 12px;
             border: 1px solid #e2e8f0;
-            min-height: 250px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            min-height: 350px;
+            position: relative;
         }
 
         .table-container {
-            max-height: 280px;
+            max-height: 350px;
             overflow-y: auto;
             border: 1px solid #e2e8f0;
             border-radius: 12px;
@@ -357,12 +388,27 @@
                     <button class="btn btn-danger" onclick="stopCurrentActiveSession()">Termina Sessione</button>
                 </div>
 
-                <!-- Sezione Creazione/Anagrafica Paziente -->
+                <!-- Sezione Creazione/Gestione Paziente -->
                 <div class="clinical-box">
-                    <h3><i class="fa-solid fa-user-plus"></i> Registra Nuovo Paziente</h3>
-                    <div class="input-group" style="margin-bottom:0;">
+                    <h3><i class="fa-solid fa-user-gear"></i> Registrazione e Anagrafica</h3>
+                    <div class="input-group">
                         <input type="text" id="new-patient-name" placeholder="Cognome Nome (es. Rossi Mario)">
                         <button class="btn" onclick="addPatient()">Registra</button>
+                    </div>
+                    
+                    <!-- Tabella per Modifica ed Eliminazione Rapida -->
+                    <div class="patient-mgmt-container">
+                        <table class="mgmt-table">
+                            <thead>
+                                <tr>
+                                    <th>Nome Paziente</th>
+                                    <th style="width: 120px; text-align: center;">Azioni</th>
+                                </tr>
+                            </thead>
+                            <tbody id="patient-mgmt-list">
+                                <!-- Popolato dinamicamente da Firebase -->
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 
@@ -370,7 +416,7 @@
                 <div class="clinical-box">
                     <h3><i class="fa-solid fa-play"></i> Seleziona Paziente e Gestisci Attività</h3>
                     <div class="input-group">
-                        <select id="patient-select" onchange="loadPatientHistory()">
+                        <select id="patient-select" onchange="loadPatientHistory()" style="width: 100%;">
                             <option value="">-- Seleziona Paziente --</option>
                         </select>
                     </div>
@@ -387,31 +433,31 @@
                     <div id="queue-list">Nessun esercizio selezionato. Seleziona le caselle sulle card degli esercizi sotto per la sessione pianificata.</div>
                 </div>
 
-                <!-- NUOVA SEZIONE: Dossier Clinico del Paziente -->
+                <!-- DOSSIER CLINICO: Grafico Multicolore e Storico Dettagliato -->
                 <div id="patient-report-section">
                     <h3 style="color: #1e3a8a; border-bottom: 2px solid #3b82f6; padding-bottom: 8px;">
-                        <i class="fa-solid fa-chart-line"></i> Dossier Clinico di: <span id="report-patient-name">Seleziona un paziente</span>
+                        <i class="fa-solid fa-chart-line"></i> Dossier Clinico: <span id="report-patient-name">Seleziona un paziente</span>
                     </h3>
                     
                     <div class="report-grid">
-                        <!-- Grafico di andamento temporale -->
+                        <!-- Grafico Multicolore ad andamento per singolo Esercizio -->
                         <div class="chart-container">
                             <canvas id="performanceChart"></canvas>
                         </div>
                         
-                        <!-- Lista degli esercizi svolti nello storico -->
+                        <!-- Lista Dettagliata Risultati Svolti -->
                         <div class="table-container">
                             <table class="report-table" id="history-table">
                                 <thead>
                                     <tr>
-                                        <th>Data / Ora</th>
-                                        <th>Tipo Sessione</th>
-                                        <th>Esercizi Completati</th>
+                                        <th>Data/Ora</th>
+                                        <th>Esercizio</th>
+                                        <th>Risultato</th>
                                     </tr>
                                 </thead>
                                 <tbody id="history-table-body">
                                     <tr>
-                                        <td colspan="3" style="text-align: center; color: #94a3b8; padding: 20px;">Nessun dato registrato per questo paziente.</td>
+                                        <td colspan="3" style="text-align: center; color: #94a3b8; padding: 20px;">Seleziona un paziente per caricare il dossier.</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -769,7 +815,7 @@
     <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
-        import { getDatabase, ref, set, push, onValue, get } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js";
+        import { getDatabase, ref, set, push, onValue, get, remove, update } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBBChH3sFfhwE4waQTzERtKGytJrucYEFM",
@@ -786,9 +832,9 @@
         const db = getDatabase(app);
 
         let activeSessionState = null;
-        let performanceChartInstance = null; // Memorizziamo l'istanza del grafico per distruggerla prima di ricrearla
+        let performanceChartInstance = null;
 
-        // Monitora in tempo reale se esiste una sessione attiva su Firebase
+        // Monitora in tempo reale la sessione attiva
         const activeSessionRef = ref(db, 'sessione_attiva');
         onValue(activeSessionRef, (snapshot) => {
             const statusBar = document.getElementById('active-status-bar');
@@ -808,7 +854,7 @@
             }
         });
 
-        // Registra Paziente
+        // 1. REGISTRA NUOVO PAZIENTE
         window.addPatient = function() {
             const nameInput = document.getElementById('new-patient-name');
             const patientName = nameInput.value.trim();
@@ -832,24 +878,96 @@
             });
         }
 
-        // Popola la lista a comparsa pazienti
+        // 2. MODIFICA PAZIENTE
+        window.editPatient = function(id, currentName) {
+            const newName = prompt("Modifica il nome del paziente:", currentName);
+            if (newName && newName.trim() !== "" && newName.trim() !== currentName) {
+                const patientRef = ref(db, `pazienti/${id}`);
+                update(patientRef, { nome: newName.trim() })
+                    .then(() => alert("Nome paziente aggiornato!"))
+                    .catch(err => alert("Errore di aggiornamento: " + err.message));
+            }
+        }
+
+        // 3. ELIMINA PAZIENTE E RELATIVO STORICO
+        window.deletePatient = function(id, name) {
+            if (confirm(`Sei sicuro di voler eliminare definitivamente ${name}? Questa azione eliminerà anche tutto il suo storico clinico.`)) {
+                const patientRef = ref(db, `pazienti/${id}`);
+                const historyRef = ref(db, `storico_pazienti/${id}`);
+
+                remove(patientRef)
+                    .then(() => remove(historyRef))
+                    .then(() => {
+                        alert("Paziente ed archivio eliminati correttamente.");
+                        // Se il paziente eliminato era quello selezionato, azzeriamo la vista
+                        const select = document.getElementById('patient-select');
+                        if (select.value === id) {
+                            select.value = "";
+                            document.getElementById('patient-report-section').style.display = "none";
+                        }
+                    })
+                    .catch(err => alert("Errore durante l'eliminazione: " + err.message));
+            }
+        }
+
+        // 4. SYNC E AGGIORNAMENTO LISTE PAZIENTI (SIA GESTIONE CHE SELETTORE)
         const patientsRef = ref(db, 'pazienti');
         onValue(patientsRef, (snapshot) => {
             const select = document.getElementById('patient-select');
+            const mgmtList = document.getElementById('patient-mgmt-list');
+            
+            // Salviamo la selezione attuale per non perderla durante gli aggiornamenti asincroni
+            const currentSelected = select.value;
+
             select.innerHTML = '<option value="">-- Seleziona Paziente --</option>';
+            mgmtList.innerHTML = '';
             
             if (snapshot.exists()) {
                 const data = snapshot.val();
                 for (let id in data) {
+                    const pName = data[id].nome;
+
+                    // Aggiungi al Selettore per Avvio Sessione / Grafico
                     const opt = document.createElement('option');
                     opt.value = id;
-                    opt.textContent = data[id].nome;
+                    opt.textContent = pName;
                     select.appendChild(opt);
+
+                    // Aggiungi al Tabellone di Gestione Clinica (Modifica / Elimina)
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td><strong>${pName}</strong></td>
+                        <td style="text-align: center; display: flex; gap: 6px; justify-content: center;">
+                            <button class="btn btn-warning btn-sm" onclick="editPatient('${id}', '${pName}')"><i class="fa-solid fa-pen"></i></button>
+                            <button class="btn btn-danger btn-sm" onclick="deletePatient('${id}', '${pName}')"><i class="fa-solid fa-trash"></i></button>
+                        </td>
+                    `;
+                    mgmtList.appendChild(row);
                 }
+                // Ripristina la selezione se ancora esistente
+                if (currentSelected && data[currentSelected]) {
+                    select.value = currentSelected;
+                }
+            } else {
+                mgmtList.innerHTML = `<tr><td colspan="2" style="text-align: center; color: #94a3b8; padding: 10px;">Nessun paziente registrato.</td></tr>`;
             }
         });
 
-        // CARICA STORICO E GRAFICO DEL PAZIENTE SELEZIONATO
+        // Generatore di colori automatici e univoci per ciascun esercizio nel grafico
+        const colorPalette = [
+            '#2563eb', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444', 
+            '#06b6d4', '#ec4899', '#14b8a6', '#f43f5e', '#64748b'
+        ];
+        const exerciseColors = {};
+        function getColorForExercise(exerciseTitle) {
+            if (!exerciseColors[exerciseTitle]) {
+                const index = Object.keys(exerciseColors).length % colorPalette.length;
+                exerciseColors[exerciseTitle] = colorPalette[index];
+            }
+            return exerciseColors[exerciseTitle];
+        }
+
+        // 5. CARICA STORICO COMPLETO E GRAFICO AVANZATO
         window.loadPatientHistory = async function() {
             const select = document.getElementById('patient-select');
             const patientId = select.value;
@@ -867,69 +985,123 @@
             nameSpan.textContent = patientName;
             reportSection.style.display = "block";
 
-            // Richiesta storico da Firebase
+            // Recupera storico sessioni
             const storicoRef = ref(db, `storico_pazienti/${patientId}/sessioni`);
             const snapshot = await get(storicoRef);
 
             if (snapshot.exists()) {
                 const sessioni = snapshot.val();
                 
-                // Ordiniamo le sessioni per data (cronologico)
+                // Ordina le sessioni cronologicamente
                 const sessioniOrdinate = Object.keys(sessioni).map(key => ({
                     id: key,
                     ...sessioni[key]
                 })).sort((a, b) => new Date(a.data) - new Date(b.data));
 
-                // 1. Popolamento Tabella
                 tableBody.innerHTML = "";
-                sessioniOrdinate.forEach(sess => {
-                    const row = document.createElement('tr');
-                    
-                    const dataFormattata = new Date(sess.data).toLocaleString('it-IT', {
-                        day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
-                    });
-
-                    const eserciziLista = sess.eserciziSvolti 
-                        ? sess.eserciziSvolti.map(e => e.titolo).join(', ') 
-                        : 'Nessun esercizio';
-
-                    row.innerHTML = `
-                        <td><strong>${dataFormattata}</strong></td>
-                        <td><span class="tag" style="background: #e0f2fe; color: #0369a1;">${sess.tipo || 'N/D'}</span></td>
-                        <td>${eserciziLista}</td>
-                    `;
-                    tableBody.appendChild(row);
-                });
-
-                // 2. Elaborazione dati per il Grafico di Andamento (Numero Esercizi per data)
-                const labels = [];
-                const dataValues = [];
+                
+                // Raccolta dei punti per il grafico (Scatter/Line)
+                // Struttura dati per Chart.js: un dataset per ogni esercizio
+                const datasetsMap = {};
 
                 sessioniOrdinate.forEach(sess => {
-                    const dataGiorno = new Date(sess.data).toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit' });
-                    labels.push(dataGiorno);
-                    dataValues.push(sess.eserciziSvolti ? sess.eserciziSvolti.length : 0);
+                    const dateObj = new Date(sess.data);
+                    const timestampLabel = dateObj.toLocaleString('it-IT', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+
+                    if (sess.eserciziSvolti) {
+                        sess.eserciziSvolti.forEach(ex => {
+                            const row = document.createElement('tr');
+                            
+                            // Normalizzazione punteggio: convertiamo in percentuale (0-100) per la visualizzazione del grafico
+                            let numericScore = 0;
+                            let visualResult = "Svolto";
+
+                            if (ex.risultati) {
+                                const r = ex.risultati;
+                                // Se abbiamo risposte corrette / totali
+                                if (r.risposteCorrette !== undefined && r.totaleDomande) {
+                                    numericScore = Math.round((r.risposteCorrette / r.totaleDomande) * 100);
+                                    visualResult = `${r.risposteCorrette}/${r.totaleDomande} risposte corrette (${numericScore}%)`;
+                                } 
+                                // Se abbiamo una percentuale diretta
+                                else if (r.percentualeAccuratezza !== undefined) {
+                                    numericScore = Math.round(r.percentualeAccuratezza);
+                                    visualResult = `Accuratezza: ${numericScore}%`;
+                                }
+                                // Se abbiamo un punteggio numerico generico o livello (normalizziamo ipotizzando un max di 10)
+                                else if (r.punteggio !== undefined) {
+                                    numericScore = Math.min(Math.round((r.punteggio / 10) * 100), 100);
+                                    visualResult = `Punteggio: ${r.punteggio}`;
+                                }
+                                // Se abbiamo solo tempo di reazione (es. Stroop), usiamo una scala invertita (più veloce = più alto)
+                                else if (r.tempoMedioS) {
+                                    numericScore = Math.max(10, Math.round(100 - (r.tempoMedioS * 5))); // Più tempo ci mette, più cala lo score
+                                    visualResult = `Tempo: ${r.tempoMedioS}s`;
+                                }
+                            } else {
+                                // Default se non ci sono dati dettagliati registrati nell'esercizio
+                                numericScore = 100;
+                                visualResult = "Svolto con successo";
+                            }
+
+                            // Popolamento tabella visuale
+                            row.innerHTML = `
+                                <td><small>${timestampLabel}</small></td>
+                                <td><strong>${ex.titolo}</strong></td>
+                                <td><span class="tag" style="background: #ecfdf5; color: #059669;">${visualResult}</span></td>
+                            `;
+                            tableBody.appendChild(row);
+
+                            // Popolamento per Dataset Grafico
+                            if (!datasetsMap[ex.titolo]) {
+                                datasetsMap[ex.titolo] = {
+                                    label: ex.titolo,
+                                    data: [],
+                                    borderColor: getColorForExercise(ex.titolo),
+                                    backgroundColor: getColorForExercise(ex.titolo),
+                                    borderWidth: 2,
+                                    pointRadius: 6,
+                                    pointHoverRadius: 8,
+                                    tension: 0.1,
+                                    fill: false
+                                };
+                            }
+                            
+                            datasetsMap[ex.titolo].data.push({
+                                x: timestampLabel,
+                                y: numericScore
+                            });
+                        });
+                    }
                 });
 
-                renderChart(labels, dataValues);
+                // Creiamo l'array di dataset per Chart.js
+                const datasetsForChart = Object.values(datasetsMap);
+
+                // Ricaviamo tutte le etichette delle date uniche sull'asse X
+                const allLabels = [...new Set(sessioniOrdinate.map(sess => 
+                    new Date(sess.data).toLocaleString('it-IT', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
+                ))];
+
+                renderChart(allLabels, datasetsForChart);
 
             } else {
                 tableBody.innerHTML = `
                     <tr>
-                        <td colspan="3" style="text-align: center; color: #94a3b8; padding: 20px;">
-                            Nessun dato registrato per questo paziente. Svolgi delle sessioni per vederle qui!
+                        <td colspan="3" style="text-align: center; color: #94a3b8; padding: 40px 10px;">
+                            <i class="fa-solid fa-folder-open" style="font-size: 2rem; margin-bottom: 10px; color: #cbd5e1;"></i>
+                            <p>Nessun esercizio registrato per questo paziente. Avvia una sessione libera o pianificata!</p>
                         </td>
                     </tr>
                 `;
-                // Se non ci sono dati, resetta/distruggi il grafico per evitare grafici fantasma vecchi
                 if (performanceChartInstance) {
                     performanceChartInstance.destroy();
                 }
             }
         }
 
-        // Funzione per generare il grafico con Chart.js
-        function renderChart(labels, dataValues) {
+        // Rendering del Grafico Avanzato Multi-Esercizio
+        function renderChart(labels, datasets) {
             const ctx = document.getElementById('performanceChart').getContext('2d');
             
             if (performanceChartInstance) {
@@ -939,18 +1111,8 @@
             performanceChartInstance = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Esercizi completati per sessione',
-                        data: dataValues,
-                        borderColor: '#2563eb',
-                        backgroundColor: 'rgba(37, 99, 235, 0.1)',
-                        borderWidth: 3,
-                        tension: 0.3,
-                        fill: true,
-                        pointBackgroundColor: '#1d4ed8',
-                        pointRadius: 5
-                    }]
+                    labels: labels, // Timeline ordinata
+                    datasets: datasets // Linee colorate diverse per ogni esercizio
                 },
                 options: {
                     responsive: true,
@@ -958,16 +1120,32 @@
                     plugins: {
                         legend: {
                             display: true,
-                            position: 'top',
-                            labels: { font: { family: 'Segoe UI', size: 12 } }
+                            position: 'bottom',
+                            labels: {
+                                boxWidth: 12,
+                                font: { family: 'Segoe UI', size: 11 }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.dataset.label}: ${context.raw.y}% d'efficacia`;
+                                }
+                            }
                         }
                     },
                     scales: {
                         y: {
-                            beginAtZero: true,
+                            min: 0,
+                            max: 100,
                             ticks: {
-                                stepSize: 1,
+                                callback: function(value) { return value + "%"; },
                                 font: { family: 'Segoe UI' }
+                            },
+                            title: {
+                                display: true,
+                                text: 'Accuratezza / Score Normalizzato',
+                                font: { weight: 'bold' }
                             },
                             grid: { color: '#f1f5f9' }
                         },
@@ -992,7 +1170,6 @@
             }
 
             if (tipo === 'libera') {
-                // SESSIONE LIBERA
                 set(activeSessionRef, {
                     pazienteId: patientId,
                     pazienteNome: patientName,
@@ -1004,7 +1181,6 @@
                     document.getElementById('patient-select').value = "";
                 });
             } else {
-                // SESSIONE PIANIFICATA
                 const selectedExercises = [];
                 const cards = document.querySelectorAll('.card');
                 cards.forEach(card => {
@@ -1031,16 +1207,13 @@
                     stato: 'in_corso',
                     risultati: {}
                 }).then(() => {
-                    // Deseleziona le checkbox graficamente per la prossima volta
                     document.querySelectorAll('.select-exercise-checkbox').forEach(c => c.checked = false);
                     updateQueue();
-                    // Avvia il contenitore clinico
                     window.location.href = `esercizio.html?sessione=true`;
                 });
             }
         }
 
-        // Funzione per terminare manualmente la sessione
         window.stopCurrentActiveSession = function() {
             if (confirm("Sei sicuro di voler chiudere la sessione attiva?")) {
                 set(activeSessionRef, null).then(() => {
@@ -1049,9 +1222,7 @@
             }
         }
 
-        // Funzione per capire come aprire un esercizio quando si clicca su una card
         window.openExerciseCard = function(cardElement, event) {
-            // Evita di aprire l'esercizio se l'utente clicca direttamente sulla checkbox
             if (event.target.classList.contains('select-exercise-checkbox')) {
                 return;
             }
@@ -1059,10 +1230,8 @@
             const file = cardElement.getAttribute('data-file');
             
             if (activeSessionState) {
-                // Se c'è una sessione attiva (libera o pianificata), lo mandiamo all'interfaccia clinica
                 window.location.href = `esercizio.html?sessione=true&file=${encodeURIComponent(file)}`;
             } else {
-                // Altrimenti, apertura standard per test veloce (senza log clinici)
                 window.location.href = `esercizio.html?file=${encodeURIComponent(file)}`;
             }
         }
@@ -1082,7 +1251,6 @@
         }
 
         function updateQueue(event) {
-            // Preveniamo che la spunta della checkbox attivi anche il clic della card
             if (event) {
                 event.stopPropagation();
             }
