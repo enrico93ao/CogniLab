@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Test Cancellazione Selettiva Clinica Avanzato</title>
+    
+    <!-- Firebase SDK (Compat v8 per massima compatibilità con script esistenti) -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
     <style>
         * {
             box-sizing: border-box;
@@ -196,6 +201,14 @@
         .spatial-panel.left-side { border-left: 5px solid #0056b3; }
         .spatial-panel.right-side { border-right: 5px solid #0056b3; }
         .spatial-panel .count { font-size: 26px; font-weight: bold; color: #000000; margin-top: 5px; }
+        
+        .saving-loader {
+            display: none;
+            font-size: 14px;
+            color: #6c757d;
+            margin-top: 10px;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -305,13 +318,40 @@
                 </div>
             </div>
 
-            <div style="text-align: center;">
-                <button class="btn" onclick="restartExercise()">Nuova Sessione</button>
+            <div id="savingStatus" class="saving-loader">Salvataggio dei dati in corso...</div>
+
+            <div style="text-align: center; margin-top: 15px;">
+                <button id="btnAction" class="btn" onclick="goToDashboard()">Torna alla Dashboard</button>
             </div>
         </div>
     </div>
 
     <script>
+        // --- CONFIGURAZIONE E SETUP INIZIALE DI FIREBASE ---
+        const firebaseConfig = window.firebaseConfig || JSON.parse(localStorage.getItem('firebaseConfig')) || {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            databaseURL: "YOUR_DATABASE_URL",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        // Inizializza Firebase se non è già stato inizializzato
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const database = firebase.database();
+
+        // Parametri di sessione letti dall'URL query string
+        const urlParams = new URLSearchParams(window.location.search);
+        const isSessioneAttiva = urlParams.get('sessione') === 'true';
+        const pazienteId = urlParams.get('pazienteId');
+        const sessionId = urlParams.get('sessionId');
+        const indiceEsercizio = parseInt(urlParams.get('indiceEsercizio')) || 0;
+
+        // --- STATI DI GIOCO ---
         const LETTER_TARGET = "H";
         const LETTER_DISTRACTORS = ["N", "M", "K", "F", "E"];
         const SHAPE_TARGET = "circle";
@@ -405,7 +445,6 @@
             canvas.width = areaW;
             canvas.height = areaH;
 
-            // CORRETTO: adesso punta al corretto ID dell'HTML
             showLines = document.getElementById('enable-guide-lines').checked;
             const enableRedBar = document.getElementById('enable-red-bar').checked;
             useConstraint = document.getElementById('enable-row-constraint').checked;
@@ -630,16 +669,23 @@
             }
         }
 
+        // --- SALVATAGGIO DEI DATI SU FIREBASE CON STRUTTURA STANDARD ---
         function endExercise() {
-            const totalTime = ((performance.now() - startTime) / 1000).toFixed(1);
-            let totalTargets = 0, clickedTargets = 0, leftOmissions = 0, rightOmissions = 0;
+            const tempFine = performance.now();
+            const tempoTotaleS = parseFloat(((tempFine - startTime) / 1000).toFixed(1));
+            
+            let totalTargets = 0;
+            let clickedTargets = 0;
+            let leftOmissions = 0;
+            let rightOmissions = 0;
             const midX = areaW / 2;
 
             stimuli.forEach(s => {
                 if (s.isTarget) {
                     totalTargets++;
-                    if (s.cancelled) clickedTargets++;
-                    else {
+                    if (s.cancelled) {
+                        clickedTargets++;
+                    } else {
                         if (s.x < midX) leftOmissions++;
                         else rightOmissions++;
                     }
@@ -647,14 +693,107 @@
             });
 
             const accuracyPercent = totalTargets > 0 ? Math.round((clickedTargets / totalTargets) * 100) : 0;
+            // Punteggio grezzo bilanciato (punti per corrette penalizzati da errori)
+            const punteggioGrezzo = Math.max(0, (clickedTargets * 10) - (falsePositives * 5));
 
+            // Aggiorna interfaccia risultati
             document.getElementById('res-accuracy').textContent = `${clickedTargets} / ${totalTargets} (${accuracyPercent}%)`;
             document.getElementById('res-errors').textContent = `${falsePositives}`;
-            document.getElementById('res-time').textContent = `${totalTime} s`;
+            document.getElementById('res-time').textContent = `${tempoTotaleS} s`;
             document.getElementById('res-left-omissions').textContent = leftOmissions;
             document.getElementById('res-right-omissions').textContent = rightOmissions;
 
             switchScreen('results-screen');
+
+            // Prepara l'oggetto dati con la STRUTTURA STANDARD per Firebase
+            const datiEsercizio = {
+                titolo: "Cancellazione Selettiva Clinica", // Corrisponde esattamente al data-title della dashboard principale
+                risultati: {
+                    risposteCorrette: clickedTargets,
+                    totaleDomande: totalTargets,
+                    percentualeAccuratezza: accuracyPercent,
+                    tempoMedioS: tempoTotaleS,
+                    punteggio: punteggioGrezzo,
+                    // Metriche cliniche specifiche aggiuntive inserite per lo storico testuale
+                    omissioniSinistra: leftOmissions,
+                    omissioniDestra: rightOmissions,
+                    falsiPositivi: falsePositives
+                }
+            };
+
+            // Salva su Firebase se la sessione riabilitativa è attiva
+            if (isSessioneAttiva && pazienteId) {
+                const savingStatus = document.getElementById('savingStatus');
+                const btnAction = document.getElementById('btnAction');
+                
+                savingStatus.style.display = 'block';
+                btnAction.disabled = true;
+
+                if (sessionId) {
+                    // SESSIONE PIANIFICATA: salva nell'indice dell'array dell'esercizio corrente
+                    const dbPath = `storico_pazienti/${pazienteId}/sessioni/${sessionId}/eserciziSvolti/${indiceEsercizio}`;
+                    database.ref(dbPath).set(datiEsercizio)
+                        .then(() => handleSalvataggioSuccesso())
+                        .catch(err => handleSalvataggioErrore(err));
+                } else {
+                    // SESSIONE LIBERA: recupera l'ultimo blocco di sessione e aggiungi all'array eserciziSvolti
+                    const refSessioni = database.ref(`storico_pazienti/${pazienteId}/sessioni`);
+                    refSessioni.limitToLast(1).once('value')
+                        .then(snapshot => {
+                            if (snapshot.exists()) {
+                                let lastSessionKey = Object.keys(snapshot.val())[0];
+                                let lastSessionData = snapshot.val()[lastSessionKey];
+                                let esercizi = lastSessionData.eserciziSvolti || [];
+                                
+                                // Se per qualche motivo esercizi non è un array
+                                if (!Array.isArray(esercizi)) {
+                                    esercizi = Object.values(esercizi);
+                                }
+                                
+                                esercizi.push(datiEsercizio);
+
+                                return database.ref(`storico_pazienti/${pazienteId}/sessioni/${lastSessionKey}/eserciziSvolti`).set(esercizi);
+                            } else {
+                                throw new Error("Nessuna sessione trovata per questo paziente.");
+                            }
+                        })
+                        .then(() => handleSalvataggioSuccesso())
+                        .catch(err => handleSalvataggioErrore(err));
+                }
+            }
+        }
+
+        function handleSalvataggioSuccesso() {
+            const savingStatus = document.getElementById('savingStatus');
+            const btnAction = document.getElementById('btnAction');
+            
+            savingStatus.textContent = "Risultati salvati con successo!";
+            savingStatus.style.color = "#28a745";
+            btnAction.disabled = false;
+            
+            if (isSessioneAttiva) {
+                btnAction.textContent = "Continua Sessione";
+            }
+        }
+
+        function handleSalvataggioErrore(error) {
+            console.error("Errore nel salvataggio su Firebase:", error);
+            const savingStatus = document.getElementById('savingStatus');
+            const btnAction = document.getElementById('btnAction');
+            
+            savingStatus.textContent = "Errore durante il salvataggio. Riprova.";
+            savingStatus.style.color = "#dc3545";
+            btnAction.disabled = false;
+        }
+
+        function goToDashboard() {
+            if (isSessioneAttiva) {
+                // Ritorna all'indice principale passando i parametri di avanzamento sessione
+                const nextIndice = indiceEsercizio + 1;
+                window.location.href = `index.html?sessione=true&pazienteId=${pazienteId}&sessionId=${sessionId || ''}&next=${nextIndice}`;
+            } else {
+                window.location.href = "index.html";
+            }
         }
 
         function restartExercise() {
