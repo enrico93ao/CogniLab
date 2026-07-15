@@ -375,7 +375,7 @@
         <!-- --- PANNELLO CLINICO DI GESTIONE --- -->
         <div id="clinical-panel">
             <div class="panel-title" onclick="togglePanel()">
-                <h2><i class="fa-solid fa-user-doctor"></i> Area Clinico: Gestione Pazienti e Sessioni</h2>
+                <h2><i class="fa-solid fa-user-doctor"></i> Area Clinica: Gestione Pazienti e Sessioni</h2>
                 <i id="panel-chevron" class="fa-solid fa-chevron-up"></i>
             </div>
             
@@ -900,7 +900,6 @@
                     .then(() => remove(historyRef))
                     .then(() => {
                         alert("Paziente ed archivio eliminati correttamente.");
-                        // Se il paziente eliminato era quello selezionato, azzeriamo la vista
                         const select = document.getElementById('patient-select');
                         if (select.value === id) {
                             select.value = "";
@@ -911,13 +910,12 @@
             }
         }
 
-        // 4. SYNC E AGGIORNAMENTO LISTE PAZIENTI (SIA GESTIONE CHE SELETTORE)
+        // 4. SYNC E AGGIORNAMENTO LISTE PAZIENTI
         const patientsRef = ref(db, 'pazienti');
         onValue(patientsRef, (snapshot) => {
             const select = document.getElementById('patient-select');
             const mgmtList = document.getElementById('patient-mgmt-list');
             
-            // Salviamo la selezione attuale per non perderla durante gli aggiornamenti asincroni
             const currentSelected = select.value;
 
             select.innerHTML = '<option value="">-- Seleziona Paziente --</option>';
@@ -928,13 +926,11 @@
                 for (let id in data) {
                     const pName = data[id].nome;
 
-                    // Aggiungi al Selettore per Avvio Sessione / Grafico
                     const opt = document.createElement('option');
                     opt.value = id;
                     opt.textContent = pName;
                     select.appendChild(opt);
 
-                    // Aggiungi al Tabellone di Gestione Clinica (Modifica / Elimina)
                     const row = document.createElement('tr');
                     row.innerHTML = `
                         <td><strong>${pName}</strong></td>
@@ -945,7 +941,6 @@
                     `;
                     mgmtList.appendChild(row);
                 }
-                // Ripristina la selezione se ancora esistente
                 if (currentSelected && data[currentSelected]) {
                     select.value = currentSelected;
                 }
@@ -954,18 +949,9 @@
             }
         });
 
-        // Nuova Palette di Colori Clinica - Moderna, distinta e ad alto contrasto
         const colorPalette = [
-            '#3b82f6', // Blu brillante (Attenzione)
-            '#10b981', // Smeraldo (Memoria)
-            '#f59e0b', // Ambra (Esecutive)
-            '#8b5cf6', // Viola (Linguaggio)
-            '#ec4899', // Rosa (Visuospaziale)
-            '#06b6d4', // Ciano (Orientamento)
-            '#ef4444', // Rosso corallo
-            '#f97316', // Arancione
-            '#14b8a6', // Teala
-            '#6366f1'  // Indaco
+            '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', 
+            '#06b6d4', '#ef4444', '#f97316', '#14b8a6', '#6366f1'
         ];
         
         const exerciseColors = {};
@@ -977,7 +963,7 @@
             return exerciseColors[exerciseTitle];
         }
 
-        // 5. CARICA STORICO COMPLETO E GRAFICO AVANZATO
+        // 5. CARICA STORICO COMPLETO E GRAFICO AVANZATO (PARSER CORRETTO)
         window.loadPatientHistory = async function() {
             const select = document.getElementById('patient-select');
             const patientId = select.value;
@@ -995,22 +981,18 @@
             nameSpan.textContent = patientName;
             reportSection.style.display = "block";
 
-            // Recupera storico sessioni
             const storicoRef = ref(db, `storico_pazienti/${patientId}/sessioni`);
             const snapshot = await get(storicoRef);
 
             if (snapshot.exists()) {
                 const sessioni = snapshot.val();
                 
-                // Ordina le sessioni cronologicamente
                 const sessioniOrdinate = Object.keys(sessioni).map(key => ({
                     id: key,
                     ...sessioni[key]
                 })).sort((a, b) => new Date(a.data) - new Date(b.data));
 
                 tableBody.innerHTML = "";
-                
-                // Raccolta dei punti per il grafico (Scatter/Line)
                 const datasetsMap = {};
 
                 sessioniOrdinate.forEach(sess => {
@@ -1021,34 +1003,50 @@
                         sess.eserciziSvolti.forEach(ex => {
                             const row = document.createElement('tr');
                             
-                            // Normalizzazione punteggio: convertiamo in percentuale (0-100)
-                            let numericScore = 0;
+                            // IDENTIFICAZIONE DINAMICA SORGENTE DATI (Fallback a cascata per intercettare qualsiasi tracciamento)
+                            const r = ex.risultati || ex.risultato || ex;
+                            
+                            let numericScore = null;
                             let visualResult = "Svolto";
 
-                            if (ex.risultati) {
-                                const r = ex.risultati;
-                                if (r.risposteCorrette !== undefined && r.totaleDomande) {
-                                    numericScore = Math.round((r.risposteCorrette / r.totaleDomande) * 100);
-                                    visualResult = `${r.risposteCorrette}/${r.totaleDomande} risposte corrette (${numericScore}%)`;
-                                } 
-                                else if (r.percentualeAccuratezza !== undefined) {
-                                    numericScore = Math.round(r.percentualeAccuratezza);
-                                    visualResult = `Accuratezza: ${numericScore}%`;
-                                }
-                                else if (r.punteggio !== undefined) {
-                                    numericScore = Math.min(Math.round((r.punteggio / 10) * 100), 100);
-                                    visualResult = `Punteggio: ${r.punteggio}`;
-                                }
-                                else if (r.tempoMedioS) {
-                                    numericScore = Math.max(10, Math.round(100 - (r.tempoMedioS * 5)));
-                                    visualResult = `Tempo: ${r.tempoMedioS}s`;
-                                }
-                            } else {
-                                numericScore = 100;
-                                visualResult = "Svolto con successo";
+                            // Tipo 1: Risposte corrette su totali
+                            if (r.risposteCorrette !== undefined && r.totaleDomande) {
+                                numericScore = Math.round((Number(r.risposteCorrette) / Number(r.totaleDomande)) * 100);
+                                visualResult = `${r.risposteCorrette}/${r.totaleDomande} corrette (${numericScore}%)`;
+                            } 
+                            // Tipo 2: Accuratezza percentuale esplicita
+                            else if (r.percentualeAccuratezza !== undefined) {
+                                numericScore = Math.round(Number(r.percentualeAccuratezza));
+                                visualResult = `Accuratezza: ${numericScore}%`;
+                            }
+                            else if (r.accuratezza !== undefined) {
+                                numericScore = Math.round(Number(r.accuratezza));
+                                visualResult = `Accuratezza: ${numericScore}%`;
+                            }
+                            // Tipo 3: Punteggio grezzo (se inferiore a 10 lo proietta in decimi su base 100, altrimenti lo usa direttamente)
+                            else if (r.punteggio !== undefined) {
+                                const p = Number(r.punteggio);
+                                numericScore = p <= 10 ? Math.min(Math.round(p * 10), 100) : Math.min(p, 100);
+                                visualResult = `Punteggio: ${r.punteggio}`;
+                            }
+                            else if (r.score !== undefined) {
+                                const s = Number(r.score);
+                                numericScore = s <= 10 ? Math.min(Math.round(s * 10), 100) : Math.min(s, 100);
+                                visualResult = `Punteggio: ${r.score}`;
+                            }
+                            // Tipo 4: Solo tempo impiegato (calcola un indice di performance scalato)
+                            else if (r.tempoMedioS !== undefined || r.tempo !== undefined) {
+                                const t = Number(r.tempoMedioS || r.tempo);
+                                numericScore = Math.max(10, Math.round(100 - (t * 4))); // Più è basso il tempo, più il punteggio si avvicina a 100
+                                visualResult = `Tempo: ${t}s`;
                             }
 
-                            // Popolamento tabella visuale
+                            // Default se non viene trovata alcuna metrica numerica
+                            if (numericScore === null) {
+                                numericScore = 100;
+                                visualResult = "Svolto";
+                            }
+
                             row.innerHTML = `
                                 <td><small>${timestampLabel}</small></td>
                                 <td><strong>${ex.titolo}</strong></td>
@@ -1056,7 +1054,6 @@
                             `;
                             tableBody.appendChild(row);
 
-                            // Popolamento per Dataset Grafico
                             if (!datasetsMap[ex.titolo]) {
                                 datasetsMap[ex.titolo] = {
                                     label: ex.titolo,
@@ -1075,10 +1072,7 @@
                     }
                 });
 
-                // Creiamo l'array di dataset per Chart.js
                 const datasetsForChart = Object.values(datasetsMap);
-
-                // Ricaviamo tutte le etichette delle date uniche sull'asse X
                 const allLabels = [...new Set(sessioniOrdinate.map(sess => 
                     new Date(sess.data).toLocaleString('it-IT', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
                 ))];
@@ -1100,7 +1094,7 @@
             }
         }
 
-        // FUNZIONE RENDER CHART COMPLETAMENTE AGGIORNATA CON LA NUOVA VESTE GRAFICA
+        // FUNZIONE RENDER CHART
         function renderChart(labels, datasets) {
             const ctx = document.getElementById('performanceChart').getContext('2d');
             
@@ -1108,17 +1102,16 @@
                 performanceChartInstance.destroy();
             }
 
-            // Applichiamo i miglioramenti visivi "premium" ad ogni dataset di esercizio
             const polishedDatasets = datasets.map(dataset => {
                 return {
                     ...dataset,
-                    tension: 0.35,              // Rende le linee curve e morbide (spline bezier)
-                    borderWidth: 3,             // Spessore linea accentuato
-                    pointRadius: 6,             // Dimensione punto standard
-                    pointHoverRadius: 10,       // Dimensione punto ingrandito all'hover
-                    pointBackgroundColor: dataset.borderColor, // Interno punto
-                    pointBorderColor: '#ffffff', // Bordo bianco per far risaltare il punto
-                    pointBorderWidth: 2,        // Spessore del bordo bianco
+                    tension: 0.35,
+                    borderWidth: 3,
+                    pointRadius: 6,
+                    pointHoverRadius: 10,
+                    pointBackgroundColor: dataset.borderColor,
+                    pointBorderColor: '#ffffff',
+                    pointBorderWidth: 2,
                     pointHoverBorderWidth: 3,
                     shadowColor: 'rgba(0, 0, 0, 0.1)',
                 };
@@ -1127,8 +1120,8 @@
             performanceChartInstance = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: labels, // Timeline orizzontale
-                    datasets: polishedDatasets // Linee colorate morbide per esercizio
+                    labels: labels,
+                    datasets: polishedDatasets
                 },
                 options: {
                     responsive: true,
@@ -1142,7 +1135,7 @@
                             display: true,
                             position: 'bottom',
                             labels: {
-                                usePointStyle: true, // Cerchietti al posto dei blocchi quadrati in legenda
+                                usePointStyle: true,
                                 pointStyle: 'circle',
                                 padding: 20,
                                 font: {
@@ -1154,7 +1147,7 @@
                             }
                         },
                         tooltip: {
-                            backgroundColor: '#1e293b', // Elegante Dark Mode per i dettagli hover
+                            backgroundColor: '#1e293b',
                             titleColor: '#ffffff',
                             bodyColor: '#e2e8f0',
                             titleFont: {
@@ -1167,7 +1160,7 @@
                                 size: 12
                             },
                             padding: 12,
-                            cornerRadius: 10, // Angoli smussati per il box nero
+                            cornerRadius: 10,
                             displayColors: true,
                             boxWidth: 8,
                             boxHeight: 8,
@@ -1186,7 +1179,7 @@
                             min: 0,
                             max: 100,
                             border: {
-                                display: false // Estetica minimalista senza asse nero verticale
+                                display: false
                             },
                             ticks: {
                                 callback: function(value) { return value + "%"; },
@@ -1196,7 +1189,7 @@
                                     weight: '500'
                                 },
                                 color: '#64748b',
-                                stepSize: 20 // Divisione pulita in step da 20%
+                                stepSize: 20
                             },
                             title: {
                                 display: true,
@@ -1209,8 +1202,8 @@
                                 }
                             },
                             grid: {
-                                color: '#f1f5f9', // Linee di griglia chiarissime
-                                tickBorderDash: [5, 5], // Effetto tratteggio sofisticato
+                                color: '#f1f5f9',
+                                tickBorderDash: [5, 5],
                                 drawTicks: false
                             }
                         },
@@ -1226,7 +1219,7 @@
                                 color: '#64748b'
                             },
                             grid: {
-                                display: false // Rimuove le righe verticali per un design ordinato
+                                display: false
                             }
                         }
                     }
