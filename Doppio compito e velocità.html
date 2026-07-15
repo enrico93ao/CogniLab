@@ -2,9 +2,13 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Doppio Binario - Test di Multitasking</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Firebase SDK Compatibili -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
         
@@ -49,10 +53,10 @@
             background-color: #fff1f2 !important;
         }
 
-        /* Effetto di evidenziazione clinica quando lo stimolo entra nella fascia attiva */
+        /* Effetto quando lo stimolo entra nella fascia attiva */
         .word-in-active-zone {
-            border-color: #059669 !important; /* emerald-600 */
-            background-color: #f0fdf4 !important; /* emerald-50 */
+            border-color: #059669 !important;
+            background-color: #f0fdf4 !important;
             box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.2), 0 4px 6px -4px rgba(16, 185, 129, 0.2) !important;
         }
 
@@ -105,7 +109,7 @@
             transition: width 1s linear;
         }
 
-        /* Tastiera Clinica Bianca e Pulita */
+        /* Tastiera Clinica */
         .kbd-style {
             background: #ffffff;
             border: 1px solid #e2e8f0;
@@ -135,6 +139,7 @@
 </head>
 <body class="flex items-center justify-center min-h-screen">
 
+    <!-- MENU INIZIALE -->
     <div id="menu" class="bg-white border border-slate-200 p-8 md:p-10 rounded-3xl shadow-sm w-full max-w-lg z-50 text-center mx-4">
         <div class="mb-3">
             <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block mr-2 animate-pulse"></span>
@@ -146,11 +151,11 @@
             <div>
                 <label class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 block text-center">Difficoltà Esercizio</label>
                 <div class="grid grid-cols-2 gap-4">
-                    <button onclick="setDifficulty(1)" id="btn-diff-1" class="diff-btn p-4 rounded-2xl border-2 border-slate-200 bg-slate-50 text-slate-700 font-bold transition-all hover:bg-slate-100">
+                    <button onclick="setDifficulty(1)" id="btn-diff-1" class="diff-btn p-4 rounded-2xl border border-slate-200 bg-slate-50 text-slate-700 font-bold transition-all hover:bg-slate-100">
                         <div class="text-lg">Standard</div>
                         <div class="text-[10px] text-slate-500 uppercase font-semibold">2 REGOLE VARIABILI</div>
                     </button>
-                    <button onclick="setDifficulty(2)" id="btn-diff-2" class="diff-btn p-4 rounded-2xl border-2 border-slate-200 bg-slate-50 text-slate-700 font-bold transition-all hover:bg-slate-100">
+                    <button onclick="setDifficulty(2)" id="btn-diff-2" class="diff-btn p-4 rounded-2xl border border-slate-200 bg-slate-50 text-slate-700 font-bold transition-all hover:bg-slate-100">
                         <div class="text-lg">Avanzato</div>
                         <div class="text-[10px] text-slate-500 uppercase font-semibold">3 REGOLE VARIABILI</div>
                     </button>
@@ -160,10 +165,10 @@
             <div>
                 <label class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 block text-center">Supporti e Aiuti Visivi</label>
                 <div class="flex gap-4">
-                    <button onclick="setShowDots(true)" id="dots-on" class="dots-btn flex-1 p-3 rounded-xl border-2 border-slate-200 bg-slate-50 text-slate-700 font-bold transition-all hover:bg-slate-100">
+                    <button onclick="setShowDots(true)" id="dots-on" class="dots-btn flex-1 p-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-700 font-bold transition-all hover:bg-slate-100">
                         Puntini Guida Attivi
                     </button>
-                    <button onclick="setShowDots(false)" id="dots-off" class="dots-btn flex-1 p-3 rounded-xl border-2 border-slate-200 bg-slate-50 text-slate-700 font-bold transition-all hover:bg-slate-100">
+                    <button onclick="setShowDots(false)" id="dots-off" class="dots-btn flex-1 p-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-700 font-bold transition-all hover:bg-slate-100">
                         Senza Aiuti
                     </button>
                 </div>
@@ -184,6 +189,7 @@
         </div>
     </div>
 
+    <!-- CONTENITORE GIOCO -->
     <div id="game-container" class="hidden fixed inset-0">
         <!-- HUD Glass Clinico -->
         <div class="absolute top-6 left-1/2 -translate-x-1/2 flex items-center gap-6 px-8 py-3 bg-white/90 backdrop-blur-md border border-slate-200 rounded-2xl z-[100] shadow-sm">
@@ -216,7 +222,7 @@
             </div>
         </div>
 
-        <!-- Area di scorrimento protetta con la nuova Fascia Verde di Risposta integrata -->
+        <!-- Area di scorrimento protetta con Fascia Verde di Risposta integrata -->
         <div id="play-area">
             <!-- Fascia Verde di Risposta Attiva -->
             <div id="active-response-band" class="absolute bottom-4 left-0 right-0 h-28 bg-emerald-500/5 border-y-2 border-dashed border-emerald-500/20 flex items-center justify-between px-6 pointer-events-none z-0">
@@ -238,6 +244,7 @@
         </div>
     </div>
 
+    <!-- SCHERMATA RIEPILOGO CLINICO / GAME OVER -->
     <div id="game-over" class="hidden bg-white border border-slate-200 p-10 rounded-3xl shadow-lg w-full max-w-md z-[200] text-center mx-4">
         <h2 class="text-2xl font-bold text-slate-500 mb-2 uppercase tracking-wide">Analisi Sessione Conclusa</h2>
         <div class="text-7xl font-black text-slate-900 my-6" id="final-score">0</div>
@@ -264,12 +271,21 @@
             </div>
         </div>
 
-        <button onclick="location.reload()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-4 rounded-2xl transition-all shadow-sm active:scale-95">
+        <button id="btn-restart" onclick="location.reload()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-4 rounded-2xl transition-all shadow-sm active:scale-95">
             Esegui Nuovo Test
         </button>
     </div>
 
     <script>
+        // Parametri per integrazione con la Dashboard Clinica
+        const urlParams = new URLSearchParams(window.location.search);
+        const isSessioneAttiva = urlParams.get('sessione') === 'true';
+        const pazienteId = urlParams.get('pazienteId') || localStorage.getItem('currentPazienteId');
+        const sessioneId = urlParams.get('sessioneId') || localStorage.getItem('currentSessioneId');
+        const indexEsercizio = parseInt(urlParams.get('indexEsercizio') || localStorage.getItem('currentIndexEsercizio') || '0', 10);
+        const tipoSessione = urlParams.get('tipo') || localStorage.getItem('currentTipoSessione') || 'libera';
+
+        // Inizializzazione Audio Context nativo
         let audioCtx = null;
         function getAudioContext() {
             if (!audioCtx) {
@@ -329,6 +345,7 @@
             }
         }
 
+        // Configurazione Vocabolario Esercizio
         const wordCategories = {
             animals: { label: "ANIMALE", list: ["LEONE", "GATTO", "CANE", "LUPO", "CERVO", "TIGRE", "ORSO", "AQUILA", "VOLPE", "RANA", "SQUALO", "BALENA", "ORCA", "PANDA", "KOALA", "GORILLA"] },
             fruit: { label: "FRUTTA", list: ["MELA", "PERA", "BANANA", "KIWI", "PESCA", "ARANCIA", "UVA", "MANGO", "LIMONE", "CILIEGIA", "SUSINA", "ANANAS", "MELONE", "MORA", "LAMPONE", "FICO"] },
@@ -370,7 +387,7 @@
 
         const INITIAL_SPEED = 2.0;
         const MIN_SPACING_X = 180;
-        const COMBO_STEP = 2; // Velocità aumenta ogni 2 risposte corrette consecutive (combo)
+        const COMBO_STEP = 2; // La velocità incrementa ogni 2 risposte corrette di fila
 
         function setDifficulty(lvl) {
             state.difficulty = lvl;
@@ -482,7 +499,10 @@
                 state.timeLeft--;
                 updateHUD();
                 
-                if(state.timeLeft <= 0) endGame();
+                if(state.timeLeft <= 0) {
+                    clearInterval(timerInt);
+                    endGame();
+                }
             }, 1000);
         }
 
@@ -586,7 +606,7 @@
                 w.y += state.speed * (deltaTime || 1);
                 w.el.style.transform = `translateY(${w.y}px)`;
 
-                // Rimuoviamo/Aggiungiamo la classe di attivazione per la fascia verde
+                // Attivazione visuale nella fascia verde
                 if (w === lowestUnprocessed && w.y >= bandTop && w.y <= bandBottom) {
                     w.el.classList.add('word-in-active-zone');
                 } else {
@@ -627,7 +647,7 @@
         function handleInput(key) {
             if(!state.gameActive) return;
 
-            // Troviamo lo stimolo non completato più vicino al fondo
+            // Restringiamo la cattura dei comandi ESCLUSIVAMENTE allo stimolo attivo più basso
             const activeWords = state.words
                 .filter(w => !w.processed && w.y > 0)
                 .sort((a, b) => b.y - a.y);
@@ -637,8 +657,6 @@
             if (lowestWord && lowestWord.targets.includes(key)) {
                 const targetIdx = lowestWord.targets.indexOf(key);
                 state.score += 10;
-                state.correct++;
-                state.combo++;
                 
                 lowestWord.el.classList.add('word-hit');
                 setTimeout(() => lowestWord.el.classList.remove('word-hit'), 150);
@@ -656,6 +674,8 @@
                 if (lowestWord.targets.length === 0) {
                     applyFeedback('+10 COMPLETA!', 'text-emerald-600', lowestWord.el.offsetLeft, lowestWord.y);
                     lowestWord.processed = true;
+                    state.correct++;
+                    state.combo++;
                     lowestWord.el.style.opacity = '0.25';
                     lowestWord.el.style.filter = 'grayscale(1) blur(1px)';
                     lowestWord.el.classList.remove('word-in-active-zone');
@@ -665,7 +685,7 @@
                     playSound('hit');
                 }
 
-                // Accelerazione ad ogni progresso di combo (ogni 2 risposte corrette di seguito)
+                // Accelerazione sequenziale ogni 2 successi di combo
                 if (state.combo > 0 && state.combo % COMBO_STEP === 0) {
                     state.lastSpeedBeforeIncrease = state.speed;
                     state.speed += 0.15;
@@ -678,7 +698,7 @@
                 }
 
             } else {
-                // Errore: Se non ci sono parole o se la chiave premuta non appartiene allo stimolo attivo più in basso
+                // Errore: l'utente ha mirato ad uno stimolo non prioritario o premuto tasto incoerente
                 state.score = Math.max(0, state.score - 5);
                 state.missed++;
                 penalizeSpeed();
@@ -711,9 +731,124 @@
             document.getElementById('stats-missed').innerText = state.missed;
             document.getElementById('stats-max-speed').innerText = `${(state.maxSpeedReached / INITIAL_SPEED).toFixed(1)}x`;
             document.getElementById('stats-max-combo').innerText = state.maxCombo;
+
+            // Se la sessione è attiva tramite parametro URL, salviamo direttamente
+            if (isSessioneAttiva) {
+                salvaRisultatiFirebase();
+            }
         }
 
-        // Blocca interazione spaziatrice e intercetta tasti fisici
+        function salvaRisultatiFirebase() {
+            const totaleDomande = state.correct + state.missed;
+            const percentualeAccuratezza = totaleDomande > 0 ? Math.round((state.correct / totaleDomande) * 100) : 0;
+
+            // STRUTTURA STANDARD DI SALVATAGGIO DEI DATI DELL'ESERCIZIO
+            const datiEsercizio = {
+                titolo: "Doppio Binario", // Corrisponde esattamente al data-title di index.html
+                risultati: {
+                    risposteCorrette: state.correct,
+                    totaleDomande: totaleDomande,
+                    percentualeAccuratezza: percentualeAccuratezza,
+                    tempoMedioS: state.duration, 
+                    punteggio: state.score
+                }
+            };
+
+            console.log("Inizializzazione salvataggio clinico standardizzato:", datiEsercizio);
+
+            const btnRestart = document.getElementById('btn-restart');
+            if (btnRestart) {
+                btnRestart.disabled = true;
+                btnRestart.innerText = "Sincronizzazione in corso...";
+            }
+
+            try {
+                // Recupera la configurazione di Firebase salvata precedentemente sul browser
+                const localConfig = localStorage.getItem('firebaseConfig');
+                if (!localConfig) {
+                    console.error("Configurazione Firebase non trovata in localStorage.");
+                    if (btnRestart) {
+                        btnRestart.disabled = false;
+                        btnRestart.innerText = "Esegui Nuovo Test (Errore DB)";
+                    }
+                    return;
+                }
+
+                // Inizializza l'app Firebase se non è già attiva
+                if (firebase.apps.length === 0) {
+                    firebase.initializeApp(JSON.parse(localConfig));
+                }
+
+                const redirectUrl = urlParams.get('redirectUrl') || 'index.html';
+
+                if (tipoSessione === 'pianificata') {
+                    // Sessione Pianificata: salva nell'indice della sessione e reindirizza
+                    const path = `storico_pazienti/${pazienteId}/sessioni/${sessioneId}/risultati/${indexEsercizio}`;
+                    firebase.database().ref(path).set(datiEsercizio)
+                        .then(() => {
+                            console.log("Salvataggio completato correttamente (Pianificata). Reindirizzamento...");
+                            window.location.href = redirectUrl;
+                        })
+                        .catch(err => {
+                            console.error("Errore nella scrittura su Firebase (Pianificata):", err);
+                            if (btnRestart) {
+                                btnRestart.disabled = false;
+                                btnRestart.innerText = "Riprova Salvataggio";
+                            }
+                        });
+                } else {
+                    // Sessione Libera: aggiungi all'array eserciziSvolti dell'ultimo blocco di sessione del paziente
+                    const sessioniRef = firebase.database().ref(`storico_pazienti/${pazienteId}/sessioni`);
+                    sessioniRef.limitToLast(1).once('value', snapshot => {
+                        if (snapshot.exists()) {
+                            const lastSessionKey = Object.keys(snapshot.val())[0];
+                            const lastSession = snapshot.val()[lastSessionKey];
+                            const eserciziSvolti = lastSession.eserciziSvolti || [];
+                            eserciziSvolti.push(datiEsercizio);
+
+                            firebase.database().ref(`storico_pazienti/${pazienteId}/sessioni/${lastSessionKey}/eserciziSvolti`)
+                                .set(eserciziSvolti)
+                                .then(() => {
+                                    console.log("Salvataggio completato correttamente (Libera). Reindirizzamento...");
+                                    window.location.href = redirectUrl;
+                                })
+                                .catch(err => {
+                                    console.error("Errore nella scrittura (Libera):", err);
+                                    if (btnRestart) {
+                                        btnRestart.disabled = false;
+                                        btnRestart.innerText = "Riprova Salvataggio";
+                                    }
+                                });
+                        } else {
+                            // Se non ci sono blocchi sessione creati, ne creiamo uno al volo per ospitare l'esercizio libero
+                            const newSessionRef = sessioniRef.push();
+                            newSessionRef.set({
+                                data: new Date().toISOString(),
+                                tipo: 'libera',
+                                eserciziSvolti: [datiEsercizio]
+                            }).then(() => {
+                                console.log("Nuova sessione creata e sincronizzata. Reindirizzamento...");
+                                window.location.href = redirectUrl;
+                            }).catch(err => {
+                                console.error("Errore nella creazione della sessione autonoma:", err);
+                                if (btnRestart) {
+                                    btnRestart.disabled = false;
+                                    btnRestart.innerText = "Riprova Salvataggio";
+                                }
+                            });
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error("Eccezione catturata durante l'integrazione Firebase:", error);
+                if (btnRestart) {
+                    btnRestart.disabled = false;
+                    btnRestart.innerText = "Esegui Nuovo Test";
+                }
+            }
+        }
+
+        // Previene l'uso della barra spaziatrice per azionare involontariamente i bottoni virtuali
         window.addEventListener('keydown', (e) => {
             if (e.key === ' ' || e.code === 'Space') {
                 e.preventDefault();
