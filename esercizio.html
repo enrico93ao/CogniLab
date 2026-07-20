@@ -48,7 +48,7 @@
             <ul class="results-list" id="final-stats">
                 <!-- Esercizi completati -->
             </ul>
-            <button class="btn-action btn-next" style="font-size: 1.1rem; padding: 12px 30px;" onclick="window.location.href='index.html'">
+            <button class="btn-action btn-next" style="font-size: 1.1rem; padding: 12px 30px;" onclick="window.location.href='esercizi.html'">
                 Torna all'Hub Centrale
             </button>
         </div>
@@ -78,10 +78,12 @@
 
         window.addEventListener('DOMContentLoaded', async () => {
             const params = new URLSearchParams(window.location.search);
-            const isSessionParam = params.get('sessione');
             const fileDirect = params.get('file');
 
-            // Controlliamo prima se c'è una sessione attiva salvata su Firebase
+            // Recupera il nome inserito nella landing page per sicurezza
+            const localUsername = localStorage.getItem('hub_username') || "Utente";
+
+            // Controlliamo se c'è una sessione clinica attiva su Firebase
             const sessionRef = ref(db, 'sessione_attiva');
             const snapshot = await get(sessionRef);
 
@@ -89,31 +91,29 @@
                 activeSession = snapshot.val();
                 
                 if (activeSession.tipo === 'libera') {
-                    // MODALITÀ LIBERA: L'esercizio specifico è caricato tramite parametro nell'URL
+                    // MODALITÀ CLINICA LIBERA: Carica l'esercizio dall'URL salvando i dati del paziente
                     if (fileDirect) {
                         const esFile = decodeURIComponent(fileDirect);
                         document.getElementById('exercise-iframe').src = esFile;
                         document.getElementById('exercise-title').textContent = `Paziente: ${activeSession.pazienteNome} ➔ Esercizio Libero: ${esFile.replace('.html', '').replace(/_/g, ' ')}`;
                         document.getElementById('back-home-btn').innerHTML = '<i class="fa-solid fa-check"></i> Salva e Torna';
                     } else {
-                        // Se sono in modalità libera ma sono finito qui senza file specifico, torno indietro
-                        window.location.href = "index.html";
+                        window.location.href = "esercizi.html";
                     }
                 } else {
-                    // MODALITÀ PIANIFICATA: Segue la sequenza preimpostata
+                    // MODALITÀ CLINICA PIANIFICATA: Segue la sequenza medica impostata
                     isSessionPianificata = true;
                     loadCurrentExerciseFromSession();
                 }
             } else {
-                // NESSUN PAZIENTE SELEZIONATO: Funzionamento classico senza salvataggio dati
+                // MODALITÀ TRAINING LIBERO (Nessun paziente clinico attivo)
                 if (fileDirect) {
                     const esFile = decodeURIComponent(fileDirect);
                     document.getElementById('exercise-iframe').src = esFile;
-                    document.getElementById('exercise-title').textContent = esFile.replace('.html', '').replace(/_/g, ' ');
-                    document.getElementById('back-home-btn').innerHTML = '<i class="fa-solid fa-arrow-left"></i> Torna alla Home (Nessun paziente)';
+                    document.getElementById('exercise-title').textContent = `${localUsername} ➔ ${esFile.replace('.html', '').replace(/_/g, ' ')}`;
+                    document.getElementById('back-home-btn').innerHTML = '<i class="fa-solid fa-arrow-left"></i> Termina Allenamento';
                 } else {
-                    alert("Seleziona un esercizio o avvia una sessione per continuare.");
-                    window.location.href = "index.html";
+                    window.location.href = "esercizi.html";
                 }
             }
         });
@@ -148,35 +148,40 @@
         }
 
         window.exitSession = async function() {
-            if (activeSession) {
-                if (activeSession.tipo === 'libera') {
-                    // Salva la singola attività nello storico prima di tornare alla home
-                    const params = new URLSearchParams(window.location.search);
-                    const fileDirect = params.get('file');
-                    const esTitle = fileDirect ? decodeURIComponent(fileDirect).replace('.html', '').replace(/_/g, ' ') : "Esercizio Libero";
+            // Se eravamo in modalità Allenamento Libero (senza database clinico attivo)
+            if (!activeSession) {
+                // Incrementiamo il counter degli esercizi fatti localmente prima di uscire
+                let fatti = parseInt(localStorage.getItem('exercises_done_counter') || '0');
+                localStorage.setItem('exercises_done_counter', (fatti + 1).toString());
+                window.location.href = "esercizi.html";
+                return;
+            }
 
+            // Altrimenti, gestiamo il salvataggio dei dati clinici del paziente
+            if (activeSession.tipo === 'libera') {
+                const params = new URLSearchParams(window.location.search);
+                const fileDirect = params.get('file');
+                const esTitle = fileDirect ? decodeURIComponent(fileDirect).replace('.html', '').replace(/_/g, ' ') : "Esercizio Libero";
+
+                const storicoRef = ref(db, `storico_pazienti/${activeSession.pazienteId}/sessioni`);
+                await push(storicoRef, {
+                    data: new Date().toISOString(),
+                    tipo: "Esercizio Libero",
+                    eserciziSvolti: [{ titolo: esTitle, file: fileDirect || "" }]
+                });
+            } else if (isSessionPianificata) {
+                const completati = activeSession.esercizi.slice(0, activeSession.indiceCorrente);
+                if (completati.length > 0) {
                     const storicoRef = ref(db, `storico_pazienti/${activeSession.pazienteId}/sessioni`);
                     await push(storicoRef, {
                         data: new Date().toISOString(),
-                        tipo: "Esercizio Libero",
-                        eserciziSvolti: [{ titolo: esTitle, file: fileDirect || "" }]
+                        tipo: "Sessione Pianificata Interrotta",
+                        eserciziSvolti: completati
                     });
-                } else if (isSessionPianificata) {
-                    // Se abbandona la sessione pianificata a metà, salviamo quello che ha fatto finora
-                    const completati = activeSession.esercizi.slice(0, activeSession.indiceCorrente);
-                    if (completati.length > 0) {
-                        const storicoRef = ref(db, `storico_pazienti/${activeSession.pazienteId}/sessioni`);
-                        await push(storicoRef, {
-                            data: new Date().toISOString(),
-                            tipo: "Sessione Pianificata Interrotta",
-                            eserciziSvolti: completati
-                        });
-                    }
-                    // Resetta la sessione attiva
-                    await set(ref(db, 'sessione_attiva'), null);
                 }
+                await set(ref(db, 'sessione_attiva'), null);
             }
-            window.location.href = "index.html";
+            window.location.href = "esercizi.html";
         }
 
         function showFinalResults() {
@@ -197,14 +202,12 @@
                 list.appendChild(li);
             });
 
-            // Salva lo storico completo nel database
             const storicoRef = ref(db, `storico_pazienti/${activeSession.pazienteId}/sessioni`);
             push(storicoRef, {
                 data: new Date().toISOString(),
                 tipo: "Sessione Pianificata Completa",
                 eserciziSvolti: activeSession.esercizi
             }).then(async () => {
-                // Elimina la sessione attiva
                 await set(ref(db, 'sessione_attiva'), null);
             });
         }
