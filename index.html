@@ -7,14 +7,14 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --primary-gradient: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #0284c7 100%);
+            --primary-gradient: linear-gradient(135deg, #0b0f19 0%, #1e293b 50%, #0f172a 100%);
             --slate-900: #0f172a;
-            --slate-700: #334155;
-            --slate-100: #f1f5f9;
+            --slate-700: #475569;
+            --slate-100: #f8fafc;
             --primary-light: #3b82f6;
             --success: #10b981;
-            --shadow-lg: 0 20px 32px -8px rgba(30, 58, 138, 0.15);
-            --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            --shadow-premium: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            --transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         * {
@@ -30,151 +30,181 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 20px;
+            padding: 24px;
             color: white;
             overflow: hidden;
             position: relative;
         }
 
-        /* Sfondo geometrico dinamico dello screen */
+        /* Sfondo geometrico dinamico premium blurrato */
         body::before {
             content: '';
             position: absolute;
-            width: 600px; height: 600px;
-            background: radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, transparent 70%);
-            top: -100px; right: -100px;
+            width: 700px; height: 700px;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.12) 0%, transparent 70%);
+            top: -150px; right: -150px;
             z-index: 1;
+            filter: blur(40px);
         }
 
         body::after {
             content: '';
             position: absolute;
-            width: 500px; height: 500px;
-            background: radial-gradient(circle, rgba(16, 185, 129, 0.1) 0%, transparent 70%);
-            bottom: -100px; left: -100px;
+            width: 600px; height: 600px;
+            background: radial-gradient(circle, rgba(16, 185, 129, 0.08) 0%, transparent 70%);
+            bottom: -150px; left: -150px;
             z-index: 1;
+            filter: blur(40px);
         }
 
-        /* --- HUB CENTRAL BOX --- */
+        /* --- HUB CENTRAL BOX (GLASSMORPHISM) --- */
         .welcome-container {
-            background: rgba(255, 255, 255, 0.98);
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.5);
             color: var(--slate-900);
-            max-width: 850px;
+            max-width: 900px;
             width: 100%;
-            border-radius: 32px;
-            padding: 50px 40px;
-            box-shadow: var(--shadow-lg);
+            border-radius: 36px;
+            padding: 60px 50px;
+            box-shadow: var(--shadow-premium);
             text-align: center;
             z-index: 10;
-            backdrop-filter: blur(10px);
-            transform: translateY(20px);
             opacity: 0;
-            animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            transform: translateY(30px);
+            animation: premiumFadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
 
-        @keyframes fadeInUp {
+        @keyframes premiumFadeIn {
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* Animazioni sequenziali per i testi (Staggered) */
+        .animate-item {
+            opacity: 0;
+            transform: translateY(15px);
+            animation: itemFadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        .anim-delay-1 { animation-delay: 0.2s; }
+        .anim-delay-2 { animation-delay: 0.4s; }
+        .anim-delay-3 { animation-delay: 0.6s; }
+
+        @keyframes itemFadeUp {
             to { transform: translateY(0); opacity: 1; }
         }
 
         .welcome-container h1 {
-            font-size: 2.5rem;
+            font-size: 2.8rem;
             font-weight: 800;
-            letter-spacing: -1px;
-            background: linear-gradient(135deg, #1e3a8a, #0284c7);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 12px;
+            letter-spacing: -1.5px;
+            color: #0f172a;
+            margin-bottom: 16px;
+            line-height: 1.2;
         }
 
-        .welcome-container p {
-            font-size: 1.15rem;
+        /* Parola dinamica con gradiente */
+        .dynamic-word {
+            background: linear-gradient(135deg, #2563eb, #0d9488);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            transition: opacity 0.3s ease;
+            display: inline-block;
+        }
+
+        .welcome-container p.subtitle {
+            font-size: 1.2rem;
             color: var(--slate-700);
-            max-width: 600px;
-            margin: 0 auto 40px auto;
+            max-width: 650px;
+            margin: 0 auto 45px auto;
             line-height: 1.6;
+            font-weight: 400;
         }
 
         /* --- GRIGLIA DELLE OPZIONI --- */
         .choice-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 24px;
+            gap: 28px;
         }
 
-        @media (max-width: 640px) {
+        @media (max-width: 680px) {
             .choice-grid { grid-template-columns: 1fr; }
-            .welcome-container { padding: 35px 20px; }
+            .welcome-container { padding: 40px 24px; }
+            .welcome-container h1 { font-size: 2.2rem; }
         }
 
         .choice-card {
-            background: var(--slate-100);
-            border: 2px solid transparent;
-            border-radius: 24px;
-            padding: 35px 25px;
+            background: rgba(255, 255, 255, 0.6);
+            border: 1px solid rgba(0, 0, 0, 0.03);
+            border-radius: 28px;
+            padding: 40px 30px;
             cursor: pointer;
             transition: var(--transition);
             display: flex;
             flex-direction: column;
             align-items: center;
             text-align: center;
-            position: relative;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
         }
 
         .choice-card:hover {
-            transform: translateY(-8px);
+            transform: translateY(-10px);
             background: white;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            box-shadow: 0 30px 40px -15px rgba(15, 23, 42, 0.1);
         }
 
-        .choice-card.training:hover { border-color: var(--success); }
-        .choice-card.clinic:hover { border-color: var(--primary-light); }
+        .choice-card.training:hover { border-color: rgba(16, 185, 129, 0.3); }
+        .choice-card.clinic:hover { border-color: rgba(59, 130, 246, 0.3); }
 
         .icon-wrapper {
-            width: 80px;
-            height: 80px;
-            border-radius: 20px;
+            width: 84px;
+            height: 84px;
+            border-radius: 24px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 2.2rem;
-            margin-bottom: 20px;
+            font-size: 2.4rem;
+            margin-bottom: 24px;
             transition: var(--transition);
         }
 
-        .training .icon-wrapper { background: #d1fae5; color: var(--success); }
-        .clinic .icon-wrapper { background: #dbeafe; color: var(--primary-light); }
+        .training .icon-wrapper { background: #e6fbf1; color: var(--success); }
+        .clinic .icon-wrapper { background: #eff6ff; color: var(--primary-light); }
 
         .choice-card:hover .icon-wrapper {
-            transform: scale(1.1) rotate(5deg);
+            transform: scale(1.1) translateY(-4px);
         }
 
         .choice-card h2 {
-            font-size: 1.4rem;
+            font-size: 1.45rem;
             font-weight: 700;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
             color: var(--slate-900);
+            letter-spacing: -0.5px;
         }
 
         .choice-card p {
-            font-size: 0.95rem;
+            font-size: 0.98rem;
             color: var(--slate-700);
             margin-bottom: 0;
-            line-height: 1.5;
+            line-height: 1.55;
         }
 
-        /* --- INTERFACCIA INPUT NOME UTENTE (MODALE) --- */
+        /* --- MODALE PREMIUM --- */
         .user-modal {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(15, 23, 42, 0.8);
-            backdrop-filter: blur(8px);
+            background: rgba(11, 15, 25, 0.6);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
             display: flex;
             align-items: center;
             justify-content: center;
             z-index: 100;
             opacity: 0;
             pointer-events: none;
-            transition: opacity 0.3s ease;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .user-modal.active {
@@ -185,65 +215,73 @@
         .modal-content {
             background: white;
             color: var(--slate-900);
-            padding: 40px;
-            border-radius: 28px;
-            max-width: 450px;
+            padding: 45px;
+            border-radius: 32px;
+            max-width: 480px;
             width: 100%;
             text-align: center;
-            box-shadow: var(--shadow-lg);
-            transform: scale(0.9);
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: var(--shadow-premium);
+            transform: scale(0.9) translateY(20px);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            border: 1px solid rgba(255, 255, 255, 0.8);
         }
 
-        .user-modal.active .modal-content { transform: scale(1); }
+        .user-modal.active .modal-content { 
+            transform: scale(1) translateY(0); 
+        }
 
         .modal-content h3 {
-            font-size: 1.6rem;
+            font-size: 1.75rem;
             font-weight: 700;
             margin-bottom: 12px;
+            letter-spacing: -0.5px;
         }
 
         .modal-content p {
-            font-size: 0.95rem;
+            font-size: 1rem;
             color: var(--slate-700);
-            margin-bottom: 24px;
+            margin-bottom: 30px;
+            line-height: 1.5;
         }
 
         .modal-content input {
             width: 100%;
-            padding: 14px 20px;
-            border-radius: 14px;
-            border: 2px solid var(--slate-100);
-            font-size: 1rem;
+            padding: 16px 24px;
+            border-radius: 16px;
+            border: 2px solid #e2e8f0;
+            font-size: 1.05rem;
             outline: none;
-            margin-bottom: 20px;
+            margin-bottom: 24px;
             transition: var(--transition);
             text-align: center;
+            font-weight: 500;
+            color: var(--slate-900);
         }
 
         .modal-content input:focus {
-            border-color: var(--success);
-            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15);
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+            background: var(--slate-100);
         }
 
         .btn-group {
             display: flex;
-            gap: 12px;
+            gap: 14px;
         }
 
         .btn {
             flex: 1;
-            padding: 12px 20px;
-            border-radius: 12px;
+            padding: 14px 24px;
+            border-radius: 14px;
             font-weight: 600;
             cursor: pointer;
             border: none;
-            font-size: 0.95rem;
+            font-size: 1rem;
             transition: var(--transition);
         }
 
-        .btn-success { background: var(--success); color: white; }
-        .btn-success:hover { background: #059669; }
+        .btn-success { background: var(--slate-900); color: white; }
+        .btn-success:hover { background: var(--primary-light); transform: translateY(-2px); }
         .btn-cancel { background: var(--slate-100); color: var(--slate-700); }
         .btn-cancel:hover { background: #e2e8f0; }
     </style>
@@ -251,10 +289,17 @@
 <body>
 
     <div class="welcome-container">
-        <h1>Hub di Stimolazione Cognitiva</h1>
-        <p>Una palestra digitale per la mente: esercizi interattivi e monitoraggio dei progressi per la riabilitazione cognitiva.</p>
+        <!-- Titolo con Messaggio di Benvenuto Dinamico -->
+        <h1 class="animate-item anim-delay-1">
+            Allena <span id="dynamic-text" class="dynamic-word">la mente</span><br>
+            Hub di Stimolazione Cognitiva
+        </h1>
         
-        <div class="choice-grid">
+        <p class="subtitle animate-item anim-delay-2">
+            Una palestra digitale esclusiva per le tue funzioni cognitive. Scegli il tuo percorso tra sessioni di allenamento guidate e monitoraggio clinico avanzato.
+        </p>
+        
+        <div class="choice-grid animate-item anim-delay-3">
             <!-- Training Libero -->
             <div class="choice-card training" onclick="openUserModal()">
                 <div class="icon-wrapper">
@@ -279,7 +324,7 @@
     <div id="user-modal" class="user-modal">
         <div class="modal-content">
             <h3>Inizia l'Allenamento</h3>
-            <p>Inserisci il tuo nome o pseudonimo per salvare e visualizzare il riepilogo delle tue attività al termine della sessione.</p>
+            <p>Inserisci il tuo nome o uno pseudonimo per personalizzare l'esperienza e tracciare i progressi odierni.</p>
             <input type="text" id="username-input" placeholder="Es. Mario R." maxlength="25">
             <div class="btn-group">
                 <button class="btn btn-cancel" onclick="closeUserModal()">Annulla</button>
@@ -292,6 +337,23 @@
         // Pulisce sessioni precedenti al caricamento della home
         localStorage.clear();
 
+        // --- SCRIPT PER PAROLA DINAMICA (BENVENUTO PREMIUM) ---
+        const words = ["la mente", "la memoria", "l'attenzione", "la logica"];
+        let currentIndex = 0;
+        const dynamicTextEl = document.getElementById("dynamic-text");
+
+        setInterval(() => {
+            dynamicTextEl.style.opacity = 0; // Inizia dissolvenza in uscita
+            
+            setTimeout(() => {
+                currentIndex = (currentIndex + 1) % words.length;
+                dynamicTextEl.textContent = words[currentIndex];
+                dynamicTextEl.style.opacity = 1; // Dissolvenza in ingresso
+            }, 300); // Cambia parola a metà effetto
+        }, 3000); // Cambia ogni 3 secondi
+
+
+        // --- LOGICA MODALE ED ESERCIZI ---
         function openUserModal() {
             document.getElementById('user-modal').classList.add('active');
             document.getElementById('username-input').focus();
@@ -311,15 +373,11 @@
                 return;
             }
 
-            // Salva la modalità e il nome utente in locale
             localStorage.setItem('hub_mode', 'free_training');
             localStorage.setItem('hub_username', username);
             localStorage.setItem('free_session_start', new Date().toISOString());
-            
-            // Inizializza un array vuoto nello storage per accumulare gli esercizi fatti in questa sessione
             localStorage.setItem('free_exercises_history', JSON.stringify([]));
 
-            // Reindirizza al catalogo esercizi
             window.location.href = 'esercizi.html';
         }
 
@@ -328,7 +386,6 @@
             window.location.href = 'esercizi.html';
         }
 
-        // Permette l'invio premendo il tasto "Enter" dentro l'input
         document.getElementById('username-input').addEventListener('keydown', function(e) {
             if (e.key === 'Enter') startFreeTraining();
         });
