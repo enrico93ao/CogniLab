@@ -8,6 +8,27 @@
     <!-- Chart.js per i Grafici di Andamento -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
+        :root {
+            --primary: #1e40af;
+            --primary-light: #3b82f6;
+            --primary-gradient: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #0284c7 100%);
+            --success: #10b981;
+            --success-hover: #059669;
+            --warning: #f59e0b;
+            --warning-hover: #d97706;
+            --danger: #ef4444;
+            --danger-hover: #dc2626;
+            --slate-50: #f8fafc;
+            --slate-100: #f1f5f9;
+            --slate-200: #e2e8f0;
+            --slate-700: #334155;
+            --slate-900: #0f172a;
+            --shadow-sm: 0 2px 8px -1px rgba(0,0,0,0.05);
+            --shadow-md: 0 12px 24px -4px rgba(15, 23, 42, 0.06);
+            --shadow-lg: 0 20px 32px -8px rgba(30, 58, 138, 0.12);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
         * {
             box-sizing: border-box;
             margin: 0;
@@ -16,45 +37,64 @@
         }
 
         body {
-            background-color: #f8fafc;
-            color: #0f172a;
-            padding-bottom: 80px;
+            background-color: #f4f7fa;
+            color: var(--slate-900);
+            padding-bottom: 100px;
+            overflow-x: hidden;
         }
 
+        /* --- HEADER PREMIUM --- */
         header {
-            background: linear-gradient(135deg, #1e3a8a, #0284c7);
+            background: var(--primary-gradient);
             color: white;
-            padding: 40px 20px;
+            padding: 60px 20px;
             text-align: center;
-            box-shadow: 0 4px 20px rgba(30, 58, 138, 0.15);
+            position: relative;
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.15);
+        }
+        
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(circle at 80% 20%, rgba(255,255,255,0.05) 0%, transparent 50%);
+            pointer-events: none;
         }
 
         header h1 {
-            font-size: 2.4rem;
-            font-weight: 700;
-            letter-spacing: -0.5px;
+            font-size: 2.8rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
         header p {
-            margin-top: 8px;
-            font-size: 1.1rem;
-            color: #e0f2fe;
+            margin-top: 12px;
+            font-size: 1.2rem;
+            color: #bae6fd;
+            font-weight: 400;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         .container {
-            max-width: 1400px;
-            margin: 40px auto 0 auto;
-            padding: 0 20px;
+            max-width: 1440px;
+            margin: -30px auto 0 auto;
+            padding: 0 24px;
+            position: relative;
+            z-index: 10;
         }
 
-        /* --- PANNELLO CLINICO --- */
+        /* --- PANNELLO CLINICO ANIMATO --- */
         #clinical-panel {
             background: #ffffff;
-            border: 2px solid #3b82f6;
-            border-radius: 20px;
-            padding: 25px;
-            margin-bottom: 40px;
-            box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 131, 246, 0.2);
+            border-radius: 24px;
+            padding: 30px;
+            margin-bottom: 45px;
+            box-shadow: var(--shadow-lg);
+            transition: var(--transition);
         }
 
         .panel-title {
@@ -66,20 +106,43 @@
         }
 
         .panel-title h2 {
-            font-size: 1.3rem;
-            color: #1e3a8a;
+            font-size: 1.4rem;
+            color: var(--primary);
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
+            font-weight: 700;
+        }
+
+        #panel-chevron {
+            transition: var(--transition);
+            background: var(--slate-100);
+            padding: 10px;
+            border-radius: 50%;
+            color: var(--slate-700);
+        }
+
+        /* Wrapper animato per apertura/chiusura */
+        .panel-content-wrapper {
+            max-height: 2000px; /* Valore alto per permettere l'espansione */
+            opacity: 1;
+            overflow: hidden;
+            transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease;
+        }
+
+        .panel-content-wrapper.collapsed {
+            max-height: 0;
+            opacity: 0;
+            pointer-events: none;
         }
 
         #panel-content {
-            margin-top: 20px;
+            margin-top: 25px;
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 30px;
-            padding-top: 20px;
-            border-top: 1px solid #e2e8f0;
+            padding-top: 25px;
+            border-top: 1px solid var(--slate-200);
         }
 
         @media (max-width: 1024px) {
@@ -87,135 +150,166 @@
         }
 
         .clinical-box {
-            background: #f8fafc;
-            padding: 20px;
-            border-radius: 12px;
-            border: 1px solid #e2e8f0;
+            background: var(--slate-50);
+            padding: 24px;
+            border-radius: 16px;
+            border: 1px solid var(--slate-200);
             display: flex;
             flex-direction: column;
             justify-content: space-between;
+            box-shadow: var(--shadow-sm);
         }
 
         .clinical-box h3 {
-            font-size: 1rem;
-            margin-bottom: 15px;
-            color: #334155;
+            font-size: 1.1rem;
+            margin-bottom: 18px;
+            color: var(--slate-700);
             font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .input-group {
             display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
+            gap: 12px;
+            margin-bottom: 18px;
         }
 
         input, select {
-            padding: 10px 14px;
-            border-radius: 8px;
-            border: 1px solid #cbd5e1;
+            padding: 12px 16px;
+            border-radius: 12px;
+            border: 1px solid var(--slate-200);
             font-size: 0.95rem;
             outline: none;
+            background: white;
+            transition: var(--transition);
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.02);
         }
 
-        input[type="text"] {
-            flex-grow: 1;
-        }
-
+        input[type="text"] { flex-grow: 1; }
         input:focus, select:focus {
-            border-color: #3b82f6;
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12);
         }
 
+        /* --- CALL TO ACTIONS & BUTTONS PREMIUM --- */
         .btn {
-            background: #2563eb;
+            background: var(--primary-light);
             color: white;
             border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
+            padding: 12px 24px;
+            border-radius: 12px;
             font-weight: 600;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: var(--transition);
             font-size: 0.95rem;
             display: inline-flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+            position: relative;
+            overflow: hidden;
         }
 
-        .btn:hover { background: #1d4ed8; }
-        .btn-success { background: #10b981; }
-        .btn-success:hover { background: #059669; }
-        .btn-warning { background: #f59e0b; color: white; }
-        .btn-warning:hover { background: #d97706; }
-        .btn-danger { background: #ef4444; color: white; }
-        .btn-danger:hover { background: #dc2626; }
-        .btn-sm { padding: 6px 12px; font-size: 0.85rem; border-radius: 6px; }
+        .btn:hover {
+            background: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(30, 58, 138, 0.3);
+        }
 
-        /* Stato della sessione attiva */
+        .btn:active { transform: translateY(0); }
+
+        .btn-success { background: var(--success); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2); }
+        .btn-success:hover { background: var(--success-hover); box-shadow: 0 6px 16px rgba(5, 150, 105, 0.3); }
+
+        .btn-warning { background: var(--warning); color: white; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2); }
+        .btn-warning:hover { background: var(--warning-hover); box-shadow: 0 6px 16px rgba(217, 119, 6, 0.3); }
+
+        .btn-danger { background: var(--danger); box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2); }
+        .btn-danger:hover { background: var(--danger-hover); box-shadow: 0 6px 16px rgba(220, 38, 38, 0.3); }
+        
+        .btn-sm { padding: 8px 14px; font-size: 0.85rem; border-radius: 8px; }
+
+        /* Stato della sessione attiva (Pulse effect) */
         #active-status-bar {
             grid-column: 1 / -1;
             background: #ecfdf5;
-            border: 1px solid #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.3);
             color: #065f46;
-            padding: 15px 20px;
-            border-radius: 10px;
+            padding: 18px 24px;
+            border-radius: 16px;
             display: none;
             justify-content: space-between;
             align-items: center;
-            font-weight: 500;
+            font-weight: 600;
+            box-shadow: var(--shadow-sm);
+            animation: pulseGlow 2.5s infinite ease-in-out;
         }
 
-        /* Queue Indicator */
+        @keyframes pulseGlow {
+            0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.2); }
+            50% { box-shadow: 0 0 16px 4px rgba(16, 185, 129, 0.1); }
+            100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.2); }
+        }
+
         #queue-list {
-            margin-top: 10px;
+            margin-top: 14px;
             font-size: 0.9rem;
             color: #64748b;
+            background: white;
+            padding: 10px 14px;
+            border-radius: 8px;
+            border: 1px dashed var(--slate-200);
         }
 
         /* --- SEZIONE GESTIONE ANAGRAFICA --- */
         .patient-mgmt-container {
             margin-top: 15px;
-            max-height: 180px;
+            max-height: 200px;
             overflow-y: auto;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
+            border: 1px solid var(--slate-200);
+            border-radius: 12px;
             background: white;
         }
 
         .mgmt-table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
         }
 
         .mgmt-table th, .mgmt-table td {
-            padding: 10px;
-            border-bottom: 1px solid #f1f5f9;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--slate-100);
             text-align: left;
         }
 
         .mgmt-table th {
-            background: #f1f5f9;
+            background: var(--slate-100);
             position: sticky;
             top: 0;
             font-weight: 600;
+            color: var(--slate-700);
         }
 
-        /* --- SEZIONE DOSSIER / CLINICAL REPORT --- */
+        /* --- DOSSIER CLINICO REPORT --- */
         #patient-report-section {
             grid-column: 1 / -1;
             background: #ffffff;
-            border: 1px solid #e2e8f0;
-            border-radius: 16px;
-            padding: 20px;
+            border: 1px solid var(--slate-200);
+            border-radius: 20px;
+            padding: 24px;
             margin-top: 20px;
             display: none;
         }
 
         .report-grid {
             display: grid;
-            grid-template-columns: 1.2fr 0.8fr;
-            gap: 24px;
-            margin-top: 20px;
+            grid-template-columns: 1.20fr 0.80fr;
+            gap: 30px;
+            margin-top: 24px;
         }
 
         @media (max-width: 900px) {
@@ -223,21 +317,23 @@
         }
 
         .chart-container {
-            background: #f8fafc;
-            padding: 20px;
-            border-radius: 12px;
-            border: 1px solid #e2e8f0;
-            min-height: 380px;
-            height: 400px;
+            background: var(--slate-50);
+            padding: 24px;
+            border-radius: 16px;
+            border: 1px solid var(--slate-200);
+            min-height: 400px;
+            height: 420px;
             position: relative;
+            box-shadow: var(--shadow-sm);
         }
 
         .table-container {
-            max-height: 400px;
+            max-height: 420px;
             overflow-y: auto;
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
+            border: 1px solid var(--slate-200);
+            border-radius: 16px;
             background: white;
+            box-shadow: var(--shadow-sm);
         }
 
         .report-table {
@@ -248,118 +344,142 @@
         }
 
         .report-table th, .report-table td {
-            padding: 12px;
-            border-bottom: 1px solid #e2e8f0;
+            padding: 14px 18px;
+            border-bottom: 1px solid var(--slate-200);
         }
 
         .report-table th {
-            background: #f1f5f9;
-            color: #475569;
+            background: var(--slate-100);
+            color: var(--slate-700);
             font-weight: 600;
             position: sticky;
             top: 0;
+            z-index: 20;
         }
 
+        .report-table tbody tr {
+            transition: var(--transition);
+        }
         .report-table tbody tr:hover {
-            background: #f8fafc;
+            background: var(--slate-50);
         }
 
-        /* --- STILI GRIGLIA E CARD --- */
+        /* --- GRIGLIA E CARD ESERCIZI PREMIUM --- */
         .area-sezione {
-            margin-bottom: 50px;
+            margin-bottom: 45px;
             background: white;
             padding: 35px;
-            border-radius: 24px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
-            border: 1px solid #e2e8f0;
+            border-radius: 28px;
+            box-shadow: var(--shadow-md);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            transition: var(--transition);
+        }
+        
+        .area-sezione:hover {
+            box-shadow: 0 16px 36px -4px rgba(15, 23, 42, 0.04);
         }
 
         .area-header {
             display: flex;
             align-items: center;
-            gap: 15px;
-            margin-bottom: 30px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid #f1f5f9;
+            gap: 16px;
+            margin-bottom: 28px;
+            padding-bottom: 18px;
+            border-bottom: 2px solid var(--slate-100);
         }
 
-        .area-header i { font-size: 2rem; }
-        .area-header h2 { font-size: 1.6rem; font-weight: 600; color: #1e293b; }
+        .area-header i { 
+            font-size: 1.8rem; 
+            background: var(--slate-100);
+            padding: 12px;
+            border-radius: 14px;
+        }
+        .area-header h2 { font-size: 1.5rem; font-weight: 700; color: var(--slate-900); letter-spacing: -0.3px; }
 
-        /* Colori Aree */
-        .area-attenzione .area-header i { color: #ef4444; }
-        .area-memoria .area-header i { color: #3b82f6; }
-        .area-funzioni .area-header i { color: #10b981; }
-        .area-linguaggio .area-header i { color: #f59e0b; }
-        .area-visuo .area-header i { color: #8b5cf6; }
-        .area-orientamento .area-header i { color: #06b6d4; }
+        /* Temi cromatici icone delle Aree */
+        .area-attenzione .area-header i { color: #ef4444; background: #fee2e2; }
+        .area-memoria .area-header i { color: #3b82f6; background: #dbeafe; }
+        .area-funzioni .area-header i { color: #10b981; background: #d1fae5; }
+        .area-linguaggio .area-header i { color: #f59e0b; background: #fef3c7; }
+        .area-visuo .area-header i { color: #8b5cf6; background: #ede9fe; }
+        .area-orientamento .area-header i { color: #06b6d4; background: #ecfeff; }
 
         .grid-esercizi {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 24px;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 26px;
         }
 
+        /* Card Esercizio */
         .card {
-            background: #f8fafc;
-            border-radius: 16px;
-            padding: 24px;
+            background: var(--slate-50);
+            border-radius: 20px;
+            padding: 26px;
             text-decoration: none;
             color: inherit;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            border: 1px solid #e2e8f0;
-            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid var(--slate-200);
+            transition: var(--transition);
             position: relative;
             cursor: pointer;
         }
 
         .card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 12px 20px -5px rgba(0,0,0,0.08);
+            transform: translateY(-5px) scale(1.01);
+            box-shadow: var(--shadow-lg);
             background: white;
         }
 
-        .card-body { flex-grow: 1; margin-bottom: 16px; }
-        .card h3 { font-size: 1.15rem; color: #0f172a; font-weight: 600; line-height: 1.4; margin-bottom: 8px; }
-        .card p { font-size: 0.88rem; color: #64748b; line-height: 1.5; }
+        .card-body { flex-grow: 1; margin-bottom: 20px; padding-right: 20px; }
+        .card h3 { font-size: 1.2rem; color: var(--slate-900); font-weight: 700; line-height: 1.4; margin-bottom: 10px; }
+        .card p { font-size: 0.9rem; color: #64748b; line-height: 1.6; }
 
-        /* Caselle selezione esercizio */
+        /* Checkbox stilizzata fluttuante */
         .select-exercise-checkbox {
             position: absolute;
-            top: 20px;
-            right: 20px;
-            width: 20px;
-            height: 20px;
+            top: 24px;
+            right: 24px;
+            width: 22px;
+            height: 22px;
             cursor: pointer;
             z-index: 5;
+            accent-color: var(--primary-light);
+            border-radius: 6px;
         }
 
         .tag {
             display: inline-block;
             align-self: flex-start;
-            padding: 4px 10px;
+            padding: 6px 12px;
             font-size: 0.75rem;
-            font-weight: 600;
+            font-weight: 700;
             text-transform: uppercase;
-            border-radius: 8px;
-            background: #e2e8f0;
-            color: #475569;
+            letter-spacing: 0.5px;
+            border-radius: 10px;
+            background: var(--slate-200);
+            color: var(--slate-700);
+            transition: var(--transition);
         }
 
-        /* Hover dinamici */
-        .area-attenzione .card:hover { border-color: #fca5a5; }
+        /* Hover Dinamici Premium basati sull'area */
+        .area-attenzione .card:hover { border-color: rgba(239, 68, 68, 0.4); }
         .area-attenzione .card:hover .tag { background: #fee2e2; color: #ef4444; }
-        .area-memoria .card:hover { border-color: #93c5fd; }
+        
+        .area-memoria .card:hover { border-color: rgba(59, 130, 246, 0.4); }
         .area-memoria .card:hover .tag { background: #dbeafe; color: #3b82f6; }
-        .area-funzioni .card:hover { border-color: #6ee7b7; }
+        
+        .area-funzioni .card:hover { border-color: rgba(16, 185, 129, 0.4); }
         .area-funzioni .card:hover .tag { background: #d1fae5; color: #10b981; }
-        .area-linguaggio .card:hover { border-color: #fde047; }
+        
+        .area-linguaggio .card:hover { border-color: rgba(245, 158, 11, 0.4); }
         .area-linguaggio .card:hover .tag { background: #fef3c7; color: #d97706; }
-        .area-visuo .card:hover { border-color: #c4b5fd; }
+        
+        .area-visuo .card:hover { border-color: rgba(139, 92, 246, 0.4); }
         .area-visuo .card:hover .tag { background: #ede9fe; color: #8b5cf6; }
-        .area-orientamento .card:hover { border-color: #67e8f9; }
+        
+        .area-orientamento .card:hover { border-color: rgba(6, 182, 212, 0.4); }
         .area-orientamento .card:hover .tag { background: #ecfeff; color: #0891b2; }
     </style>
 </head>
@@ -367,7 +487,7 @@
 
     <header>
         <h1>Hub di Stimolazione Cognitiva</h1>
-        <p>Piattaforma clinica per la riabilitazione con database Realtime Firebase.</p>
+        <p>Piattaforma clinica d'avanguardia per la riabilitazione neuropsicologica.</p>
     </header>
 
     <div class="container">
@@ -379,93 +499,93 @@
                 <i id="panel-chevron" class="fa-solid fa-chevron-up"></i>
             </div>
             
-            <div id="panel-content">
-                <!-- Banner Stato Sessione Attiva -->
-                <div id="active-status-bar">
-                    <div>
-                        <i class="fa-solid fa-circle-notch fa-spin"></i> 
-                        <span id="session-status-text">C'è una sessione attiva...</span>
+            <!-- Contenitore Animato -->
+            <div id="panel-content-wrapper" class="panel-content-wrapper">
+                <div id="panel-content">
+                    <!-- Banner Stato Sessione Attiva -->
+                    <div id="active-status-bar">
+                        <div>
+                            <i class="fa-solid fa-circle-notch fa-spin" style="margin-right: 8px;"></i> 
+                            <span id="session-status-text">Monitoraggio sessione attiva...</span>
+                        </div>
+                        <button class="btn btn-danger btn-sm" onclick="stopCurrentActiveSession()">Termina Sessione</button>
                     </div>
-                    <button class="btn btn-danger" onclick="stopCurrentActiveSession()">Termina Sessione</button>
-                </div>
 
-                <!-- Sezione Creazione/Gestione Paziente -->
-                <div class="clinical-box">
-                    <h3><i class="fa-solid fa-user-gear"></i> Registrazione e Anagrafica</h3>
-                    <div class="input-group">
-                        <input type="text" id="new-patient-name" placeholder="Cognome Nome (es. Rossi Mario)">
-                        <button class="btn" onclick="addPatient()">Registra</button>
-                    </div>
-                    
-                    <!-- Tabella per Modifica ed Eliminazione Rapida -->
-                    <div class="patient-mgmt-container">
-                        <table class="mgmt-table">
-                            <thead>
-                                <tr>
-                                    <th>Nome Paziente</th>
-                                    <th style="width: 120px; text-align: center;">Azioni</th>
-                                </tr>
-                            </thead>
-                            <tbody id="patient-mgmt-list">
-                                <!-- Popolato dinamicamente da Firebase -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- Sezione Avvio Sessione -->
-                <div class="clinical-box">
-                    <h3><i class="fa-solid fa-play"></i> Seleziona Paziente e Gestisci Attività</h3>
-                    <div class="input-group">
-                        <select id="patient-select" onchange="loadPatientHistory()" style="width: 100%;">
-                            <option value="">-- Seleziona Paziente --</option>
-                        </select>
-                    </div>
-                    
-                    <div style="display: flex; gap: 10px; margin-top: 10px;">
-                        <button class="btn btn-success" style="flex: 1;" onclick="startSession('pianificata')">
-                            <i class="fa-solid fa-layer-group"></i> Avvia Pianificata
-                        </button>
-                        <button class="btn btn-warning" style="flex: 1;" onclick="startSession('libera')">
-                            <i class="fa-solid fa-unlock-keyhole"></i> Sessione Libera
-                        </button>
-                    </div>
-                    
-                    <div id="queue-list">Nessun esercizio selezionato. Seleziona le caselle sulle card degli esercizi sotto per la sessione pianificata.</div>
-                </div>
-
-                <!-- DOSSIER CLINICO: Grafico Multicolore e Storico Dettagliato -->
-                <div id="patient-report-section">
-                    <h3 style="color: #1e3a8a; border-bottom: 2px solid #3b82f6; padding-bottom: 8px;">
-                        <i class="fa-solid fa-chart-line"></i> Dossier Clinico: <span id="report-patient-name">Seleziona un paziente</span>
-                    </h3>
-                    
-                    <div class="report-grid">
-                        <!-- Grafico Multicolore ad andamento per singolo Esercizio -->
-                        <div class="chart-container">
-                            <canvas id="performanceChart"></canvas>
+                    <!-- Sezione Creazione/Gestione Paziente -->
+                    <div class="clinical-box">
+                        <h3><i class="fa-solid fa-user-gear" style="color: var(--primary-light);"></i> Registrazione e Anagrafica</h3>
+                        <div class="input-group">
+                            <input type="text" id="new-patient-name" placeholder="Cognome Nome (es. Rossi Mario)">
+                            <button class="btn" onclick="addPatient()"><i class="fa-solid fa-plus"></i> Registra</button>
                         </div>
                         
-                        <!-- Lista Dettagliata Risultati Svolti -->
-                        <div class="table-container">
-                            <table class="report-table" id="history-table">
+                        <div class="patient-mgmt-container">
+                            <table class="mgmt-table">
                                 <thead>
                                     <tr>
-                                        <th>Data/Ora</th>
-                                        <th>Esercizio</th>
-                                        <th>Risultato</th>
+                                        <th>Nome Paziente</th>
+                                        <th style="width: 120px; text-align: center;">Azioni</th>
                                     </tr>
                                 </thead>
-                                <tbody id="history-table-body">
-                                    <tr>
-                                        <td colspan="3" style="text-align: center; color: #94a3b8; padding: 20px;">Seleziona un paziente per caricare il dossier.</td>
-                                    </tr>
+                                <tbody id="patient-mgmt-list">
+                                    <!-- Popolato dinamicamente -->
                                 </tbody>
                             </table>
                         </div>
                     </div>
-                </div>
 
+                    <!-- Sezione Avvio Sessione -->
+                    <div class="clinical-box">
+                        <h3><i class="fa-solid fa-play" style="color: var(--success);"></i> Configurazione Attività</h3>
+                        <div class="input-group">
+                            <select id="patient-select" onchange="loadPatientHistory()" style="width: 100%;">
+                                <option value="">-- Seleziona Paziente --</option>
+                            </select>
+                        </div>
+                        
+                        <div style="display: flex; gap: 14px; margin-top: 10px;">
+                            <button class="btn btn-success" style="flex: 1;" onclick="startSession('pianificata')">
+                                <i class="fa-solid fa-layer-group"></i> Avvia Pianificata
+                            </button>
+                            <button class="btn btn-warning" style="flex: 1;" onclick="startSession('libera')">
+                                <i class="fa-solid fa-unlock-keyhole"></i> Sessione Libera
+                            </button>
+                        </div>
+                        
+                        <div id="queue-list">Nessun esercizio in coda. Spunta i quadratini sulle card per creare una pianificazione automatica.</div>
+                    </div>
+
+                    <!-- DOSSIER CLINICO: Grafico e Storico -->
+                    <div id="patient-report-section">
+                        <h3 style="color: var(--primary); border-bottom: 2px solid var(--primary-light); padding-bottom: 10px; margin-bottom: 10px;">
+                            <i class="fa-solid fa-chart-line"></i> Dossier Clinico: <span id="report-patient-name">Seleziona un paziente</span>
+                        </h3>
+                        
+                        <div class="report-grid">
+                            <div class="chart-container">
+                                <canvas id="performanceChart"></canvas>
+                            </div>
+                            
+                            <div class="table-container">
+                                <table class="report-table" id="history-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Data/Ora</th>
+                                            <th>Esercizio</th>
+                                            <th>Risultato</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="history-table-body">
+                                        <tr>
+                                            <td colspan="3" style="text-align: center; color: #94a3b8; padding: 30px;">Seleziona un paziente per visualizzare la telemetria riabilitativa.</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
             </div>
         </div>
 
@@ -835,7 +955,6 @@
         let activeSessionState = null;
         let performanceChartInstance = null;
 
-        // Monitora in tempo reale la sessione attiva
         const activeSessionRef = ref(db, 'sessione_attiva');
         onValue(activeSessionRef, (snapshot) => {
             const statusBar = document.getElementById('active-status-bar');
@@ -855,7 +974,6 @@
             }
         });
 
-        // 1. REGISTRA NUOVO PAZIENTE
         window.addPatient = function() {
             const nameInput = document.getElementById('new-patient-name');
             const patientName = nameInput.value.trim();
@@ -879,7 +997,6 @@
             });
         }
 
-        // 2. MODIFICA PAZIENTE
         window.editPatient = function(id, currentName) {
             const newName = prompt("Modifica il nome del paziente:", currentName);
             if (newName && newName.trim() !== "" && newName.trim() !== currentName) {
@@ -890,7 +1007,6 @@
             }
         }
 
-        // 3. ELIMINA PAZIENTE E RELATIVO STORICO
         window.deletePatient = function(id, name) {
             if (confirm(`Sei sicuro di voler eliminare definitivamente ${name}? Questa azione eliminerà anche tutto il suo storico clinico.`)) {
                 const patientRef = ref(db, `pazienti/${id}`);
@@ -910,12 +1026,10 @@
             }
         }
 
-        // 4. SYNC E AGGIORNAMENTO LISTE PAZIENTI
         const patientsRef = ref(db, 'pazienti');
         onValue(patientsRef, (snapshot) => {
             const select = document.getElementById('patient-select');
             const mgmtList = document.getElementById('patient-mgmt-list');
-            
             const currentSelected = select.value;
 
             select.innerHTML = '<option value="">-- Seleziona Paziente --</option>';
@@ -963,7 +1077,6 @@
             return exerciseColors[exerciseTitle];
         }
 
-        // 5. CARICA STORICO COMPLETO E GRAFICO AVANZATO (PARSER ULTRA-RESILIENTE)
         window.loadPatientHistory = async function() {
             const select = document.getElementById('patient-select');
             const patientId = select.value;
@@ -986,7 +1099,6 @@
 
             if (snapshot.exists()) {
                 const sessioni = snapshot.val();
-                
                 const sessioniOrdinate = Object.keys(sessioni).map(key => ({
                     id: key,
                     ...sessioni[key]
@@ -1006,14 +1118,11 @@
                             if (!ex) return;
 
                             const row = document.createElement('tr');
-                            
-                            // ESTRAZIONE INTELLIGENTE: Cerca i dati sia a livello radice sia nel sotto-oggetto (.risultati o .risultato)
                             const r = ex.risultati || ex.risultato || ex;
                             
                             let numericScore = null;
                             let visualResult = "Svolto";
 
-                            // 1. Controllo Accuratezza Percentuale Esplicita
                             if (r.percentualeAccuratezza !== undefined && r.percentualeAccuratezza !== null) {
                                 numericScore = Math.round(Number(r.percentualeAccuratezza));
                                 visualResult = `Accuratezza: ${numericScore}%`;
@@ -1022,17 +1131,14 @@
                                 numericScore = Math.round(Number(ex.percentualeAccuratezza));
                                 visualResult = `Accuratezza: ${numericScore}%`;
                             }
-                            // 2. Controllo accuratezza generica
                             else if (r.accuratezza !== undefined && r.accuratezza !== null) {
                                 numericScore = Math.round(Number(r.accuratezza));
                                 visualResult = `Accuratezza: ${numericScore}%`;
                             }
-                            // 3. Controllo Risposte Corrette su Totali
                             else if (r.risposteCorrette !== undefined && r.totaleDomande) {
                                 numericScore = Math.round((Number(r.risposteCorrette) / Number(r.totaleDomande)) * 100);
                                 visualResult = `${r.risposteCorrette}/${r.totaleDomande} corrette (${numericScore}%)`;
                             } 
-                            // 4. Controllo Punteggi / Score
                             else if (r.punteggio !== undefined && r.punteggio !== null) {
                                 const p = Number(r.punteggio);
                                 numericScore = p <= 10 ? Math.min(Math.round(p * 10), 100) : Math.min(p, 100);
@@ -1043,14 +1149,12 @@
                                 numericScore = s <= 10 ? Math.min(Math.round(s * 10), 100) : Math.min(s, 100);
                                 visualResult = `Punteggio: ${r.score}`;
                             }
-                            // 5. Solo tempo impiegato
                             else if (r.tempoMedioS !== undefined || r.tempo !== undefined) {
                                 const t = Number(r.tempoMedioS || r.tempo);
                                 numericScore = Math.max(10, Math.round(100 - (t * 2))); 
                                 visualResult = `Tempo: ${t}s`;
                             }
 
-                            // Se non trova alcuna metrica numerica coerente, mette 0 invece del fallback fisso a 100
                             if (numericScore === null) {
                                 numericScore = 0; 
                                 visualResult = "Dato N/D";
@@ -1104,7 +1208,6 @@
             }
         }
 
-        // FUNZIONE RENDER CHART
         function renderChart(labels, datasets) {
             const ctx = document.getElementById('performanceChart').getContext('2d');
             
@@ -1136,10 +1239,7 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    interaction: {
-                        mode: 'nearest',
-                        intersect: false,
-                    },
+                    interaction: { mode: 'nearest', intersect: false },
                     plugins: {
                         legend: {
                             display: true,
@@ -1148,11 +1248,7 @@
                                 usePointStyle: true,
                                 pointStyle: 'circle',
                                 padding: 20,
-                                font: {
-                                    family: "'Segoe UI', system-ui, sans-serif",
-                                    size: 12,
-                                    weight: '600'
-                                },
+                                font: { family: "'Segoe UI', sans-serif", size: 12, weight: '600' },
                                 color: '#475569'
                             }
                         },
@@ -1160,23 +1256,8 @@
                             backgroundColor: '#1e293b',
                             titleColor: '#ffffff',
                             bodyColor: '#e2e8f0',
-                            titleFont: {
-                                family: "'Segoe UI', sans-serif",
-                                size: 13,
-                                weight: 'bold'
-                            },
-                            bodyFont: {
-                                family: "'Segoe UI', sans-serif",
-                                size: 12
-                            },
                             padding: 12,
                             cornerRadius: 10,
-                            displayColors: true,
-                            boxWidth: 8,
-                            boxHeight: 8,
-                            boxPadding: 6,
-                            borderColor: '#334155',
-                            borderWidth: 1,
                             callbacks: {
                                 label: function(context) {
                                     return `  ${context.dataset.label}: ${context.raw.y}% accuratezza`;
@@ -1186,58 +1267,26 @@
                     },
                     scales: {
                         y: {
-                            min: 0,
-                            max: 100,
-                            border: {
-                                display: false
-                            },
+                            min: 0, max: 100,
+                            border: { display: false },
                             ticks: {
                                 callback: function(value) { return value + "%"; },
-                                font: {
-                                    family: "'Segoe UI', sans-serif",
-                                    size: 11,
-                                    weight: '500'
-                                },
+                                font: { family: "'Segoe UI', sans-serif", size: 11, weight: '500' },
                                 color: '#64748b',
                                 stepSize: 20
                             },
-                            title: {
-                                display: true,
-                                text: 'Efficacia Cognitiva',
-                                color: '#475569',
-                                font: {
-                                    family: "'Segoe UI', sans-serif",
-                                    size: 12,
-                                    weight: 'bold'
-                                }
-                            },
-                            grid: {
-                                color: '#f1f5f9',
-                                tickBorderDash: [5, 5],
-                                drawTicks: false
-                            }
+                            grid: { color: '#f1f5f9', drawTicks: false }
                         },
                         x: {
-                            border: {
-                                display: false
-                            },
-                            ticks: {
-                                font: {
-                                    family: "'Segoe UI', sans-serif",
-                                    size: 11
-                                },
-                                color: '#64748b'
-                            },
-                            grid: {
-                                display: false
-                            }
+                            border: { display: false },
+                            ticks: { font: { family: "'Segoe UI', sans-serif", size: 11 }, color: '#64748b' },
+                            grid: { display: false }
                         }
                     }
                 }
             });
         }
 
-        // Avvia Sessione (Pianificata o Libera)
         window.startSession = function(tipo) {
             const patientSelect = document.getElementById('patient-select');
             const patientId = patientSelect.value;
@@ -1256,7 +1305,7 @@
                     stato: 'in_corso',
                     dataAvvio: new Date().toISOString()
                 }).then(() => {
-                    alert(`Sessione Libera attivata per ${patientName}. Ora puoi cliccare liberamente su qualsiasi esercizio qui sotto!`);
+                    alert(`Sessione Libera attivata per ${patientName}.`);
                     document.getElementById('patient-select').value = "";
                 });
             } else {
@@ -1305,9 +1354,7 @@
             if (event.target.classList.contains('select-exercise-checkbox')) {
                 return;
             }
-
             const file = cardElement.getAttribute('data-file');
-            
             if (activeSessionState) {
                 window.location.href = `esercizio.html?sessione=true&file=${encodeURIComponent(file)}`;
             } else {
@@ -1318,21 +1365,20 @@
 
     <script>
         function togglePanel() {
-            const content = document.getElementById('panel-content');
+            const wrapper = document.getElementById('panel-content-wrapper');
             const chevron = document.getElementById('panel-chevron');
-            if (content.style.display === "none") {
-                content.style.display = "grid";
-                chevron.className = "fa-solid fa-chevron-up";
+            
+            if (wrapper.classList.contains('collapsed')) {
+                wrapper.classList.remove('collapsed');
+                chevron.style.transform = "rotate(0deg)";
             } else {
-                content.style.display = "none";
-                chevron.className = "fa-solid fa-chevron-down";
+                wrapper.classList.add('collapsed');
+                chevron.style.transform = "rotate(180deg)";
             }
         }
 
         function updateQueue(event) {
-            if (event) {
-                event.stopPropagation();
-            }
+            if (event) event.stopPropagation();
 
             const selected = [];
             const cards = document.querySelectorAll('.card');
@@ -1346,8 +1392,12 @@
             const indicator = document.getElementById('queue-list');
             if (selected.length > 0) {
                 indicator.innerHTML = "<strong>Sequenza pianificata:</strong> " + selected.join(" ➔ ");
+                indicator.style.borderStyle = "solid";
+                indicator.style.borderColor = "var(--primary-light)";
             } else {
-                indicator.textContent = "Nessun esercizio selezionato. Seleziona le caselle sulle card degli esercizi sotto per la sessione pianificata.";
+                indicator.textContent = "Nessun esercizio in coda. Spunta i quadratini sulle card per creare una pianificazione automatica.";
+                indicator.style.borderStyle = "dashed";
+                indicator.style.borderColor = "var(--slate-200)";
             }
         }
     </script>
