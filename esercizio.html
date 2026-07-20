@@ -11,6 +11,18 @@
         
         #top-bar { height: 60px; background-color: #ffffff; color: #1e293b; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; border-bottom: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); z-index: 100;[cite: 4] }
         
+        /* Contenitori per bilanciare l'header a 3 sezioni (Sinistra, Centro, Destra) */
+        .top-bar-left, .top-bar-right { flex: 1; display: flex; align-items: center; }
+        .top-bar-right { justify-content: flex-end; gap: 10px; }
+        .top-bar-center { flex: 1; display: flex; justify-content: center; align-items: center; }
+        
+        /* Stile per il logo centrale */
+        .logo-container img {
+            max-height: 40px;
+            width: auto;
+            object-fit: contain;
+        }
+
         .btn-action { background-color: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; padding: 10px 16px; border-radius: 8px; cursor: pointer; text-decoration: none; font-size: 0.9rem; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s;[cite: 4] }
         .btn-action:hover { background-color: #e2e8f0; color: #0f172a;[cite: 4] }
         
@@ -34,13 +46,28 @@
 <body>
 
     <div id="top-bar">
-        <button class="btn-action btn-danger" id="back-home-btn" onclick="exitSession()">
-            <i class="fa-solid fa-arrow-left"></i> Termina Sessione
-        </button>
-        <div id="exercise-title">Caricamento in corso...</div>
-        <button class="btn-action btn-next" id="next-btn" style="display: none;" onclick="nextStep()">
-            Avanti (Prossimo Esercizio) <i class="fa-solid fa-arrow-right"></i>
-        </button>
+        <!-- Sezione Sinistra: Pulsante Termina/Indietro -->
+        <div class="top-bar-left">
+            <button class="btn-action btn-danger" id="back-home-btn" onclick="exitSession()">
+                <i class="fa-solid fa-arrow-left"></i> Termina Sessione
+            </button>
+        </div>
+
+        <!-- Sezione Centrale: Logo -->
+        <div class="top-bar-center">
+            <div class="logo-container">
+                <!-- Sostituisci 'logo.png' con il percorso reale del tuo logo -->
+                <img src="logo.png" alt="Logo Hub Cognitivo">
+            </div>
+        </div>
+
+        <!-- Sezione Destra: Titolo esercizio e pulsante Avanti -->
+        <div class="top-bar-right">
+            <div id="exercise-title">Caricamento in corso...</div>
+            <button class="btn-action btn-next" id="next-btn" style="display: none;" onclick="nextStep()">
+                Avanti <i class="fa-solid fa-arrow-right"></i>
+            </button>
+        </div>
     </div>
 
     <iframe id="exercise-iframe" src=""></iframe>
