@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Palestra Mentale | Esercizi Cognitive</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-slate: #f8fafc;
+            --text-dark: #0f172a;
+            --text-muted: #64748b;
+            --primary: #1e3a8a;
+            --primary-light: #3b82f6;
+            --success: #10b981;
+            --accent: #8b5cf6;
+            --card-bg: #ffffff;
+            --border: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
+            --transition: all 0.3s ease;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
+        body { background-color: var(--bg-slate); color: var(--text-dark); min-height: 100vh; padding-bottom: 60px; }
+
+        /* --- NAVBAR SUPERIORE --- */
+        .navbar {
+            background: white;
+            border-bottom: 1px solid var(--border);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0; z-index: 50;
+        }
+        .nav-logo { font-weight: 800; font-size: 1.3rem; color: var(--primary); display: flex; align-items: center; gap: 10px; }
+        .user-badge { background: #d1fae5; color: #065f46; padding: 6px 16px; border-radius: 9999px; font-weight: 600; font-size: 0.9rem; }
+        .btn-exit { background: var(--border); color: var(--text-dark); border: none; padding: 8px 16px; border-radius: 10px; cursor: pointer; font-weight: 600; transition: var(--transition); }
+        .btn-exit:hover { background: #cbd5e1; }
+
+        .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
+
+        /* --- CONTATORI RICHIESTI (KPI DASHBOARD) --- */
+        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-bottom: 40px; }
+        .kpi-card { background: white; padding: 24px; border-radius: 20px; box-shadow: var(--shadow); border: 1px solid var(--border); display: flex; align-items: center; gap: 20px; }
+        .kpi-icon { width: 54px; height: 54px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
+        .kpi-card.users .kpi-icon { background: #e0f2fe; color: #0369a1; }
+        .kpi-card.done .kpi-icon { background: #d1fae5; color: #047857; }
+        .kpi-card.mode .kpi-icon { background: #f3e8ff; color: #6d28d9; }
+        .kpi-info h4 { font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+        .kpi-info p { font-size: 1.6rem; font-weight: 700; color: var(--text-dark); }
+
+        /* --- SEZIONE CLINICA (NASCONDIBILE) --- */
+        .clinical-panel { background: white; border: 1px solid var(--border); border-radius: 24px; padding: 30px; margin-bottom: 40px; box-shadow: var(--shadow); }
+        .clinical-panel h2 { margin-bottom: 15px; color: var(--primary); display: flex; align-items: center; gap: 10px; }
+        .clinical-placeholder { background: var(--bg-slate); border: 2px dashed var(--border); border-radius: 16px; padding: 40px; text-align: center; color: var(--text-muted); }
+
+        /* --- VETRINA ESERCIZI --- */
+        .section-title { font-size: 1.8rem; font-weight: 700; margin-bottom: 24px; color: var(--text-dark); display: flex; justify-content: space-between; align-items: center; }
+        .exercises-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px; }
+        .exercise-card { background: white; border: 1px solid var(--border); border-radius: 20px; overflow: hidden; box-shadow: var(--shadow); transition: var(--transition); display: flex; flex-direction: column; }
+        .exercise-card:hover { transform: translateY(-5px); box-shadow: 0 12px 20px -5px rgba(0,0,0,0.1); }
+        .exercise-banner { height: 140px; background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); padding: 20px; color: white; display: flex; align-items: flex-end; position: relative; }
+        .exercise-card.memoria .exercise-banner { background: linear-gradient(135deg, #8b5cf6 0%, #5b21b6 100%); }
+        .exercise-card.attenzione .exercise-banner { background: linear-gradient(135deg, #10b981 0%, #065f46 100%); }
+        .exercise-icon-floating { position: absolute; top: 20px; right: 20px; font-size: 2rem; opacity: 0.3; }
+        .exercise-banner h3 { font-size: 1.3rem; font-weight: 700; }
+        .exercise-body { padding: 20px; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; }
+        .exercise-body p { color: var(--text-muted); font-size: 0.95rem; line-height: 1.5; margin-bottom: 18px; }
+        .cognitive-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+        .tag { background: var(--bg-slate); color: var(--text-dark); font-size: 0.8rem; padding: 4px 10px; border-radius: 6px; font-weight: 600; border: 1px solid var(--border); }
+        .btn-start-ex { background: var(--primary); color: white; border: none; width: 100%; padding: 12px; border-radius: 12px; font-weight: 600; cursor: pointer; transition: var(--transition); display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-start-ex:hover { background: var(--primary-light); }
+
+        /* Bottoncino fine sessione per allenamento libero */
+        .finish-session-container { margin-top: 40px; text-align: center; display: none; }
+        .btn-finish-session { background: var(--success); color: white; border: none; padding: 16px 40px; font-size: 1.1rem; font-weight: 700; border-radius: 16px; cursor: pointer; box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.3); transition: var(--transition); }
+        .btn-finish-session:hover { background: #059669; transform: scale(1.02); }
+    </style>
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <div class="nav-logo">
+            <i class="fa-solid fa-seedling"></i> MindGym Hub
+        </div>
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <div id="user-display" class="user-badge">Ospite</div>
+            <button class="btn-exit" onclick="tornaAllaHome()"><i class="fa-solid fa-arrow-right-from-bracket"></i> Esci</button>
+        </div>
+    </nav>
+
+    <div class="container">
+        
+        <!-- DASHBOARD CON I NUOVI CONTATORI -->
+        <div class="kpi-grid">
+            <!-- Utenti Attivi (Sostituisce Target Accuratezza) -->
+            <div class="kpi-card users">
+                <div class="kpi-icon"><i class="fa-solid fa-users"></i></div>
+                <div class="kpi-info">
+                    <h4>Utenti Attivi</h4>
+                    <p id="kpi-utenti">142</p>
+                </div>
+            </div>
+            <!-- Esercizi Svolti (Sostituisce Sessione Consigliata) -->
+            <div class="kpi-card done">
+                <div class="kpi-icon"><i class="fa-solid fa-circle-check"></i></div>
+                <div class="kpi-info">
+                    <h4>Esercizi Eseguiti</h4>
+                    <p id="kpi-svolti">0</p>
+                </div>
+            </div>
+            <!-- Modalità Corrente -->
+            <div class="kpi-card mode">
+                <div class="kpi-icon"><i class="fa-solid fa-sliders"></i></div>
+                <div class="kpi-info">
+                    <h4>Ambiente Attivo</h4>
+                    <p id="kpi-modalita">-</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- AREA CLINICA (Visibile solo se modalità == 'clinical') -->
+        <div id="clinical-section" class="clinical-panel" style="display: none;">
+            <h2><i class="fa-solid fa-user-doctor"></i> Pannello di Controllo Clinico (La tua Home Attuale)</h2>
+            <p style="color: var(--text-muted); margin-bottom: 20px;">Qui risiedono le tue configurazioni Firebase, i grafici di tracciamento e la gestione dei pazienti.</p>
+            <div class="clinical-placeholder">
+                <i class="fa-solid fa-chart-line" style="font-size: 3rem; margin-bottom: 15px; color: var(--primary-light);"></i>
+                <p><strong>[Integrazione Codice Clinico Esistente]</strong></p>
+                <p style="font-size: 0.9rem; margin-top: 5px;">Qui si collegherà perfettamente il tuo vecchio script di gestione/tabelle medici.</p>
+            </div>
+        </div>
+
+        <!-- PALESTRA DEGLI ESERCIZI (Visibile a entrambi) -->
+        <div class="section-title">
+            <span><i class="fa-solid fa-cubes"></i> Palestra Cognitiva</span>
+        </div>
+
+        <div class="exercises-grid">
+            <!-- Esercizio 1: Memoria -->
+            <div class="exercise-card memoria">
+                <div class="exercise-banner">
+                    <i class="fa-solid fa-shapes exercise-icon-floating"></i>
+                    <h3>Tessere Visive</h3>
+                </div>
+                <div class="exercise-body">
+                    <p>Memorizza la posizione delle figure geometriche e ricomponi la griglia senza commettere errori.</p>
+                    <div class="cognitive-tags">
+                        <span class="tag">Memoria a Breve Termine</span>
+                        <span class="tag">Codifica Spaziale</span>
+                    </div>
+                    <button class="btn-start-ex" onclick="simulaEsercizio('Tessere Visive')">
+                        <i class="fa-solid fa-play"></i> Avvia Esercizio
+                    </button>
+                </div>
+            </div>
+
+            <!-- Esercizio 2: Attenzione -->
+            <div class="exercise-card attenzione">
+                <div class="exercise-banner">
+                    <i class="fa-solid fa-bullseye exercise-icon-floating"></i>
+                    <h3>Caccia all'Intruso</h3>
+                </div>
+                <div class="exercise-body">
+                    <p>Trova l'elemento estraneo nel minor tempo possibile all'interno di un insieme di simboli in movimento.</p>
+                    <div class="cognitive-tags">
+                        <span class="tag">Attenzione Selettiva</span>
+                        <span class="tag">Velocità di Elaborazione</span>
+                    </div>
+                    <button class="btn-start-ex" onclick="simulaEsercizio('Caccia all\'Intruso')">
+                        <i class="fa-solid fa-play"></i> Avvia Esercizio
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- TASTO FINE SESSIONE (Solo per Training Libero) -->
+        <div id="finish-session-area" class="finish-session-container">
+            <button class="btn-finish-session" onclick="concludiSessione()">
+                <i class="fa-solid fa-flag-checkered"></i> Concludi Sessione di Allenamento
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        // All'avvio della pagina, capiamo chi è entrato e adattiamo l'interfaccia
+        document.addEventListener("DOMContentLoaded", function() {
+            const modalita = localStorage.getItem('hub_mode');
+            const username = localStorage.getItem('hub_username');
+            
+            if (!modalita) {
+                // Se tenta di entrare senza passare dalla landing, lo rispedisce indietro
+                tornaAllaHome();
+                return;
+            }
+
+            if (modalita === 'free_training') {
+                // Impostazioni interfaccia UTENTE LIBERO
+                document.getElementById('user-display').innerText = `👤 Utente: ${username}`;
+                document.getElementById('kpi-modalita').innerText = "Training Libero";
+                document.getElementById('clinical-section').style.display = 'none'; // Nasconde la clinica
+                document.getElementById('finish-session-area').style.display = 'block'; // Mostra il tasto fine sessione
+                
+                aggiornaContatoreEserciziSvolti();
+            } else if (modalita === 'clinical') {
+                // Impostazioni interfaccia AREA CLINICA (Il tuo vecchio pannello)
+                document.getElementById('user-display').innerText = `🩺 Professionista`;
+                document.getElementById('kpi-modalita').innerText = "Area Clinica";
+                document.getElementById('clinical-section').style.display = 'block'; // Mostra il pannello clinico
+                document.getElementById('finish-session-area').style.display = 'none';
+                document.getElementById('kpi-svolti').innerText = "N/D (Clinica)";
+            }
+        });
+
+        function aggiornaContatoreEserciziSvolti() {
+            const cronologia = JSON.parse(localStorage.getItem('free_exercises_history')) || [];
+            document.getElementById('kpi-svolti').innerText = cronologia.length;
+        }
+
+        // Funzione per simulare l'esecuzione di un esercizio e registrarlo nella sessione attuale
+        function simulaEsercizio(nomeEsercizio) {
+            const modalita = localStorage.getItem('hub_mode');
+            
+            if (modalita === 'free_training') {
+                let cronologia = JSON.parse(localStorage.getItem('free_exercises_history')) || [];
+                cronologia.push({
+                    esercizio: nomeEsercizio,
+                    data: new Date().toISOString(),
+                    punteggio: Math.floor(Math.random() * 30) + 70 // Simula un punteggio da 70 a 100
+                });
+                localStorage.setItem('free_exercises_history', JSON.stringify(cronologia));
+                aggiornaContatoreEserciziSvolti();
+                
+                alert(`Hai completato l'esercizio "${nomeEsercizio}" con successo! La sessione è stata aggiornata.`);
+            } else {
+                alert(`Modalità Clinica: Esercizio "${nomeEsercizio}" avviato in modalità monitorata dal medico.`);
+            }
+        }
+
+        function concludiSessione() {
+            // Indirizza alla schermata finale dei risultati
+            window.location.href = 'riepilogo.html';
+        }
+
+        function tornaAllaHome() {
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>
