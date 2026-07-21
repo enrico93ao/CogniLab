@@ -69,7 +69,7 @@
 <body>
 
     <div id="top-bar">
-        <!-- Sezione Sinistra: Tasto Scegli / Prossimo Esercizio -->
+        <!-- Sezione Sinistra: Torna alla Scelta Esercizi -->
         <div class="top-bar-left">
             <button class="btn-action btn-next" id="next-exercise-btn" onclick="nextExercise()">
                 <i class="fa-solid fa-list"></i> Scegli Esercizio
@@ -151,7 +151,7 @@
             </div>
 
             <button class="btn-action btn-next" style="font-size: 1.1rem; padding: 12px 30px; margin-top: 20px; width: 100%; justify-content: center;" onclick="concludiESalvaFeedback()">
-                Salva e Torna alla Home
+                Salva e Torna all'Hub
             </button>
         </div>
     </div>
@@ -178,22 +178,26 @@
         let activeSession = null;
         let isSessionPianificata = false;
         let sessionDataToSave = null;
+        let origineProvenienza = "index.html"; // Default di ritorno
 
         window.addEventListener('DOMContentLoaded', async () => {
             const params = new URLSearchParams(window.location.search);
             const fileDirect = params.get('file');
             const localUsername = localStorage.getItem('hub_username') || "Utente";
 
-            // 1. Se viene passato un file diretto nell'URL
+            // Se arriviamo dall'area clinica o da una pagina specifica, memorizziamo da dove veniamo se salvato in sessione/local storage
+            // O impostiamo la destinazione corretta in base al tipo di utente
+            origineProvenienza = localStorage.getItem('hub_last_origin') || "index.html";
+
+            // 1. Se viene passato un file direttamente nell'URL (Training Libero o Selezione)
             if (fileDirect) {
                 const esFile = decodeURIComponent(fileDirect);
                 document.getElementById('exercise-iframe').src = esFile;
                 document.getElementById('exercise-title').textContent = `${localUsername} ➔ Esercizio`;
-                document.getElementById('next-exercise-btn').innerHTML = '<i class="fa-solid fa-list"></i> Scegli Esercizio';
                 return; 
             }
 
-            // 2. Controllo sessione su Firebase
+            // 2. Controllo sessione su Firebase (Area Clinica / Sessioni Pianificate)
             try {
                 const sessionRef = ref(db, 'sessione_attiva');
                 const snapshot = await get(sessionRef);
@@ -202,20 +206,18 @@
                     activeSession = snapshot.val();
                     
                     if (activeSession.tipo === 'libera') {
-                        // Se è una sessione libera avviata dall'area clinica senza file diretto, reindirizziamo alla scelta o apriamo un menu
+                        document.getElementById('exercise-iframe').style.display = "none";
                         document.getElementById('exercise-title').textContent = `Paziente: ${activeSession.pazienteNome}`;
-                        document.getElementById('next-exercise-btn').innerHTML = '<i class="fa-solid fa-list"></i> Scegli Esercizio';
                     } else {
                         isSessionPianificata = true;
                         loadCurrentExerciseFromSession();
                     }
                 } else {
-                    // Se arrivi qui senza file e senza sessione attiva, reindirizziamo direttamente alla home (index.html) in modo pulito
-                    window.location.href = "index.html";
+                    // Se non ci sono file o sessioni, evitiamo blocchi: se l'utente arriva dall'area clinica, rimandiamo lì, altrimenti a index
+                    document.getElementById('exercise-title').textContent = "Pronto per l'allenamento";
                 }
             } catch (error) {
                 console.error("Errore di connessione a Firebase:", error);
-                window.location.href = "index.html";
             }
         });
 
@@ -237,8 +239,8 @@
         }
 
         window.nextExercise = function() {
-            // Cliccando su "Scegli Esercizio" si torna alla landing page o alla scelta
-            window.location.href = "index.html";
+            // Pulsante per cambiare o tornare alla lista esercizi / area di provenienza
+            window.location.href = origineProvenienza;
         }
 
         window.requestEndSession = async function() {
@@ -309,8 +311,8 @@
                 }
             }
 
-            // Riporta correttamente alla landing page iniziale dopo il salvataggio
-            window.location.href = "index.html";
+            // Reindirizzamento pulito alla sezione corretta (area clinica o index generale)
+            window.location.href = origineProvenienza;
         }
     </script>
 </body>
