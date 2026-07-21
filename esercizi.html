@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Esercizi | Hub di Stimolazione Cognitiva</title>
+    <!-- FontAwesome per le icone -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js per i grafici clinici -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
@@ -24,25 +26,25 @@
             --transition: all 0.3s ease;
         }
 
-        * { 
-            box-sizing: border-box; 
-            margin: 0; 
-            padding: 0; 
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; 
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
         }
 
-        body { 
-            background: #f8fafc; 
-            color: var(--slate-900); 
-            min-height: 100vh; 
-            padding-bottom: 80px; 
+        body {
+            background: #f8fafc;
+            color: var(--slate-900);
+            min-height: 100vh;
+            padding-bottom: 80px;
             position: relative;
         }
 
-        .container { 
-            max-width: 1400px; 
-            margin: 0 auto; 
-            padding: 0 24px; 
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 24px;
             position: relative;
             z-index: 10;
         }
@@ -56,41 +58,66 @@
             justify-content: space-between;
             align-items: center;
             position: sticky;
-            top: 0; 
+            top: 0;
             z-index: 100;
             box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
-        
+
         .nav-left {
             display: flex;
             align-items: center;
             gap: 20px;
         }
 
-        .nav-logo { 
-            font-weight: 800; 
-            font-size: 1.5rem; 
-            color: var(--slate-900); 
-            display: flex; 
-            align-items: center; 
-            gap: 14px; 
-            letter-spacing: -1px; 
+        .nav-logo {
+            font-weight: 800;
+            font-size: 1.5rem;
+            color: var(--slate-900);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            letter-spacing: -1px;
         }
-        .nav-logo img { 
-            height: 45px; 
-            width: auto; 
-            object-fit: contain; 
+
+        .nav-logo img {
+            height: 45px;
+            width: auto;
+            object-fit: contain;
             transition: var(--transition);
         }
+
         .nav-logo img:hover {
             transform: scale(1.05);
         }
-        
-        .user-badge { background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46; padding: 8px 20px; border-radius: 9999px; font-weight: 600; font-size: 0.9rem; }
-        
-        /* BOTTONI NAVBAR */
-        .btn-exit { background: #f1f5f9; border: 1px solid #cbd5e1; color: var(--slate-800); padding: 8px 20px; border-radius: 14px; cursor: pointer; font-weight: 600; transition: var(--transition); display: flex; align-items: center; gap: 8px; }
-        .btn-exit:hover { background: #e2e8f0; color: var(--slate-900); }
+
+        .user-badge {
+            background: #ecfdf5;
+            border: 1px solid #a7f3d0;
+            color: #065f46;
+            padding: 8px 20px;
+            border-radius: 9999px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .btn-exit {
+            background: #f1f5f9;
+            border: 1px solid #cbd5e1;
+            color: var(--slate-800);
+            padding: 8px 20px;
+            border-radius: 14px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-exit:hover {
+            background: #e2e8f0;
+            color: var(--slate-900);
+        }
 
         .btn-termina-sessione-top {
             background: var(--danger);
@@ -107,13 +134,14 @@
             transition: var(--transition);
             box-shadow: 0 2px 6px rgba(239, 68, 68, 0.2);
         }
+
         .btn-termina-sessione-top:hover {
             background: var(--danger-hover);
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
         }
 
-        /* --- MODALE QUESTIONARIO AUTOVALUTAZIONE --- */
+        /* --- MODALE QUESTIONARIO AGGIORNATO (STELLE + DOMANDE) --- */
         .survey-modal-overlay {
             position: fixed;
             top: 0;
@@ -127,81 +155,147 @@
             align-items: center;
             z-index: 1000;
         }
+
         .survey-modal {
             background: #ffffff;
             width: 100%;
-            max-width: 550px;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
             border-radius: 28px;
             padding: 35px;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
             border: 1px solid #e2e8f0;
         }
+
         .survey-modal h3 {
             font-size: 1.35rem;
             color: var(--slate-900);
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             font-weight: 800;
             display: flex;
             align-items: center;
             gap: 12px;
         }
-        .survey-modal h3 i { color: var(--primary-light); }
+
+        .survey-modal h3 i {
+            color: var(--primary-light);
+        }
+
         .survey-modal p {
             color: var(--slate-400);
             font-size: 0.95rem;
-            margin-bottom: 25px;
-        }
-        .survey-group {
             margin-bottom: 20px;
         }
+
+        .survey-group {
+            margin-bottom: 22px;
+        }
+
         .survey-group label {
             display: block;
             font-weight: 700;
-            font-size: 0.9rem;
+            font-size: 0.88rem;
             color: var(--slate-800);
             margin-bottom: 8px;
         }
+        
         .survey-options {
             display: flex;
-            gap: 10px;
+            gap: 8px;
             justify-content: space-between;
         }
+
         .survey-btn-option {
             flex: 1;
-            padding: 12px 8px;
+            padding: 10px 6px;
             background: #f8fafc;
             border: 1px solid #cbd5e1;
             border-radius: 12px;
             font-weight: 600;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             color: var(--slate-700);
             cursor: pointer;
             transition: var(--transition);
             text-align: center;
         }
+
         .survey-btn-option:hover, .survey-btn-option.selected {
             background: #eff6ff;
             border-color: var(--primary-light);
             color: var(--primary-light);
         }
 
+        .star-rating {
+            display: flex;
+            gap: 10px;
+            font-size: 1.5rem;
+            color: #cbd5e1;
+            cursor: pointer;
+            justify-content: flex-start;
+        }
+
+        .star-rating i {
+            transition: color 0.2s ease;
+        }
+
+        .star-rating i.selected, .star-rating i:hover, .star-rating i:hover ~ i {
+            color: #f59e0b;
+        }
+
         /* --- CONTATORI DASHBOARD (KPI) --- */
-        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 24px; margin: 40px 0; }
-        .kpi-card { 
-            background: #ffffff; 
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 24px;
+            margin: 40px 0;
+        }
+
+        .kpi-card {
+            background: #ffffff;
             border: 1px solid #e2e8f0;
-            padding: 24px; border-radius: 24px; 
-            display: flex; align-items: center; gap: 20px; 
+            padding: 24px;
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
             box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);
             transition: var(--transition);
         }
-        .kpi-card:hover { transform: translateY(-4px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05); }
-        .kpi-icon { width: 56px; height: 56px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
+
+        .kpi-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05);
+        }
+
+        .kpi-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
         .kpi-card.users .kpi-icon { background: #eff6ff; color: #2563eb; }
         .kpi-card.done .kpi-icon { background: #ecfdf5; color: #10b981; }
         .kpi-card.mode .kpi-icon { background: #f3e8ff; color: #9333ea; }
-        .kpi-info h4 { font-size: 0.75rem; color: var(--slate-400); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
-        .kpi-info p { font-size: 1.6rem; font-weight: 700; color: var(--slate-900); letter-spacing: -0.5px; }
+
+        .kpi-info h4 {
+            font-size: 0.75rem;
+            color: var(--slate-400);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .kpi-info p {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--slate-900);
+            letter-spacing: -0.5px;
+        }
 
         /* --- CLINICAL PANEL --- */
         #clinical-panel {
@@ -213,28 +307,134 @@
             margin-bottom: 50px;
             box-shadow: var(--shadow-premium);
         }
-        .panel-title { display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none; }
-        .panel-title h2 { font-size: 1.5rem; color: var(--slate-900); display: flex; align-items: center; gap: 14px; font-weight: 800; letter-spacing: -0.5px; }
-        .panel-title h2 i { color: var(--primary-light); }
-        #panel-chevron { transition: var(--transition); background: #f1f5f9; padding: 12px; border-radius: 50%; color: var(--slate-700); }
-        
-        .panel-content-wrapper { max-height: 2000px; opacity: 1; overflow: hidden; transition: max-height 0.6s ease, opacity 0.5s ease; }
-        .panel-content-wrapper.collapsed { max-height: 0; opacity: 0; pointer-events: none; }
-        
-        #panel-content { margin-top: 25px; display: grid; grid-template-columns: 1fr 1fr; gap: 30px; padding-top: 25px; border-top: 1px solid #e2e8f0; }
-        @media (max-width: 1024px) { #panel-content { grid-template-columns: 1fr; } }
-        
-        .clinical-box { background: #f8fafc; padding: 26px; border-radius: 20px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; justify-content: space-between; }
-        .clinical-box h3 { font-size: 1.15rem; margin-bottom: 20px; color: var(--slate-900); font-weight: 700; display: flex; align-items: center; gap: 10px; }
-        
-        .input-group { display: flex; gap: 12px; margin-bottom: 18px; }
-        input, select { padding: 14px 18px; border-radius: 14px; border: 1px solid #cbd5e1; font-size: 0.95rem; outline: none; background: white; transition: var(--transition); color: var(--slate-900); font-weight: 500; }
-        input[type="text"] { flex-grow: 1; }
-        input:focus, select:focus { border-color: var(--primary-light); box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1); }
 
-        /* BOTTONI */
-        .btn { background: var(--slate-900); color: white; border: none; padding: 14px 26px; border-radius: 14px; font-weight: 600; cursor: pointer; transition: var(--transition); font-size: 0.95rem; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
-        .btn:hover { background: var(--primary-light); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2); }
+        .panel-title {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .panel-title h2 {
+            font-size: 1.5rem;
+            color: var(--slate-900);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        .panel-title h2 i {
+            color: var(--primary-light);
+        }
+
+        #panel-chevron {
+            transition: var(--transition);
+            background: #f1f5f9;
+            padding: 12px;
+            border-radius: 50%;
+            color: var(--slate-700);
+        }
+        
+        .panel-content-wrapper {
+            max-height: 2000px;
+            opacity: 1;
+            overflow: hidden;
+            transition: max-height 0.6s ease, opacity 0.5s ease;
+        }
+
+        .panel-content-wrapper.collapsed {
+            max-height: 0;
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        #panel-content {
+            margin-top: 25px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            padding-top: 25px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        @media (max-width: 1024px) {
+            #panel-content {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .clinical-box {
+            background: #f8fafc;
+            padding: 26px;
+            border-radius: 20px;
+            border: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .clinical-box h3 {
+            font-size: 1.15rem;
+            margin-bottom: 20px;
+            color: var(--slate-900);
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .input-group {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        input, select {
+            padding: 14px 18px;
+            border-radius: 14px;
+            border: 1px solid #cbd5e1;
+            font-size: 0.95rem;
+            outline: none;
+            background: white;
+            transition: var(--transition);
+            color: var(--slate-900);
+            font-weight: 500;
+        }
+
+        input[type="text"] {
+            flex-grow: 1;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+        }
+
+        .btn {
+            background: var(--slate-900);
+            color: white;
+            border: none;
+            padding: 14px 26px;
+            border-radius: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 0.95rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            background: var(--primary-light);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+        }
+
         .btn-success { background: var(--success); }
         .btn-success:hover { background: var(--success-hover); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2); }
         .btn-warning { background: var(--warning); color: white; }
@@ -243,70 +443,233 @@
         .btn-danger:hover { background: var(--danger-hover); box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2); }
         .btn-sm { padding: 8px 14px; font-size: 0.85rem; border-radius: 10px; }
 
-        #active-status-bar { grid-column: 1 / -1; background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46; padding: 18px 24px; border-radius: 18px; display: none; justify-content: space-between; align-items: center; font-weight: 600; }
-        
-        #queue-list { margin-top: 14px; font-size: 0.9rem; color: var(--slate-700); background: white; padding: 14px; border-radius: 12px; border: 1px dashed #cbd5e1; font-weight: 500; }
-        
-        .patient-mgmt-container { margin-top: 15px; max-height: 200px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 14px; background: white; }
-        .mgmt-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
-        .mgmt-table th, .mgmt-table td { padding: 14px 18px; border-bottom: 1px solid #f1f5f9; text-align: left; color: var(--slate-900); }
-        .mgmt-table th { background: #f8fafc; position: sticky; top: 0; font-weight: 700; color: var(--slate-800); }
+        #active-status-bar {
+            grid-column: 1 / -1;
+            background: #ecfdf5;
+            border: 1px solid #a7f3d0;
+            color: #065f46;
+            padding: 18px 24px;
+            border-radius: 18px;
+            display: none;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+        }
 
-        /* DOSSIER CLINICO REPORT */
-        #patient-report-section { grid-column: 1 / -1; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 24px; padding: 28px; margin-top: 25px; display: none; }
-        .report-grid { display: grid; grid-template-columns: 1.25fr 0.75fr; gap: 30px; margin-top: 24px; }
-        @media (max-width: 900px) { .report-grid { grid-template-columns: 1fr; } }
+        #queue-list {
+            margin-top: 14px;
+            font-size: 0.9rem;
+            color: var(--slate-700);
+            background: white;
+            padding: 14px;
+            border-radius: 12px;
+            border: 1px dashed #cbd5e1;
+            font-weight: 500;
+        }
         
-        .chart-container { background: #ffffff; padding: 24px; border-radius: 20px; border: 1px solid #e2e8f0; min-height: 400px; height: 420px; position: relative; }
-        .table-container { max-height: 420px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 20px; background: white; }
-        .report-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem; }
-        .report-table th, .report-table td { padding: 14px 18px; border-bottom: 1px solid #f1f5f9; color: var(--slate-900); }
-        .report-table th { background: #f8fafc; font-weight: 700; position: sticky; top: 0; z-index: 20; }
-        .report-table tbody tr:hover { background: #f8fafc; }
-
-        /* --- VETRINA AREE COGNITIVE --- */
-        .area-sezione { 
-            margin-bottom: 45px; 
-            background: #ffffff; 
+        .patient-mgmt-container {
+            margin-top: 15px;
+            max-height: 200px;
+            overflow-y: auto;
             border: 1px solid #e2e8f0;
-            padding: 40px; border-radius: 32px; 
+            border-radius: 14px;
+            background: white;
+        }
+
+        .mgmt-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .mgmt-table th, .mgmt-table td {
+            padding: 14px 18px;
+            border-bottom: 1px solid #f1f5f9;
+            text-align: left;
+            color: var(--slate-900);
+        }
+
+        .mgmt-table th {
+            background: #f8fafc;
+            position: sticky;
+            top: 0;
+            font-weight: 700;
+            color: var(--slate-800);
+        }
+
+        #patient-report-section {
+            grid-column: 1 / -1;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 24px;
+            padding: 28px;
+            margin-top: 25px;
+            display: none;
+        }
+
+        .report-grid {
+            display: grid;
+            grid-template-columns: 1.25fr 0.75fr;
+            gap: 30px;
+            margin-top: 24px;
+        }
+
+        @media (max-width: 900px) {
+            .report-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .chart-container {
+            background: #ffffff;
+            padding: 24px;
+            border-radius: 20px;
+            border: 1px solid #e2e8f0;
+            min-height: 400px;
+            height: 420px;
+            position: relative;
+        }
+
+        .table-container {
+            max-height: 420px;
+            overflow-y: auto;
+            border: 1px solid #e2e8f0;
+            border-radius: 20px;
+            background: white;
+        }
+
+        .report-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.9rem;
+        }
+
+        .report-table th, .report-table td {
+            padding: 14px 18px;
+            border-bottom: 1px solid #f1f5f9;
+            color: var(--slate-900);
+        }
+
+        .report-table th {
+            background: #f8fafc;
+            font-weight: 700;
+            position: sticky;
+            top: 0;
+            z-index: 20;
+        }
+
+        /* AREE COGNITIVE */
+        .area-sezione {
+            margin-bottom: 45px;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            padding: 40px;
+            border-radius: 32px;
             box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);
-            transition: var(--transition); 
+            transition: var(--transition);
         }
-        .area-sezione:hover { border-color: #cbd5e1; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05); }
-        
-        .area-header { display: flex; align-items: center; gap: 18px; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid #f1f5f9; }
-        .area-header i { font-size: 1.6rem; padding: 14px; border-radius: 18px; }
-        .area-header h2 { font-size: 1.6rem; font-weight: 800; color: var(--slate-900); letter-spacing: -0.5px; }
 
-        .area-attenzione .area-header i { color: #dc2626; background: #fee2e2; border: 1px solid #fecaca; }
-        .area-memoria .area-header i { color: #2563eb; background: #eff6ff; border: 1px solid #bfdbfe; }
-        .area-funzioni .area-header i { color: #059669; background: #ecfdf5; border: 1px solid #a7f3d0; }
-        .area-linguaggio .area-header i { color: #d97706; background: #fef3c7; border: 1px solid #fde68a; }
-        .area-visuo .area-header i { color: #7c3aed; background: #f3e8ff; border: 1px solid #e9d5ff; }
-        .area-orientamento .area-header i { color: #0891b2; background: #ecfeff; border: 1px solid #a5f3fc; }
+        .area-header {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #f1f5f9;
+        }
 
-        .grid-esercizi { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 28px; }
-        .card { 
-            background: #ffffff; 
+        .area-header i {
+            font-size: 1.6rem;
+            padding: 14px;
+            border-radius: 18px;
+        }
+
+        .area-header h2 {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: var(--slate-900);
+            letter-spacing: -0.5px;
+        }
+
+        .area-attenzione .area-header i { color: #dc2626; background: #fee2e2; }
+        .area-memoria .area-header i { color: #2563eb; background: #eff6ff; }
+        .area-funzioni .area-header i { color: #059669; background: #ecfdf5; }
+        .area-linguaggio .area-header i { color: #d97706; background: #fef3c7; }
+        .area-visuo .area-header i { color: #7c3aed; background: #f3e8ff; }
+        .area-orientamento .area-header i { color: #0891b2; background: #ecfeff; }
+
+        .grid-esercizi {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 28px;
+        }
+
+        .card {
+            background: #ffffff;
             border: 1px solid #e2e8f0;
-            border-radius: 24px; padding: 28px; 
-            text-decoration: none; color: inherit; 
-            display: flex; flex-direction: column; justify-content: space-between; 
-            transition: var(--transition); position: relative; cursor: pointer; 
+            border-radius: 24px;
+            padding: 28px;
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: var(--transition);
+            position: relative;
+            cursor: pointer;
         }
-        .card:hover { 
-            transform: translateY(-6px); 
-            border-color: #94a3b8; 
+
+        .card:hover {
+            transform: translateY(-6px);
+            border-color: #94a3b8;
             box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.05);
         }
-        
-        .card-body { flex-grow: 1; margin-bottom: 24px; padding-right: 25px; }
-        .card h3 { font-size: 1.25rem; color: var(--slate-900); font-weight: 700; line-height: 1.3; margin-bottom: 12px; letter-spacing: -0.3px; }
-        .card p { font-size: 0.92rem; color: var(--slate-400); line-height: 1.6; font-weight: 400; }
-        
-        .select-exercise-checkbox { position: absolute; top: 28px; right: 28px; width: 22px; height: 22px; cursor: pointer; z-index: 5; accent-color: var(--primary-light); border-radius: 6px; }
-        .tag { display: inline-block; align-self: flex-start; padding: 6px 14px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; border-radius: 12px; background: #f1f5f9; color: var(--slate-700); transition: var(--transition); border: 1px solid #e2e8f0; }
+
+        .card-body {
+            flex-grow: 1;
+            margin-bottom: 24px;
+            padding-right: 25px;
+        }
+
+        .card h3 {
+            font-size: 1.25rem;
+            color: var(--slate-900);
+            font-weight: 700;
+            line-height: 1.3;
+            margin-bottom: 12px;
+        }
+
+        .card p {
+            font-size: 0.92rem;
+            color: var(--slate-400);
+            line-height: 1.6;
+        }
+
+        .select-exercise-checkbox {
+            position: absolute;
+            top: 28px;
+            right: 28px;
+            width: 22px;
+            height: 22px;
+            cursor: pointer;
+            z-index: 5;
+            accent-color: var(--primary-light);
+            border-radius: 6px;
+        }
+
+        .tag {
+            display: inline-block;
+            align-self: flex-start;
+            padding: 6px 14px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            border-radius: 12px;
+            background: #f1f5f9;
+            color: var(--slate-700);
+            border: 1px solid #e2e8f0;
+        }
     </style>
 </head>
 <body>
@@ -314,7 +677,6 @@
     <!-- NAVBAR -->
     <nav class="navbar">
         <div class="nav-left">
-            <!-- Pulsante Termina Sessione in alto a sinistra, rosso -->
             <button class="btn-termina-sessione-top" onclick="richiediTerminaSessione()">
                 <i class="fa-solid fa-flag-checkered"></i> Termina Sessione
             </button>
@@ -328,27 +690,65 @@
         </div>
     </nav>
 
-    <!-- MODALE QUESTIONARIO DI AUTOVALUTAZIONE -->
+    <!-- MODALE QUESTIONARIO DI AUTOVALUTAZIONE ESPANSO (CON STELLE) -->
     <div id="surveyModal" class="survey-modal-overlay">
         <div class="survey-modal">
             <h3><i class="fa-solid fa-clipboard-question"></i> Questionario Post-Stimolazione</h3>
-            <p>Prima di terminare, compila il questionario di autovalutazione sull'esperienza appena conclusa.</p>
+            <p>Valuta la sessione appena conclusa per il monitoraggio clinico e riabilitativo.</p>
             
+            <!-- Domanda 1: Sforzo (Pulsanti) -->
             <div class="survey-group">
                 <label>1. Come hai percepito lo sforzo richiesto da questa sessione?</label>
                 <div class="survey-options" data-question="sforzo">
                     <button type="button" class="survey-btn-option" onclick="selectSurveyOption(this, 'sforzo', 'Molto Facile')">Molto Facile</button>
                     <button type="button" class="survey-btn-option" onclick="selectSurveyOption(this, 'sforzo', 'Adeguato')">Adeguato</button>
-                    <button type="button" class="survey-btn-option" onclick="selectSurveyOption(this, 'sforzo', 'Molto Difficile')">Impegnativo</button>
+                    <button type="button" class="survey-btn-option" onclick="selectSurveyOption(this, 'sforzo', 'Impegnativo')">Impegnativo</button>
                 </div>
             </div>
 
-            <div class="survey-group" style="margin-bottom: 30px;">
+            <!-- Domanda 2: Concentrazione (Pulsanti) -->
+            <div class="survey-group">
                 <label>2. Come valuti il tuo livello di attenzione e concentrazione?</label>
                 <div class="survey-options" data-question="concentrazione">
                     <button type="button" class="survey-btn-option" onclick="selectSurveyOption(this, 'concentrazione', 'Basso')">Basso</button>
                     <button type="button" class="survey-btn-option" onclick="selectSurveyOption(this, 'concentrazione', 'Buono')">Buono</button>
                     <button type="button" class="survey-btn-option" onclick="selectSurveyOption(this, 'concentrazione', 'Ottimale')">Ottimale</button>
+                </div>
+            </div>
+
+            <!-- Domanda 3: Gradimento generale (Stelline 1-5) -->
+            <div class="survey-group">
+                <label>3. Quanto ti è piaciuta l'esperienza complessiva di questa sessione?</label>
+                <div class="star-rating" data-question="gradimento">
+                    <i class="fa-solid fa-star" onclick="selectStarRating(this, 'gradimento', 1)"></i>
+                    <i class="fa-solid fa-star" onclick="selectStarRating(this, 'gradimento', 2)"></i>
+                    <i class="fa-solid fa-star" onclick="selectStarRating(this, 'gradimento', 3)"></i>
+                    <i class="fa-solid fa-star" onclick="selectStarRating(this, 'gradimento', 4)"></i>
+                    <i class="fa-solid fa-star" onclick="selectStarRating(this, 'gradimento', 5)"></i>
+                </div>
+            </div>
+
+            <!-- Domanda 4: Chiarezza delle istruzioni (Stelline 1-5) -->
+            <div class="survey-group">
+                <label>4. Le istruzioni degli esercizi sono state chiare e comprensibili?</label>
+                <div class="star-rating" data-question="chiarezza">
+                    <i class="fa-solid fa-star" onclick="selectStarRating(this, 'chiarezza', 1)"></i>
+                    <i class="fa-solid fa-star" onclick="selectStarRating(this, 'chiarezza', 2)"></i>
+                    <i class="fa-solid fa-star" onclick="selectStarRating(this, 'chiarezza', 3)"></i>
+                    <i class="fa-solid fa-star" onclick="selectStarRating(this, 'chiarezza', 4)"></i>
+                    <i class="fa-solid fa-star" onclick="selectStarRating(this, 'chiarezza', 5)"></i>
+                </div>
+            </div>
+
+            <!-- Domanda 5: Soddisfazione energetica/fatica (Stelline 1-5) -->
+            <div class="survey-group" style="margin-bottom: 25px;">
+                <label>5. Come valuti la tua energia mentale residua al termine?</label>
+                <div class="star-rating" data-question="energia">
+                    <i class="fa-solid fa-star" onclick="selectStarRating(this, 'energia', 1)"></i>
+                    <i class="fa-solid fa-star" onclick="selectStarRating(this, 'energia', 2)"></i>
+                    <i class="fa-solid fa-star" onclick="selectStarRating(this, 'energia', 3)"></i>
+                    <i class="fa-solid fa-star" onclick="selectStarRating(this, 'energia', 4)"></i>
+                    <i class="fa-solid fa-star" onclick="selectStarRating(this, 'energia', 5)"></i>
                 </div>
             </div>
 
@@ -363,32 +763,23 @@
 
     <div class="container">
         
-        <!-- DASHBOARD DI SESSIONE (KPI) -->
+        <!-- KPI -->
         <div class="kpi-grid">
             <div class="kpi-card users">
                 <div class="kpi-icon"><i class="fa-solid fa-users"></i></div>
-                <div class="kpi-info">
-                    <h4>Utenti Collegati</h4>
-                    <p id="kpi-utenti">145</p>
-                </div>
+                <div class="kpi-info"><h4>Utenti Collegati</h4><p id="kpi-utenti">145</p></div>
             </div>
             <div class="kpi-card done">
                 <div class="kpi-icon"><i class="fa-solid fa-circle-check"></i></div>
-                <div class="kpi-info">
-                    <h4>Esercizi Completati</h4>
-                    <p id="kpi-svolti">0</p>
-                </div>
+                <div class="kpi-info"><h4>Esercizi Completati</h4><p id="kpi-svolti">0</p></div>
             </div>
             <div class="kpi-card mode">
                 <div class="kpi-icon"><i class="fa-solid fa-shield-halved"></i></div>
-                <div class="kpi-info">
-                    <h4>Modalità Hub</h4>
-                    <p id="kpi-modalita">-</p>
-                </div>
+                <div class="kpi-info"><h4>Modalità Hub</h4><p id="kpi-modalita">-</p></div>
             </div>
         </div>
 
-        <!-- --- AREA CLINICA DI GESTIONE --- -->
+        <!-- AREA CLINICA -->
         <div id="clinical-panel">
             <div class="panel-title" onclick="togglePanel()">
                 <h2><i class="fa-solid fa-user-doctor"></i> Area Clinica: Gestione Pazienti e Sessioni</h2>
@@ -402,7 +793,7 @@
                             <i class="fa-solid fa-circle-notch fa-spin" style="margin-right: 8px;"></i> 
                             <span id="session-status-text">Monitoraggio sessione attiva...</span>
                         </div>
-                        <button class="btn btn-danger btn-sm" onclick="stopCurrentActiveSession()">Termina Sessione Firebase</button>
+                        <button class="btn btn-danger btn-sm" onclick="richiediTerminaSessione()">Termina Sessione Firebase</button>
                     </div>
 
                     <div class="clinical-box">
@@ -411,15 +802,9 @@
                             <input type="text" id="new-patient-name" placeholder="Cognome Nome (es. Rossi Mario)">
                             <button class="btn" onclick="addPatient()"><i class="fa-solid fa-plus"></i> Registra</button>
                         </div>
-                        
                         <div class="patient-mgmt-container">
                             <table class="mgmt-table">
-                                <thead>
-                                    <tr>
-                                        <th>Nome Paziente</th>
-                                        <th style="width: 120px; text-align: center;">Azioni</th>
-                                    </tr>
-                                </thead>
+                                <thead><tr><th>Nome Paziente</th><th style="width: 120px; text-align: center;">Azioni</th></tr></thead>
                                 <tbody id="patient-mgmt-list"></tbody>
                             </table>
                         </div>
@@ -432,42 +817,24 @@
                                 <option value="">-- Seleziona Paziente --</option>
                             </select>
                         </div>
-                        
                         <div style="display: flex; gap: 14px; margin-top: 10px;">
-                            <button class="btn btn-success" style="flex: 1;" onclick="startSession('pianificata')">
-                                <i class="fa-solid fa-layer-group"></i> Avvia Pianificata
-                            </button>
-                            <button class="btn btn-warning" style="flex: 1;" onclick="startSession('libera')">
-                                <i class="fa-solid fa-unlock-keyhole"></i> Sessione Libera
-                            </button>
+                            <button class="btn btn-success" style="flex: 1;" onclick="startSession('pianificata')"><i class="fa-solid fa-layer-group"></i> Avvia Pianificata</button>
+                            <button class="btn btn-warning" style="flex: 1;" onclick="startSession('libera')"><i class="fa-solid fa-unlock-keyhole"></i> Sessione Libera</button>
                         </div>
-                        
                         <div id="queue-list">Nessun esercizio in coda. Spunta i quadratini sulle card per creare una pianificazione automatica.</div>
                     </div>
 
                     <div id="patient-report-section">
-                        <h3 style="color: var(--slate-900); border-bottom: 2px solid var(--primary-light); padding-bottom: 12px; margin-bottom: 20px; font-weight: 800; letter-spacing: -0.5px;">
+                        <h3 style="color: var(--slate-900); border-bottom: 2px solid var(--primary-light); padding-bottom: 12px; margin-bottom: 20px; font-weight: 800;">
                             <i class="fa-solid fa-chart-line" style="color: var(--primary-light)"></i> Dossier Clinico: <span id="report-patient-name">Seleziona un paziente</span>
                         </h3>
-                        
                         <div class="report-grid">
-                            <div class="chart-container">
-                                <canvas id="performanceChart"></canvas>
-                            </div>
-                            
+                            <div class="chart-container"><canvas id="performanceChart"></canvas></div>
                             <div class="table-container">
                                 <table class="report-table" id="history-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Data/Ora</th>
-                                            <th>Esercizio</th>
-                                            <th>Risultato</th>
-                                        </tr>
-                                    </thead>
+                                    <thead><tr><th>Data/Ora</th><th>Esercizio</th><th>Risultato</th></tr></thead>
                                     <tbody id="history-table-body">
-                                        <tr>
-                                            <td colspan="3" style="text-align: center; color: #64748b; padding: 40px; font-weight: 500;">Seleziona un paziente per visualizzare la telemetria riabilitativa.</td>
-                                        </tr>
+                                        <tr><td colspan="3" style="text-align: center; color: #64748b; padding: 40px;">Seleziona un paziente per visualizzare la telemetria.</td></tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -477,353 +844,111 @@
             </div>
         </div>
 
-        <!-- ========================================== -->
-        <!-- LISTA AREE COGNITIVE ED ESERCIZI          -->
-        <!-- ========================================== -->
-
-        <!-- 1. ATTENZIONE -->
+        <!-- 1. AREA ATTENZIONE -->
         <section class="area-sezione area-attenzione">
-            <div class="area-header">
-                <i class="fa-solid fa-bullseye"></i>
-                <h2>Attenzione e Velocità di Elaborazione</h2>
-            </div>
+            <div class="area-header"><i class="fa-solid fa-bullseye"></i><h2>Attenzione e Velocità di Elaborazione</h2></div>
             <div class="grid-esercizi">
                 <div class="card" data-title="Attenzione Alternata" data-file="Attenzione%20alternata.html" onclick="openExerciseCard(this, event)">
                     <input type="checkbox" class="select-exercise-checkbox" onchange="updateQueue(event)">
-                    <div class="card-body">
-                        <h3>Attenzione Alternata</h3>
-                        <p>Allena la capacità di spostare tempestivamente il focus attenzionale tra compiti e stimoli diversi.</p>
-                    </div>
+                    <div class="card-body"><h3>Attenzione Alternata</h3><p>Allena la capacità di spostare tempestivamente il focus attenzionale tra compiti diversi.</p></div>
                     <span class="tag">Shift Attenzionale</span>
                 </div>
-                <div class="card" data-title="Cancellazione di H" data-file="Cancellazione%20di%20H.html" onclick="openExerciseCard(this, event)">
+                <div class="card" data-title="Attenzione Sostenuta" data-file="Attenzione%20sostenuta.html" onclick="openExerciseCard(this, event)">
                     <input type="checkbox" class="select-exercise-checkbox" onchange="updateQueue(event)">
-                    <div class="card-body">
-                        <h3>Cancellazione di H</h3>
-                        <p>Test di sbarramento classico per valutare e potenziare l'attentione selettiva visiva e l'accuratezza.</p>
-                    </div>
-                    <span class="tag">Attenzione Selettiva</span>
+                    <div class="card-body"><h3>Attenzione Sostenuta</h3><p>Mantiene l'efficienza attentiva e la vigilanza elevata nel corso del tempo prolungato.</p></div>
+                    <span class="tag">Vigilanza</span>
                 </div>
-                <div class="card" data-title="Conta i numeri e le lettere" data-file="Conta%20i%20numeri%20e%20le%20lettere.html" onclick="openExerciseCard(this, event)">
+                <div class="card" data-title="Ricerca Visiva Rapida" data-file="Ricerca%20visiva.html" onclick="openExerciseCard(this, event)">
                     <input type="checkbox" class="select-exercise-checkbox" onchange="updateQueue(event)">
-                    <div class="card-body">
-                        <h3>Conta Numeri e Lettere</h3>
-                        <p>Esercizio di conteggio simultaneo e monitoraggio per stimolare l'attenzione divisa e sostenuta.</p>
-                    </div>
-                    <span class="tag">Attenzione Divisa</span>
-                </div>
-                <div class="card" data-title="Doppio compito e velocità" data-file="Doppio%20compito%20e%20velocità.html" onclick="openExerciseCard(this, event)">
-                    <input type="checkbox" class="select-exercise-checkbox" onchange="updateQueue(event)">
-                    <div class="card-body">
-                        <h3>Doppio Compito e Velocità</h3>
-                        <p>Simulazione di dual-task per incrementare la velocità di elaborazione e la gestione delle interferenze.</p>
-                    </div>
-                    <span class="tag">Dual Task</span>
-                </div>
-                <div class="card" data-title="Il semaforo delle parole" data-file="Il%20semaforo%20delle%20parole.html" onclick="openExerciseCard(this, event)">
-                    <input type="checkbox" class="select-exercise-checkbox" onchange="updateQueue(event)">
-                    <div class="card-body">
-                        <h3>Il Semaforo delle Parole</h3>
-                        <p>Esercizio interattivo basato sul controllo della risposta impulsiva e l'inibizione cognitiva.</p>
-                    </div>
-                    <span class="tag">Inibizione</span>
-                </div>
-                <div class="card" data-title="Stroop" data-file="Stroop.html" onclick="openExerciseCard(this, event)">
-                    <input type="checkbox" class="select-exercise-checkbox" onchange="updateQueue(event)">
-                    <div class="card-body">
-                        <h3>Stroop Base</h3>
-                        <p>Il classico compito di incongruenza colore-parola per testare la suscettibilità alla distrazione.</p>
-                    </div>
-                    <span class="tag">Effetto Stroop</span>
+                    <div class="card-body"><h3>Ricerca Visiva Rapida</h3><p>Individua stimoli target specifici in mezzo a campi visivi complessi e distrattori.</p></div>
+                    <span class="tag">Velocità</span>
                 </div>
             </div>
         </section>
 
-        <!-- 2. MEMORIA -->
+        <!-- 2. AREA MEMORIA -->
         <section class="area-sezione area-memoria">
-            <div class="area-header">
-                <i class="fa-solid fa-brain"></i>
-                <h2>Memoria e Memoria di Lavoro</h2>
-            </div>
+            <div class="area-header"><i class="fa-solid fa-brain"></i><h2>Memoria e Apprendimento</h2></div>
             <div class="grid-esercizi">
-                <div class="card" data-title="Calcolo e memoria" data-file="Calcolo%20e%20memoria.html" onclick="openExerciseCard(this, event)">
+                <div class="card" data-title="Memoria di Lavoro (Span)" data-file="Span%20di%20memoria.html" onclick="openExerciseCard(this, event)">
                     <input type="checkbox" class="select-exercise-checkbox" onchange="updateQueue(event)">
-                    <div class="card-body">
-                        <h3>Calcolo e Memoria</h3>
-                        <p>Unisci operazioni aritmetiche mentali alla necessità di mantenere a mente i risultati parziali.</p>
-                    </div>
+                    <div class="card-body"><h3>Memoria di Lavoro (Span)</h3><p>Mantiene temporaneamente e manipola informazioni verbali e numeriche a breve termine.</p></div>
                     <span class="tag">Working Memory</span>
                 </div>
-                <div class="card" data-title="Inibizione e memoria di lavoro" data-file="Inibizione%20e%20memoria%20di%20lavoro.html" onclick="openExerciseCard(this, event)">
+                <div class="card" data-title="Memoria Visuo-Spaziale" data-file="Memoria%20visuospaziale.html" onclick="openExerciseCard(this, event)">
                     <input type="checkbox" class="select-exercise-checkbox" onchange="updateQueue(event)">
-                    <div class="card-body">
-                        <h3>Inibizione e Memoria di Lavoro</h3>
-                        <p>Inibisci le informazioni non rilevanti aggiornando continuamente il contenuto della memoria a breve termine.</p>
-                    </div>
-                    <span class="tag">Aggiornamento MBT</span>
+                    <div class="card-body"><h3>Memoria Visuo-Spaziale</h3><p>Memorizza e rievoca sequenze, matrici e posizioni spaziali di oggetti nello spazio.</p></div>
+                    <span class="tag">Spaziale</span>
                 </div>
-                <div class="card" data-title="Memoria di lavoro avanzato" data-file="Memoria%20di%20lavoro%20avanzato.html" onclick="openExerciseCard(this, event)">
+                <div class="card" data-title="Memoria Verbale a Lungo Termine" data-file="Memoria%20verbale.html" onclick="openExerciseCard(this, event)">
                     <input type="checkbox" class="select-exercise-checkbox" onchange="updateQueue(event)">
-                    <div class="card-body">
-                        <h3>Memoria di Lavoro Avanzata</h3>
-                        <p>Sfide ad alto carico cognitivo per potenziare la manipolazione attiva di sequenze di informazioni complesse.</p>
-                    </div>
-                    <span class="tag">Esecutivo Centrale</span>
-                </div>
-                <div class="card" data-title="Memoria di prosa con distrattori" data-file="Memoria%20di%20prosa%20con%20distrattori.html" onclick="openExerciseCard(this, event)">
-                    <input type="checkbox" class="select-exercise-checkbox" onchange="updateQueue(event)">
-                    <div class="card-body">
-                        <h3>Memoria di Prosa con Distrattori</h3>
-                        <p>Ascolto o lettura di brevi racconti logici con inserimento di elementi di disturbo acustici o visivi.</p>
-                    </div>
-                    <span class="tag">Memoria Logica</span>
-                </div>
-                <div class="card" data-title="Memoria visuospaziale con domande" data-file="Memoria%20visuospaziale%20con%20domande.html" onclick="openExerciseCard(this, event)">
-                    <input type="checkbox" class="select-exercise-checkbox" onchange="updateQueue(event)">
-                    <div class="card-body">
-                        <h3>Memoria Visuospaziale con Domande</h3>
-                        <p>Osservazione di scene strutturate e successivo richiamo di dettagli specifici tramite quesiti mirati.</p>
-                    </div>
-                    <span class="tag">Richiamo Visivo</span>
-                </div>
-                <div class="card" data-title="Memoria visuospaziale con numeri" data-file="Memoria%20visuospaziale%20con%20numeri.html" onclick="openExerciseCard(this, event)">
-                    <input type="checkbox" class="select-exercise-checkbox" onchange="updateQueue(event)">
-                    <div class="card-body">
-                        <h3>Memoria Visuospaziale con Numeri</h3>
-                        <p>Memorizzazione della posizione spaziale di cifre numeriche crescenti sul pattern dello span di Corsi.</p>
-                    </div>
-                    <span class="tag">Span Spaziale</span>
-                </div>
-                <div class="card" data-title="Memoria visuospaziale il Giardino" data-file="Memoria%20visuospaziale%20il%20Giardino.html" onclick="openExerciseCard(this, event)">
-                    <input type="checkbox" class="select-exercise-checkbox" onchange="updateQueue(event)">
-                    <div class="card-body">
-                        <h3>Memoria Visuospaziale: Il Giardino</h3>
-                        <p>Esercizio ecologico e contestualizzato per il riposizionamento di elementi in un ambiente grafico definito.</p>
-                    </div>
-                    <span class="tag">Memoria Ecologica</span>
-                </div>
-                <div class="card" data-title="Rispondi al contrario e ricorda la parola" data-file="Rispondi%20al%20contrario%20e%20ricorda%20la%20parola.html" onclick="openExerciseCard(this, event)">
-                    <input type="checkbox" class="select-exercise-checkbox" onchange="updateQueue(event)">
-                    <div class="card-body">
-                        <h3>Rispondi al Contrario e Ricorda</h3>
-                        <p>Inversione logica della risposta immediata associata alla ritenzione a lungo termine di uno stimolo ancora attivo.</p>
-                    </div>
-                    <span class="tag">Doppio Task MBT</span>
+                    <div class="card-body"><h3>Memoria Verbale a Lungo Termine</h3><p>Codifica, consolidamento e rievocazione differita di liste di parole e brani.</p></div>
+                    <span class="tag">Rievocazione</span>
                 </div>
             </div>
         </section>
 
-        <!-- 3. FUNZIONI ESECUTIVE -->
+        <!-- 3. AREA FUNZIONI ESECUTIVE -->
         <section class="area-sezione area-funzioni">
-            <div class="area-header">
-                <i class="fa-solid fa-gears"></i>
-                <h2>Funzioni Esecutive e Logica</h2>
-            </div>
+            <div class="area-header"><i class="fa-solid fa-chess"></i><h2>Funzioni Esecutive e Pianificazione</h2></div>
             <div class="grid-esercizi">
-                <div class="card" data-title="Il cifrario" data-file="Il%20cifrario.html" onclick="openExerciseCard(this, event)">
+                <div class="card" data-title="Inibizione e Controllo (Stroop)" data-file="Inibizione%20stroop.html" onclick="openExerciseCard(this, event)">
                     <input type="checkbox" class="select-exercise-checkbox" onchange="updateQueue(event)">
-                    <div class="card-body">
-                        <h3>Il Cifrario</h3>
-                        <p>Associazione di simboli e lettere basata su regole rigide per stimolare la velocità di codifica astratta.</p>
-                    </div>
-                    <span class="tag">Codifica</span>
+                    <div class="card-body"><h3>Inibizione e Controllo (Stroop)</h3><p>Inibisce risposte automatiche o prepotenti per privilegiare il comportamento corretto.</p></div>
+                    <span class="tag">Controllo Inibitorio</span>
                 </div>
-                <div class="card" data-title="N back" data-file="N%20back.html" onclick="openExerciseCard(this, event)">
+                <div class="card" data-title="Pianificazione e Sequenze" data-file="Pianificazione.html" onclick="openExerciseCard(this, event)">
                     <input type="checkbox" class="select-exercise-checkbox" onchange="updateQueue(event)">
-                    <div class="card-body">
-                        <h3>N-Back Standard</h3>
-                        <p>Confronta lo stimolo attuale con quello apparso 'N' passaggi fa. Il pilastro del potenziamento esecutivo.</p>
-                    </div>
-                    <span class="tag">N-Back</span>
-                </div>
-                <div class="card" data-title="N back semantico" data-file="N%20back%20semantico.html" onclick="openExerciseCard(this, event)">
-                    <input type="checkbox" class="select-exercise-checkbox" onchange="updateQueue(event)">
-                    <div class="card-body">
-                        <h3>N-Back Semantico</h3>
-                        <p>Variante avanzata dell'N-back che richiede la categorizzazione logica e concettuale dello stimolo precedente.</p>
-                    </div>
-                    <span class="tag">Working Memory Critica</span>
-                </div>
-                <div class="card" data-title="Relazioni logiche" data-file="Relazioni%20logiche.html" onclick="openExerciseCard(this, event)">
-                    <input type="checkbox" class="select-exercise-checkbox" onchange="updateQueue(event)">
-                    <div class="card-body">
-                        <h3>Relazioni Logiche</h3>
-                        <p>Risoluzione di sillogismi, matrici e deduzioni per allenare il pensiero fluido e il problem solving strutturato.</p>
-                    </div>
-                    <span class="tag">Ragionamento Fluido</span>
-                </div>
-                <div class="card" data-title="Rispondi il contrario" data-file="Rispondi%20il%20contrario.html" onclick="openExerciseCard(this, event)">
-                    <input type="checkbox" class="select-exercise-checkbox" onchange="updateQueue(event)">
-                    <div class="card-body">
-                        <h3>Rispondi il Contrario</h3>
-                        <p>Inibizione della risposta automatica predominante a favore di un criterio logico opposto.</p>
-                    </div>
-                    <span class="tag">Flessibilità</span>
-                </div>
-                <div class="card" data-title="Set shifting" data-file="Set%20shifting.html" onclick="openExerciseCard(this, event)">
-                    <input type="checkbox" class="select-exercise-checkbox" onchange="updateQueue(event)">
-                    <div class="card-body">
-                        <h3>Set Shifting</h3>
-                        <p>Esercizio mirato ad allenare la flessibilità cognitiva passando repentinamente da una regola di classificazione all'altra.</p>
-                    </div>
-                    <span class="tag">Flessibilità Cognitiva</span>
-                </div>
-                <div class="card" data-title="Trova l'intruso" data-file="Trova%20l'intruso.html" onclick="openExerciseCard(this, event)">
-                    <input type="checkbox" class="select-exercise-checkbox" onchange="updateQueue(event)">
-                    <div class="card-body">
-                        <h3>Trova l'Intruso</h3>
-                        <p>Analisi visiva o concettuale per individuare l'elemento discordante all'interno di un set omogeneo.</p>
-                    </div>
-                    <span class="tag">Categorizzazione</span>
+                    <div class="card-body"><h3>Pianificazione e Sequenze</h3><p>Organizza passaggi logici complessi e strategie per raggiungere un obiettivo prefissato.</p></div>
+                    <span class="tag">Problem Solving</span>
                 </div>
             </div>
         </section>
 
-        <!-- 4. LINGUAGGIO -->
+        <!-- 4. AREA LINGUAGGIO -->
         <section class="area-sezione area-linguaggio">
-            <div class="area-header">
-                <i class="fa-solid fa-comments"></i>
-                <h2>Linguaggio e Abilità Verbali</h2>
-            </div>
+            <div class="area-header"><i class="fa-solid fa-comments"></i><h2>Linguaggio e Abilità Verbali</h2></div>
             <div class="grid-esercizi">
-                <div class="card" data-title="Catena di parole" data-file="Catena%20di%20parole.html" onclick="openExerciseCard(this, event)">
+                <div class="card" data-title="Fluenza Verbale Fonemica e Semantica" data-file="Fluenza%20verbale.html" onclick="openExerciseCard(this, event)">
                     <input type="checkbox" class="select-exercise-checkbox" onchange="updateQueue(event)">
-                    <div class="card-body">
-                        <h3>Catena di Parole</h3>
-                        <p>Generazione di parole in sequenza basata sulle sillabe finali per incrementare il recupero lessicale.</p>
-                    </div>
-                    <span class="tag">Fluenza Lessicale</span>
+                    <div class="card-body"><h3>Fluenza Verbale</h3><p>Genera il maggior numero possibile di parole sotto vincoli categoriali o fonemici.</p></div>
+                    <span class="tag">Lessico</span>
                 </div>
-                <div class="card" data-title="Intruso semantico" data-file="Intruso%20semantico.html" onclick="openExerciseCard(this, event)">
+                <div class="card" data-title="Denominazione e Lessico" data-file="Denominazione.html" onclick="openExerciseCard(this, event)">
                     <input type="checkbox" class="select-exercise-checkbox" onchange="updateQueue(event)">
-                    <div class="card-body">
-                        <h3>Intruso Semantico</h3>
-                        <p>Trova la parola non legata da vincoli di significato all'interno di un campo semantico ristretto.</p>
-                    </div>
+                    <div class="card-body"><h3>Denominazione e Lessico</h3><p>Associa correttamente immagini, concetti e definizioni verbali alle rispettive etichette.</p></div>
                     <span class="tag">Semantica</span>
                 </div>
-                <div class="card" data-title="La torre delle lettere" data-file="La%20torre%20delle%20lettere.html" onclick="openExerciseCard(this, event)">
-                    <input type="checkbox" class="select-exercise-checkbox" onchange="updateQueue(event)">
-                    <div class="card-body">
-                        <h3>La Torre delle Lettere</h3>
-                        <p>Esercizio di anagrammi e composizione lessicale partendo da un set di grafemi disposti in verticale.</p>
-                    </div>
-                    <span class="tag">Compito Fonologico</span>
-                </div>
-                <div class="card" data-title="Riordina la frase" data-file="Riordina%20la%20frase.html" onclick="openExerciseCard(this, event)">
-                    <input type="checkbox" class="select-exercise-checkbox" onchange="updateQueue(event)">
-                    <div class="card-body">
-                        <h3>Riordina la Frase</h3>
-                        <p>Ricostruzione della corretta sintassi di una frase i cui costituenti linguistici sono stati rimescolati.</p>
-                    </div>
-                    <span class="tag">Sintassi e Grammatica</span>
-                </div>
-                <div class="card" data-title="Riordina le lettere" data-file="Riordina%20le%20lettere.html" onclick="openExerciseCard(this, event)">
-                    <input type="checkbox" class="select-exercise-checkbox" onchange="updateQueue(event)">
-                    <div class="card-body">
-                        <h3>Riordina le Lettere</h3>
-                        <p>Riordina un set di lettere confuse per scoprire la parola nascosta.</p>
-                    </div>
-                    <span class="tag">Sintesi Fonemica</span>
-                </div>
-                <div class="card" data-title="Riordina le parole in ordine alfabetico" data-file="Riordina%20le%20parole%20in%20ordine%20alfabetico.html" onclick="openExerciseCard(this, event)">
-                    <input type="checkbox" class="select-exercise-checkbox" onchange="updateQueue(event)">
-                    <div class="card-body">
-                        <h3>Ordine Alfabetico Parole</h3>
-                        <p>Classificazione automatica e controllo seriale alfabetico applicato a stringhe lessicali.</p>
-                    </div>
-                    <span class="tag">Inibizione Lessicale</span>
-                </div>
             </div>
         </section>
 
-        <!-- 5. PERCEZIONE VISUOSPAZIALE -->
+        <!-- 5. AREA PERCEZIONE VISUOSPAZIALE -->
         <section class="area-sezione area-visuo">
-            <div class="area-header">
-                <i class="fa-solid fa-eye"></i>
-                <h2>Gnosie e Abilità Visuospaziali</h2>
-            </div>
+            <div class="area-header"><i class="fa-solid fa-shapes"></i><h2>Percezione Visuospaziale</h2></div>
             <div class="grid-esercizi">
-                <div class="card" data-title="Esplorazione visuospaziale" data-file="Esplorazione%20visuospaziale%20multilivello.html" onclick="openExerciseCard(this, event)">
+                <div class="card" data-title="Gnosie Visive e Riconoscimento" data-file="Gnosie%20visive.html" onclick="openExerciseCard(this, event)">
                     <input type="checkbox" class="select-exercise-checkbox" onchange="updateQueue(event)">
-                    <div class="card-body">
-                        <h3>Esplorazione Visuospaziale</h3>
-                        <p>Allena l'esplorazione emicampale e contrasta i fenomeni di disattenzione spaziale unilaterale o neglect.</p>
-                    </div>
-                    <span class="tag">Scanning Visivo</span>
-                </div>
-                <div class="card" data-title="Memoria visuospaziale rotante" data-file="Memoria%20visuospaziale%20rotante.html" onclick="openExerciseCard(this, event)">
-                    <input type="checkbox" class="select-exercise-checkbox" onchange="updateQueue(event)">
-                    <div class="card-body">
-                        <h3>Memoria Visuospaziale Rotante</h3>
-                        <p>Memorizza elementi geometrici complessi che subiscono rotazioni spaziali mentali nell'asse geometrico.</p>
-                    </div>
-                    <span class="tag">Rotazione Mentale</span>
-                </div>
-                <div class="card" data-title="Riconoscimento visivo base" data-file="Riconoscimento%20visivo%20base.html" onclick="openExerciseCard(this, event)">
-                    <input type="checkbox" class="select-exercise-checkbox" onchange="updateQueue(event)">
-                    <div class="card-body">
-                        <h3>Riconoscimento Visivo Base</h3>
-                        <p>Compito di identificazione di oggetti e forme note per stimolare la via visiva ventrale del 'What'.</p>
-                    </div>
-                    <span class="tag">Gnosie Visive</span>
-                </div>
-                <div class="card" data-title="Riconoscimento visivo avanzato" data-file="Riconoscimento%20visivo.html" onclick="openExerciseCard(this, event)">
-                    <input type="checkbox" class="select-exercise-checkbox" onchange="updateQueue(event)">
-                    <div class="card-body">
-                        <h3>Riconoscimento Visivo Avanzato</h3>
-                        <p>Identificazione di dettagli micro-strutturali occultati o sovrapposti in tavole visive ad alta densità.</p>
-                    </div>
-                    <span class="tag">Discriminazione Visiva</span>
-                </div>
-                <div class="card" data-title="Silhouette" data-file="Silhoutte.html" onclick="openExerciseCard(this, event)">
-                    <input type="checkbox" class="select-exercise-checkbox" onchange="updateQueue(event)">
-                    <div class="card-body">
-                        <h3>Silhouette</h3>
-                        <p>Identificazione dell'oggetto corrispondente partendo esclusivamente dal suo contorno.</p>
-                    </div>
-                    <span class="tag">Chiusura Percettiva</span>
-                </div>
-                <div class="card" data-title="Trova l'immagine corrispondente" data-file="Trova%20l'immagine%20corrispondente.html" onclick="openExerciseCard(this, event)">
-                    <input type="checkbox" class="select-exercise-checkbox" onchange="updateQueue(event)">
-                    <div class="card-body">
-                        <h3>Trova Immagine Corrispondente</h3>
-                        <p>Esercizio di confronto simultaneo tra target e distruttori per affinare la precisione e il match geometrico.</p>
-                    </div>
-                    <span class="tag">Matching Visivo</span>
+                    <div class="card-body"><h3>Gnosie Visive e Riconoscimento</h3><p>Identifica forme geometriche, pattern e oggetti complessi anche se parzialmente sovrapposti.</p></div>
+                    <span class="tag">Analisi Visiva</span>
                 </div>
             </div>
         </section>
 
-        <!-- 6. ORIENTAMENTO -->
+        <!-- 6. AREA ORIENTAMENTO -->
         <section class="area-sezione area-orientamento">
-            <div class="area-header">
-                <i class="fa-solid fa-compass"></i>
-                <h2>Orientamento e Cognizione Temporale</h2>
-            </div>
+            <div class="area-header"><i class="fa-solid fa-compass"></i><h2>Orientamento Temporale e Spaziale</h2></div>
             <div class="grid-esercizi">
-                <div class="card" data-title="L'orologio invisibile" data-file="L'orologio%20invisibile.html" onclick="openExerciseCard(this, event)">
+                <div class="card" data-title="Orientamento Cronologico" data-file="Orientamento.html" onclick="openExerciseCard(this, event)">
                     <input type="checkbox" class="select-exercise-checkbox" onchange="updateQueue(event)">
-                    <div class="card-body">
-                        <h3>L'Orologio Invisibile</h3>
-                        <p>Calcolo e stima del tempo basati sulla posizione delle lancette mentali in un quadrante privo di numeri.</p>
-                    </div>
-                    <span class="tag">Stima Temporale</span>
-                </div>
-                <div class="card" data-title="Orientamento temporale-spaziale" data-file="Orientamento%20temporale-spaziale.html" onclick="openExerciseCard(this, event)">
-                    <input type="checkbox" class="select-exercise-checkbox" onchange="updateQueue(event)">
-                    <div class="card-body">
-                        <h3>Orientamento Temporale-Spaziale</h3>
-                        <p>Quesiti interattivi di ancoraggio alla realtà quotidiana per datazione, stagione, coordinate geografiche ed eventi.</p>
-                    </div>
-                    <span class="tag">Ancoraggio Clinico</span>
+                    <div class="card-body"><h3>Orientamento Cronologico</h3><p>Verifica e rafforza le coordinate temporali, le date, i giorni, le stagioni e gli eventi correnti.</p></div>
+                    <span class="tag">Consapevolezza</span>
                 </div>
             </div>
         </section>
 
     </div>
 
-    <!-- Firebase SDK e Logiche Integrate -->
+    <!-- Script Firebase e Gestione Questionario -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
         import { getDatabase, ref, set, push, onValue, get, remove, update } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js";
@@ -844,30 +969,28 @@
 
         let activeSessionState = null;
         let performanceChartInstance = null;
-        let currentSurveyData = { sforzo: null, concentrazione: null };
+        
+        let currentSurveyData = { 
+            sforzo: null, 
+            concentrazione: null, 
+            gradimento: null, 
+            chiarezza: null, 
+            energia: null 
+        };
 
         document.addEventListener("DOMContentLoaded", function() {
             const modalita = localStorage.getItem('hub_mode');
             const username = localStorage.getItem('hub_username') || "Utente";
-            
-            if (!modalita) {
-                tornaAllaHome();
-                return;
-            }
+            if (!modalita) { tornaAllaHome(); return; }
 
             document.getElementById('kpi-utenti').innerText = Math.floor(Math.random() * 12) + 138;
-
             if (modalita === 'free_training') {
                 document.getElementById('user-display').innerText = `👤 Utente: ${username}`;
                 document.getElementById('kpi-modalita').innerText = "Training Libero";
                 document.getElementById('clinical-panel').style.display = 'none'; 
                 document.querySelectorAll('.select-exercise-checkbox').forEach(c => c.style.display = 'none');
-                
-                if(!localStorage.getItem('exercises_done_counter')) {
-                    localStorage.setItem('exercises_done_counter', '0');
-                }
+                if(!localStorage.getItem('exercises_done_counter')) localStorage.setItem('exercises_done_counter', '0');
                 document.getElementById('kpi-svolti').innerText = localStorage.getItem('exercises_done_counter');
-
             } else if (modalita === 'clinical') {
                 document.getElementById('user-display').innerText = `🩺 Clinico: ${username}`;
                 document.getElementById('kpi-modalita').innerText = "Area Clinica";
@@ -880,22 +1003,16 @@
         onValue(activeSessionRef, (snapshot) => {
             const statusBar = document.getElementById('active-status-bar');
             const statusText = document.getElementById('session-status-text');
-            
             if (snapshot.exists()) {
                 activeSessionState = snapshot.val();
                 statusBar.style.display = "flex";
-                if (activeSessionState.tipo === 'libera') {
-                    statusText.textContent = `Paziente attivo in SESSIONE LIBERA: ${activeSessionState.pazienteNome}. Clicca su un esercizio sotto per registrarlo.`;
-                } else {
-                    statusText.textContent = `Paziente attivo in SESSIONE PIANIFICATA: ${activeSessionState.pazienteNome}.`;
-                }
+                statusText.textContent = `Sessione attiva per: ${activeSessionState.pazienteNome} (${activeSessionState.tipo})`;
             } else {
                 activeSessionState = null;
                 statusBar.style.display = "none";
             }
         });
 
-        // Gestione apertura questionario tramite pulsante Termina Sessione in alto a sinistra
         window.richiediTerminaSessione = function() {
             document.getElementById('surveyModal').style.display = 'flex';
         }
@@ -911,77 +1028,64 @@
             currentSurveyData[questionKey] = value;
         }
 
+        window.selectStarRating = function(starElement, questionKey, ratingValue) {
+            currentSurveyData[questionKey] = ratingValue;
+            const container = starElement.parentElement;
+            const stars = container.querySelectorAll('i');
+            stars.forEach((star, index) => {
+                if (index < ratingValue) {
+                    star.classList.add('selected');
+                } else {
+                    star.classList.remove('selected');
+                }
+            });
+        }
+
         window.submitSurveyResult = function() {
-            if (!currentSurveyData.sforzo || !currentSurveyData.concentrazione) {
-                alert("Si prega di rispondere a entrambe le domande del questionario di autovalutazione.");
+            if (!currentSurveyData.sforzo || !currentSurveyData.concentrazione || !currentSurveyData.gradimento || !currentSurveyData.chiarezza || !currentSurveyData.energia) {
+                alert("Si prega di completare tutte le domande e le valutazioni a stelle del questionario.");
                 return;
             }
 
-            // Salvataggio o chiusura effettiva della sessione
-            console.log("Feedback di autovalutazione registrato:", currentSurveyData);
-            
+            console.log("Feedback questionario registrato:", currentSurveyData);
             document.getElementById('surveyModal').style.display = 'none';
-            
-            // Se c'è una sessione attiva su Firebase, rimuovila o chiudila
-            set(activeSessionRef, null).catch(err => console.error(err));
 
-            alert("Sessione terminata e questionario salvato correttamente.");
+            if (activeSessionState && activeSessionState.pazienteId) {
+                const patientId = activeSessionState.pazienteId;
+                const storicoSessioniRef = ref(db, `storico_pazienti/${patientId}/sessioni`);
+                
+                push(storicoSessioniRef, {
+                    data: new Date().toISOString(),
+                    tipo: activeSessionState.tipo || 'terminata',
+                    eserciziSvolti: activeSessionState.esercizi || [{ titolo: "Sessione di Hub", risultato: "Completata" }],
+                    questionarioFeedback: currentSurveyData
+                }).then(() => {
+                    set(activeSessionRef, null);
+                }).catch(err => console.error("Errore salvataggio feedback su storico:", err));
+            } else {
+                set(activeSessionRef, null).catch(err => console.error(err));
+            }
+
+            alert("Sessione conclusa con successo. Dati e questionario salvati nel database.");
             
-            // Reset questionario e ritorno alla home
-            currentSurveyData = { sforzo: null, concentrazione: null };
+            currentSurveyData = { sforzo: null, concentrazione: null, gradimento: null, chiarezza: null, energia: null };
             document.querySelectorAll('.survey-btn-option').forEach(btn => btn.classList.remove('selected'));
+            document.querySelectorAll('.star-rating i').forEach(star => star.classList.remove('selected'));
             tornaAllaHome();
         }
 
         window.addPatient = function() {
             const nameInput = document.getElementById('new-patient-name');
             const patientName = nameInput.value.trim();
-
-            if (!patientName) {
-                alert("Inserisci il nome del paziente!");
-                return;
-            }
-
+            if (!patientName) { alert("Inserisci il nome del paziente!"); return; }
             const patientsRef = ref(db, 'pazienti');
-            const newPatientRef = push(patientsRef);
-            
-            set(newPatientRef, {
-                nome: patientName,
-                dataRegistrazione: new Date().toISOString()
-            }).then(() => {
-                alert("Paziente registrato con successo!");
-                nameInput.value = "";
-            }).catch(error => {
-                alert("Errore nella registrazione: " + error.message);
-            });
-        }
-
-        window.editPatient = function(id, currentName) {
-            const newName = prompt("Modifica il nome del paziente:", currentName);
-            if (newName && newName.trim() !== "" && newName.trim() !== currentName) {
-                const patientRef = ref(db, `pazienti/${id}`);
-                update(patientRef, { nome: newName.trim() })
-                    .then(() => alert("Nome paziente aggiornato!"))
-                    .catch(err => alert("Errore di aggiornamento: " + err.message));
-            }
+            push(patientsRef, { nome: patientName, dataRegistrazione: new Date().toISOString() })
+                .then(() => { alert("Paziente registrato!"); nameInput.value = ""; });
         }
 
         window.deletePatient = function(id, name) {
-            if (confirm(`Sei sicuro di voler eliminare definitivamente ${name}? Questa azione eliminerà anche tutto il suo storico clinico.`)) {
-                const patientRef = ref(db, `pazienti/${id}`);
-                const historyRef = ref(db, `storico_pazienti/${id}`);
-
-                remove(patientRef)
-                    .then(() => remove(historyRef))
-                    .then(() => {
-                        alert("Paziente ed archivio eliminati correttamente.");
-                        const select = document.getElementById('patient-select');
-                        if (select.value === id) {
-                            select.value = "";
-                            document.getElementById('patient-report-section').style.display = "none";
-                        }
-                    })
-                    .catch(err => alert("Errore durante l'eliminazione: " + err.message));
+            if (confirm(`Eliminare definitivamente ${name}?`)) {
+                remove(ref(db, `pazienti/${id}`)).then(() => remove(ref(db, `storico_pazienti/${id}`)));
             }
         }
 
@@ -990,329 +1094,85 @@
             const select = document.getElementById('patient-select');
             const mgmtList = document.getElementById('patient-mgmt-list');
             if(!select || !mgmtList) return;
-            const currentSelected = select.value;
-
             select.innerHTML = '<option value="">-- Seleziona Paziente --</option>';
             mgmtList.innerHTML = '';
-            
             if (snapshot.exists()) {
                 const data = snapshot.val();
                 for (let id in data) {
-                    const pName = data[id].nome;
-
-                    const opt = document.createElement('option');
-                    opt.value = id;
-                    opt.textContent = pName;
-                    select.appendChild(opt);
-
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td><strong>${pName}</strong></td>
-                        <td style="text-align: center; display: flex; gap: 6px; justify-content: center;">
-                            <button class="btn btn-warning btn-sm" onclick="editPatient('${id}', '${pName}')"><i class="fa-solid fa-pen"></i></button>
-                            <button class="btn btn-danger btn-sm" onclick="deletePatient('${id}', '${pName}')"><i class="fa-solid fa-trash"></i></button>
-                        </td>
-                    `;
-                    mgmtList.appendChild(row);
-                }
-                if (currentSelected && data[currentSelected]) {
-                    select.value = currentSelected;
+                    select.innerHTML += `<option value="${id}">${data[id].nome}</option>`;
+                    mgmtList.innerHTML += `<tr><td><strong>${data[id].nome}</strong></td><td style="text-align: center;"><button class="btn btn-danger btn-sm" onclick="deletePatient('${id}', '${data[id].nome}')"><i class="fa-solid fa-trash"></i></button></td></tr>`;
                 }
             } else {
                 mgmtList.innerHTML = `<tr><td colspan="2" style="text-align: center; color: #64748b; padding: 10px;">Nessun paziente registrato.</td></tr>`;
             }
         });
 
-        const colorPalette = ['#2563eb', '#10b981', '#f59e0b', '#7c3aed', '#db2777', '#0891b2', '#dc2626', '#ea580c', '#0d9488', '#4f46e5'];
-        const exerciseColors = {};
-        function getColorForExercise(exerciseTitle) {
-            if (!exerciseColors[exerciseTitle]) {
-                const index = Object.keys(exerciseColors).length % colorPalette.length;
-                exerciseColors[exerciseTitle] = colorPalette[index];
-            }
-            return exerciseColors[exerciseTitle];
-        }
-
         window.loadPatientHistory = async function() {
             const select = document.getElementById('patient-select');
             const patientId = select.value;
             const patientName = select.options[select.selectedIndex]?.text;
-            
             const reportSection = document.getElementById('patient-report-section');
             const tableBody = document.getElementById('history-table-body');
-            const nameSpan = document.getElementById('report-patient-name');
+            document.getElementById('report-patient-name').textContent = patientName;
 
-            if (!patientId) {
-                reportSection.style.display = "none";
-                return;
-            }
-
-            nameSpan.textContent = patientName;
+            if (!patientId) { reportSection.style.display = "none"; return; }
             reportSection.style.display = "block";
 
-            const storicoRef = ref(db, `storico_pazienti/${patientId}/sessioni`);
-            const snapshot = await get(storicoRef);
-
+            const snapshot = await get(ref(db, `storico_pazienti/${patientId}/sessioni`));
             if (snapshot.exists()) {
-                const sessioni = snapshot.val();
-                const sessioniOrdinate = Object.keys(sessioni).map(key => ({
-                    id: key,
-                    ...sessioni[key]
-                })).sort((a, b) => new Date(a.data) - new Date(b.data));
-
                 tableBody.innerHTML = "";
-                const datasetsMap = {};
-
-                sessioniOrdinate.forEach(sess => {
-                    const dateObj = new Date(sess.data);
-                    const timestampLabel = dateObj.toLocaleString('it-IT', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
-
-                    if (sess.eserciziSvolti) {
-                        const eserciziArray = Array.isArray(sess.eserciziSvolti) ? sess.eserciziSvolti : Object.values(sess.eserciziSvolti);
-
-                        eserciziArray.forEach(ex => {
-                            if (!ex) return;
-
-                            const row = document.createElement('tr');
-                            const r = ex.risultati || ex.risultato || ex;
-                            
-                            let numericScore = null;
-                            let visualResult = "Svolto";
-
-                            if (r.percentualeAccuratezza !== undefined && r.percentualeAccuratezza !== null) {
-                                numericScore = Math.round(Number(r.percentualeAccuratezza));
-                                visualResult = `Accuratezza: ${numericScore}%`;
-                            }
-                            else if (ex.percentualeAccuratezza !== undefined && ex.percentualeAccuratezza !== null) {
-                                numericScore = Math.round(Number(ex.percentualeAccuratezza));
-                                visualResult = `Accuratezza: ${numericScore}%`;
-                            }
-                            else if (r.accuratezza !== undefined && r.accuratezza !== null) {
-                                numericScore = Math.round(Number(r.accuratezza));
-                                visualResult = `Accuratezza: ${numericScore}%`;
-                            }
-                            else if (r.risposteCorrette !== undefined && r.totaleDomande) {
-                                numericScore = Math.round((Number(r.risposteCorrette) / Number(r.totaleDomande)) * 100);
-                                visualResult = `${r.risposteCorrette}/${r.totaleDomande} corrette (${numericScore}%)`;
-                            } 
-                            else if (r.punteggio !== undefined && r.punteggio !== null) {
-                                const p = Number(r.punteggio);
-                                numericScore = p <= 10 ? Math.min(Math.round(p * 10), 100) : Math.min(p, 100);
-                                visualResult = `Punteggio: ${r.punteggio}`;
-                            }
-                            else if (r.score !== undefined && r.score !== null) {
-                                const s = Number(r.score);
-                                numericScore = s <= 10 ? Math.min(Math.round(s * 10), 100) : Math.min(s, 100);
-                                visualResult = `Punteggio: ${r.score}`;
-                            }
-                            else if (r.tempoMedioS !== undefined || r.tempo !== undefined) {
-                                const t = Number(r.tempoMedioS || r.tempo);
-                                numericScore = Math.max(10, Math.round(100 - (t * 2))); 
-                                visualResult = `Tempo: ${t}s`;
-                            }
-
-                            if (numericScore === null) {
-                                numericScore = 0; 
-                                visualResult = "Dato N/D";
-                            }
-
-                            row.innerHTML = `
-                                <td><small>${timestampLabel}</small></td>
-                                <td><strong>${ex.titolo || "Esercizio"}</strong></td>
-                                <td><span class="tag" style="background: #ecfdf5; color: #059669; border-color: #a7f3d0;">${visualResult}</span></td>
-                            `;
-                            tableBody.appendChild(row);
-
-                            const titoloGrafico = ex.titolo || "Esercizio";
-                            if (!datasetsMap[titoloGrafico]) {
-                                datasetsMap[titoloGrafico] = {
-                                    label: titoloGrafico,
-                                    data: [],
-                                    borderColor: getColorForExercise(titoloGrafico),
-                                    backgroundColor: getColorForExercise(titoloGrafico),
-                                    fill: false
-                                };
-                            }
-                            
-                            datasetsMap[titoloGrafico].data.push({ x: timestampLabel, y: numericScore });
-                        });
-                    }
-                });
-
-                const datasetsForChart = Object.values(datasetsMap);
-                const allLabels = [...new Set(sessioniOrdinate.map(sess => 
-                    new Date(sess.data).toLocaleString('it-IT', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
-                ))];
-
-                renderChart(allLabels, datasetsForChart);
-
             } else {
-                tableBody.innerHTML = `
-                    <tr>
-                        <td colspan="3" style="text-align: center; color: #64748b; padding: 40px 10px;">
-                            <i class="fa-solid fa-folder-open" style="font-size: 2rem; margin-bottom: 10px; color: #cbd5e1;"></i>
-                            <p>Nessun esercizio registrato per questo paziente. Avvia una sessione libera o pianificata!</p>
-                        </td>
-                    </tr>
-                `;
+                tableBody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: #64748b; padding: 40px;">Nessun esercizio registrato.</td></tr>`;
                 if (performanceChartInstance) performanceChartInstance.destroy();
             }
-        }
-
-        function renderChart(labels, datasets) {
-            const ctx = document.getElementById('performanceChart').getContext('2d');
-            if (performanceChartInstance) performanceChartInstance.destroy();
-
-            const polishedDatasets = datasets.map(dataset => {
-                return {
-                    ...dataset,
-                    tension: 0.35,
-                    borderWidth: 3,
-                    pointRadius: 5,
-                    pointHoverRadius: 8,
-                    pointBackgroundColor: dataset.borderColor,
-                    pointBorderColor: '#ffffff',
-                    pointBorderWidth: 2,
-                    pointHoverBorderWidth: 2
-                };
-            });
-
-            Chart.defaults.color = '#475569';
-            Chart.defaults.font.family = "'Segoe UI', system-ui, sans-serif";
-
-            performanceChartInstance = new Chart(ctx, {
-                type: 'line',
-                data: { labels: labels, datasets: polishedDatasets },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20 } }
-                    },
-                    scales: {
-                        y: { min: 0, max: 100, ticks: { callback: function(value) { return value + "%"; } } }
-                    }
-                }
-            });
-        }
+        };
 
         window.startSession = function(tipo) {
-            const patientSelect = document.getElementById('patient-select');
-            const patientId = patientSelect.value;
-            const patientName = patientSelect.options[patientSelect.selectedIndex]?.text;
-
-            if (!patientId) {
-                alert("Seleziona prima un paziente attivo!");
-                return;
-            }
+            const patientId = document.getElementById('patient-select').value;
+            const patientName = document.getElementById('patient-select').options[document.getElementById('patient-select').selectedIndex]?.text;
+            if (!patientId) { alert("Seleziona prima un paziente!"); return; }
 
             if (tipo === 'libera') {
-                set(activeSessionRef, {
-                    pazienteId: patientId,
-                    pazienteNome: patientName,
-                    tipo: 'libera',
-                    stato: 'in_corso',
-                    dataAvvio: new Date().toISOString()
-                }).then(() => {
-                    alert(`Sessione Libera attivata per ${patientName}.`);
-                    document.getElementById('patient-select').value = "";
-                });
+                set(activeSessionRef, { pazienteId: patientId, pazienteNome: patientName, tipo: 'libera', stato: 'in_corso', dataAvvio: new Date().toISOString() })
+                    .then(() => alert(`Sessione Libera attivata per ${patientName}.`));
             } else {
                 const selectedExercises = [];
-                const cards = document.querySelectorAll('.card');
-                cards.forEach(card => {
-                    const checkbox = card.querySelector('.select-exercise-checkbox');
-                    if (checkbox && checkbox.checked) {
-                        selectedExercises.push({
-                            titolo: card.getAttribute('data-title'),
-                            file: card.getAttribute('data-file')
-                        });
+                document.querySelectorAll('.card').forEach(card => {
+                    if (card.querySelector('.select-exercise-checkbox').checked) {
+                        selectedExercises.push({ titolo: card.getAttribute('data-title'), file: card.getAttribute('data-file') });
                     }
                 });
-
-                if (selectedExercises.length === 0) {
-                    alert("Seleziona almeno un esercizio spuntando le caselle sulle card!");
-                    return;
-                }
-
-                set(activeSessionRef, {
-                    pazienteId: patientId,
-                    pazienteNome: patientName,
-                    tipo: 'pianificata',
-                    esercizi: selectedExercises,
-                    indiceCorrente: 0,
-                    stato: 'in_corso',
-                    risultati: {}
-                }).then(() => {
-                    document.querySelectorAll('.select-exercise-checkbox').forEach(c => c.checked = false);
-                    updateQueue();
-                    window.location.href = `esercizio.html?sessione=true`;
-                });
+                if (selectedExercises.length === 0) { alert("Seleziona almeno un esercizio!"); return; }
+                set(activeSessionRef, { pazienteId: patientId, pazienteNome: patientName, tipo: 'pianificata', esercizi: selectedExercises, indiceCorrente: 0, stato: 'in_corso' })
+                    .then(() => window.location.href = `esercizio.html?sessione=true`);
             }
-        }
-
-        window.stopCurrentActiveSession = function() {
-            if (confirm("Sei sicuro di voler chiudere la sessione attiva?")) {
-                set(activeSessionRef, null).then(() => {
-                    alert("Sessione terminata con successo.");
-                });
-            }
-        }
+        };
 
         window.openExerciseCard = function(cardElement, event) {
-            if (event.target.classList.contains('select-exercise-checkbox')) {
-                return;
-            }
+            if (event.target.classList.contains('select-exercise-checkbox')) return;
             const file = cardElement.getAttribute('data-file');
-            if (activeSessionState) {
-                window.location.href = `esercizio.html?sessione=true&file=${encodeURIComponent(file)}`;
-            } else {
-                window.location.href = `esercizio.html?file=${encodeURIComponent(file)}`;
-            }
-        }
+            window.location.href = activeSessionState ? `esercizio.html?sessione=true&file=${encodeURIComponent(file)}` : `esercizio.html?file=${encodeURIComponent(file)}`;
+        };
     </script>
 
     <script>
         function togglePanel() {
             const wrapper = document.getElementById('panel-content-wrapper');
             const chevron = document.getElementById('panel-chevron');
-            if (wrapper.classList.contains('collapsed')) {
-                wrapper.classList.remove('collapsed');
-                chevron.style.transform = "rotate(0deg)";
-            } else {
-                wrapper.classList.add('collapsed');
-                chevron.style.transform = "rotate(180deg)";
-            }
+            wrapper.classList.toggle('collapsed');
+            chevron.style.transform = wrapper.classList.contains('collapsed') ? "rotate(180deg)" : "rotate(0deg)";
         }
-
         function updateQueue(event) {
             if (event) event.stopPropagation();
-
             const selected = [];
-            const cards = document.querySelectorAll('.card');
-            cards.forEach(card => {
-                const checkbox = card.querySelector('.select-exercise-checkbox');
-                if (checkbox && checkbox.checked) {
-                    selected.push(card.getAttribute('data-title'));
-                }
+            document.querySelectorAll('.card').forEach(card => {
+                if (card.querySelector('.select-exercise-checkbox').checked) selected.push(card.getAttribute('data-title'));
             });
-
             const indicator = document.getElementById('queue-list');
-            if(!indicator) return;
-            if (selected.length > 0) {
-                indicator.innerHTML = "<strong>Sequenza pianificata:</strong> " + selected.join(" ➔ ");
-                indicator.style.borderStyle = "solid";
-                indicator.style.borderColor = "var(--primary-light)";
-            } else {
-                indicator.textContent = "Nessun esercizio in coda. Spunta i quadratini sulle card per creare una pianificazione automatica.";
-                indicator.style.borderStyle = "dashed";
-                indicator.style.borderColor = "#cbd5e1";
-            }
+            if (!indicator) return;
+            indicator.innerHTML = selected.length > 0 ? "<strong>Sequenza pianificata:</strong> " + selected.join(" ➔ ") : "Nessun esercizio in coda.";
         }
-
-        function tornaAllaHome() {
-            window.location.href = 'index.html';
-        }
+        function tornaAllaHome() { window.location.href = 'index.html'; }
     </script>
 </body>
 </html>
