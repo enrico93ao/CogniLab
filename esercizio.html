@@ -21,9 +21,6 @@
             object-fit: contain;
         }
 
-        .session-info { display: flex; align-items: center; gap: 15px; font-size: 0.9rem; font-weight: 600; color: #475569; background: #f1f5f9; padding: 8px 14px; border-radius: 8px; border: 1px solid #e2e8f0; }
-        .session-info span i { color: #2563eb; margin-right: 5px; }
-
         .btn-action { background-color: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; padding: 10px 16px; border-radius: 8px; cursor: pointer; text-decoration: none; font-size: 0.9rem; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s; }
         .btn-action:hover { background-color: #e2e8f0; color: #0f172a; }
         
@@ -33,21 +30,11 @@
         .btn-danger { background-color: #ffeeef; color: #dc2626; border-color: #fecaca; }
         .btn-danger:hover { background-color: #fef2f2; color: #b91c1c; }
 
+        .btn-libero { background-color: #eff6ff; color: #2563eb; border-color: #bfdbfe; }
+        .btn-libero:hover { background-color: #dbeafe; color: #1d4ed8; }
+
         #exercise-title { font-size: 1.05rem; font-weight: 600; color: #334155; text-align: right; }
         #exercise-iframe { flex-grow: 1; width: 100%; height: calc(100% - 80px); border: none; background: #ffffff; }
-        
-        #results-screen { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(5px); z-index: 999; color: #0f172a; flex-direction: column; justify-content: center; align-items: center; padding: 20px; overflow-y: auto; }
-        .results-box { background: #ffffff; padding: 40px; border-radius: 24px; max-width: 600px; width: 100%; border: 1px solid #e2e8f0; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); text-align: center; }
-        .results-box h2 { font-size: 2rem; color: #2563eb; margin-bottom: 15px; }
-        .results-list { list-style: none; margin: 20px 0; text-align: left; max-height: 200px; overflow-y: auto; }
-        .results-list li { padding: 10px 0; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; font-size: 1rem; color: #334155; }
-        
-        .autovalutazione-section { margin-top: 20px; text-align: left; border-top: 1px solid #e2e8f0; padding-top: 15px; }
-        .autovalutazione-section label { display: block; font-weight: 600; margin-bottom: 8px; color: #1e293b; font-size: 0.95rem; }
-        .rating-stars { display: flex; gap: 10px; justify-content: center; margin-bottom: 15px; }
-        .rating-stars input { display: none; }
-        .rating-stars label { font-size: 1.5rem; color: #cbd5e1; cursor: pointer; transition: color 0.2s; }
-        .rating-stars input:checked ~ label, .rating-stars label:hover, .rating-stars label:hover ~ label { color: #f59e0b; }
     </style>
 </head>
 <body>
@@ -55,12 +42,8 @@
     <div id="top-bar">
         <div class="top-bar-left">
             <button class="btn-action btn-danger" id="back-home-btn" onclick="exitSession()">
-                <i class="fa-solid fa-arrow-right-from-bracket"></i> Termina Sessione
+                <i class="fa-solid fa-arrow-left"></i> Torna all'Hub
             </button>
-            <div class="session-info">
-                <span><i class="fa-solid fa-stopwatch"></i><span id="timer-display">00:00</span></span>
-                <span><i class="fa-solid fa-list-check"></i><span id="counter-display">0</span> es.</span>
-            </div>
         </div>
 
         <div class="top-bar-center">
@@ -79,36 +62,10 @@
 
     <iframe id="exercise-iframe" src=""></iframe>
 
-    <!-- Schermata Risultati / Questionario Autovalutazione -->
-    <div id="results-screen">
-        <div class="results-box">
-            <h2><i class="fa-solid fa-square-poll-vertical"></i> Sessione Conclusa!</h2>
-            <p id="paziente-concluso" style="font-size: 1.1rem; color: #64748b; margin-bottom: 10px;"></p>
-            <p id="session-summary-time" style="font-size: 0.95rem; color: #475569; font-weight: 600;"></p>
-            
-            <ul class="results-list" id="final-stats"></ul>
-
-            <div class="autovalutazione-section">
-                <label>Come valuti questa sessione di stimolazione?</label>
-                <div class="rating-stars" id="star-rating">
-                    <input type="radio" id="star5" name="rating" value="5"><label for="star5" title="Eccellente"><i class="fa-solid fa-star"></i></label>
-                    <input type="radio" id="star4" name="rating" value="4"><label for="star4" title="Buono"><i class="fa-solid fa-star"></i></label>
-                    <input type="radio" id="star3" name="rating" value="3"><label for="star3" title="Medio"><i class="fa-solid fa-star"></i></label>
-                    <input type="radio" id="star2" name="rating" value="2"><label for="star2" title="Basso"><i class="fa-solid fa-star"></i></label>
-                    <input type="radio" id="star1" name="rating" value="1"><label for="star1" title="Difficile"><i class="fa-solid fa-star"></i></label>
-                </div>
-            </div>
-
-            <button class="btn-action btn-next" style="font-size: 1.1rem; padding: 12px 30px; width: 100%; justify-content: center; margin-top: 15px;" onclick="closeAndReturn()">
-                Salva e Torna all'Hub
-            </button>
-        </div>
-    </div>
-
-    <!-- Firebase SDK e Logica -->
+    <!-- Firebase SDK e Logica per il caricamento dell'esercizio -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
-        import { getDatabase, ref, get, set, update, push } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js";
+        import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBBChH3sFfhwE4waQTzERtKGytJrucYEFM",
@@ -125,36 +82,23 @@
         const db = getDatabase(app);
 
         let activeSession = null;
-        let isSessionPianificata = false;
-        let secondsElapsed = 0;
-        let timerInterval = null;
-        let exercisesCompletedCount = 0;
-
-        function startTimer() {
-            secondsElapsed = 0;
-            if (timerInterval) clearInterval(timerInterval);
-            timerInterval = setInterval(() => {
-                secondsElapsed++;
-                const mins = String(Math.floor(secondsElapsed / 60)).padStart(2, '0');
-                const secs = String(secondsElapsed % 60).padStart(2, '0');
-                document.getElementById('timer-display').textContent = `${mins}:${secs}`;
-            }, 1000);
-        }
 
         window.addEventListener('DOMContentLoaded', async () => {
-            startTimer();
             const params = new URLSearchParams(window.location.search);
             const fileDirect = params.get('file');
             const localUsername = localStorage.getItem('hub_username') || "Utente";
 
             if (fileDirect) {
-                // Modalità Libera
                 const esFile = decodeURIComponent(fileDirect);
                 document.getElementById('exercise-iframe').src = esFile;
                 document.getElementById('exercise-title').textContent = `${localUsername} ➔ ${esFile.replace('.html', '').replace(/_/g, ' ')}`;
                 
-                exercisesCompletedCount = parseInt(localStorage.getItem('temp_libero_count') || '0');
-                document.getElementById('counter-display').textContent = exercisesCompletedCount;
+                const btnBack = document.getElementById('back-home-btn');
+                btnBack.className = "btn-action btn-libero";
+                btnBack.innerHTML = '<i class="fa-solid fa-list-check"></i> Torna agli esercizi';
+                btnBack.onclick = function() {
+                    window.location.href = "esercizi.html";
+                };
                 return;
             }
 
@@ -164,11 +108,9 @@
 
                 if (snapshot.exists()) {
                     activeSession = snapshot.val();
-                    
                     if (activeSession.tipo === 'libera') {
                         window.location.href = "esercizi.html";
                     } else {
-                        isSessionPianificata = true;
                         loadCurrentExerciseFromSession();
                     }
                 } else {
@@ -185,16 +127,13 @@
             const index = activeSession.indiceCorrente || 0;
             const esercizi = activeSession.esercizi;
 
-            exercisesCompletedCount = index;
-            document.getElementById('counter-display').textContent = exercisesCompletedCount;
-
             if (esercizi && index < esercizi.length) {
                 const esercizioAttivo = esercizi[index];
                 document.getElementById('exercise-iframe').src = esercizioAttivo.file;
                 document.getElementById('exercise-title').textContent = `${activeSession.pazienteNome || 'Paziente'} ➔ Esercizio ${index + 1} di ${esercizi.length}: ${esercizioAttivo.titolo}`;
                 document.getElementById('next-btn').style.display = "inline-flex";
             } else {
-                showFinalResults();
+                window.location.href = "esercizi.html";
             }
         }
 
@@ -210,63 +149,6 @@
         }
 
         window.exitSession = function() {
-            showFinalResults();
-        }
-
-        function showFinalResults() {
-            if (timerInterval) clearInterval(timerInterval);
-            document.getElementById('exercise-iframe').style.display = "none";
-            document.getElementById('top-bar').style.display = "none";
-            
-            const resultsScreen = document.getElementById('results-screen');
-            resultsScreen.style.display = "flex";
-            
-            const mins = Math.floor(secondsElapsed / 60);
-            const secs = secondsElapsed % 60;
-            document.getElementById('session-summary-time').textContent = `Durata totale sessione: ${mins} min ${secs} sec`;
-
-            const list = document.getElementById('final-stats');
-            list.innerHTML = "";
-
-            if (activeSession && activeSession.esercizi) {
-                document.getElementById('paziente-concluso').textContent = `Paziente: ${activeSession.pazienteNome}`;
-                const completati = activeSession.esercizi.slice(0, activeSession.indiceCorrente || 0);
-                completati.forEach((es) => {
-                    const li = document.createElement('li');
-                    li.innerHTML = `<span><i class="fa-solid fa-check" style="color: #10b981;"></i> ${es.titolo}</span> <span style="font-weight: bold; color: #10b981;">Completato</span>`;
-                    list.appendChild(li);
-                });
-                exercisesCompletedCount = completati.length;
-            } else {
-                const localUsername = localStorage.getItem('hub_username') || "Utente";
-                document.getElementById('paziente-concluso').textContent = `Utente: ${localUsername} (Training Libero)`;
-                let fatti = parseInt(localStorage.getItem('exercises_done_counter') || '0') + 1;
-                localStorage.setItem('exercises_done_counter', fatti.toString());
-                
-                const li = document.createElement('li');
-                li.innerHTML = `<span><i class="fa-solid fa-check" style="color: #10b981;"></i> Esercizio completato in modalità libera</span> <span style="font-weight: bold; color: #10b981;">Completato</span>`;
-                list.appendChild(li);
-                exercisesCompletedCount = 1;
-            }
-            document.getElementById('counter-display').textContent = exercisesCompletedCount;
-        }
-
-        window.closeAndReturn = async function() {
-            const selectedRating = document.querySelector('input[name="rating"]:checked');
-            const ratingValue = selectedRating ? selectedRating.value : "Non specificato";
-
-            if (activeSession && isSessionPianificata) {
-                const completati = activeSession.esercizi.slice(0, activeSession.indiceCorrente || 0);
-                const storicoRef = ref(db, `storico_pazienti/${activeSession.pazienteId}/sessioni`);
-                await push(storicoRef, {
-                    data: new Date().toISOString(),
-                    tipo: completati.length === activeSession.esercizi.length ? "Sessione Pianificata Completa" : "Sessione Pianificata Interrotta",
-                    eserciziSvolti: completati,
-                    durataSecondi: secondsElapsed,
-                    autovalutazione: ratingValue
-                });
-                await set(ref(db, 'sessione_attiva'), null);
-            }
             window.location.href = "esercizi.html";
         }
     </script>
