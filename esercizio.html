@@ -163,7 +163,8 @@
             localStorage.setItem('global_timer_start', globalStartTime);
         }
 
-        setInterval(() => {
+        // Funzione per calcolare e aggiornare immediatamente il display del timer
+        function updateGlobalTimer() {
             const elapsedSeconds = Math.floor((Date.now() - parseInt(globalStartTime)) / 1000);
             const hrs = Math.floor(elapsedSeconds / 3600).toString().padStart(2, '0');
             const mins = Math.floor((elapsedSeconds % 3600) / 60).toString().padStart(2, '0');
@@ -172,7 +173,13 @@
             if (timerEl) {
                 timerEl.innerHTML = `<i class="fa-regular fa-clock" style="color: var(--primary-light);"></i> ${hrs}:${mins}:${secs}`;
             }
-        }, 1000);
+        }
+
+        // Aggiorna subito all'avvio dello script per evitare lo sfarfallamento a 00:00:00
+        updateGlobalTimer();
+
+        // Avvia l'intervallo regolare di aggiornamento ogni secondo
+        setInterval(updateGlobalTimer, 1000);
 
         // --- CARICAMENTO DATI UTENTE E PARAMETRO ESERCIZIO ---
         document.addEventListener("DOMContentLoaded", function() {
