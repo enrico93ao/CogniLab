@@ -119,7 +119,7 @@
         .kpi-icon { width: 56px; height: 56px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
         .kpi-card.users .kpi-icon { background: #eff6ff; color: #2563eb; }
         .kpi-card.done .kpi-icon { background: #ecfdf5; color: #10b981; }
-        .kpi-card.mode .kpi-icon { background: #f3e8ff; color: #9333ea; }
+        .kpi-card.satisfaction .kpi-icon { background: #fef3c7; color: #d97706; }
         .kpi-info h4 { font-size: 0.75rem; color: var(--slate-400); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
         .kpi-info p { font-size: 1.6rem; font-weight: 700; color: var(--slate-900); letter-spacing: -0.5px; }
 
@@ -243,7 +243,7 @@
         .area-orientamento .card:hover { border-color: #67e8f9; }
         .area-orientamento .card:hover .tag { background: #ecfeff; color: #0891b2; }
 
-        /* --- MODALE DI AUTOVALUTAZIONE --- */
+        /* --- MODALE DI AUTOVALUTAZIONE MULTI-DOMANDA --- */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -257,31 +257,52 @@
         .modal-card {
             background: #ffffff;
             border-radius: 28px;
-            padding: 40px;
-            max-width: 480px;
+            padding: 35px 40px;
+            max-width: 540px;
             width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-            text-align: center;
             animation: modalPop 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
         @keyframes modalPop {
             0% { transform: scale(0.9); opacity: 0; }
             100% { transform: scale(1); opacity: 1; }
         }
-        .modal-card h3 { font-size: 1.4rem; color: var(--slate-900); font-weight: 800; margin-bottom: 12px; }
-        .modal-card p { font-size: 0.95rem; color: var(--slate-400); margin-bottom: 24px; line-height: 1.5; }
-        .rating-faces { display: flex; justify-content: center; gap: 15px; margin-bottom: 30px; }
-        .face-btn {
+        .modal-card h3 { font-size: 1.4rem; color: var(--slate-900); font-weight: 800; margin-bottom: 8px; text-align: center; }
+        .modal-card > p { font-size: 0.95rem; color: var(--slate-400); margin-bottom: 24px; line-height: 1.5; text-align: center; }
+        
+        .question-block {
             background: #f8fafc;
-            border: 2px solid #e2e8f0;
-            border-radius: 20px;
-            width: 64px; height: 64px;
+            border: 1px solid #e2e8f0;
+            border-radius: 18px;
+            padding: 18px;
+            margin-bottom: 16px;
+        }
+        .question-block label {
+            display: block;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--slate-900);
+            margin-bottom: 12px;
+        }
+        .star-rating {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+        }
+        .star-btn {
+            background: transparent;
+            border: none;
             font-size: 1.8rem;
+            color: #cbd5e1;
             cursor: pointer;
             transition: var(--transition);
-            display: flex; align-items: center; justify-content: center;
         }
-        .face-btn:hover { background: #eff6ff; border-color: var(--primary-light); transform: translateY(-4px); }
+        .star-btn.active, .star-btn:hover {
+            color: #f59e0b;
+            transform: scale(1.1);
+        }
     </style>
 </head>
 <body>
@@ -333,11 +354,11 @@
                     <p id="kpi-svolti">0</p>
                 </div>
             </div>
-            <div class="kpi-card mode">
-                <div class="kpi-icon"><i class="fa-solid fa-shield-halved"></i></div>
+            <div class="kpi-card satisfaction">
+                <div class="kpi-icon"><i class="fa-solid fa-star"></i></div>
                 <div class="kpi-info">
-                    <h4>Modalità Hub</h4>
-                    <p id="kpi-modalita">-</p>
+                    <h4>Media Soddisfazione</h4>
+                    <p id="kpi-media-stelle">-</p>
                 </div>
             </div>
         </div>
@@ -781,18 +802,49 @@
 
     </div>
 
-    <!-- Modale di Autovalutazione -->
+    <!-- Modale di Autovalutazione con 3 domande e stelline -->
     <div id="feedback-modal" class="modal-overlay">
         <div class="modal-card">
-            <h3>Come valuti questa sessione?</h3>
-            <p>Esprimi il tuo grado di soddisfazione o affaticamento per aiutarci a calibrare il percorso cognitivo.</p>
-            <div class="rating-faces">
-                <button class="face-btn" onclick="submitFeedback(5)">😊</button>
-                <button class="face-btn" onclick="submitFeedback(4)">🙂</button>
-                <button class="face-btn" onclick="submitFeedback(3)">😐</button>
-                <button class="face-btn" onclick="submitFeedback(2)">🙁</button>
+            <h3>Questionario di Autovalutazione</h3>
+            <p>Esprimi la tua opinione valutando i seguenti aspetti da 1 a 5 stelline.</p>
+            
+            <div class="question-block">
+                <label>1. Come valuti la chiarezza e la comprensibilità degli esercizi svolti?</label>
+                <div class="star-rating" data-q="1">
+                    <button class="star-btn" onclick="setRating(1, 1)"><i class="fa-solid fa-star"></i></button>
+                    <button class="star-btn" onclick="setRating(1, 2)"><i class="fa-solid fa-star"></i></button>
+                    <button class="star-btn" onclick="setRating(1, 3)"><i class="fa-solid fa-star"></i></button>
+                    <button class="star-btn" onclick="setRating(1, 4)"><i class="fa-solid fa-star"></i></button>
+                    <button class="star-btn" onclick="setRating(1, 5)"><i class="fa-solid fa-star"></i></button>
+                </div>
             </div>
-            <button class="btn btn-sm" onclick="closeFeedbackModal()" style="background: #f1f5f9; color: var(--slate-700);">Salta per ora</button>
+
+            <div class="question-block">
+                <label>2. Come valuti il livello di gradimento e coinvolgimento generale della sessione?</label>
+                <div class="star-rating" data-q="2">
+                    <button class="star-btn" onclick="setRating(2, 1)"><i class="fa-solid fa-star"></i></button>
+                    <button class="star-btn" onclick="setRating(2, 2)"><i class="fa-solid fa-star"></i></button>
+                    <button class="star-btn" onclick="setRating(2, 3)"><i class="fa-solid fa-star"></i></button>
+                    <button class="star-btn" onclick="setRating(2, 4)"><i class="fa-solid fa-star"></i></button>
+                    <button class="star-btn" onclick="setRating(2, 5)"><i class="fa-solid fa-star"></i></button>
+                </div>
+            </div>
+
+            <div class="question-block">
+                <label>3. Come giudichi l'impatto e l'utilità percepita per il tuo allenamento cognitivo?</label>
+                <div class="star-rating" data-q="3">
+                    <button class="star-btn" onclick="setRating(3, 1)"><i class="fa-solid fa-star"></i></button>
+                    <button class="star-btn" onclick="setRating(3, 2)"><i class="fa-solid fa-star"></i></button>
+                    <button class="star-btn" onclick="setRating(3, 3)"><i class="fa-solid fa-star"></i></button>
+                    <button class="star-btn" onclick="setRating(3, 4)"><i class="fa-solid fa-star"></i></button>
+                    <button class="star-btn" onclick="setRating(3, 5)"><i class="fa-solid fa-star"></i></button>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button class="btn btn-success" style="flex: 1;" onclick="submitFeedbackForm()">Invia Risposte</button>
+                <button class="btn btn-sm" onclick="closeFeedbackModal()" style="background: #f1f5f9; color: var(--slate-700);">Salta</button>
+            </div>
         </div>
     </div>
 
@@ -817,6 +869,22 @@
 
         let activeSessionState = null;
         let performanceChartInstance = null;
+        
+        // Oggetto di memorizzazione temporanea delle risposte del questionario
+        let currentRatings = { q1: 0, q2: 0, q3: 0 };
+
+        window.setRating = function(questionNumber, starsCount) {
+            currentRatings[`q${questionNumber}`] = starsCount;
+            const container = document.querySelector(`.star-rating[data-q="${questionNumber}"]`);
+            const buttons = container.querySelectorAll('.star-btn');
+            buttons.forEach((btn, index) => {
+                if (index < starsCount) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+        }
 
         // Cronometro Globale
         let globalSeconds = 0;
@@ -847,10 +915,8 @@
                 document.getElementById('kpi-modalita').innerText = "Training Libero";
                 document.getElementById('clinical-panel').style.display = 'none'; 
                 
-                // Mostra il pulsante "Termina Sessione" nella navbar anche per il training libero
                 document.getElementById('btn-termina-sessione-nav').style.display = 'inline-flex';
                 
-                // Messaggio di benvenuto personalizzato
                 document.getElementById('welcome-heading').innerText = `Bentornato, ${username}!`;
                 document.getElementById('welcome-subtext').innerText = "Scegli liberamente gli esercizi che preferisci completare oggi per mantenere allenate le tue abilità cognitive.";
                 document.getElementById('guidelines-text').innerText = "Modalità Libera attiva: puoi completare quanti esercizi desideri e terminare la sessione quando preferisci.";
@@ -872,6 +938,31 @@
                 document.getElementById('welcome-subtext').innerText = "Gestisci i pazienti registrati, crea pianificazioni di esercizi personalizzate e monitora i grafici di andamento clinico.";
                 document.getElementById('guidelines-text').innerText = "Seleziona un paziente dall'Area Clinica per abilitare il report e la programmazione.";
             }
+
+            // Ascolta e calcola la media globale delle valutazioni salvate nel database
+            const feedbackRef = ref(db, 'questionari_autovalutazione');
+            onValue(feedbackRef, (snapshot) => {
+                if (snapshot.exists()) {
+                    let totalScoreSum = 0;
+                    let totalCount = 0;
+                    snapshot.forEach((childSnapshot) => {
+                        const data = childSnapshot.val();
+                        if (data.q1 && data.q2 && data.q3) {
+                            const avgSession = (Number(data.q1) + Number(data.q2) + Number(data.q3)) / 3;
+                            totalScoreSum += avgSession;
+                            totalCount++;
+                        }
+                    });
+                    if (totalCount > 0) {
+                        const overallAverage = (totalScoreSum / totalCount).toFixed(1);
+                        document.getElementById('kpi-media-stelle').innerText = `${overallAverage} / 5 ⭐`;
+                    } else {
+                        document.getElementById('kpi-media-stelle').innerText = "N/D";
+                    }
+                } else {
+                    document.getElementById('kpi-media-stelle').innerText = "N/D";
+                }
+            });
         });
 
         const activeSessionRef = ref(db, 'sessione_attiva');
@@ -1235,9 +1326,28 @@
             window.location.href = `esercizio.html?file=${encodeURIComponent(file)}`;
         }
 
-        window.submitFeedback = function(score) {
-            alert(`Grazie per il tuo feedback! Punteggio registrato: ${score}/5`);
-            document.getElementById('feedback-modal').style.display = 'none';
+        window.submitFeedbackForm = function() {
+            if (currentRatings.q1 === 0 || currentRatings.q2 === 0 || currentRatings.q3 === 0) {
+                alert("Per favore, rispondi a tutte e tre le domande selezionando le stelline prima di inviare.");
+                return;
+            }
+
+            const feedbackRef = ref(db, 'questionari_autovalutazione');
+            const newFeedbackRef = push(feedbackRef);
+
+            set(newFeedbackRef, {
+                ...currentRatings,
+                utente: localStorage.getItem('hub_username') || "Utente",
+                dataInvio: new Date().toISOString()
+            }).then(() => {
+                alert("Grazie per aver completato il questionario! Le risposte sono state salvate con successo.");
+                document.getElementById('feedback-modal').style.display = 'none';
+                // Reset delle stelline
+                currentRatings = { q1: 0, q2: 0, q3: 0 };
+                document.querySelectorAll('.star-btn').forEach(btn => btn.classList.remove('active'));
+            }).catch(err => {
+                alert("Errore durante il salvataggio: " + err.message);
+            });
         }
 
         window.closeFeedbackModal = function() {
