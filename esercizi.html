@@ -919,7 +919,8 @@
             localStorage.setItem('global_timer_start', globalStartTime);
         }
 
-        setInterval(() => {
+        // Funzione per aggiornare il testo del cronometro
+        function updateGlobalTimer() {
             const elapsedSeconds = Math.floor((Date.now() - parseInt(globalStartTime)) / 1000);
             const hrs = Math.floor(elapsedSeconds / 3600).toString().padStart(2, '0');
             const mins = Math.floor((elapsedSeconds % 3600) / 60).toString().padStart(2, '0');
@@ -928,7 +929,13 @@
             if (timerEl) {
                 timerEl.innerHTML = `<i class="fa-regular fa-clock" style="color: var(--primary-light);"></i> ${hrs}:${mins}:${secs}`;
             }
-        }, 1000);
+        }
+
+        // Esegui subito l'aggiornamento per azzerare il ritardo visivo iniziale
+        updateGlobalTimer();
+
+        // Poi continua ad aggiornare ogni secondo
+        setInterval(updateGlobalTimer, 1000);
 
         document.addEventListener("DOMContentLoaded", function() {
             const modalita = localStorage.getItem('hub_mode');
