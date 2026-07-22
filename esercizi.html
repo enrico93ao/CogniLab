@@ -221,42 +221,6 @@
         .area-visuo .card:hover .tag { background: #f3e8ff; color: #7c3aed; }
         .area-orientamento .card:hover { border-color: #67e8f9; }
         .area-orientamento .card:hover .tag { background: #ecfeff; color: #0891b2; }
-
-        /* MODALE INTERNA PER ESERCIZI DINAMICI */
-        #exercise-modal {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(15, 23, 42, 0.75);
-            backdrop-filter: blur(5px);
-            z-index: 1000;
-            display: none;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-        .modal-card {
-            background: #ffffff;
-            width: 100%;
-            max-width: 800px;
-            border-radius: 28px;
-            padding: 35px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-            position: relative;
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-        .close-modal {
-            position: absolute;
-            top: 25px; right: 25px;
-            background: #f1f5f9;
-            border: none;
-            width: 40px; height: 40px;
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1.2rem; cursor: pointer; color: var(--slate-700);
-            transition: var(--transition);
-        }
-        .close-modal:hover { background: var(--danger); color: white; }
     </style>
 </head>
 <body>
@@ -738,16 +702,6 @@
 
     </div>
 
-    <!-- Modale Contenitore Esercizio Interattivo -->
-    <div id="exercise-modal">
-        <div class="modal-card">
-            <button class="close-modal" onclick="closeExerciseModal()"><i class="fa-solid fa-xmark"></i></button>
-            <div id="modal-exercise-container">
-                <!-- Il contenuto dell'esercizio viene caricato dinamicamente qui -->
-            </div>
-        </div>
-    </div>
-
     <!-- Firebase SDK e Logiche Integrate -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
@@ -1134,8 +1088,8 @@
                     document.querySelectorAll('.select-exercise-checkbox').forEach(c => c.checked = false);
                     updateQueue();
                     
-                    // Avvia il primo esercizio della coda pianificata
-                    openInteractiveExercise(selectedExercises[0].titolo, selectedExercises[0].file);
+                    // Reindirizza al sistema di caricamento tramite esercizio.html per il primo esercizio pianificato
+                    window.location.href = `esercizio.html`;
                 });
             }
         }
@@ -1148,89 +1102,15 @@
             }
         }
 
-        // Funzione integrata per aprire l'esercizio interattivo (tramite modale o generatore integrato)
+        // Funzione corretta per reindirizzare a esercizio.html caricando il file effettivo
         window.openExerciseCard = function(cardElement, event) {
             if (event.target.classList.contains('select-exercise-checkbox')) {
                 return;
             }
-            const titolo = cardElement.getAttribute('data-title');
             const file = cardElement.getAttribute('data-file');
             
-            if (activeSessionState && activeSessionState.tipo === 'libera') {
-                // Registrazione automatica per sessione libera clinica
-                openInteractiveExercise(titolo, file, (risultatoDato) => {
-                    const storicoRef = ref(db, `storico_pazienti/${activeSessionState.pazienteId}/sessioni`);
-                    push(storicoRef, {
-                        data: new Date().toISOString(),
-                        eserciziSvolti: [{ titolo: titolo, risultati: risultatoDato }]
-                    });
-                    alert(`Esercizio "${titolo}" completato e salvato per ${activeSessionState.pazienteNome}!`);
-                });
-            } else {
-                openInteractiveExercise(titolo, file, (risultatoDato) => {
-                    // Modalità utente singolo / training libero
-                    let svolti = parseInt(localStorage.getItem('exercises_done_counter') || '0') + 1;
-                    localStorage.setItem('exercises_done_counter', svolti);
-                    const counterElem = document.getElementById('kpi-svolti');
-                    if(counterElem) counterElem.innerText = svolti;
-                });
-            }
-        }
-
-        function openInteractiveExercise(titolo, file, callbackRisultato) {
-            const modal = document.getElementById('exercise-modal');
-            const container = document.getElementById('modal-exercise-container');
-            modal.style.display = 'flex';
-
-            // Generazione dinamica di un'interfaccia interattiva funzionante per l'esercizio selezionato
-            container.innerHTML = `
-                <div style="text-align: center; padding: 20px;">
-                    <h2 style="color: var(--slate-900); margin-bottom: 10px; font-weight: 800;"><i class="fa-solid fa-brain" style="color: var(--primary-light);"></i> ${titolo}</h2>
-                    <p style="color: var(--slate-400); margin-bottom: 25px;">Esegui il compito cognitivo e registra il completamento.</p>
-                    
-                    <div id="exercise-interactive-box" style="background: #f8fafc; border: 2px dashed #cbd5e1; padding: 30px; border-radius: 20px; margin-bottom: 25px;">
-                        <p id="ex-instruction" style="font-size: 1.1rem; font-weight: 600; margin-bottom: 20px;">Premi il pulsante sottostante per avviare la sessione di test e calcolare l'accuratezza.</p>
-                        <button class="btn btn-success" id="btn-start-test" onclick="simulateExerciseExecution()"><i class="fa-solid fa-play"></i> Avvia Test Interattivo</button>
-                    </div>
-
-                    <div id="ex-result-section" style="display: none;">
-                        <div style="font-size: 1.4rem; font-weight: 700; color: var(--success); margin-bottom: 15px;">
-                            <i class="fa-solid fa-circle-check"></i> Esercizio Completato con Successo!
-                        </div>
-                        <p id="ex-score-display" style="font-size: 1.1rem; font-weight: 600; margin-bottom: 20px;"></p>
-                        <button class="btn" onclick="concludeExerciseSuccess()"><i class="fa-solid fa-check"></i> Registra e Chiudi</button>
-                    </div>
-                </div>
-            `;
-
-            window._currentExerciseCallback = callbackRisultato;
-        }
-
-        window.simulateExerciseExecution = function() {
-            const box = document.getElementById('exercise-interactive-box');
-            box.innerHTML = `<p style="font-size: 1.2rem; font-weight: 700; color: var(--primary-light);">Elaborazione stimoli in corso...</p><i class="fa-solid fa-spinner fa-spin" style="font-size: 2rem; margin-top: 15px; color: var(--primary-light);"></i>`;
-            
-            setTimeout(() => {
-                const accuratezzaCasuale = Math.floor(Math.random() * 25) + 75; // Punteggio tra 75% e 100%
-                window._lastExerciseScore = { percentualeAccuratezza: accuratezzaCasuale };
-                
-                box.style.display = 'none';
-                const resSec = document.getElementById('ex-result-section');
-                resSec.style.display = 'block';
-                document.getElementById('ex-score-display').innerText = `Accuratezza registrata: ${accuratezzle = accuratezzaCasuale}%`;
-                document.getElementById('ex-score-display').innerText = `Accuratezza registrata: ${accuratezzaCasuale}%`;
-            }, 1500);
-        }
-
-        window.concludeExerciseSuccess = function() {
-            if (window._currentExerciseCallback && window._lastExerciseScore) {
-                window._currentExerciseCallback(window._lastExerciseScore);
-            }
-            closeExerciseModal();
-        }
-
-        window.closeExerciseModal = function() {
-            document.getElementById('exercise-modal').style.display = 'none';
+            // Reindirizzamento diretto a esercizio.html passando il file dell'esercizio via GET
+            window.location.href = `esercizio.html?file=${encodeURIComponent(file)}`;
         }
     </script>
 
