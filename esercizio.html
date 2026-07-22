@@ -224,11 +224,19 @@
         }
     </script>
 
-    <!-- Script per bypassare automaticamente la modale di avvio interna all'iframe se presente -->
+    <!-- Script per la gestione dell'iframe (rimozione barra interna ed eventuale avvio automatico) -->
     <script>
         document.getElementById('exercise-iframe').addEventListener('load', function() {
             try {
                 const iframeDoc = this.contentWindow.document;
+                
+                // Rimuove la barra interna duplicata dall'esercizio se presente
+                const internalTopBar = iframeDoc.querySelector('#top-bar, header, .navbar, .top-header');
+                if (internalTopBar) {
+                    internalTopBar.style.display = 'none';
+                }
+
+                // Cerca ed esegue il pulsante di avvio se presente nella pagina interna
                 const startBtn = iframeDoc.querySelector('#start-btn') || 
                                  iframeDoc.querySelector('button[id*="avvia"]') || 
                                  iframeDoc.querySelector('.btn-start') ||
@@ -238,8 +246,7 @@
                     startBtn.click();
                 }
             } catch (e) {
-                // Gestione cross-origin o restrizioni di sicurezza del browser
-                console.log("Impossibile automatizzare il click interno direttamente via script.");
+                console.log("Impossibile accedere al DOM dell'iframe a causa di restrizioni cross-origin.");
             }
         });
     </script>
