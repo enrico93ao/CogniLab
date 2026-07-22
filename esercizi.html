@@ -296,6 +296,9 @@
                 <i class="fa-regular fa-clock" style="color: var(--primary-light);"></i> 00:00:00
             </div>
             <div id="user-display" class="user-badge">Ospite</div>
+            <button class="btn btn-danger btn-sm" id="btn-termina-sessione-nav" onclick="terminaSessioneGlobale()" style="display: none;">
+                <i class="fa-solid fa-flag-checkered"></i> Termina Sessione
+            </button>
             <button class="btn-exit" onclick="tornaAllaHome()"><i class="fa-solid fa-arrow-right-from-bracket"></i> Esci</button>
         </div>
     </nav>
@@ -844,10 +847,13 @@
                 document.getElementById('kpi-modalita').innerText = "Training Libero";
                 document.getElementById('clinical-panel').style.display = 'none'; 
                 
+                // Mostra il pulsante "Termina Sessione" nella navbar anche per il training libero
+                document.getElementById('btn-termina-sessione-nav').style.display = 'inline-flex';
+                
                 // Messaggio di benvenuto personalizzato
                 document.getElementById('welcome-heading').innerText = `Bentornato, ${username}!`;
                 document.getElementById('welcome-subtext').innerText = "Scegli liberamente gli esercizi che preferisci completare oggi per mantenere allenate le tue abilità cognitive.";
-                document.getElementById('guidelines-text').innerText = "Modalità Libera attiva: puoi completare quanti esercizi desideri senza vincoli temporali.";
+                document.getElementById('guidelines-text').innerText = "Modalità Libera attiva: puoi completare quanti esercizi desideri e terminare la sessione quando preferisci.";
 
                 document.querySelectorAll('.select-exercise-checkbox').forEach(c => c.style.display = 'none');
                 
@@ -1210,9 +1216,14 @@
             if (confirm("Sei sicuro di voler chiudere la sessione attiva?")) {
                 set(activeSessionRef, null).then(() => {
                     alert("Sessione terminata con successo.");
-                    // Mostra la modale di autovalutazione alla chiusura
                     document.getElementById('feedback-modal').style.display = 'flex';
                 });
+            }
+        }
+
+        window.terminaSessioneGlobale = function() {
+            if (confirm("Vuoi concludere l'allenamento di oggi e visualizzare il questionario di autovalutazione?")) {
+                document.getElementById('feedback-modal').style.display = 'flex';
             }
         }
 
@@ -1221,8 +1232,6 @@
                 return;
             }
             const file = cardElement.getAttribute('data-file');
-            
-            // Mostra la modale di autovalutazione prima di procedere o consentila in uscita
             window.location.href = `esercizio.html?file=${encodeURIComponent(file)}`;
         }
 
