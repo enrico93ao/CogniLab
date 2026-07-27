@@ -97,7 +97,7 @@
             position: absolute;
             right: 0;
             top: 0;
-            height: 100%; /* Estesa per tutta l'altezza della finestra */
+            height: 100%;
             width: 35px;
             background-color: #dc3545;
             z-index: 20;
@@ -225,10 +225,7 @@
 
     <!-- 1. CONFIGURAZIONE -->
     <div id="welcome-screen" class="screen active">
-        <div style="position: absolute; top: 20px; left: 20px;">
-            <button class="btn btn-small" onclick="goToDashboard()">Torna alla Dashboard</button>
-        </div>
-        <h1 style="font-size: 26px; text-align: center; margin-top: 20px;">Esercizio di Cancellazione Clinica Modulare</h1>
+        <h1 style="font-size: 26px; text-align: center; margin-top: 10px;">Esercizio di Cancellazione Clinica Modulare</h1>
         
         <div class="config-card">
             <h3 style="margin-bottom: 12px; color: #333; border-bottom: 1px solid #eee; padding-bottom: 5px;">Configurazione:</h3>
@@ -284,7 +281,7 @@
     <!-- 2. AREA DEL COMPITO -->
     <div id="game-screen" class="screen">
         <div class="top-bar-header">
-            <button class="btn btn-small" onclick="goToDashboard()">Torna alla Dashboard</button>
+            <!-- Pulsante rimosso come richiesto -->
         </div>
         <div class="canvas-area">
             <canvas id="cancellationCanvas"></canvas>
@@ -337,13 +334,12 @@
             <div id="savingStatus" class="saving-loader">Salvataggio dei dati in corso...</div>
 
             <div style="text-align: center; margin-top: 15px;">
-                <button id="btnAction" class="btn" onclick="goToDashboard()">Torna alla Dashboard</button>
+                <button id="btnAction" class="btn" onclick="goToDashboard()">Torna alla Lista Esercizi</button>
             </div>
         </div>
     </div>
 
     <script>
-        // --- INIZIALIZZAZIONE PROTETTA DI FIREBASE ---
         let database = null;
         
         function initFirebaseSafe() {
@@ -354,23 +350,18 @@
                         firebase.initializeApp(config);
                     }
                     database = firebase.database();
-                    console.log("Firebase collegato correttamente.");
-                } else {
-                    console.warn("Nessuna credenziale valida trovata per Firebase. Il gioco girerà in modalità offline.");
                 }
             } catch (e) {
-                console.error("Errore durante il caricamento di Firebase:", e);
+                console.error("Errore Firebase:", e);
             }
         }
 
-        // Parametri URL
         const urlParams = new URLSearchParams(window.location.search);
         const isSessioneAttiva = urlParams.get('sessione') === 'true';
         const pazienteId = urlParams.get('pazienteId');
         const sessionId = urlParams.get('sessionId');
         const indiceEsercizio = parseInt(urlParams.get('indiceEsercizio')) || 0;
 
-        // --- STATI DI GIOCO ---
         const LETTER_TARGET = "H";
         const LETTER_DISTRACTORS = ["N", "M", "K", "F", "E"];
         const SHAPE_TARGET = "circle";
@@ -394,7 +385,6 @@
         let showLines = false;
         let activeRowIndex = 0; 
 
-        // Gestione checkbox vincolo di riga
         document.getElementById('enable-red-bar').addEventListener('change', function(e) {
             const constraintCheckbox = document.getElementById('enable-row-constraint');
             if(!e.target.checked) {
@@ -693,7 +683,6 @@
             }
         }
 
-        // --- SALVATAGGIO DEI DATI ---
         function endExercise() {
             const tempFine = performance.now();
             const tempoTotaleS = parseFloat(((tempFine - startTime) / 1000).toFixed(1));
@@ -741,7 +730,6 @@
                 }
             };
 
-            // Esegui salvataggio se Firebase è attivo e configurato
             if (isSessioneAttiva && pazienteId && database) {
                 const savingStatus = document.getElementById('savingStatus');
                 const btnAction = document.getElementById('btnAction');
@@ -790,7 +778,6 @@
             savingStatus.textContent = "Risultati salvati correttamente!";
             savingStatus.style.color = "#28a745";
             btnAction.disabled = false;
-            if (isSessioneAttiva) btnAction.textContent = "Continua Sessione";
         }
 
         function handleSalvataggioErrore(error) {
@@ -808,7 +795,6 @@
             const sId = params.get('sessionId') || '';
             const sess = params.get('sessione') || '';
             
-            // Reindirizzamento corretto alla pagina della lista esercizi (esercizi.html)
             window.location.href = `esercizi.html?sessione=${sess}&pazienteId=${pId}&sessionId=${sId}`;
         }
 
