@@ -1220,6 +1220,7 @@
                     .then(() => remove(historyRef))
                     .then(() => {
                         alert("Paziente ed archivio eliminati correttamente.");
+                        localStorage.removeItem('hub_selected_patient_id');
                         const select = document.getElementById('patient-select');
                         if (select.value === id) {
                             select.value = "";
@@ -1235,7 +1236,6 @@
             const select = document.getElementById('patient-select');
             const mgmtList = document.getElementById('patient-mgmt-list');
             if(!select || !mgmtList) return;
-            const currentSelected = select.value;
 
             select.innerHTML = '<option value="">-- Seleziona Paziente --</option>';
             mgmtList.innerHTML = '';
@@ -1260,13 +1260,38 @@
                     `;
                     mgmtList.appendChild(row);
                 }
-                if (currentSelected && data[currentSelected]) {
-                    select.value = currentSelected;
+
+                // RIPRISTINA IL PAZIENTE SELEZIONATO IN PRECEDENZA
+                const savedPatientId = localStorage.getItem('hub_selected_patient_id');
+                if (savedPatientId && data[savedPatientId]) {
+                    select.value = savedPatientId;
+                    loadPatientHistory();
                 }
             } else {
                 mgmtList.innerHTML = `<tr><td colspan="2" style="text-align: center; color: #64748b; padding: 10px;">Nessun paziente registrato.</td></tr>`;
             }
         });
+
+        // RIPRISTINA LE SPUNTE DEGLI ESERCIZI IN CODA AL CARICAMENTO
+        const savedExercisesJSON = localStorage.getItem('hub_selected_exercises');
+        if (savedExercisesJSON) {
+            try {
+                const savedFiles = JSON.parse(savedExercisesJSON);
+                setTimeout(() => {
+                    const cards = document.querySelectorAll('.card');
+                    cards.forEach(card => {
+                        const file = card.getAttribute('data-file');
+                        const checkbox = card.querySelector('.select-exercise-checkbox');
+                        if (savedFiles.includes(file) && checkbox) {
+                            checkbox.checked = true;
+                        }
+                    });
+                    updateQueue();
+                }, 100);
+            } catch(e) {
+                console.error("Errore nel ripristino della coda esercizi", e);
+            }
+        }
 
         const colorPalette = ['#2563eb', '#10b981', '#f59e0b', '#7c3aed', '#db2777', '#0891b2', '#dc2626', '#ea580c', '#0d9488', '#4f46e5'];
         const exerciseColors = {};
@@ -1281,8 +1306,14 @@
         window.loadPatientHistory = async function() {
             const select = document.getElementById('patient-select');
             const patientId = select.value;
-            const patientName = select.options[select.selectedIndex]?.text;
             
+            if (patientId) {
+                localStorage.setItem('hub_selected_patient_id', patientId);
+            } else {
+                localStorage.removeItem('hub_selected_patient_id');
+            }
+
+            const patientName = select.options[select.selectedIndex]?.text;
             const reportSection = document.getElementById('patient-report-section');
             const tableBody = document.getElementById('history-table-body');
             const nameSpan = document.getElementById('report-patient-name');
@@ -1460,7 +1491,6 @@
                     dataAvvio: new Date().toISOString()
                 }).then(() => {
                     alert(`Sessione Libera attivata per ${patientName}.`);
-                    document.getElementById('patient-select').value = "";
                 });
             } else {
                 const selectedExercises = [];
@@ -1490,6 +1520,7 @@
                     risultati: {}
                 }).then(() => {
                     document.querySelectorAll('.select-exercise-checkbox').forEach(c => c.checked = false);
+                    localStorage.removeItem('hub_selected_exercises');
                     updateQueue();
                     
                     window.location.href = `esercizio.html`;
@@ -1509,6 +1540,8 @@
         window.terminaSessioneGlobale = function() {
             if (confirm("Vuoi concludere l'allenamento di oggi e visualizzare il questionario di autovalutazione?")) {
                 localStorage.removeItem('global_timer_start');
+                localStorage.removeItem('hub_selected_patient_id');
+                localStorage.removeItem('hub_selected_exercises');
                 document.getElementById('feedback-modal').style.display = 'flex';
             }
         }
@@ -1566,13 +1599,18 @@
             if (event) event.stopPropagation();
 
             const selected = [];
+            const selectedFiles = [];
+            
             const cards = document.querySelectorAll('.card');
             cards.forEach(card => {
                 const checkbox = card.querySelector('.select-exercise-checkbox');
                 if (checkbox && checkbox.checked) {
                     selected.push(card.getAttribute('data-title'));
+                    selectedFiles.push(card.getAttribute('data-file'));
                 }
             });
+
+            localStorage.setItem('hub_selected_exercises', JSON.stringify(selectedFiles));
 
             const indicator = document.getElementById('queue-list');
             if(!indicator) return;
