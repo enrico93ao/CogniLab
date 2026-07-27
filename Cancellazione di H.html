@@ -57,6 +57,16 @@
             display: flex;
         }
 
+        .top-bar-header {
+            height: 50px;
+            background-color: #f1f3f5;
+            border-bottom: 1px solid #dee2e6;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            z-index: 30;
+        }
+
         .canvas-area {
             position: relative;
             flex-grow: 1;
@@ -87,7 +97,7 @@
             position: absolute;
             right: 0;
             top: 0;
-            height: 100%; /* Estesa per tutta l'altezza dell'area canvas */
+            height: 100%; /* Estesa per tutta l'altezza della finestra */
             width: 35px;
             background-color: #dc3545;
             z-index: 20;
@@ -156,6 +166,7 @@
 
         .btn:hover { background-color: #004085; }
         .btn-complete { background-color: #6c757d; padding: 12px 40px; font-size: 16px; }
+        .btn-small { font-size: 14px; padding: 8px 16px; }
 
         .results-card {
             background: #ffffff;
@@ -214,7 +225,10 @@
 
     <!-- 1. CONFIGURAZIONE -->
     <div id="welcome-screen" class="screen active">
-        <h1 style="font-size: 26px; text-align: center;">Esercizio di Cancellazione Clinica Modulare</h1>
+        <div style="position: absolute; top: 20px; left: 20px;">
+            <button class="btn btn-small" onclick="goToDashboard()">Torna alla Dashboard</button>
+        </div>
+        <h1 style="font-size: 26px; text-align: center; margin-top: 20px;">Esercizio di Cancellazione Clinica Modulare</h1>
         
         <div class="config-card">
             <h3 style="margin-bottom: 12px; color: #333; border-bottom: 1px solid #eee; padding-bottom: 5px;">Configurazione:</h3>
@@ -269,6 +283,9 @@
 
     <!-- 2. AREA DEL COMPITO -->
     <div id="game-screen" class="screen">
+        <div class="top-bar-header">
+            <button class="btn btn-small" onclick="goToDashboard()">Torna alla Dashboard</button>
+        </div>
         <div class="canvas-area">
             <canvas id="cancellationCanvas"></canvas>
             <div id="rightCueBar" class="red-cue-bar" onclick="handleBarClick()"></div>
@@ -444,7 +461,7 @@
             ctx = canvas.getContext('2d');
 
             areaW = window.innerWidth;
-            areaH = window.innerHeight - 80; 
+            areaH = window.innerHeight - 130; // Considerando header e bottom bar
             canvas.width = areaW;
             canvas.height = areaH;
 
@@ -786,12 +803,13 @@
         }
 
         function goToDashboard() {
-            if (isSessioneAttiva) {
-                const nextIndice = indiceEsercizio + 1;
-                window.location.href = `esercizio.html?sessione=true&pazienteId=${pazienteId}&sessionId=${sessionId || ''}&next=${nextIndice}`;
-            } else {
-                window.location.href = `esercizio.html?pazienteId=${pazienteId || ''}`;
-            }
+            const params = new URLSearchParams(window.location.search);
+            const pId = params.get('pazienteId') || '';
+            const sId = params.get('sessionId') || '';
+            const sess = params.get('sessione') || '';
+            
+            // Forza sempre il reindirizzamento corretto a esercizio.html preservando i parametri
+            window.location.href = `esercizio.html?sessione=${sess}&pazienteId=${pId}&sessionId=${sId}`;
         }
 
         window.addEventListener('DOMContentLoaded', initFirebaseSafe);
