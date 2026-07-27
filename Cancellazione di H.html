@@ -87,7 +87,7 @@
             position: absolute;
             right: 0;
             top: 0;
-            bottom: 0;
+            height: 100%; /* Estesa per tutta l'altezza dell'area canvas */
             width: 35px;
             background-color: #dc3545;
             z-index: 20;
@@ -453,7 +453,6 @@
             useConstraint = document.getElementById('enable-row-constraint').checked;
 
             const cueBar = document.getElementById('rightCueBar');
-            cueBar.style.bottom = "80px"; 
             cueBar.style.display = enableRedBar ? 'block' : 'none';
             
             if (useConstraint) {
