@@ -1261,11 +1261,13 @@
                     mgmtList.appendChild(row);
                 }
 
-                // RIPRISTINA IL PAZIENTE SELEZIONATO IN PRECEDENZA
+                // RIPRISTINA IL PAZIENTE SELEZIONATO IN PRECEDENZA (SENZA FORZARE DI DEFAULT IL PRIMO)
                 const savedPatientId = localStorage.getItem('hub_selected_patient_id');
                 if (savedPatientId && data[savedPatientId]) {
                     select.value = savedPatientId;
                     loadPatientHistory();
+                } else {
+                    select.value = "";
                 }
             } else {
                 mgmtList.innerHTML = `<tr><td colspan="2" style="text-align: center; color: #64748b; padding: 10px;">Nessun paziente registrato.</td></tr>`;
@@ -1542,6 +1544,7 @@
                 localStorage.removeItem('global_timer_start');
                 localStorage.removeItem('hub_selected_patient_id');
                 localStorage.removeItem('hub_selected_exercises');
+                remove(activeSessionRef); // Pulisce eventuale sessione attiva rimasta appesa
                 document.getElementById('feedback-modal').style.display = 'flex';
             }
         }
