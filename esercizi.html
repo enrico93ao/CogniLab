@@ -70,15 +70,6 @@
             gap: 14px; 
             letter-spacing: -1px; 
         }
-        .nav-logo img { 
-            height: 45px; 
-            width: auto; 
-            object-fit: contain; 
-            transition: var(--transition);
-        }
-        .nav-logo img:hover {
-            transform: scale(1.05);
-        }
         
         .nav-left-cluster { display: flex; align-items: center; gap: 14px; }
         .nav-right-cluster { display: flex; align-items: center; gap: 14px; }
@@ -125,7 +116,6 @@
         .kpi-info h4 { font-size: 0.75rem; color: var(--slate-400); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
         .kpi-info p { font-size: 1.6rem; font-weight: 700; color: var(--slate-900); letter-spacing: -0.5px; }
 
-        /* --- STELLE GRAFICHE NELLA KPI --- */
         .kpi-stars-container {
             display: flex;
             align-items: center;
@@ -219,7 +209,7 @@
         .area-header i { font-size: 1.6rem; padding: 14px; border-radius: 18px; }
         .area-header h2 { font-size: 1.6rem; font-weight: 800; color: var(--slate-900); letter-spacing: -0.5px; }
 
-        /* Colori tematici icone */
+        /* Colori tematici icone sezioni */
         .area-attenzione .area-header i { color: #dc2626; background: #fee2e2; border: 1px solid #fecaca; }
         .area-memoria .area-header i { color: #2563eb; background: #eff6ff; border: 1px solid #bfdbfe; }
         .area-funzioni .area-header i { color: #059669; background: #ecfdf5; border: 1px solid #a7f3d0; }
@@ -227,13 +217,13 @@
         .area-visuo .area-header i { color: #7c3aed; background: #f3e8ff; border: 1px solid #e9d5ff; }
         .area-orientamento .area-header i { color: #0891b2; background: #ecfeff; border: 1px solid #a5f3fc; }
 
-        /* CARD SINGOLO ESERCIZIO CON ANTEPRIMA */
+        /* CARD SINGOLO ESERCIZIO CON ICONA VETTORIALE DI ANTEPRIMA */
         .grid-esercizi { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 28px; }
         .card { 
             background: #ffffff; 
             border: 1px solid #e2e8f0;
             border-radius: 24px; 
-            overflow: hidden; /* Fondamentale per far sì che l'immagine rispetti i bordi arrotondati */
+            overflow: hidden; 
             text-decoration: none; 
             color: inherit; 
             display: flex; 
@@ -251,24 +241,23 @@
 
         .card-image-container {
             width: 100%;
-            height: 150px;
-            background-color: #f1f5f9;
-            overflow: hidden;
+            height: 130px;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
             display: flex;
             align-items: center;
             justify-content: center;
             border-bottom: 1px solid #e2e8f0;
+            font-size: 2.8rem;
+            transition: var(--transition);
         }
 
-        .card-image-container img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.4s ease;
+        .card:hover .card-image-container {
+            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
         }
 
-        .card:hover .card-image-container img {
-            transform: scale(1.06);
+        .card:hover .card-image-container i {
+            transform: scale(1.1);
+            transition: transform 0.3s ease;
         }
         
         .card-body { 
@@ -519,8 +508,8 @@
             <div class="grid-esercizi">
                 <div class="card" data-title="Attenzione Alternata" data-file="Attenzione%20alternata.html" onclick="openExerciseCard(this, event)">
                     <input type="checkbox" class="select-exercise-checkbox" onchange="updateQueue(event)">
-                    <div class="card-image-container">
-                        <img src="img/anteprima_attenzione_alternata.png" alt="Attenzione Alternata">
+                    <div class="card-image-container" style="color: #dc2626;">
+                        <i class="fa-solid fa-right-left"></i>
                     </div>
                     <div class="card-body">
                         <h3>Attenzione Alternata</h3>
@@ -531,8 +520,8 @@
                 
                 <div class="card" data-title="Cancellazione di H" data-file="Cancellazione%20di%20H.html" onclick="openExerciseCard(this, event)">
                     <input type="checkbox" class="select-exercise-checkbox" onchange="updateQueue(event)">
-                    <div class="card-image-container">
-                        <img src="img/anteprima_cancellazione_h.png" alt="Cancellazione di H">
+                    <div class="card-image-container" style="color: #dc2626;">
+                        <i class="fa-solid fa-list-check"></i>
                     </div>
                     <div class="card-body">
                         <h3>Cancellazione di H</h3>
@@ -543,8 +532,8 @@
 
                 <div class="card" data-title="Conta i numeri e le lettere" data-file="Conta%20i%20numeri%20e%20le%20lettere.html" onclick="openExerciseCard(this, event)">
                     <input type="checkbox" class="select-exercise-checkbox" onchange="updateQueue(event)">
-                    <div class="card-image-container">
-                        <img src="img/anteprima_conta_numeri.png" alt="Conta Numeri e Lettere">
+                    <div class="card-image-container" style="color: #dc2626;">
+                        <i class="fa-solid fa-calculator"></i>
                     </div>
                     <div class="card-body">
                         <h3>Conta Numeri e Lettere</h3>
@@ -555,8 +544,8 @@
 
                 <div class="card" data-title="Doppio compito e velocità" data-file="Doppio%20compito%20e%20velocità.html" onclick="openExerciseCard(this, event)">
                     <input type="checkbox" class="select-exercise-checkbox" onchange="updateQueue(event)">
-                    <div class="card-image-container">
-                        <img src="img/anteprima_doppio_compito.png" alt="Doppio Compito e Velocità">
+                    <div class="card-image-container" style="color: #dc2626;">
+                        <i class="fa-solid fa-gauge-high"></i>
                     </div>
                     <div class="card-body">
                         <h3>Doppio Compito e Velocità</h3>
@@ -567,8 +556,8 @@
 
                 <div class="card" data-title="Il semaforo delle parole" data-file="Il%20semaforo%20delle%20parole.html" onclick="openExerciseCard(this, event)">
                     <input type="checkbox" class="select-exercise-checkbox" onchange="updateQueue(event)">
-                    <div class="card-image-container">
-                        <img src="img/anteprima_semaforo.png" alt="Il Semaforo delle Parole">
+                    <div class="card-image-container" style="color: #dc2626;">
+                        <i class="fa-solid fa-traffic-light"></i>
                     </div>
                     <div class="card-body">
                         <h3>Il Semaforo delle Parole</h3>
@@ -579,8 +568,8 @@
 
                 <div class="card" data-title="Stroop" data-file="Stroop.html" onclick="openExerciseCard(this, event)">
                     <input type="checkbox" class="select-exercise-checkbox" onchange="updateQueue(event)">
-                    <div class="card-image-container">
-                        <img src="img/anteprima_stroop.png" alt="Stroop Base">
+                    <div class="card-image-container" style="color: #dc2626;">
+                        <i class="fa-solid fa-palette"></i>
                     </div>
                     <div class="card-body">
                         <h3>Stroop Base</h3>
@@ -600,8 +589,8 @@
             <div class="grid-esercizi">
                 <div class="card" data-title="Calcolo e memoria" data-file="Calcolo%20e%20memoria.html" onclick="openExerciseCard(this, event)">
                     <input type="checkbox" class="select-exercise-checkbox" onchange="updateQueue(event)">
-                    <div class="card-image-container">
-                        <img src="img/anteprima_calcolo_memoria.png" alt="Calcolo e Memoria">
+                    <div class="card-image-container" style="color: #2563eb;">
+                        <i class="fa-solid fa-square-root-variable"></i>
                     </div>
                     <div class="card-body">
                         <h3>Calcolo e Memoria</h3>
@@ -612,8 +601,8 @@
 
                 <div class="card" data-title="Inibizione e memoria di lavoro" data-file="Inibizione%20e%20memoria%20di%20lavoro.html" onclick="openExerciseCard(this, event)">
                     <input type="checkbox" class="select-exercise-checkbox" onchange="updateQueue(event)">
-                    <div class="card-image-container">
-                        <img src="img/anteprima_inibizione_memoria.png" alt="Inibizione e Memoria di Lavoro">
+                    <div class="card-image-container" style="color: #2563eb;">
+                        <i class="fa-solid fa-shield-halved"></i>
                     </div>
                     <div class="card-body">
                         <h3>Inibizione e Memoria di Lavoro</h3>
@@ -624,8 +613,8 @@
 
                 <div class="card" data-title="Memoria di lavoro avanzato" data-file="Memoria%20di%20lavoro%20avanzato.html" onclick="openExerciseCard(this, event)">
                     <input type="checkbox" class="select-exercise-checkbox" onchange="updateQueue(event)">
-                    <div class="card-image-container">
-                        <img src="img/anteprima_memoria_avanzata.png" alt="Memoria di Lavoro Avanzata">
+                    <div class="card-image-container" style="color: #2563eb;">
+                        <i class="fa-solid fa-microchip"></i>
                     </div>
                     <div class="card-body">
                         <h3>Memoria di Lavoro Avanzata</h3>
@@ -636,8 +625,8 @@
 
                 <div class="card" data-title="Memoria di prosa con distrattori" data-file="Memoria%20di%20prosa%20con%20distrattori.html" onclick="openExerciseCard(this, event)">
                     <input type="checkbox" class="select-exercise-checkbox" onchange="updateQueue(event)">
-                    <div class="card-image-container">
-                        <img src="img/anteprima_prosa.png" alt="Memoria di Prosa con Distrattori">
+                    <div class="card-image-container" style="color: #2563eb;">
+                        <i class="fa-solid fa-book-open"></i>
                     </div>
                     <div class="card-body">
                         <h3>Memoria di Prosa con Distrattori</h3>
@@ -648,8 +637,8 @@
 
                 <div class="card" data-title="Memoria visuospaziale con domande" data-file="Memoria%20visuospaziale%20con%20domande.html" onclick="openExerciseCard(this, event)">
                     <input type="checkbox" class="select-exercise-checkbox" onchange="updateQueue(event)">
-                    <div class="card-image-container">
-                        <img src="img/anteprima_visuospaziale_domande.png" alt="Memoria Visuospaziale con Domande">
+                    <div class="card-image-container" style="color: #2563eb;">
+                        <i class="fa-solid fa-map-location-dot"></i>
                     </div>
                     <div class="card-body">
                         <h3>Memoria Visuospaziale con Domande</h3>
@@ -660,8 +649,8 @@
 
                 <div class="card" data-title="Memoria visuospaziale con numeri" data-file="Memoria%20visuospaziale%20con%20numeri.html" onclick="openExerciseCard(this, event)">
                     <input type="checkbox" class="select-exercise-checkbox" onchange="updateQueue(event)">
-                    <div class="card-image-container">
-                        <img src="img/anteprima_visuospaziale_numeri.png" alt="Memoria Visuospaziale con Numeri">
+                    <div class="card-image-container" style="color: #2563eb;">
+                        <i class="fa-solid fa-arrow-up-1-9"></i>
                     </div>
                     <div class="card-body">
                         <h3>Memoria Visuospaziale con Numeri</h3>
@@ -672,8 +661,8 @@
 
                 <div class="card" data-title="Memoria visuospaziale il Giardino" data-file="Memoria%20visuospaziale%20il%20Giardino.html" onclick="openExerciseCard(this, event)">
                     <input type="checkbox" class="select-exercise-checkbox" onchange="updateQueue(event)">
-                    <div class="card-image-container">
-                        <img src="img/anteprima_giardino.png" alt="Memoria Visuospaziale: Il Giardino">
+                    <div class="card-image-container" style="color: #2563eb;">
+                        <i class="fa-solid fa-tree"></i>
                     </div>
                     <div class="card-body">
                         <h3>Memoria Visuospaziale: Il Giardino</h3>
@@ -684,8 +673,8 @@
 
                 <div class="card" data-title="Rispondi al contrario e ricorda la parola" data-file="Rispondi%20al%20contrario%20e%20ricorda%20la%20parola.html" onclick="openExerciseCard(this, event)">
                     <input type="checkbox" class="select-exercise-checkbox" onchange="updateQueue(event)">
-                    <div class="card-image-container">
-                        <img src="img/anteprima_contrario_ricorda.png" alt="Rispondi al Contrario e Ricorda">
+                    <div class="card-image-container" style="color: #2563eb;">
+                        <i class="fa-solid fa-arrows-split-up-and-left"></i>
                     </div>
                     <div class="card-body">
                         <h3>Rispondi al Contrario e Ricorda</h3>
@@ -705,8 +694,8 @@
             <div class="grid-esercizi">
                 <div class="card" data-title="Il cifrario" data-file="Il%20cifrario.html" onclick="openExerciseCard(this, event)">
                     <input type="checkbox" class="select-exercise-checkbox" onchange="updateQueue(event)">
-                    <div class="card-image-container">
-                        <img src="img/anteprima_cifrario.png" alt="Il Cifrario">
+                    <div class="card-image-container" style="color: #059669;">
+                        <i class="fa-solid fa-key"></i>
                     </div>
                     <div class="card-body">
                         <h3>Il Cifrario</h3>
@@ -717,8 +706,8 @@
 
                 <div class="card" data-title="N back" data-file="N%20back.html" onclick="openExerciseCard(this, event)">
                     <input type="checkbox" class="select-exercise-checkbox" onchange="updateQueue(event)">
-                    <div class="card-image-container">
-                        <img src="img/anteprima_nback.png" alt="N-Back Standard">
+                    <div class="card-image-container" style="color: #059669;">
+                        <i class="fa-solid fa-rotate-left"></i>
                     </div>
                     <div class="card-body">
                         <h3>N-Back Standard</h3>
@@ -729,8 +718,8 @@
 
                 <div class="card" data-title="N back semantico" data-file="N%20back%20semantico.html" onclick="openExerciseCard(this, event)">
                     <input type="checkbox" class="select-exercise-checkbox" onchange="updateQueue(event)">
-                    <div class="card-image-container">
-                        <img src="img/anteprima_nback_semantico.png" alt="N-Back Semantico">
+                    <div class="card-image-container" style="color: #059669;">
+                        <i class="fa-solid fa-network-wired"></i>
                     </div>
                     <div class="card-body">
                         <h3>N-Back Semantico</h3>
@@ -741,8 +730,8 @@
 
                 <div class="card" data-title="Relazioni logiche" data-file="Relazioni%20logiche.html" onclick="openExerciseCard(this, event)">
                     <input type="checkbox" class="select-exercise-checkbox" onchange="updateQueue(event)">
-                    <div class="card-image-container">
-                        <img src="img/anteprima_relazioni_logiche.png" alt="Relazioni Logiche">
+                    <div class="card-image-container" style="color: #059669;">
+                        <i class="fa-solid fa-puzzle-piece"></i>
                     </div>
                     <div class="card-body">
                         <h3>Relazioni Logiche</h3>
@@ -753,8 +742,8 @@
 
                 <div class="card" data-title="Rispondi il contrario" data-file="Rispondi%20il%20contrario.html" onclick="openExerciseCard(this, event)">
                     <input type="checkbox" class="select-exercise-checkbox" onchange="updateQueue(event)">
-                    <div class="card-image-container">
-                        <img src="img/anteprima_rispondi_contrario.png" alt="Rispondi il Contrario">
+                    <div class="card-image-container" style="color: #059669;">
+                        <i class="fa-solid fa-shuffle"></i>
                     </div>
                     <div class="card-body">
                         <h3>Rispondi il Contrario</h3>
@@ -765,8 +754,8 @@
 
                 <div class="card" data-title="Set shifting" data-file="Set%20shifting.html" onclick="openExerciseCard(this, event)">
                     <input type="checkbox" class="select-exercise-checkbox" onchange="updateQueue(event)">
-                    <div class="card-image-container">
-                        <img src="img/anteprima_set_shifting.png" alt="Set Shifting">
+                    <div class="card-image-container" style="color: #059669;">
+                        <i class="fa-solid fa-arrows-rotate"></i>
                     </div>
                     <div class="card-body">
                         <h3>Set Shifting</h3>
@@ -777,8 +766,8 @@
 
                 <div class="card" data-title="Trova l'intruso" data-file="Trova%20l'intruso.html" onclick="openExerciseCard(this, event)">
                     <input type="checkbox" class="select-exercise-checkbox" onchange="updateQueue(event)">
-                    <div class="card-image-container">
-                        <img src="img/anteprima_trova_intruso.png" alt="Trova l'Intruso">
+                    <div class="card-image-container" style="color: #059669;">
+                        <i class="fa-solid fa-user-xmark"></i>
                     </div>
                     <div class="card-body">
                         <h3>Trova l'Intruso</h3>
@@ -798,8 +787,8 @@
             <div class="grid-esercizi">
                 <div class="card" data-title="Catena di parole" data-file="Catena%20di%20parole.html" onclick="openExerciseCard(this, event)">
                     <input type="checkbox" class="select-exercise-checkbox" onchange="updateQueue(event)">
-                    <div class="card-image-container">
-                        <img src="img/anteprima_catena_parole.png" alt="Catena di Parole">
+                    <div class="card-image-container" style="color: #d97706;">
+                        <i class="fa-solid fa-link"></i>
                     </div>
                     <div class="card-body">
                         <h3>Catena di Parole</h3>
@@ -810,8 +799,8 @@
 
                 <div class="card" data-title="Intruso semantico" data-file="Intruso%20semantico.html" onclick="openExerciseCard(this, event)">
                     <input type="checkbox" class="select-exercise-checkbox" onchange="updateQueue(event)">
-                    <div class="card-image-container">
-                        <img src="img/anteprima_intruso_semantico.png" alt="Intruso Semantico">
+                    <div class="card-image-container" style="color: #d97706;">
+                        <i class="fa-solid fa-comment-slash"></i>
                     </div>
                     <div class="card-body">
                         <h3>Intruso Semantico</h3>
@@ -822,8 +811,8 @@
 
                 <div class="card" data-title="La torre delle lettere" data-file="La%20torre%20delle%20lettere.html" onclick="openExerciseCard(this, event)">
                     <input type="checkbox" class="select-exercise-checkbox" onchange="updateQueue(event)">
-                    <div class="card-image-container">
-                        <img src="img/anteprima_torre_lettere.png" alt="La Torre delle Lettere">
+                    <div class="card-image-container" style="color: #d97706;">
+                        <i class="fa-solid fa-towers"></i>
                     </div>
                     <div class="card-body">
                         <h3>La Torre delle Lettere</h3>
@@ -834,8 +823,8 @@
 
                 <div class="card" data-title="Riordina la frase" data-file="Riordina%20la%20frase.html" onclick="openExerciseCard(this, event)">
                     <input type="checkbox" class="select-exercise-checkbox" onchange="updateQueue(event)">
-                    <div class="card-image-container">
-                        <img src="img/anteprima_riordina_frase.png" alt="Riordina la Frase">
+                    <div class="card-image-container" style="color: #d97706;">
+                        <i class="fa-solid fa-align-left"></i>
                     </div>
                     <div class="card-body">
                         <h3>Riordina la Frase</h3>
@@ -846,8 +835,8 @@
 
                 <div class="card" data-title="Riordina le lettere" data-file="Riordina%20le%20lettere.html" onclick="openExerciseCard(this, event)">
                     <input type="checkbox" class="select-exercise-checkbox" onchange="updateQueue(event)">
-                    <div class="card-image-container">
-                        <img src="img/anteprima_riordina_lettere.png" alt="Riordina le Lettere">
+                    <div class="card-image-container" style="color: #d97706;">
+                        <i class="fa-solid fa-font"></i>
                     </div>
                     <div class="card-body">
                         <h3>Riordina le Lettere</h3>
@@ -858,8 +847,8 @@
 
                 <div class="card" data-title="Riordina le parole in ordine alfabetico" data-file="Riordina%20le%20parole%20in%20ordine%20alfabetico.html" onclick="openExerciseCard(this, event)">
                     <input type="checkbox" class="select-exercise-checkbox" onchange="updateQueue(event)">
-                    <div class="card-image-container">
-                        <img src="img/anteprima_ordine_alfabetico.png" alt="Ordine Alfabetico Parole">
+                    <div class="card-image-container" style="color: #d97706;">
+                        <i class="fa-solid fa-arrow-down-a-z"></i>
                     </div>
                     <div class="card-body">
                         <h3>Ordine Alfabetico Parole</h3>
@@ -879,8 +868,8 @@
             <div class="grid-esercizi">
                 <div class="card" data-title="Esplorazione visuospaziale" data-file="Esplorazione%20visuospaziale%20multilivello.html" onclick="openExerciseCard(this, event)">
                     <input type="checkbox" class="select-exercise-checkbox" onchange="updateQueue(event)">
-                    <div class="card-image-container">
-                        <img src="img/anteprima_esplorazione_visuospaziale.png" alt="Esplorazione Visuospaziale">
+                    <div class="card-image-container" style="color: #7c3aed;">
+                        <i class="fa-solid fa-binoculars"></i>
                     </div>
                     <div class="card-body">
                         <h3>Esplorazione Visuospaziale</h3>
@@ -891,8 +880,8 @@
 
                 <div class="card" data-title="Memoria visuospaziale rotante" data-file="Memoria%20visuospaziale%20rotante.html" onclick="openExerciseCard(this, event)">
                     <input type="checkbox" class="select-exercise-checkbox" onchange="updateQueue(event)">
-                    <div class="card-image-container">
-                        <img src="img/anteprima_visuospaziale_rotante.png" alt="Memoria Visuospaziale Rotante">
+                    <div class="card-image-container" style="color: #7c3aed;">
+                        <i class="fa-solid fa-compass-drafting"></i>
                     </div>
                     <div class="card-body">
                         <h3>Memoria Visuospaziale Rotante</h3>
@@ -903,8 +892,8 @@
 
                 <div class="card" data-title="Riconoscimento visivo base" data-file="Riconoscimento%20visivo%20base.html" onclick="openExerciseCard(this, event)">
                     <input type="checkbox" class="select-exercise-checkbox" onchange="updateQueue(event)">
-                    <div class="card-image-container">
-                        <img src="img/anteprima_riconoscimento_base.png" alt="Riconoscimento Visivo Base">
+                    <div class="card-image-container" style="color: #7c3aed;">
+                        <i class="fa-solid fa-shapes"></i>
                     </div>
                     <div class="card-body">
                         <h3>Riconoscimento Visivo Base</h3>
@@ -915,8 +904,8 @@
 
                 <div class="card" data-title="Riconoscimento visivo avanzato" data-file="Riconoscimento%20visivo.html" onclick="openExerciseCard(this, event)">
                     <input type="checkbox" class="select-exercise-checkbox" onchange="updateQueue(event)">
-                    <div class="card-image-container">
-                        <img src="img/anteprima_riconoscimento_avanzato.png" alt="Riconoscimento Visivo Avanzato">
+                    <div class="card-image-container" style="color: #7c3aed;">
+                        <i class="fa-solid fa-magnifying-glass"></i>
                     </div>
                     <div class="card-body">
                         <h3>Riconoscimento Visivo Avanzato</h3>
@@ -927,8 +916,8 @@
 
                 <div class="card" data-title="Silhouette" data-file="Silhoutte.html" onclick="openExerciseCard(this, event)">
                     <input type="checkbox" class="select-exercise-checkbox" onchange="updateQueue(event)">
-                    <div class="card-image-container">
-                        <img src="img/anteprima_silhouette.png" alt="Silhouette">
+                    <div class="card-image-container" style="color: #7c3aed;">
+                        <i class="fa-solid fa-image"></i>
                     </div>
                     <div class="card-body">
                         <h3>Silhouette</h3>
@@ -939,8 +928,8 @@
 
                 <div class="card" data-title="Trova l'immagine corrispondente" data-file="Trova%20l'immagine%20corrispondente.html" onclick="openExerciseCard(this, event)">
                     <input type="checkbox" class="select-exercise-checkbox" onchange="updateQueue(event)">
-                    <div class="card-image-container">
-                        <img src="img/anteprima_trova_immagine.png" alt="Trova Immagine Corrispondente">
+                    <div class="card-image-container" style="color: #7c3aed;">
+                        <i class="fa-solid fa-clone"></i>
                     </div>
                     <div class="card-body">
                         <h3>Trova Immagine Corrispondente</h3>
@@ -960,8 +949,8 @@
             <div class="grid-esercizi">
                 <div class="card" data-title="L'orologio invisibile" data-file="L'orologio%20invisibile.html" onclick="openExerciseCard(this, event)">
                     <input type="checkbox" class="select-exercise-checkbox" onchange="updateQueue(event)">
-                    <div class="card-image-container">
-                        <img src="img/anteprima_orologio.png" alt="L'Orologio Invisibile">
+                    <div class="card-image-container" style="color: #0891b2;">
+                        <i class="fa-regular fa-clock"></i>
                     </div>
                     <div class="card-body">
                         <h3>L'Orologio Invisibile</h3>
@@ -972,8 +961,8 @@
 
                 <div class="card" data-title="Orientamento temporale-spaziale" data-file="Orientamento%20temporale-spaziale.html" onclick="openExerciseCard(this, event)">
                     <input type="checkbox" class="select-exercise-checkbox" onchange="updateQueue(event)">
-                    <div class="card-image-container">
-                        <img src="img/anteprima_orientamento.png" alt="Orientamento Temporale-Spaziale">
+                    <div class="card-image-container" style="color: #0891b2;">
+                        <i class="fa-solid fa-earth-americas"></i>
                     </div>
                     <div class="card-body">
                         <h3>Orientamento Temporale-Spaziale</h3>
