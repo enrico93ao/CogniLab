@@ -461,7 +461,7 @@
             ctx = canvas.getContext('2d');
 
             areaW = window.innerWidth;
-            areaH = window.innerHeight - 130; // Considerando header e bottom bar
+            areaH = window.innerHeight - 130; 
             canvas.width = areaW;
             canvas.height = areaH;
 
@@ -808,8 +808,8 @@
             const sId = params.get('sessionId') || '';
             const sess = params.get('sessione') || '';
             
-            // Forza sempre il reindirizzamento corretto a esercizio.html preservando i parametri
-            window.location.href = `esercizio.html?sessione=${sess}&pazienteId=${pId}&sessionId=${sId}`;
+            // Reindirizzamento corretto alla pagina della lista esercizi (esercizi.html)
+            window.location.href = `esercizi.html?sessione=${sess}&pazienteId=${pId}&sessionId=${sId}`;
         }
 
         window.addEventListener('DOMContentLoaded', initFirebaseSafe);
