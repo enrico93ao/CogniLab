@@ -789,9 +789,9 @@
         function goToDashboard() {
             if (isSessioneAttiva) {
                 const nextIndice = indiceEsercizio + 1;
-                window.location.href = `index.html?sessione=true&pazienteId=${pazienteId}&sessionId=${sessionId || ''}&next=${nextIndice}`;
+                window.location.href = `esercizio.html?sessione=true&pazienteId=${pazienteId}&sessionId=${sessionId || ''}&next=${nextIndice}`;
             } else {
-                window.location.href = "index.html";
+                window.location.href = `esercizio.html?pazienteId=${pazienteId || ''}`;
             }
         }
 
