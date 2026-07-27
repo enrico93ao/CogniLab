@@ -1261,7 +1261,6 @@
                     mgmtList.appendChild(row);
                 }
 
-                // RIPRISTINA IL PAZIENTE SELEZIONATO IN PRECEDENZA (SENZA FORZARE DI DEFAULT IL PRIMO)
                 const savedPatientId = localStorage.getItem('hub_selected_patient_id');
                 if (savedPatientId && data[savedPatientId]) {
                     select.value = savedPatientId;
@@ -1274,7 +1273,6 @@
             }
         });
 
-        // RIPRISTINA LE SPUNTE DEGLI ESERCIZI IN CODA AL CARICAMENTO
         const savedExercisesJSON = localStorage.getItem('hub_selected_exercises');
         if (savedExercisesJSON) {
             try {
@@ -1544,7 +1542,7 @@
                 localStorage.removeItem('global_timer_start');
                 localStorage.removeItem('hub_selected_patient_id');
                 localStorage.removeItem('hub_selected_exercises');
-                remove(activeSessionRef); // Pulisce eventuale sessione attiva rimasta appesa
+                remove(activeSessionRef);
                 document.getElementById('feedback-modal').style.display = 'flex';
             }
         }
