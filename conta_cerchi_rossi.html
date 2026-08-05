@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stimolazione Cognitiva Avanzata Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: radial-gradient(circle at top left, #3b82f6, #1e1b4b);
+            color: #1e293b;
+            user-select: none;
+            overflow: hidden;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.94);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
+        }
+
+        .shape {
+            position: absolute;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+            transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease;
+            animation: bounceIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .shape.circle { border-radius: 50%; }
+        .shape.square { border-radius: 20px; }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0); opacity: 0; }
+            70% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .animate-pop {
+            animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        /* Custom scrollbar for menu */
+        .custom-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scroll::-webkit-scrollbar-track {
+            background: rgba(241, 245, 249, 0.5);
+            border-radius: 8px;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: rgba(203, 213, 225, 0.8);
+            border-radius: 8px;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb:hover {
+            background: rgba(148, 163, 184, 1);
+        }
+    </style>
+</head>
+<body class="h-screen w-screen flex items-center justify-center p-3 sm:p-6">
+
+    <div id="feedback-overlay" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm hidden items-center justify-center z-50">
+        <div id="feedback-card" class="bg-white px-8 py-6 rounded-3xl text-3xl font-extrabold shadow-2xl animate-pop text-center"></div>
+    </div>
+
+    <div class="container w-full max-w-4xl max-h-[96vh] glass-card rounded-[32px] p-6 sm:p-8 flex flex-col justify-between relative overflow-hidden">
+        
+        <!-- SCREEN MENU -->
+        <div id="screen-menu" class="screen flex flex-col h-full justify-between">
+            <div>
+                <div class="flex items-center justify-center gap-3 mb-1.5">
+                    <div class="w-10 h-10 rounded-2xl bg-indigo-600 flex items-center justify-center text-white shadow-lg shadow-indigo-500/30">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
+                    </div>
+                    <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Stimolazione Cognitiva</h1>
+                </div>
+                <p class="text-slate-500 text-center text-xs sm:text-sm mb-4">Personalizza la sessione di allenamento cognitivo secondo le tue esigenze.</p>
+            </div>
+
+            <!-- Organized Menu Container with Grid/Sections -->
+            <div class="overflow-y-auto max-h-[calc(85vh-200px)] space-y-4 pr-1 custom-scroll">
+                
+                <!-- SEZIONE 1: DIFFICOLTÀ & MODALITÀ DI GIOCO -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                    
+                    <!-- Difficoltà -->
+                    <div class="bg-white border border-slate-200/90 p-3.5 rounded-2xl shadow-sm hover:border-indigo-400 transition group">
+                        <label class="block text-xs uppercase tracking-wider font-extrabold text-indigo-600 mb-1.5 flex items-center gap-1.5">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                            Livello di Difficoltà
+                        </label>
+                        <select id="select-level" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                            <option value="base">Livello Base (Max 5 cerchi rossi)</option>
+                            <option value="intermediate">Livello Intermedio (+ Distrattori blu)</option>
+                            <option value="advanced">Livello Avanzato (+ Distrattori misti)</option>
+                        </select>
+                    </div>
+
+                    <!-- Modalità Presentazione -->
+                    <div class="bg-white border border-slate-200/90 p-3.5 rounded-2xl shadow-sm hover:border-indigo-400 transition group">
+                        <label class="block text-xs uppercase tracking-wider font-extrabold text-indigo-600 mb-1.5 flex items-center gap-1.5">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                            Presentazione Stimoli
+                        </label>
+                        <select id="select-mode" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                            <option value="simultaneous">Simultanea (Tutti insieme)</option>
+                            <option value="sequential">Sequenziale (Uno alla volta)</option>
+                        </select>
+                    </div>
+
+                </div>
+
+                <!-- SEZIONE 2: PUNTEGGIO & SUPPORTO -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                    
+                    <!-- Punteggio -->
+                    <div class="bg-white border border-slate-200/90 p-3.5 rounded-2xl shadow-sm hover:border-indigo-400 transition group">
+                        <label class="block text-xs uppercase tracking-wider font-extrabold text-indigo-600 mb-1.5 flex items-center gap-1.5">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                            Modalità Punteggio
+                        </label>
+                        <select id="select-gameplay" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                            <option value="reset">Round Singoli (Quanti visti)</option>
+                            <option value="continuous">Conto Continuo (Somma progressiva)</option>
+                        </select>
+                    </div>
+
+                    <!-- Supporto Visivo -->
+                    <div class="bg-white border border-slate-200/90 p-3.5 rounded-2xl shadow-sm hover:border-indigo-400 transition group">
+                        <label class="block text-xs uppercase tracking-wider font-extrabold text-indigo-600 mb-1.5 flex items-center gap-1.5">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                            Supporto Numerico
+                        </label>
+                        <select id="select-helper" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                            <option value="off">Disattivato (Nessun numero)</option>
+                            <option value="on">Attivo (Numeri sui target)</option>
+                        </select>
+                    </div>
+
+                </div>
+
+                <!-- Info Box d'aiuto rapido nel menu -->
+                <div class="bg-gradient-to-r from-indigo-50/80 to-blue-50/80 border border-indigo-100 p-3.5 rounded-2xl flex items-center gap-3 text-indigo-900">
+                    <div class="p-2 bg-indigo-100 rounded-xl text-indigo-600 shrink-0">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    </div>
+                    <div class="text-xs font-medium leading-relaxed">
+                        Suggerimento: Seleziona <strong class="font-bold">Livello Base</strong> con <strong class="font-bold">Supporto Attivo</strong> per un approccio graduale alla memoria di lavoro.
+                    </div>
+                </div>
+
+            </div>
+
+            <button onclick="startGame()" class="w-full mt-4 py-4 bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-bold text-lg rounded-2xl shadow-lg shadow-indigo-500/30 hover:opacity-95 transform hover:-translate-y-0.5 transition active:scale-[0.98]">
+                Avvia Esercizio
+            </button>
+        </div>
+
+        <!-- SCREEN GAME -->
+        <div id="screen-game" class="screen hidden flex-col h-full justify-between">
+            <div class="flex justify-between items-center mb-4">
+                <span id="game-mode-label" class="font-bold text-indigo-900 bg-indigo-100/80 px-4 py-1.5 rounded-xl text-sm"></span>
+                <button onclick="returnToMenu()" class="bg-slate-200/80 hover:bg-slate-300 text-slate-700 font-semibold px-4 py-1.5 rounded-xl text-sm transition">
+                    Torna al Menu
+                </button>
+            </div>
+
+            <div class="flex justify-between items-center mb-3">
+                <span id="round-badge" class="font-extrabold text-slate-600 bg-slate-100 px-3 py-1 rounded-lg text-sm">Round 1/5</span>
+            </div>
+
+            <div id="instruction-box" class="bg-gradient-to-r from-indigo-50 to-blue-50 border-2 border-indigo-200 text-indigo-950 p-4 font-extrabold text-lg sm:text-xl rounded-2xl text-center mb-4 shadow-sm">
+                Osserva attentamente gli stimoli...
+            </div>
+            
+            <div id="stimulus-area" class="w-full flex-grow min-h-[260px] sm:min-h-[320px] border-3 border-dashed border-slate-300 rounded-3xl relative bg-white/60 backdrop-blur-sm mb-4 overflow-hidden flex items-center justify-center"></div>
+            
+            <div id="numpad-section" class="flex-col items-center w-full hidden">
+                <div class="grid grid-cols-5 gap-2.5 w-full max-w-xl">
+                    <button class="num-btn bg-white hover:bg-indigo-50 hover:border-indigo-500 hover:text-indigo-600 text-slate-800 text-2xl font-black py-3.5 border-2 border-slate-200 rounded-xl shadow-sm transition active:scale-95" onclick="submitNumber(0)">0</button>
+                    <button class="num-btn bg-white hover:bg-indigo-50 hover:border-indigo-500 hover:text-indigo-600 text-slate-800 text-2xl font-black py-3.5 border-2 border-slate-200 rounded-xl shadow-sm transition active:scale-95" onclick="submitNumber(1)">1</button>
+                    <button class="num-btn bg-white hover:bg-indigo-50 hover:border-indigo-500 hover:text-indigo-600 text-slate-800 text-2xl font-black py-3.5 border-2 border-slate-200 rounded-xl shadow-sm transition active:scale-95" onclick="submitNumber(2)">2</button>
+                    <button class="num-btn bg-white hover:bg-indigo-50 hover:border-indigo-500 hover:text-indigo-600 text-slate-800 text-2xl font-black py-3.5 border-2 border-slate-200 rounded-xl shadow-sm transition active:scale-95" onclick="submitNumber(3)">3</button>
+                    <button class="num-btn bg-white hover:bg-indigo-50 hover:border-indigo-500 hover:text-indigo-600 text-slate-800 text-2xl font-black py-3.5 border-2 border-slate-200 rounded-xl shadow-sm transition active:scale-95" onclick="submitNumber(4)">4</button>
+                    <button class="num-btn bg-white hover:bg-indigo-50 hover:border-indigo-500 hover:text-indigo-600 text-slate-800 text-2xl font-black py-3.5 border-2 border-slate-200 rounded-xl shadow-sm transition active:scale-95" onclick="submitNumber(5)">5</button>
+                    <button class="num-btn bg-white hover:bg-indigo-50 hover:border-indigo-500 hover:text-indigo-600 text-slate-800 text-2xl font-black py-3.5 border-2 border-slate-200 rounded-xl shadow-sm transition active:scale-95" onclick="submitNumber(6)">6</button>
+                    <button class="num-btn bg-white hover:bg-indigo-50 hover:border-indigo-500 hover:text-indigo-600 text-slate-800 text-2xl font-black py-3.5 border-2 border-slate-200 rounded-xl shadow-sm transition active:scale-95" onclick="submitNumber(7)">7</button>
+                    <button class="num-btn bg-white hover:bg-indigo-50 hover:border-indigo-500 hover:text-indigo-600 text-slate-800 text-2xl font-black py-3.5 border-2 border-slate-200 rounded-xl shadow-sm transition active:scale-95" onclick="submitNumber(8)">8</button>
+                    <button class="num-btn bg-white hover:bg-indigo-50 hover:border-indigo-500 hover:text-indigo-600 text-slate-800 text-2xl font-black py-3.5 border-2 border-slate-200 rounded-xl shadow-sm transition active:scale-95" onclick="submitNumber(9)">9</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- SCREEN RESULTS -->
+        <div id="screen-results" class="screen hidden flex-col h-full justify-between">
+            <h2 class="text-2xl font-extrabold text-slate-900 text-center mb-4">Riepilogo della Sessione</h2>
+            <div id="results-content" class="bg-white/80 border border-slate-200 p-4 rounded-2xl overflow-y-auto max-h-[360px] space-y-3 mb-6"></div>
+            <button onclick="returnToMenu()" class="w-full py-4 bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-bold text-lg rounded-2xl shadow-lg shadow-indigo-500/30 hover:opacity-95 transform hover:-translate-y-0.5 transition">
+                Torna al Menu Principale
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        let audioCtx = null;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function playSound(type) {
+            try {
+                initAudio();
+                if (!audioCtx) return;
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                const now = audioCtx.currentTime;
+
+                if (type === 'pop') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(400, now);
+                    osc.frequency.exponentialRampToValueAtTime(800, now + 0.08);
+                    gain.gain.setValueAtTime(0.12, now);
+                    gain.gain.linearRampToValueAtTime(0, now + 0.08);
+                    osc.start(now);
+                    osc.stop(now + 0.08);
+                } else if (type === 'success') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(523.25, now);
+                    osc.frequency.setValueAtTime(659.25, now + 0.08);
+                    osc.frequency.setValueAtTime(783.99, now + 0.16);
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.linearRampToValueAtTime(0, now + 0.35);
+                    osc.start(now);
+                    osc.stop(now + 0.35);
+                } else if (type === 'error') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(220, now);
+                    osc.frequency.setValueAtTime(170, now + 0.12);
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.linearRampToValueAtTime(0, now + 0.25);
+                    osc.start(now);
+                    osc.stop(now + 0.25);
+                }
+            } catch (e) {
+                console.log('Audio error:', e);
+            }
+        }
+
+        let config = { level: 'base', presentation: 'simultaneous', gameplay: 'reset', helper: 'off' };
+        let gameState = { currentRound: 0, maxRounds: 5, targetCount: 0, scoreLog: [], continuousRunningTotal: 0, continuousTargetSum: 0, sessionTimer: null, timeoutId: null, intervalId: null };
+
+        function switchScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+            document.getElementById(screenId).classList.remove('hidden');
+            document.getElementById(screenId).classList.add('flex');
+        }
+
+        function clearAllTimers() {
+            if (gameState.timeoutId) { clearTimeout(gameState.timeoutId); gameState.timeoutId = null; }
+            if (gameState.intervalId) { clearInterval(gameState.intervalId); gameState.intervalId = null; }
+        }
+
+        function returnToMenu() {
+            clearAllTimers();
+            if (gameState.sessionTimer) { clearTimeout(gameState.sessionTimer); gameState.sessionTimer = null; }
+            switchScreen('screen-menu');
+        }
+
+        function startGame() {
+            initAudio();
+            config.level = document.getElementById('select-level').value;
+            config.presentation = document.getElementById('select-mode').value;
+            config.gameplay = document.getElementById('select-gameplay').value;
+            config.helper = document.getElementById('select-helper').value;
+
+            gameState.currentRound = 0;
+            gameState.scoreLog = [];
+            gameState.continuousRunningTotal = 0;
+            gameState.continuousTargetSum = 0;
+
+            document.getElementById('game-mode-label').innerText = config.gameplay === 'reset' ? 'Modo: Quanti ne hai visti' : 'Modo: Tieni il conto totale';
+
+            switchScreen('screen-game');
+
+            if (config.gameplay === 'continuous') {
+                document.getElementById('round-badge').style.display = 'none';
+                gameState.sessionTimer = setTimeout(() => { endContinuousSession(); }, 120000);
+            } else {
+                document.getElementById('round-badge').style.display = 'block';
+            }
+            startRound();
+        }
+
+        function startRound() {
+            clearAllTimers();
+            gameState.currentRound++;
+            if (config.gameplay === 'reset') {
+                document.getElementById('round-badge').innerText = `Round ${gameState.currentRound}/${gameState.maxRounds}`;
+            }
+
+            document.getElementById('numpad-section').style.display = 'none';
+            document.getElementById('numpad-section').classList.remove('flex');
+
+            const instructionBox = document.getElementById('instruction-box');
+            instructionBox.className = "bg-gradient-to-r from-indigo-50 to-blue-50 border-2 border-indigo-200 text-indigo-950 p-4 font-extrabold text-lg sm:text-xl rounded-2xl text-center mb-4 shadow-sm";
+            instructionBox.innerText = "Osserva attentamente gli stimoli...";
+
+            if (config.presentation === 'simultaneous') {
+                generateSimultaneousStimuli();
+            } else {
+                generateSequentialStimuli();
+            }
+        }
+
+        function generateNonOverlappingPositions(count, size, areaWidth, areaHeight) {
+            let positions = [];
+            let maxAttempts = 200;
+            let padding = 15;
+            for (let i = 0; i < count; i++) {
+                let placed = false, attempts = 0, x = 0, y = 0;
+                while (!placed && attempts < maxAttempts) {
+                    attempts++;
+                    x = Math.random() * (areaWidth - size - (padding * 2)) + padding;
+                    y = Math.random() * (areaHeight - size - (padding * 2)) + padding;
+                    let overlap = false;
+                    for (let p of positions) {
+                        let dx = p.x - x, dy = p.y - y;
+                        if (Math.sqrt(dx * dx + dy * dy) < size + 16) { overlap = true; break; }
+                    }
+                    if (!overlap || attempts >= maxAttempts) placed = true;
+                }
+                positions.push({ x, y });
+            }
+            return positions;
+        }
+
+        function generateSimultaneousStimuli() {
+            const area = document.getElementById('stimulus-area');
+            area.innerHTML = '';
+            let shapesConfig = [], targetCount = 0;
+            const size = 76;
+
+            if (config.level === 'base') {
+                targetCount = Math.floor(Math.random() * 4) + 2;
+                gameState.targetCount = targetCount;
+                for (let i = 0; i < targetCount; i++) shapesConfig.push({ type: 'circle', color: '#ef4444', isTarget: true });
+            } else if (config.level === 'intermediate') {
+                targetCount = Math.floor(Math.random() * 4) + 2;
+                let distractorCount = Math.floor(Math.random() * 3) + 2;
+                gameState.targetCount = targetCount;
+                for (let i = 0; i < targetCount; i++) shapesConfig.push({ type: 'circle', color: '#ef4444', isTarget: true });
+                for (let i = 0; i < distractorCount; i++) shapesConfig.push({ type: 'circle', color: '#3b82f6', isTarget: false });
+            } else if (config.level === 'advanced') {
+                targetCount = Math.floor(Math.random() * 3) + 2;
+                let d1 = Math.floor(Math.random() * 2) + 1, d2 = Math.floor(Math.random() * 2) + 1;
+                gameState.targetCount = targetCount;
+                for (let i = 0; i < targetCount; i++) shapesConfig.push({ type: 'circle', color: '#ef4444', isTarget: true });
+                for (let i = 0; i < d1; i++) shapesConfig.push({ type: 'circle', color: '#3b82f6', isTarget: false });
+                for (let i = 0; i < d2; i++) shapesConfig.push({ type: 'square', color: '#10b981', isTarget: false });
+            }
+
+            if (config.gameplay === 'continuous') {
+                gameState.continuousTargetSum += targetCount;
+            }
+            shapesConfig.sort(() => Math.random() - 0.5);
+
+            let areaWidth = area.clientWidth || 700, areaHeight = area.clientHeight || 300;
+            let positions = generateNonOverlappingPositions(shapesConfig.length, size, areaWidth, areaHeight);
+            let currentTargetIndex = 1;
+
+            shapesConfig.forEach((item, index) => {
+                const el = document.createElement('div');
+                el.classList.add('shape', item.type);
+                el.style.backgroundColor = item.color;
+                el.style.width = `${size}px`;
+                el.style.height = `${size}px`;
+                el.style.left = `${positions[index].x}px`;
+                el.style.top = `${positions[index].y}px`;
+
+                if (config.helper === 'on' && item.isTarget) {
+                    el.innerText = currentTargetIndex;
+                    el.style.color = '#ffffff';
+                    el.style.fontSize = '2rem';
+                    currentTargetIndex++;
+                }
+                area.appendChild(el);
+            });
+
+            playSound('pop');
+            let exposureTime = config.level === 'base' ? 6000 : (config.level === 'intermediate' ? 8000 : 10000);
+            gameState.timeoutId = setTimeout(() => {
+                if (config.gameplay === 'continuous' && !gameState.sessionTimer) return;
+                showQuestionPrompt();
+            }, exposureTime);
+        }
+
+        function generateSequentialStimuli() {
+            const area = document.getElementById('stimulus-area');
+            area.innerHTML = '';
+            let sequence = [], targetCount = 0;
+
+            if (config.level === 'base') {
+                targetCount = Math.floor(Math.random() * 4) + 2;
+                gameState.targetCount = targetCount;
+                for (let i = 0; i < targetCount; i++) sequence.push({ type: 'circle', color: '#ef4444', isTarget: true });
+            } else if (config.level === 'intermediate') {
+                targetCount = Math.floor(Math.random() * 3) + 2;
+                let distractorCount = Math.floor(Math.random() * 3) + 2;
+                gameState.targetCount = targetCount;
+                for (let i = 0; i < targetCount; i++) sequence.push({ type: 'circle', color: '#ef4444', isTarget: true });
+                for (let i = 0; i < distractorCount; i++) sequence.push({ type: 'circle', color: '#3b82f6', isTarget: false });
+            } else if (config.level === 'advanced') {
+                targetCount = Math.floor(Math.random() * 3) + 2;
+                let d1 = Math.floor(Math.random() * 2) + 1, d2 = Math.floor(Math.random() * 2) + 1;
+                gameState.targetCount = targetCount;
+                for (let i = 0; i < targetCount; i++) sequence.push({ type: 'circle', color: '#ef4444', isTarget: true });
+                for (let i = 0; i < d1; i++) sequence.push({ type: 'circle', color: '#3b82f6', isTarget: false });
+                for (let i = 0; i < d2; i++) sequence.push({ type: 'square', color: '#10b981', isTarget: false });
+            }
+
+            if (config.gameplay === 'continuous') {
+                gameState.continuousTargetSum += targetCount;
+            }
+            sequence.sort(() => Math.random() - 0.5);
+
+            let currentIndex = 0, targetCounterSeq = 1;
+            gameState.intervalId = setInterval(() => {
+                area.innerHTML = '';
+                if (currentIndex < sequence.length) {
+                    let item = sequence[currentIndex];
+                    const el = document.createElement('div');
+                    el.classList.add('shape', item.type);
+                    el.style.backgroundColor = item.color;
+                    const size = 80;
+                    el.style.width = `${size}px`;
+                    el.style.height = `${size}px`;
+                    el.style.left = `${(area.clientWidth - size) / 2}px`;
+                    el.style.top = `${(area.clientHeight - size) / 2}px`;
+
+                    if (config.helper === 'on' && item.isTarget) {
+                        el.innerText = targetCounterSeq;
+                        el.style.color = '#ffffff';
+                        el.style.fontSize = '2.2rem';
+                        targetCounterSeq++;
+                    }
+                    area.appendChild(el);
+                    playSound('pop');
+                    currentIndex++;
+                } else {
+                    clearInterval(gameState.intervalId);
+                    gameState.intervalId = null;
+                    area.innerHTML = '';
+                    showQuestionPrompt();
+                }
+            }, 1400);
+        }
+
+        function showQuestionPrompt() {
+            clearAllTimers();
+            document.getElementById('stimulus-area').innerHTML = '';
+            const instructionBox = document.getElementById('instruction-box');
+            instructionBox.className = "bg-emerald-50 border-2 border-emerald-300 text-emerald-900 p-4 font-extrabold text-lg sm:text-xl rounded-2xl text-center mb-4 shadow-sm";
+            instructionBox.innerText = config.gameplay === 'reset' ? "Quanti cerchi rossi hai visto in questo round?" : `Totale accumulato fino ad ora (Round ${gameState.currentRound}):`;
+
+            const numpad = document.getElementById('numpad-section');
+            numpad.style.display = 'flex';
+            numpad.classList.add('flex');
+        }
+
+        function showFeedbackOverlay(isCorrect, callback) {
+            const overlay = document.getElementById('feedback-overlay');
+            const card = document.getElementById('feedback-card');
+            card.className = `bg-white px-8 py-6 rounded-3xl text-3xl font-extrabold shadow-2xl animate-pop text-center ${isCorrect ? 'text-emerald-600 border-4 border-emerald-200' : 'text-rose-600 border-4 border-rose-200'}`;
+            card.innerHTML = isCorrect ? '✓ CORRETTO!' : '✗ ERRATO';
+            overlay.style.display = 'flex';
+            overlay.classList.remove('hidden');
+            overlay.classList.add('flex');
+            playSound(isCorrect ? 'success' : 'error');
+
+            setTimeout(() => {
+                overlay.style.display = 'none';
+                overlay.classList.add('hidden');
+                overlay.classList.remove('flex');
+                if (callback) callback();
+            }, 900);
+        }
+
+        function submitNumber(num) {
+            if (config.gameplay === 'reset') {
+                let correct = (num === gameState.targetCount);
+                gameState.scoreLog.push({ round: gameState.currentRound, target: gameState.targetCount, user: num, correct: correct });
+                showFeedbackOverlay(correct, () => {
+                    if (gameState.currentRound >= gameState.maxRounds) endSession();
+                    else startRound();
+                });
+            } else {
+                gameState.continuousRunningTotal = num;
+                let correct = (gameState.continuousRunningTotal === gameState.continuousTargetSum);
+                gameState.scoreLog.push({ round: gameState.currentRound, target: gameState.continuousTargetSum, user: num, correct: correct });
+                showFeedbackOverlay(correct, () => {
+                    if (gameState.currentRound >= gameState.maxRounds) endSession();
+                    else startRound();
+                });
+            }
+        }
+
+        function endContinuousSession() {
+            clearAllTimers();
+            if (gameState.sessionTimer) { clearTimeout(gameState.sessionTimer); gameState.sessionTimer = null; }
+            endSession();
+        }
+
+        function endSession() {
+            clearAllTimers();
+            if (gameState.sessionTimer) { clearTimeout(gameState.sessionTimer); gameState.sessionTimer = null; }
+            switchScreen('screen-results');
+            const resultsContent = document.getElementById('results-content');
+            let html = '', correctCount = 0;
+
+            if (config.gameplay === 'reset') {
+                gameState.scoreLog.forEach(log => {
+                    if (log.correct) correctCount++;
+                    html += `<div class="flex justify-between items-center py-3 border-b border-slate-100 text-sm sm:text-base font-medium">
+                        <span>Round ${log.round} — Visti: <strong class="text-indigo-600">${log.target}</strong> | Risposta: <strong class="text-slate-800">${log.user}</strong></span>
+                        <span class="px-3 py-1 rounded-full text-xs font-bold ${log.correct ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}">${log.correct ? 'Corretto' : 'Errato'}</span>
+                    </div>`;
+                });
+                html = `<div class="mb-4 font-extrabold text-lg text-slate-800 bg-indigo-50 p-3 rounded-xl text-center">Risultato Finale: ${correctCount} su ${gameState.maxRounds} risposte corrette</div>` + html;
+            } else {
+                gameState.scoreLog.forEach(log => {
+                    if (log.correct) correctCount++;
+                    html += `<div class="flex justify-between items-center py-3 border-b border-slate-100 text-sm sm:text-base font-medium">
+                        <span>Round ${log.round} — Totale Reale: <strong class="text-indigo-600">${log.target}</strong> | Tuo Conto: <strong class="text-slate-800">${log.user}</strong></span>
+                        <span class="px-3 py-1 rounded-full text-xs font-bold ${log.correct ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}">${log.correct ? 'Corretto' : 'Errato'}</span>
+                    </div>`;
+                });
+                html = `<div class="mb-4 font-extrabold text-lg text-slate-800 bg-indigo-50 p-3 rounded-xl text-center">Riepilogo Conto Continuo: ${correctCount} su ${gameState.scoreLog.length} round corretti</div>` + html;
+            }
+            resultsContent.innerHTML = html;
+        }
+    </script>
+</body>
+</html>
