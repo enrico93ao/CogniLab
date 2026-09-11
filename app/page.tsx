@@ -1,0 +1,1 @@
+export default function Home(){return <main style={{height:'100dvh',width:'100%',overflow:'hidden'}}><iframe src="/exercises/index.html" title="CogniLab: catalogo completo, esercizi e progressi" style={{height:'100%',width:'100%',border:0}} allow="fullscreen"/></main>;}

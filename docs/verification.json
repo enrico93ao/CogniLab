@@ -1,0 +1,546 @@
+{
+  "test": "DOM integration: load, native start, completion with representative counters, canonical result and idempotent save; audio/canvas rendering mocked",
+  "browserVisualQA": false,
+  "results": [
+    {
+      "file": "Stroop.html",
+      "status": "passed",
+      "metrics": {
+        "correct": 7,
+        "total": 10,
+        "errors": 3,
+        "omissions": null,
+        "accuracyPct": 70,
+        "responseTimeMs": 400,
+        "score": 7,
+        "scoreUnit": "punti",
+        "scoreDirection": "higher"
+      }
+    },
+    {
+      "file": "Attenzione alternata.html",
+      "status": "passed",
+      "metrics": {
+        "correct": 6,
+        "total": 8,
+        "errors": 2,
+        "omissions": null,
+        "accuracyPct": 75,
+        "responseTimeMs": null,
+        "score": null,
+        "scoreUnit": "punti",
+        "scoreDirection": "higher"
+      }
+    },
+    {
+      "file": "Calcolo e memoria.html",
+      "status": "passed",
+      "metrics": {
+        "correct": 3,
+        "total": 5,
+        "errors": 2,
+        "omissions": null,
+        "accuracyPct": 60,
+        "responseTimeMs": null,
+        "score": 3,
+        "scoreUnit": "punti",
+        "scoreDirection": "higher"
+      }
+    },
+    {
+      "file": "Cancellazione di H.html",
+      "status": "passed",
+      "metrics": {
+        "correct": 8,
+        "total": 14,
+        "errors": 2,
+        "omissions": 6,
+        "accuracyPct": 57.14,
+        "responseTimeMs": null,
+        "score": 70,
+        "scoreUnit": "punti",
+        "scoreDirection": "higher"
+      }
+    },
+    {
+      "file": "Catena di parole.html",
+      "status": "passed",
+      "metrics": {
+        "correct": 4,
+        "total": 5,
+        "errors": 1,
+        "omissions": null,
+        "accuracyPct": 80,
+        "responseTimeMs": null,
+        "score": null,
+        "scoreUnit": "punti",
+        "scoreDirection": "higher"
+      }
+    },
+    {
+      "file": "Conta i numeri e le lettere.html",
+      "status": "passed",
+      "metrics": {
+        "correct": 3,
+        "total": 4,
+        "errors": 1,
+        "omissions": null,
+        "accuracyPct": 75,
+        "responseTimeMs": null,
+        "score": null,
+        "scoreUnit": "punti",
+        "scoreDirection": "higher"
+      }
+    },
+    {
+      "file": "Doppio compito e velocità.html",
+      "status": "passed",
+      "metrics": {
+        "correct": 4,
+        "total": 6,
+        "errors": 2,
+        "omissions": null,
+        "accuracyPct": 66.67,
+        "responseTimeMs": null,
+        "score": 40,
+        "scoreUnit": "punti",
+        "scoreDirection": "higher"
+      }
+    },
+    {
+      "file": "Esplorazione visuospaziale multilivello.html",
+      "status": "passed",
+      "metrics": {
+        "correct": 5,
+        "total": 7,
+        "errors": 2,
+        "omissions": null,
+        "accuracyPct": 71.43,
+        "responseTimeMs": 350,
+        "score": 5,
+        "scoreUnit": "punti",
+        "scoreDirection": "higher"
+      }
+    },
+    {
+      "file": "Il cifrario.html",
+      "status": "passed",
+      "metrics": {
+        "correct": 7,
+        "total": 10,
+        "errors": 3,
+        "omissions": null,
+        "accuracyPct": 70,
+        "responseTimeMs": null,
+        "score": 2,
+        "scoreUnit": "sequenze",
+        "scoreDirection": "higher"
+      }
+    },
+    {
+      "file": "Il semaforo delle parole.html",
+      "status": "passed",
+      "metrics": {
+        "correct": 3,
+        "total": 5,
+        "errors": 1,
+        "omissions": 1,
+        "accuracyPct": 60,
+        "responseTimeMs": 500,
+        "score": null,
+        "scoreUnit": "punti",
+        "scoreDirection": "higher"
+      }
+    },
+    {
+      "file": "Inibizione e memoria di lavoro.html",
+      "status": "passed",
+      "metrics": {
+        "correct": 3,
+        "total": 5,
+        "errors": 1,
+        "omissions": 1,
+        "accuracyPct": 60,
+        "responseTimeMs": 500,
+        "score": 0,
+        "scoreUnit": "punti",
+        "scoreDirection": "higher"
+      }
+    },
+    {
+      "file": "Intruso semantico.html",
+      "status": "passed",
+      "metrics": {
+        "correct": 7,
+        "total": 10,
+        "errors": 3,
+        "omissions": null,
+        "accuracyPct": 70,
+        "responseTimeMs": null,
+        "score": null,
+        "scoreUnit": "punti",
+        "scoreDirection": "higher"
+      }
+    },
+    {
+      "file": "L'orologio invisibile.html",
+      "status": "passed",
+      "metrics": {
+        "correct": null,
+        "total": 1,
+        "errors": null,
+        "omissions": null,
+        "accuracyPct": null,
+        "responseTimeMs": null,
+        "score": 150,
+        "scoreUnit": "ms",
+        "scoreDirection": "lower"
+      }
+    },
+    {
+      "file": "La torre delle lettere.html",
+      "status": "passed",
+      "metrics": {
+        "correct": null,
+        "total": null,
+        "errors": null,
+        "omissions": null,
+        "accuracyPct": null,
+        "responseTimeMs": null,
+        "score": 1,
+        "scoreUnit": "parole",
+        "scoreDirection": "higher"
+      }
+    },
+    {
+      "file": "Memoria di lavoro avanzato.html",
+      "status": "passed",
+      "metrics": {
+        "correct": 3,
+        "total": 3,
+        "errors": null,
+        "omissions": null,
+        "accuracyPct": 100,
+        "responseTimeMs": null,
+        "score": null,
+        "scoreUnit": "punti",
+        "scoreDirection": "higher"
+      }
+    },
+    {
+      "file": "Memoria di prosa con distrattori.html",
+      "status": "passed",
+      "metrics": {
+        "correct": 2,
+        "total": 4,
+        "errors": null,
+        "omissions": null,
+        "accuracyPct": 50,
+        "responseTimeMs": null,
+        "score": null,
+        "scoreUnit": "punti",
+        "scoreDirection": "higher"
+      }
+    },
+    {
+      "file": "Memoria visuospaziale con domande.html",
+      "status": "passed",
+      "metrics": {
+        "correct": 0,
+        "total": 3,
+        "errors": null,
+        "omissions": null,
+        "accuracyPct": 0,
+        "responseTimeMs": null,
+        "score": null,
+        "scoreUnit": "punti",
+        "scoreDirection": "higher"
+      }
+    },
+    {
+      "file": "Memoria visuospaziale con numeri.html",
+      "status": "passed",
+      "metrics": {
+        "correct": 7,
+        "total": 10,
+        "errors": null,
+        "omissions": null,
+        "accuracyPct": 70,
+        "responseTimeMs": 1500,
+        "score": 7,
+        "scoreUnit": "punti",
+        "scoreDirection": "higher"
+      }
+    },
+    {
+      "file": "Memoria visuospaziale il Giardino.html",
+      "status": "passed",
+      "metrics": {
+        "correct": 2,
+        "total": 3,
+        "errors": null,
+        "omissions": null,
+        "accuracyPct": 66.67,
+        "responseTimeMs": null,
+        "score": 2,
+        "scoreUnit": "punti",
+        "scoreDirection": "higher"
+      }
+    },
+    {
+      "file": "Memoria visuospaziale rotante.html",
+      "status": "passed",
+      "metrics": {
+        "correct": 3,
+        "total": 5,
+        "errors": null,
+        "omissions": null,
+        "accuracyPct": 60,
+        "responseTimeMs": 1500,
+        "score": 0,
+        "scoreUnit": "punti",
+        "scoreDirection": "higher"
+      }
+    },
+    {
+      "file": "N back semantico.html",
+      "status": "passed",
+      "metrics": {
+        "correct": 0,
+        "total": 8,
+        "errors": 0,
+        "omissions": 8,
+        "accuracyPct": 0,
+        "responseTimeMs": null,
+        "score": null,
+        "scoreUnit": "punti",
+        "scoreDirection": "higher"
+      }
+    },
+    {
+      "file": "N back.html",
+      "status": "passed",
+      "metrics": {
+        "correct": 4,
+        "total": 7,
+        "errors": 1,
+        "omissions": 2,
+        "accuracyPct": 57.14,
+        "responseTimeMs": null,
+        "score": 0,
+        "scoreUnit": "punti",
+        "scoreDirection": "higher"
+      }
+    },
+    {
+      "file": "Orientamento temporale-spaziale.html",
+      "status": "passed",
+      "metrics": {
+        "correct": 7,
+        "total": 8,
+        "errors": 1,
+        "omissions": null,
+        "accuracyPct": 87.5,
+        "responseTimeMs": null,
+        "score": null,
+        "scoreUnit": "punti",
+        "scoreDirection": "higher"
+      }
+    },
+    {
+      "file": "Relazioni logiche.html",
+      "status": "passed",
+      "metrics": {
+        "correct": 7,
+        "total": 10,
+        "errors": null,
+        "omissions": null,
+        "accuracyPct": 70,
+        "responseTimeMs": 1500,
+        "score": null,
+        "scoreUnit": "punti",
+        "scoreDirection": "higher"
+      }
+    },
+    {
+      "file": "Riconoscimento visivo base.html",
+      "status": "passed",
+      "metrics": {
+        "correct": 3,
+        "total": 5,
+        "errors": 2,
+        "omissions": null,
+        "accuracyPct": 60,
+        "responseTimeMs": null,
+        "score": 3,
+        "scoreUnit": "punti",
+        "scoreDirection": "higher"
+      }
+    },
+    {
+      "file": "Riconoscimento visivo.html",
+      "status": "passed",
+      "metrics": {
+        "correct": 5,
+        "total": 7,
+        "errors": 2,
+        "omissions": null,
+        "accuracyPct": 71.43,
+        "responseTimeMs": null,
+        "score": 0,
+        "scoreUnit": "punti",
+        "scoreDirection": "higher"
+      }
+    },
+    {
+      "file": "Riordina la frase.html",
+      "status": "passed",
+      "metrics": {
+        "correct": 8,
+        "total": 10,
+        "errors": 2,
+        "omissions": null,
+        "accuracyPct": 80,
+        "responseTimeMs": null,
+        "score": 5,
+        "scoreUnit": "frasi",
+        "scoreDirection": "higher"
+      }
+    },
+    {
+      "file": "Riordina le lettere.html",
+      "status": "passed",
+      "metrics": {
+        "correct": 4,
+        "total": 5,
+        "errors": 1,
+        "omissions": null,
+        "accuracyPct": 80,
+        "responseTimeMs": null,
+        "score": 40,
+        "scoreUnit": "punti",
+        "scoreDirection": "higher"
+      }
+    },
+    {
+      "file": "Riordina le parole in ordine alfabetico.html",
+      "status": "passed",
+      "metrics": {
+        "correct": 2,
+        "total": 3,
+        "errors": null,
+        "omissions": null,
+        "accuracyPct": 66.67,
+        "responseTimeMs": null,
+        "score": null,
+        "scoreUnit": "punti",
+        "scoreDirection": "higher"
+      }
+    },
+    {
+      "file": "Rispondi al contrario e ricorda la parola.html",
+      "status": "passed",
+      "metrics": {
+        "correct": 3,
+        "total": 6,
+        "errors": null,
+        "omissions": null,
+        "accuracyPct": 50,
+        "responseTimeMs": null,
+        "score": null,
+        "scoreUnit": "punti",
+        "scoreDirection": "higher"
+      }
+    },
+    {
+      "file": "Rispondi il contrario.html",
+      "status": "passed",
+      "metrics": {
+        "correct": 15,
+        "total": 15,
+        "errors": 0,
+        "omissions": null,
+        "accuracyPct": 100,
+        "responseTimeMs": null,
+        "score": null,
+        "scoreUnit": "punti",
+        "scoreDirection": "higher"
+      }
+    },
+    {
+      "file": "Set shifting.html",
+      "status": "passed",
+      "metrics": {
+        "correct": 2,
+        "total": 3,
+        "errors": 0,
+        "omissions": 1,
+        "accuracyPct": 66.67,
+        "responseTimeMs": null,
+        "score": null,
+        "scoreUnit": "punti",
+        "scoreDirection": "higher"
+      }
+    },
+    {
+      "file": "Silhoutte.html",
+      "status": "passed",
+      "metrics": {
+        "correct": 2,
+        "total": 3,
+        "errors": 1,
+        "omissions": null,
+        "accuracyPct": 66.67,
+        "responseTimeMs": 800,
+        "score": null,
+        "scoreUnit": "punti",
+        "scoreDirection": "higher"
+      }
+    },
+    {
+      "file": "Trova l'immagine corrispondente.html",
+      "status": "passed",
+      "metrics": {
+        "correct": 3,
+        "total": 4,
+        "errors": 1,
+        "omissions": null,
+        "accuracyPct": 75,
+        "responseTimeMs": null,
+        "score": 0,
+        "scoreUnit": "punti",
+        "scoreDirection": "higher"
+      }
+    },
+    {
+      "file": "Trova l'intruso.html",
+      "status": "passed",
+      "metrics": {
+        "correct": 3,
+        "total": 4,
+        "errors": 1,
+        "omissions": null,
+        "accuracyPct": 75,
+        "responseTimeMs": 1500,
+        "score": 3,
+        "scoreUnit": "punti",
+        "scoreDirection": "higher"
+      }
+    },
+    {
+      "file": "conta_cerchi_rossi.html",
+      "status": "passed",
+      "metrics": {
+        "correct": 1,
+        "total": 2,
+        "errors": 1,
+        "omissions": null,
+        "accuracyPct": 50,
+        "responseTimeMs": null,
+        "score": null,
+        "scoreUnit": "punti",
+        "scoreDirection": "higher"
+      }
+    }
+  ]
+}

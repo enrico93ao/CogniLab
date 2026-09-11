@@ -1,0 +1,11 @@
+{
+  "status": "passed",
+  "checks": [
+    "36 exercise and 4 navigation HTTP routes",
+    "SQLite result and profile survive server restart",
+    "idempotent retry without duplicate",
+    "conflicting retry rejected",
+    "invalid accuracy rejected",
+    "cross-origin write rejected"
+  ]
+}
