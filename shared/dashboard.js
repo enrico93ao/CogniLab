@@ -15,6 +15,12 @@ const help=document.createElement('p');
 help.textContent='Puoi rispondere senza creare un account. In questa modalità le risposte non contengono nome o email e non sono associate al tuo account personale.';
 feedbackOption.after(help);
 let feedbackSubmissionId=crypto.randomUUID(),feedbackSent=false,closingSessionPromise=null;
+function returnToLanding(){
+ localStorage.removeItem('global_timer_start');
+ const uid=auth.currentUser?.uid;
+ if(uid){sessionStorage.removeItem('cognilab.session.'+uid);sessionStorage.removeItem('cognilab.plan.'+uid);}
+ location.href='index.html';
+}
 function closeCurrentSession(){
  if(!closingSessionPromise)closingSessionPromise=finishSession().then(()=>{localStorage.removeItem('global_timer_start');}).catch(error=>{
    notice.hidden=false;notice.textContent='La chiusura della sessione non è stata completata. '+friendlyError(error);
@@ -34,7 +40,7 @@ window.submitFeedbackForm=async()=>{
    feedbackSent=true;feedbackStatus.textContent='Questionario inviato. Grazie!';button.textContent='Risposte inviate';
    feedbackStatus.textContent='Questionario inviato. Ritorno alla home…';
    await Promise.race([closeCurrentSession(),new Promise(resolve=>setTimeout(resolve,1500))]);
-   location.href='index.html';
+   returnToLanding();
  }catch(error){
    const code=errorCode(error)||'errore-non-identificato';
    const stage=error.feedbackStage==='authentication'?'accesso anonimo':error.feedbackStage==='database'?'salvataggio risposte':'invio';
@@ -42,9 +48,10 @@ window.submitFeedbackForm=async()=>{
    button.disabled=false;
  }
 };
-window.closeFeedbackModal=()=>{
+window.closeFeedbackModal=async()=>{
  document.getElementById('feedback-modal').style.display='none';
- void closeCurrentSession();
+ await Promise.race([closeCurrentSession(),new Promise(resolve=>setTimeout(resolve,1500))]);
+ returnToLanding();
 };
 window.terminaSessioneGlobale=()=>{
  feedbackStatus.textContent='';feedbackSent=false;feedbackSubmissionId=crypto.randomUUID();closingSessionPromise=null;

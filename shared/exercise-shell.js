@@ -1,5 +1,8 @@
 (() => {
   'use strict';
+  const controls=document.getElementById('cl-focus-controls');
+  controls.onclick=()=>{const open=document.body.classList.toggle('cl-show-controls');controls.setAttribute('aria-expanded',String(open));controls.textContent=open?'Nascondi comandi':'Mostra comandi';};
+  window.addEventListener('message',event=>{if(event.origin!==location.origin||event.source!==document.getElementById('exercise-frame').contentWindow||event.data?.type!=='cognilab-exercise-state')return;document.body.classList.toggle('cl-running',event.data.running===true);document.body.classList.remove('cl-show-controls');controls.setAttribute('aria-expanded','false');controls.textContent='Mostra comandi';});
   const frame = document.getElementById('exercise-frame');
   const error = document.getElementById('cl-load-error');
   const title = document.getElementById('cl-exercise-title');

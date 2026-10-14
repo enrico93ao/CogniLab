@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stimolazione Cognitiva - Schermo Intero</title>
+    <title>Trova l’immagine corrispondente | CogniLab</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Lexend:wght=300;400;600&display=swap');
@@ -87,26 +87,27 @@
     </style>
 <link rel="stylesheet" href="shared/cognilab.css">
 <script src="shared/interface.js" defer></script>
-<script>window.CogniLabExercise={"id":"immagine-corrispondente","title":"Trova l'immagine corrispondente","category":"Visuospaziale","setup":"setup-screen"};</script>
+<script>window.CogniLabExercise={"id":"immagine-corrispondente","title":"Trova l'immagine corrispondente","category":"Visuospaziale","setup":"setup-screen","stimulusVersion":"realistic-v1","version":"3.1.0"};</script>
 <script src="shared/exercise-runtime.js"></script>
+<link rel="stylesheet" href="shared/exercise-modern.css"><link rel="stylesheet" href="shared/exercise-focus.css"><link rel="stylesheet" href="shared/object-images.css"><link rel="preload" as="image" href="assets/objects/realistic-atlas.webp"><script src="shared/object-images.js"></script>
 </head>
-<body data-cognilab="exercise" class="flex flex-col">
+<body data-cognilab="exercise" class="cl-modern-match flex flex-col">
 
     <div id="setup-screen" class="m-auto max-w-lg w-full bg-white rounded-3xl shadow-xl p-8 border border-gray-100">
-        <h1 class="text-3xl font-bold text-blue-800 text-center mb-6">Allenamento Cognitivo</h1>
+        <header class="cl-exercise-banner"><div><span class="cl-eyebrow">Visuospaziale · Ascolto e riconoscimento</span><h1>Trova l’immagine corrispondente</h1><p>Ascolta la parola e scegli l’immagine che corrisponde al modello.</p></div><div class="cl-target-badge" aria-hidden="true">◎</div></header>
         
         <div class="mb-6">
             <label class="block text-gray-700 font-semibold mb-2">Scegli la Difficoltà:</label>
             <div class="grid grid-cols-1 gap-3">
-                <button onclick="setDifficulty('semplice')" id="btn-semplice" class="difficulty-btn p-4 rounded-2xl border-2 border-blue-500 bg-blue-50 text-blue-800 font-bold text-left transition-all">
+                <button onclick="setDifficulty('semplice')" id="btn-semplice" aria-pressed="true" class="difficulty-btn p-4 rounded-2xl border-2 border-blue-500 bg-blue-50 text-blue-800 font-bold text-left transition-all">
                     <div class="text-lg">Livello Semplificato</div>
-                    <div class="text-sm font-normal text-blue-600">Scelta tra 2 icone GIGANTI.</div>
+                    <div class="text-sm font-normal text-blue-600">Scelta tra due immagini grandi.</div>
                 </button>
-                <button onclick="setDifficulty('base')" id="btn-base" class="difficulty-btn p-4 rounded-2xl border-2 border-gray-200 hover:border-blue-300 text-gray-700 font-bold text-left transition-all">
+                <button onclick="setDifficulty('base')" id="btn-base" aria-pressed="false" class="difficulty-btn p-4 rounded-2xl border-2 border-gray-200 hover:border-blue-300 text-gray-700 font-bold text-left transition-all">
                     <div class="text-lg">Livello Base</div>
-                    <div class="text-sm font-normal text-gray-500">Griglia media con oggetti colorati.</div>
+                    <div class="text-sm font-normal text-gray-500">Otto immagini di oggetti e animali.</div>
                 </button>
-                <button onclick="setDifficulty('intermedio')" id="btn-intermedio" class="difficulty-btn p-4 rounded-2xl border-2 border-gray-200 hover:border-blue-300 text-gray-700 font-bold text-left transition-all">
+                <button onclick="setDifficulty('intermedio')" id="btn-intermedio" aria-pressed="false" class="difficulty-btn p-4 rounded-2xl border-2 border-gray-200 hover:border-blue-300 text-gray-700 font-bold text-left transition-all">
                     <div class="text-lg">Livello Intermedio</div>
                     <div class="text-sm font-normal text-gray-500">Matrici (X/O). Trova tutti i target.</div>
                 </button>
@@ -122,8 +123,8 @@
             </select>
         </div>
 
-        <button onclick="startGame()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl text-xl shadow-lg transition-transform active:scale-95">
-            INIZIA ESERCIZIO
+        <button onclick="startGame()" class="cl-primary">
+            Inizia la prova →
         </button>
     </div>
 
@@ -189,7 +190,8 @@
             </div>
         </div>
 
-        <button onclick="exitGame()" class="w-full bg-blue-600 text-white font-bold py-5 rounded-2xl text-xl transition-transform active:scale-95">
+        <div id="cl-exercise-save-status" role="status" style="margin:18px 0"></div>
+        <button onclick="exitGame()" class="cl-primary">
             TORNA AL MENU
         </button>
     </div>
@@ -207,7 +209,7 @@
         let difficulty = 'semplice';
         let score = 0;
         let timeLeft = 60;
-        let timerInterval = null;
+        let timerInterval = null,levelTimeout,instructionTimeout,running=false;
         let currentTargetIcon = '';
         let currentTargetName = '';
         let targetsFoundInLevel = 0;
@@ -231,6 +233,7 @@
                 btn.classList.add('border-gray-200', 'text-gray-700');
             });
             const selected = document.getElementById('btn-' + level);
+            document.querySelectorAll('.difficulty-btn').forEach(button=>button.setAttribute('aria-pressed',String(button===selected)));
             selected.classList.add('border-blue-500', 'bg-blue-50', 'text-blue-800');
             selected.classList.remove('border-gray-200', 'text-gray-700');
         }
@@ -248,6 +251,7 @@
         }
 
         function startGame() {
+            running=true;gridElement.dataset.mode=difficulty;
  window.CogniLabRun?.begin(typeof arguments === "undefined" ? null : arguments[0]);
 
             score = 0;
@@ -281,6 +285,7 @@
         }
 
         function initLevel() {
+            if(!running)return;
             gridElement.innerHTML = '';
             targetsFoundInLevel = 0;
 
@@ -292,7 +297,7 @@
                 setupIntermediateLevel();
             }
             
-            setTimeout(repeatInstruction, 400);
+            instructionTimeout=setTimeout(()=>{if(running)repeatInstruction();},400);
         }
 
         function setupSempliceLevel() {
@@ -308,14 +313,14 @@
             currentTargetName = target.name;
             
             // Il target nel livello Semplice diventa GIGANTE (text-[11rem] su desktop)
-            targetDisplay.className = "text-[7rem] md:text-[11rem] font-bold leading-none animate-pulse";
-            targetDisplay.textContent = target.icon;
+            targetDisplay.className = "text-[7rem] md:text-[11rem] font-bold leading-none";
+            targetDisplay.innerHTML = window.CogniLabObjects.markup(target.name);
             targetName.textContent = target.name;
             totalTargetsInLevel = 1;
 
             selection.forEach(item => {
                 // Le carte di opzione sono un po' più piccole del target gigante per dare chiara priorità visiva
-                createCard(item.icon, item.icon === currentTargetIcon, "text-[6rem] md:text-[9rem]");
+                createCard(item.icon, item.icon === currentTargetIcon, "text-[6rem] md:text-[9rem]",item.name);
             });
         }
 
@@ -336,12 +341,12 @@
 
             // Target nel livello Base è chiaramente più grande degli elementi della griglia
             targetDisplay.className = "text-[6rem] md:text-[8rem] font-bold leading-none";
-            targetDisplay.textContent = target.icon;
+            targetDisplay.innerHTML = window.CogniLabObjects.markup(target.name);
             targetName.textContent = target.name;
             totalTargetsInLevel = 1;
 
             selection.forEach(item => {
-                createCard(item.icon, item.icon === currentTargetIcon, "text-[4.5rem] md:text-[6rem]");
+                createCard(item.icon, item.icon === currentTargetIcon, "text-[4.5rem] md:text-[6rem]",item.name);
             });
         }
 
@@ -381,12 +386,13 @@
             });
         }
 
-        function createCard(content, isTarget, fontSizeClass) {
-            const card = document.createElement('div');
+        function createCard(content, isTarget, fontSizeClass,spokenName=content) {
+            const card = document.createElement('button');card.type='button';card.setAttribute('aria-label',spokenName);
             card.className = `item-card ${fontSizeClass} font-bold select-none`;
-            card.textContent = content;
+            const photo=window.CogniLabObjects.markup(spokenName);if(photo)card.innerHTML=photo;else card.textContent=content;
             
             card.onclick = () => {
+                if (!running)return;
                 if (card.classList.contains('correct') || card.classList.contains('wrong')) return;
 
                 if (isTarget) {
@@ -398,7 +404,7 @@
 
                     if (targetsFoundInLevel === totalTargetsInLevel) {
                         stats.levelsCompleted++;
-                        setTimeout(initLevel, 600);
+                        levelTimeout=setTimeout(initLevel,600);
                     }
                 } else {
                     card.classList.add('wrong');
@@ -406,8 +412,8 @@
                     score = Math.max(0, score - 5);
                     scoreDisplay.textContent = score;
                     
-                    // Ripete solo la parola target per ri-orientare l'attenzione
-                    speak(currentTargetName);
+                    // Name the object actually touched, rather than the target.
+                    clearTimeout(instructionTimeout);speak(spokenName);
                     
                     setTimeout(() => card.classList.remove('wrong'), 500);
                 }
@@ -416,6 +422,7 @@
         }
 
         function endGame() {
+            running=false;clearTimeout(levelTimeout);clearTimeout(instructionTimeout);window.speechSynthesis.cancel();
             clearInterval(timerInterval);
             gameScreen.classList.add('hidden-screen');
             resultScreen.classList.remove('hidden-screen');
@@ -429,7 +436,10 @@
  window.CogniLabRun?.complete({correct:window.CogniLabRun.measure(()=>(stats.clicksCorrect)),total:window.CogniLabRun.measure(()=>(totalClicks)),errors:window.CogniLabRun.measure(()=>(stats.clicksWrong)),score:window.CogniLabRun.measure(()=>(score))});
 }
 
-        function exitGame() {
+        async function exitGame() {
+            running=false;clearTimeout(levelTimeout);clearTimeout(instructionTimeout);window.speechSynthesis.cancel();
+            const aborted=window.CogniLabRun?.abort();if(aborted){if(parent!==window)parent.postMessage({type:'cognilab-result-v3',result:aborted},location.origin);else await import('./shared/progress-store.js').then(module=>module.saveResult(aborted)).catch(()=>{});}
+            await window.CogniLabRun?.waitForSave?.();
             clearInterval(timerInterval);
             resultScreen.classList.add('hidden-screen');
             gameScreen.classList.add('hidden-screen');
