@@ -5,16 +5,44 @@ import {saveFeedback,finishSession,pending,retryPending,ensurePrivateStorage} fr
 import {onlineCount,completedCount,satisfaction,groupKey,comparableSeries,measurement,change} from './progress-model.mjs';
 const notice=document.createElement('p');notice.className='cl-notice';notice.hidden=true;notice.setAttribute('role','status');document.querySelector('.kpi-grid').after(notice);
 const feedbackStatus=document.createElement('p');feedbackStatus.id='cl-feedback-status';feedbackStatus.setAttribute('role','status');document.querySelector('#feedback-modal .modal-card').append(feedbackStatus);
+const feedbackOption=document.createElement('label');
+feedbackOption.style.cssText='display:flex;gap:10px;align-items:center;margin:16px 0';
+feedbackOption.innerHTML='<input id="cl-feedback-anonymous" type="checkbox" checked> Invia senza collegare le risposte al mio account';
+document.querySelector('#feedback-modal .modal-card').insertBefore(feedbackOption,feedbackStatus);
+const help=document.createElement('p');
+help.textContent='Puoi rispondere senza creare un account. In questa modalità le risposte non contengono nome o email e non sono associate al tuo account personale.';
+feedbackOption.after(help);
+let feedbackSubmissionId=crypto.randomUUID(),feedbackSent=false,closingSessionPromise=null;
+function closeCurrentSession(){
+ if(!closingSessionPromise)closingSessionPromise=finishSession().then(()=>{localStorage.removeItem('global_timer_start');}).catch(error=>{
+   notice.hidden=false;notice.textContent='La chiusura della sessione non è stata completata. '+friendlyError(error);
+   closingSessionPromise=null;
+ });
+ return closingSessionPromise;
+}
 window.submitFeedbackForm=async()=>{
+ if(feedbackSent)return;
  const ratings=Object.fromEntries([1,2,3].map(n=>['q'+n,document.querySelectorAll(`.star-rating[data-q="${n}"] .star-btn.active`).length]));
  if(Object.values(ratings).some(n=>n===0)){feedbackStatus.textContent='Rispondi a tutte le domande scegliendo da 1 a 5 stelle.';return;}
- if(!auth.currentUser){feedbackStatus.textContent='Accedi al tuo account per inviare il questionario.';window.CogniLabOpenAccount?.();return;}
- const button=document.querySelector('[onclick="submitFeedbackForm()"]');button.disabled=true;feedbackStatus.textContent='Invio in corso…';
- try{await saveFeedback(ratings);feedbackStatus.textContent='Questionario salvato. Grazie!';await finishSession();localStorage.removeItem('global_timer_start');button.textContent='Risposte inviate';}
- catch(error){feedbackStatus.textContent=friendlyError(error);button.disabled=false;}
+ const button=document.querySelector('[onclick="submitFeedbackForm()"]');
+ if(button.disabled)return;
+ button.disabled=true;feedbackStatus.textContent='Invio in corso…';
+ try{
+   await saveFeedback(ratings,{anonymous:document.getElementById('cl-feedback-anonymous').checked,submissionId:feedbackSubmissionId});
+   feedbackSent=true;feedbackStatus.textContent='Questionario inviato. Grazie!';button.textContent='Risposte inviate';
+   void closeCurrentSession();
+ }catch(error){feedbackStatus.textContent=friendlyError(error);button.disabled=false;}
 };
-window.closeFeedbackModal=async()=>{try{await finishSession();document.getElementById('feedback-modal').style.display='none';localStorage.removeItem('global_timer_start');}catch(error){feedbackStatus.textContent=friendlyError(error);}};
-window.terminaSessioneGlobale=()=>{feedbackStatus.textContent='';const button=document.querySelector('[onclick="submitFeedbackForm()"]');button.disabled=false;button.textContent='Invia Risposte';document.querySelectorAll('.star-btn').forEach(b=>b.classList.remove('active'));document.getElementById('feedback-modal').style.display='flex';};
+window.closeFeedbackModal=()=>{
+ document.getElementById('feedback-modal').style.display='none';
+ void closeCurrentSession();
+};
+window.terminaSessioneGlobale=()=>{
+ feedbackStatus.textContent='';feedbackSent=false;feedbackSubmissionId=crypto.randomUUID();closingSessionPromise=null;
+ const button=document.querySelector('[onclick="submitFeedbackForm()"]');button.disabled=false;button.textContent='Invia Risposte';
+ document.querySelectorAll('.star-btn').forEach(button=>button.classList.remove('active'));
+ document.getElementById('feedback-modal').style.display='flex';
+};
 window.tornaAllaHome=()=>{location.href='esercizi.html';};
 if(new URLSearchParams(location.search).get('feedback')==='1')window.terminaSessioneGlobale();
 const progress=document.createElement('section');progress.className='cl-progress';

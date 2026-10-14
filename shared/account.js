@@ -1,11 +1,12 @@
 import {disconnectPresence} from './presence.js';
-import {createUserWithEmailAndPassword,signInWithEmailAndPassword,sendPasswordResetEmail,signOut,updateProfile,onAuthStateChanged,EmailAuthProvider,linkWithCredential} from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js';
+import {createUserWithEmailAndPassword,signInWithEmailAndPassword,sendPasswordResetEmail,signOut,updateProfile,onAuthStateChanged,EmailAuthProvider,linkWithCredential,sendEmailVerification} from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js';
 import {auth,authReady,friendlyError} from './firebase-client.js';
 import {retryPending} from './progress-store.js';
+const HOME_URL='https://enrico93ao.github.io/CogniLab/esercizi.html';
 const button=document.createElement('button');button.className='btn';button.textContent='Accedi / Registrati';
 const host=document.querySelector('.nav-right-cluster')||document.querySelector('.welcome-container');host?.append(button);
 const dialog=document.createElement('dialog');dialog.className='cl-account';
-dialog.innerHTML='<form id="cl-account-form"><h2>Il tuo spazio CogniLab</h2><p>Accedi per ritrovare sessioni e progressi anche su un altro dispositivo.</p><label>Nome<input name="name" autocomplete="name" maxlength="80"></label><label>Email<input name="email" type="email" required autocomplete="email"></label><label>Password<input name="password" type="password" required minlength="6" autocomplete="current-password"></label><p id="cl-account-status" role="status" aria-live="polite"></p><div class="cl-account-actions"><button class="btn" type="submit" name="action" value="login">Accedi</button><button class="btn" type="submit" name="action" value="register">Crea account</button><button type="button" id="cl-reset-password">Password dimenticata</button><button type="button" id="cl-close-account">Chiudi</button></div></form><div id="cl-signed-account" hidden><h2>Il tuo account</h2><p id="cl-account-name"></p><button id="cl-logout" class="btn">Esci dall’account</button><button id="cl-close-signed">Chiudi</button></div>';
+dialog.innerHTML='<form id="cl-account-form"><h2>Il tuo spazio CogniLab</h2><p>Accedi per ritrovare sessioni e progressi anche su un altro dispositivo.</p><label>Nome<input name="name" autocomplete="name" maxlength="80"></label><label>Email<input name="email" type="email" required autocomplete="email"></label><label>Password<input name="password" type="password" required minlength="6" autocomplete="current-password"></label><p id="cl-account-status" role="status" aria-live="polite"></p><div class="cl-account-actions"><button class="btn" type="submit" name="action" value="login">Accedi</button><button class="btn" type="submit" name="action" value="register">Crea account</button><button type="button" id="cl-reset-password">Password dimenticata</button><button type="button" id="cl-close-account">Chiudi</button></div></form><div id="cl-signed-account" hidden><h2>Il tuo account</h2><p id="cl-account-name"></p><p id="cl-email-status" role="status"></p><button id="cl-resend-verification" class="btn">Reinvia email di conferma</button><button id="cl-logout" class="btn">Esci dall’account</button><button id="cl-close-signed">Chiudi</button></div>';
 document.body.append(dialog);
 button.onclick=()=>dialog.showModal();window.CogniLabOpenAccount=()=>dialog.showModal();
 const form=dialog.querySelector('form'),status=document.getElementById('cl-account-status');
@@ -16,10 +17,16 @@ form.addEventListener('submit',async event=>{
  try{
   await authReady;
   let credential;
+  const registering=event.submitter?.value==='register';
   if(event.submitter?.value==='register'){credential=auth.currentUser?.isAnonymous?await linkWithCredential(auth.currentUser,EmailAuthProvider.credential(fields.get('email').trim(),fields.get('password'))):await createUserWithEmailAndPassword(auth,fields.get('email').trim(),fields.get('password'));const name=fields.get('name').trim();if(name)await updateProfile(credential.user,{displayName:name});}
   else credential=await signInWithEmailAndPassword(auth,fields.get('email').trim(),fields.get('password'));
+  let emailState='';
+  if(registering){
+    try{await sendEmailVerification(credential.user,{url:HOME_URL,handleCodeInApp:false});emailState='sent';}
+    catch(error){emailState='pending';console.warn('Email confirmation delivery request failed:',error.code||'unknown');}
+  }
   form.reset();dialog.close();localStorage.setItem('hub_username',credential.user.displayName||'Utente');localStorage.setItem('hub_mode','free_training');
-  location.href='esercizi.html';
+  location.href=registering?'esercizi.html?welcome='+emailState:'esercizi.html';
  }catch(error){status.textContent=friendlyError(error);}finally{busy(false);}
 });
 document.getElementById('cl-reset-password').onclick=async()=>{const email=form.elements.email.value.trim();if(!email){status.textContent='Inserisci prima la tua email.';return;}busy(true);try{await sendPasswordResetEmail(auth,email);status.textContent='Se l’account esiste, riceverai le istruzioni per reimpostare la password.';}catch(e){status.textContent=friendlyError(e);}finally{busy(false);}};
@@ -28,7 +35,22 @@ document.getElementById('cl-logout').onclick=async()=>{try{await disconnectPrese
 onAuthStateChanged(auth,user=>{
  const registered=Boolean(user&&!user.isAnonymous);button.textContent=registered?'Il mio account':'Accedi / Registrati';form.hidden=registered;document.getElementById('cl-signed-account').hidden=!registered;
  document.getElementById('cl-account-name').textContent=user?.displayName||user?.email||'';
+ document.getElementById('cl-resend-verification').hidden=!registered||Boolean(user.emailVerified);
  if(user){if(localStorage.getItem('cognilab.lastUser')!==user.uid)localStorage.removeItem('hub_selected_patient_id');localStorage.setItem('cognilab.lastUser',user.uid);localStorage.setItem('hub_username',user.displayName||'Utente');const display=document.getElementById('user-display');if(display)display.textContent=user.displayName||'Utente';retryPending().catch(()=>{});}
  else{const display=document.getElementById('user-display');if(display)display.textContent='Ospite';}
 });
 window.addEventListener('online',()=>retryPending().catch(()=>{}));
+
+document.getElementById('cl-resend-verification').onclick=async()=>{
+ const user=auth.currentUser;if(!user||user.isAnonymous)return;
+ const target=document.getElementById('cl-email-status');const button=document.getElementById('cl-resend-verification');
+ button.disabled=true;target.textContent='Invio dell’email in corso…';
+ try{await sendEmailVerification(user,{url:HOME_URL,handleCodeInApp:false});target.textContent='Email di conferma richiesta. Controlla anche la cartella spam.';}
+ catch(error){target.textContent=friendlyError(error);}finally{button.disabled=false;}
+};
+const welcome=new URLSearchParams(location.search).get('welcome');
+if(welcome==='sent'||welcome==='pending'){
+ const message=document.createElement('p');message.className='cl-notice';message.setAttribute('role','status');
+ message.textContent=welcome==='sent'?'Benvenuto in CogniLab! Ti abbiamo richiesto l’invio di un’email per confermare l’indirizzo e tornare alla palestra.':'Account creato. Non è stato possibile richiedere l’email di conferma; puoi riprovare da Il mio account.';
+ const host=document.querySelector('.container')||document.querySelector('.welcome-container');host?.prepend(message);
+}
