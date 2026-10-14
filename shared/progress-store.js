@@ -1,3 +1,4 @@
+import {requireProfessional} from './clinical-access.js';
 import {isPermissionDenied} from './firebase-errors.js';
 import {guestFeedbackClient} from './feedback-guest.js';
 import {ref,set,update,get,serverTimestamp} from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js';
@@ -11,7 +12,7 @@ export async function ensurePrivateStorage(){
  let denied=false;
  try{await get(ref(db,'cognilab/users/__privacy_probe__'));}catch(error){if(isPermissionDenied(error))denied=true;else throw error;}
  if(!denied)throw Object.assign(new Error('Privacy rules required'),{code:'privacy-not-configured'});
- await get(ref(db,`cognilab/users/${user.uid}`));privateAccounts.add(user.uid);
+ await get(ref(db,`cognilab/users/${user.uid}/profile`));privateAccounts.add(user.uid);
 }
 export function sessionFor(uid){
  const key='cognilab.session.'+uid;let session;
@@ -28,19 +29,29 @@ export async function saveResult(input){
  if(input?.sessionId&&!/^[a-z0-9-]{8,80}$/i.test(input.sessionId))throw Error('Invalid session');
  if(!input?.id||!/^[a-z0-9-]{8,80}$/i.test(input.id)||typeof input.exerciseId!=='string'||!input.startedAt||!input.finishedAt)throw Error('Invalid exercise result');
  const session=input.sessionId?{id:input.sessionId,startedAt:input.sessionStartedAt,patientId:input.patientId||null}:sessionFor(user.uid);
+ if(session.patientId)await requireProfessional();
  const result={...input,metrics:normalizeMetrics(input.metrics),sessionId:session.id,sessionStartedAt:session.startedAt,patientId:session.patientId||null};
  const queue=pending(user.uid);queue[result.id]=result;localStorage.setItem(queueKey(user.uid),JSON.stringify(queue));
  await ensurePrivateStorage();
  const values={};
- values[`cognilab/users/${user.uid}/sessions/${session.id}/startedAt`]=session.startedAt;
- values[`cognilab/users/${user.uid}/sessions/${session.id}/results/${result.id}`]=result;
+ const base=`cognilab/users/${user.uid}/`+(session.patientId?'clinical/sessions/':'sessions/');
+ values[`${base}${session.id}/startedAt`]=session.startedAt;
+ values[`${base}${session.id}/patientId`]=session.patientId||null;
+ values[`${base}${session.id}/results/${result.id}`]=result;
  values[`cognilab/activity/${user.uid}/${result.id}`]=result.status==='completed';
  await update(ref(db),values);
  const latest=pending(user.uid);delete latest[result.id];localStorage.setItem(queueKey(user.uid),JSON.stringify(latest));
  return result;
 }
 export async function retryPending(){await authReady;const user=auth.currentUser;if(!user)return;for(const result of Object.values(pending(user.uid)))await saveResult(result);}
-export async function finishSession(){await authReady;const user=auth.currentUser;if(!user)return;await ensurePrivateStorage();const session=sessionFor(user.uid);const values={};values[`cognilab/users/${user.uid}/sessions/${session.id}/status`]='completed';values[`cognilab/users/${user.uid}/sessions/${session.id}/finishedAt`]=new Date().toISOString();values[`cognilab/users/${user.uid}/clinical/sessione_attiva`]=null;await update(ref(db),values);sessionStorage.removeItem('cognilab.session.'+user.uid);sessionStorage.removeItem('cognilab.plan.'+user.uid);}
+export async function finishSession(){
+ await authReady;const user=auth.currentUser;if(!user)return;await ensurePrivateStorage();const session=sessionFor(user.uid);
+ if(session.patientId||localStorage.getItem('hub_mode')==='clinical')await requireProfessional();
+ const base=`cognilab/users/${user.uid}/`+(session.patientId?'clinical/sessions/':'sessions/');const values={};
+ values[`${base}${session.id}/status`]='completed';values[`${base}${session.id}/finishedAt`]=new Date().toISOString();
+ if(localStorage.getItem('hub_mode')==='clinical')values[`cognilab/users/${user.uid}/clinical/sessione_attiva`]=null;
+ await update(ref(db),values);sessionStorage.removeItem('cognilab.session.'+user.uid);sessionStorage.removeItem('cognilab.plan.'+user.uid);
+}
 export async function saveFeedback(ratings,options={}){
  if(![ratings.q1,ratings.q2,ratings.q3].every(v=>Number.isInteger(v)&&v>=1&&v<=5))throw Error('Rispondi a tutte le domande.');
  await authReady;

@@ -1,3 +1,4 @@
+import {requireProfessional} from './clinical-access.js';
 import {errorCode} from './firebase-errors.js';
 import {onAuthStateChanged} from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js';
 import {ref,onValue,onDisconnect,set,remove} from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js';
@@ -102,7 +103,12 @@ onAuthStateChanged(auth,async user=>{
  },document.getElementById('kpi-utenti'));
  try{await ensurePrivateStorage();}catch(error){unavailable(document.getElementById('cl-progress-status'),error);return;}
  if(auth.currentUser?.uid!==user.uid)return;
- watch(`cognilab/users/${user.uid}/sessions`,value=>renderResults(Object.values(value||{}).flatMap(s=>Object.values(s.results||{}))),document.getElementById('cl-progress-status'));
+ const clinicalMode=localStorage.getItem('hub_mode')==='clinical';
+ if(clinicalMode){try{await requireProfessional();}catch(error){document.getElementById('cl-progress-status').textContent='Accesso professionale non autorizzato.';return;}}
+ const saved={personal:[],clinical:[]};
+ const renderSaved=()=>renderResults([...saved.personal,...saved.clinical]);
+ watch(`cognilab/users/${user.uid}/sessions`,value=>{saved.personal=Object.values(value||{}).flatMap(s=>Object.values(s.results||{}));renderSaved();},document.getElementById('cl-progress-status'));
+ if(clinicalMode)watch(`cognilab/users/${user.uid}/clinical/sessions`,value=>{saved.clinical=Object.values(value||{}).flatMap(s=>Object.values(s.results||{}));renderSaved();},document.getElementById('cl-progress-status'));
  if(user.isAnonymous){notice.hidden=false;notice.textContent='Modalità ospite: crea un account per ritrovare i progressi anche su altri dispositivi.';}
  const queued=Object.keys(pending(user.uid)).length;if(queued){notice.hidden=false;notice.textContent=`${queued} risultati in attesa di sincronizzazione. Vengono ritentati automaticamente quando la connessione è disponibile.`;try{await retryPending();}catch(error){notice.textContent=friendlyError(error)+' I risultati restano nella coda locale del tuo account.';}}
 });

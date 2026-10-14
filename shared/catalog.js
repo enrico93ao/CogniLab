@@ -1,4 +1,5 @@
 window.CogniLabCatalog = [
+  {"title":"Lista della spesa","file":"Lista della spesa.html"},
   {
     "title": "Attenzione Alternata",
     "file": "Attenzione alternata.html"

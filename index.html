@@ -440,15 +440,7 @@
             }, 400);
         }
 
-        function enterClinicalMode() {
-            localStorage.setItem('hub_mode', 'clinical');
-
-            // Transizione fluida in uscita (Fade-out)
-            document.body.classList.add('fade-out');
-            setTimeout(() => {
-                window.location.href = 'esercizi.html';
-            }, 400);
-        }
+        function enterClinicalMode() { window.location.href = 'area-clinica.html'; }
 
         document.getElementById('username-input').addEventListener('keydown', function(e) {
             if (e.key === 'Enter') startFreeTraining();

@@ -1,0 +1,5 @@
+export const PRODUCTS=['Pane','Latte','Uova','Mele','Pasta','Riso','Pomodori','Carote','Patate','Yogurt','Formaggio','Banane','Arance','Insalata','Zucchine','Pere','Limoni','Biscotti','Caffè','Farina','Olio','Piselli','Fagioli','Miele'];
+export const LEVELS={easy:{count:4,study:25,delay:20},medium:{count:6,study:30,delay:30},hard:{count:8,study:35,delay:45}};
+export function shuffle(items,random=Math.random){const result=[...items];for(let i=result.length-1;i>0;i--){const j=Math.floor(random()*(i+1));[result[i],result[j]]=[result[j],result[i]];}return result;}
+export function createShoppingRound(level,random=Math.random){const config=LEVELS[level];if(!config)throw Error('Invalid level');const pool=shuffle(PRODUCTS,random);return {...config,targets:pool.slice(0,config.count),options:shuffle(pool.slice(0,config.count*2),random)};}
+export function scoreShopping(targets,selection){const chosen=new Set(selection);const correct=targets.filter(item=>chosen.has(item)).length;return {correct,total:targets.length,errors:[...chosen].filter(item=>!targets.includes(item)).length,omissions:targets.length-correct};}

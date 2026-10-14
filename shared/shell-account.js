@@ -1,7 +1,9 @@
+import {requireProfessional} from './clinical-access.js';
 import {saveResult} from './progress-store.js';
 import {friendlyError,auth,authReady} from './firebase-client.js';
 const frame=document.getElementById('exercise-frame');
 await authReady;
+if(localStorage.getItem('hub_mode')==='clinical'){try{await requireProfessional();}catch{frame.hidden=true;location.replace('area-clinica.html');throw Error('Clinical access denied');}}
 const planKey=auth.currentUser?'cognilab.plan.'+auth.currentUser.uid:null;
 let plan;try{plan=planKey?JSON.parse(sessionStorage.getItem(planKey)):null;}catch{}
 let nextButton;

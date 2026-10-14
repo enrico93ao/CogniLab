@@ -391,7 +391,7 @@
             </div>
         </div>
 
-        <div id="clinical-panel">
+        <div id="clinical-panel" style="display:none">
             <div class="panel-title" onclick="togglePanel()">
                 <h2><i class="fa-solid fa-user-doctor"></i> Area Clinica: Gestione Pazienti e Sessioni</h2>
                 <div id="panel-chevron"><i class="fa-solid fa-chevron-down"></i></div>
@@ -565,6 +565,12 @@
                 <h2>Memoria e Memoria di Lavoro</h2>
             </div>
             <div class="grid-esercizi">
+                <div class="card" data-title="Lista della spesa" data-file="Lista%20della%20spesa.html" onclick="openExerciseCard(this, event)">
+                    <input type="checkbox" class="select-exercise-checkbox" onchange="updateQueue(event)">
+                    <div class="card-image-container" style="color:var(--primary)"><i class="fa-solid fa-basket-shopping"></i></div>
+                    <div class="card-body"><h3>Lista della spesa</h3><p>Memorizza i prodotti, affronta una breve distrazione e ricostruisci la lista.</p></div><span class="tag">Memoria quotidiana · Nuovo</span>
+                </div>
+
                 <div class="card" data-title="Calcolo e memoria" data-file="Calcolo%20e%20memoria.html" onclick="openExerciseCard(this, event)">
                     <input type="checkbox" class="select-exercise-checkbox" onchange="updateQueue(event)">
                     <div class="card-image-container" style="color: var(--primary);"><i class="fa-solid fa-square-root-variable"></i></div>
@@ -946,6 +952,7 @@
         import { getDatabase, ref, set, push, onValue, get, remove, update } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js";
 
         import {db,auth,authReady,friendlyError} from './shared/firebase-client.js';
+        import {requireProfessional,clinicalMessage} from './shared/clinical-access.js';
         import {ensurePrivateStorage} from './shared/progress-store.js';
         let activeSessionState = null;
         let performanceChartInstance = null;
@@ -1011,7 +1018,7 @@
 
             } else if (modalita === 'clinical') {
                 document.getElementById('user-display').innerText = `🩺 Dott. ${username}`;
-                document.getElementById('clinical-panel').style.display = 'block'; 
+                // Clinical panel opens only after server-side role verification. 
                 document.getElementById('kpi-svolti').innerText = "-"; 
 
                 document.getElementById('welcome-heading').innerText = `Pannello Clinico, Dott. ${username}`;
@@ -1023,9 +1030,11 @@
         });
 
         await authReady;
+        const clinicalMode=localStorage.getItem('hub_mode')==='clinical';
+        if(clinicalMode){try{await requireProfessional();document.getElementById('clinical-panel').style.display='block';}catch(error){localStorage.setItem('hub_mode','free_training');localStorage.removeItem('hub_selected_patient_id');location.replace('area-clinica.html');throw error;}}
         const clinicalBase='cognilab/users/'+(auth.currentUser?.uid||'guest')+'/clinical/';
         const activeSessionRef = ref(db, clinicalBase+'sessione_attiva');
-        onValue(activeSessionRef, (snapshot) => {
+        if(clinicalMode)onValue(activeSessionRef, (snapshot) => {
             const statusBar = document.getElementById('active-status-bar');
             const statusText = document.getElementById('session-status-text');
             
@@ -1047,7 +1056,7 @@
 
         window.addPatient = async function() {
             if(!auth.currentUser||auth.currentUser.isAnonymous){window.CogniLabOpenAccount?.();return;}
-            try { await ensurePrivateStorage(); } catch(error) { alert(friendlyError(error)); return; }
+            try { await requireProfessional(); await ensurePrivateStorage(); } catch(error) { alert(friendlyError(error)); return; }
             const nameInput = document.getElementById('new-patient-name');
             const patientName = nameInput.value.trim();
 
@@ -1069,7 +1078,7 @@
 
         window.editPatient = async function(id, currentName) {
             if(!auth.currentUser||auth.currentUser.isAnonymous){window.CogniLabOpenAccount?.();return;}
-            try { await ensurePrivateStorage(); } catch(error) { alert(friendlyError(error)); return; }
+            try { await requireProfessional(); await ensurePrivateStorage(); } catch(error) { alert(friendlyError(error)); return; }
             const newName = prompt("Modifica il nome del paziente:", currentName);
             if (newName && newName.trim() !== "" && newName.trim() !== currentName) {
                 const patientRef = ref(db, `${clinicalBase}pazienti/${id}`);
@@ -1079,7 +1088,7 @@
 
         window.deletePatient = async function(id, name) {
             if(!auth.currentUser||auth.currentUser.isAnonymous){window.CogniLabOpenAccount?.();return;}
-            try { await ensurePrivateStorage(); } catch(error) { alert(friendlyError(error)); return; }
+            try { await requireProfessional(); await ensurePrivateStorage(); } catch(error) { alert(friendlyError(error)); return; }
             if (confirm(`Eliminare definitivamente ${name} e tutto il suo storico clinico?`)) {
                 const patientRef = ref(db, `${clinicalBase}pazienti/${id}`);
                 const historyRef = ref(db, `${clinicalBase}storico_pazienti/${id}`);
@@ -1095,7 +1104,7 @@
         }
 
         const patientsRef = ref(db, clinicalBase+'pazienti');
-        onValue(patientsRef, (snapshot) => {
+        if(clinicalMode)onValue(patientsRef, (snapshot) => {
             const select = document.getElementById('patient-select');
             const mgmtList = document.getElementById('patient-mgmt-list');
             if(!select || !mgmtList) return;
@@ -1182,7 +1191,7 @@
 
         window.startSession = async function(tipo) {
             if(!auth.currentUser||auth.currentUser.isAnonymous){window.CogniLabOpenAccount?.();return;}
-            try { await ensurePrivateStorage(); } catch(error) { alert(friendlyError(error)); return; }
+            try { await requireProfessional(); await ensurePrivateStorage(); } catch(error) { alert(friendlyError(error)); return; }
             const patientSelect = document.getElementById('patient-select');
             const patientId = patientSelect.value;
             const patientName = patientSelect.options[patientSelect.selectedIndex]?.text;
@@ -1232,7 +1241,8 @@
             }
         }
 
-        window.stopCurrentActiveSession = function() {
+        window.stopCurrentActiveSession = async function() {
+            try{await requireProfessional();}catch(error){alert(clinicalMessage(error));return;}
             if (confirm("Terminare la sessione attiva?")) {
                 set(activeSessionRef, null).then(() => document.getElementById('feedback-modal').style.display = 'flex');
             }

@@ -5,8 +5,21 @@
     "cognilab": {
       "users": {
         "$uid": {
-          ".read": "auth != null && auth.uid === $uid",
-          ".write": "auth != null && auth.uid === $uid"
+          "profile": {
+            ".read": "auth != null && auth.uid === $uid",
+            ".write": "auth != null && auth.uid === $uid"
+          },
+          "sessions": {
+            ".read": "auth != null && auth.uid === $uid && (!root.child('cognilab/users').child($uid).child('clinical').exists() || root.child('cognilab/professionals').child($uid).val() === true)",
+            ".write": "auth != null && auth.uid === $uid",
+            "$session": {
+              ".validate": "!newData.child('patientId').exists() && !data.child('patientId').exists()"
+            }
+          },
+          "clinical": {
+            ".read": "auth != null && auth.uid === $uid && auth.token.firebase.sign_in_provider !== 'anonymous' && root.child('cognilab/professionals').child($uid).val() === true",
+            ".write": "auth != null && auth.uid === $uid && auth.token.firebase.sign_in_provider !== 'anonymous' && root.child('cognilab/professionals').child($uid).val() === true"
+          }
         }
       },
       "presence": {
@@ -54,6 +67,13 @@
       "stats": {
         ".read": "auth != null",
         ".write": false
+      },
+      "professionals": {
+        "$uid": {
+          ".read": "auth != null && auth.uid === $uid",
+          ".write": false,
+          ".validate": "newData.isBoolean()"
+        }
       }
     },
     "cognilab_v2": {
