@@ -224,15 +224,16 @@
 <script src="shared/interface.js" defer></script>
 <script>window.CogniLabExercise={"id":"cancellazione-h","title":"Cancellazione di H","category":"Attenzione","setup":"welcome-screen"};</script>
 <script src="shared/exercise-runtime.js"></script>
+<link rel="stylesheet" href="shared/exercise-modern.css">
 </head>
-<body data-cognilab="exercise">
+<body data-cognilab="exercise" class="cl-modern-cancellation">
 
     <!-- 1. CONFIGURAZIONE -->
     <div id="welcome-screen" class="screen active">
-        <h1 style="font-size: 26px; text-align: center; margin-top: 10px;">Esercizio di Cancellazione Clinica Modulare</h1>
+        <header class="cl-exercise-banner"><div><span class="cl-eyebrow">Attenzione · Esplorazione visiva</span><h1>Cancellazione di H</h1><p>Trova e seleziona tutti gli stimoli bersaglio. Scegli la densità e gli aiuti prima di iniziare.</p></div><div class="cl-target-badge" aria-hidden="true">H</div></header>
         
         <div class="config-card">
-            <h3 style="margin-bottom: 12px; color: #333; border-bottom: 1px solid #eee; padding-bottom: 5px;">Configurazione:</h3>
+            <h3 style="margin-bottom: 12px; color: #333; border-bottom: 1px solid #eee; padding-bottom: 5px;">Personalizza la tua prova</h3>
             
             <div class="config-group">
                 <label for="stimulus-type">Tipo di Stimolo:</label>
@@ -285,7 +286,7 @@
     <!-- 2. AREA DEL COMPITO -->
     <div id="game-screen" class="screen">
         <div class="top-bar-header">
-            <!-- Pulsante rimosso come richiesto -->
+            <span>Cancellazione selettiva</span><span>Seleziona i bersagli, poi termina la prova.</span>
         </div>
         <div class="canvas-area">
             <canvas id="cancellationCanvas"></canvas>
@@ -304,7 +305,7 @@
             <table class="results-table">
                 <thead>
                     <tr>
-                        <th>Indicatore Clinico</th>
+                        <th>Indicatore</th>
                         <th>Valore</th>
                     </tr>
                 </thead>
@@ -335,6 +336,7 @@
                 </div>
             </div>
 
+            <div id="cl-exercise-save-status" role="status"></div>
             <div id="savingStatus" class="saving-loader">Salvataggio dei dati in corso...</div>
 
             <div style="text-align: center; margin-top: 15px;">
@@ -808,5 +810,6 @@
 
         window.addEventListener('DOMContentLoaded', initFirebaseSafe);
     </script>
+<script src="shared/exercise-modern.js" defer></script>
 </body>
 </html>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BrainTrain - Coerenza Linguistica</title>
+    <title>Riconoscimento visivo base | CogniLab</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .option-card {
@@ -45,25 +45,21 @@
 <script src="shared/interface.js" defer></script>
 <script>window.CogniLabExercise={"id":"riconoscimento-base","title":"Riconoscimento visivo base","category":"Visuospaziale","setup":"menu-screen"};</script>
 <script src="shared/exercise-runtime.js"></script>
+<link rel="stylesheet" href="shared/exercise-modern.css">
 </head>
-<body data-cognilab="exercise" class="bg-slate-50 min-h-screen flex flex-col items-center justify-center p-4 font-sans text-slate-800">
+<body data-cognilab="exercise" class="cl-modern-visual bg-slate-50 min-h-screen flex flex-col items-center justify-center p-4 font-sans text-slate-800">
 
     <div id="game-container" class="max-w-md w-full bg-white rounded-[3rem] shadow-2xl p-8 relative overflow-hidden border border-slate-100">
         
         <!-- SCHERMATA MENU -->
         <div id="menu-screen" class="flex flex-col items-center">
-            <div class="w-20 h-20 bg-indigo-600 rounded-3xl flex items-center justify-center mb-6 shadow-xl shadow-indigo-100">
-                <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-            </div>
-            <h1 class="text-3xl font-black mb-2 text-slate-900 tracking-tight">BrainTrain</h1>
-            <p class="text-slate-500 mb-8 text-center text-sm px-6">Esercizi di corrispondenza per il recupero del linguaggio.</p>
-
+            <header class="cl-exercise-banner"><div><span class="cl-eyebrow">Visuospaziale · Corrispondenze</span><h1>Riconoscimento visivo</h1><p>Osserva il modello e scegli l’alternativa corrispondente.</p></div><div class="cl-target-badge" aria-hidden="true">◎</div></header>
+            <p class="cl-instruction">Allenati con colori, forme o oggetti. Durante la prova scegli tra le due alternative quella che corrisponde al modello.</p>
+            <div class="cl-config-grid">
             <!-- Livelli -->
-            <div class="w-full mb-6">
-                <label class="block text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 mb-3 ml-1">Scegli il livello</label>
-                <div class="grid grid-cols-3 gap-3">
+            <div>
+                <label class="cl-label">Scegli il livello</label>
+                <div class="cl-choices">
                     <button onclick="selectLevel('easy')" id="btn-level-easy" class="option-card p-4 rounded-2xl border-2 border-slate-100 bg-white text-center shadow-sm">
                         <div class="text-2xl mb-1">🟡</div>
                         <span class="font-bold block text-xs">Colori</span>
@@ -80,17 +76,18 @@
             </div>
 
             <!-- Tempo -->
-            <div class="w-full mb-10">
-                <label class="block text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 mb-3 ml-1">Durata</label>
-                <div class="grid grid-cols-3 gap-3">
+            <div>
+                <label class="cl-label">Durata</label>
+                <div class="cl-choices">
                     <button onclick="selectDuration(30)" id="btn-time-30" class="option-card py-3 rounded-xl border-2 border-slate-100 bg-white font-bold text-sm">30s</button>
                     <button onclick="selectDuration(60)" id="btn-time-60" class="option-card py-3 rounded-xl border-2 border-slate-100 bg-white font-bold text-sm">60s</button>
                     <button onclick="selectDuration(90)" id="btn-time-90" class="option-card py-3 rounded-xl border-2 border-slate-100 bg-white font-bold text-sm">90s</button>
                 </div>
             </div>
 
-            <button onclick="startGame()" class="w-full py-5 bg-indigo-600 text-white rounded-[2rem] text-xl font-black shadow-2xl shadow-indigo-200 hover:bg-indigo-700 transition-all">
-                INIZIA SESSIONE
+            </div>
+            <button onclick="startGame()" class="cl-primary">
+                Inizia la prova →
             </button>
         </div>
 
@@ -105,6 +102,7 @@
                 </div>
             </div>
 
+            <p class="cl-header-label">Il modello da riconoscere</p>
             <div id="target-area" class="mb-8 p-8 bg-slate-50 rounded-[2.5rem] border-2 border-dashed border-slate-200 text-center">
                 <div id="target-visual" class="flex flex-col items-center justify-center min-h-[120px]">
                     <!-- Target icon/color -->
@@ -131,9 +129,11 @@
                 <p id="final-score" class="text-7xl font-black text-indigo-600">0</p>
             </div>
 
-            <button onclick="location.reload()" class="w-full py-5 bg-slate-900 text-white rounded-[2rem] text-xl font-bold shadow-xl hover:bg-black transition-all">
-                RIFAI ESERCIZIO
+            <div id="cl-exercise-save-status" role="status"></div>
+            <button onclick="location.reload()" class="cl-primary">
+                Ripeti la prova
             </button>
+            <a class="cl-secondary" href="esercizi.html">Torna alla palestra</a>
         </div>
     </div>
 
@@ -287,5 +287,6 @@
  window.CogniLabRun?.complete({correct:window.CogniLabRun.measure(()=>(score)),total:window.CogniLabRun.measure(()=>(window.cogAttempts)),errors:window.CogniLabRun.measure(()=>(Math.max(0,window.cogAttempts-score))),score:window.CogniLabRun.measure(()=>(score))});
 }
     </script>
+<script src="shared/exercise-modern.js" defer></script>
 </body>
 </html>
