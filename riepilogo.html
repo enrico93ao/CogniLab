@@ -121,8 +121,10 @@
             box-shadow: 0 15px 20px -3px rgba(59, 130, 246, 0.4);
         }
     </style>
+<link rel="stylesheet" href="shared/cognilab.css">
+<script src="shared/interface.js" defer></script>
 </head>
-<body>
+<body data-cognilab="hub">
 
     <div class="summary-card">
         <div class="trophy-icon"><i class="fa-solid fa-award"></i></div>
@@ -169,8 +171,8 @@
         });
 
         function TornaAllaLanding() {
-            // Pulisce la sessione e torna alla pagina di scelta iniziale
-            localStorage.clear();
+            // Preserve saved history and preferences when returning home.
+            localStorage.removeItem("global_timer_start");
             window.location.href = 'index.html';
         }
     </script>

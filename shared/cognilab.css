@@ -1,0 +1,61 @@
+/* Shared interface; task stimuli retain their original colors and geometry. */
+:root {
+  --cl-ink: #18343e;
+  --cl-muted: #536d77;
+  --cl-primary: #087e8b;
+  --cl-line: #dce8eb;
+  --cl-canvas: #f3f7f8;
+  --cl-shadow: 0 12px 36px #18343e08;
+}
+body[data-cognilab] { font-family: Inter, system-ui, -apple-system, 'Segoe UI', sans-serif; }
+body[data-cognilab='hub'] { background: var(--cl-canvas); color: var(--cl-ink); }
+body[data-cognilab='hub'] .navbar { background: #ffffffed; backdrop-filter: blur(16px); border-bottom: 1px solid var(--cl-line); box-shadow: none; }
+body[data-cognilab='hub'] .container { max-width: 1320px; padding: 32px; }
+body[data-cognilab='hub'] .welcome-container { border: 1px solid var(--cl-line); box-shadow: var(--cl-shadow); border-radius: 28px; }
+body[data-cognilab='hub'] :is(h1,h2,h3) { letter-spacing: -.025em; }
+body[data-cognilab='hub'] h1 { color: var(--cl-ink); }
+body[data-cognilab='hub'] :is(.choice-card,.card,.kpi-card,.clinical-box) { border-radius: 20px; border-color: var(--cl-line); box-shadow: var(--cl-shadow); }
+body[data-cognilab='hub'] .card { background: white; overflow: hidden; transition: transform .18s, box-shadow .18s; }
+body[data-cognilab='hub'] .card:hover { transform: translateY(-3px); box-shadow: 0 14px 30px #18343e12; }
+body[data-cognilab='hub'] .card-image-container { height: 92px; background: #eef6f7; }
+body[data-cognilab='hub'] .card-image-container i { font-size: 2rem; }
+body[data-cognilab='hub'] .area-sezione { margin-top: 32px; }
+body[data-cognilab='hub'] .area-header { border-bottom: 1px solid var(--cl-line); padding-bottom: 16px; }
+body[data-cognilab='hub'] :is(.btn:not(.btn-danger),.btn-primary) { background: var(--cl-primary); color: white; }
+.cl-search { display: flex; align-items: end; flex-wrap: wrap; gap: 16px; background: white; padding: 22px; border: 1px solid var(--cl-line); border-radius: 20px; margin: 28px 0; }
+.cl-search label { flex: 1; min-width: 200px; font-weight: 650; color: var(--cl-ink); }
+.cl-search input { display: block; width: 100%; margin-top: 9px; padding: 13px 16px; border: 1px solid #b7cdd3; border-radius: 12px; background: #f8fbfc; font: inherit; }
+.cl-search p { margin: 0 0 14px; color: var(--cl-muted); font-size: .9rem; }
+.cl-empty { padding: 36px; text-align: center; background: white; border: 1px dashed #b7cdd3; border-radius: 20px; color: var(--cl-muted); }
+.cl-notice { background: #fff8e6; color: #654b0f; padding: 16px; border: 1px solid #e5d39a; border-radius: 12px; margin: 16px 0; line-height: 1.5; }
+body[data-cognilab] :is(button,input,select,textarea) { font-family: inherit; }
+body[data-cognilab] :is(button,a,input,select,textarea,[role='link']):focus-visible { outline: 3px solid #087e8b; outline-offset: 4px; }
+body[data-cognilab] :is(button,input:not([type='checkbox']):not([type='radio']):not([type='range']),select) { min-height: 44px; }
+body[data-cognilab] button:disabled { cursor: not-allowed; opacity: .55; }
+body[data-cognilab] [hidden] { display: none !important; }
+/* Normalize only identified setup/report surfaces, never all colored elements. */
+body[data-cognilab='exercise'] { overflow-y: auto; }
+body[data-cognilab='exercise'] .cl-panel { background: #fff !important; color: var(--cl-ink) !important; border: 1px solid var(--cl-line) !important; border-radius: 24px !important; box-shadow: var(--cl-shadow) !important; backdrop-filter: none; }
+body[data-cognilab='exercise'] .cl-panel :is(h1,h2,h3,p,label,span):not([style*='color']) { color: inherit; }
+body[data-cognilab='exercise'] .cl-panel :is(.text-white,.text-slate-200,.text-slate-300,.text-slate-400,.text-slate-500):not(button):not(button *) { color: var(--cl-ink) !important; }
+body[data-cognilab='exercise'] .cl-panel :is(.bg-slate-800,.bg-slate-900):not(button) { background: #edf4f6 !important; color: var(--cl-ink) !important; }
+body[data-cognilab='exercise'] .cl-panel :is(input:not([type='checkbox']):not([type='range']):not([type='radio']),select) { background: #f5f9fa !important; color: var(--cl-ink) !important; border: 1px solid #bfd2d8 !important; border-radius: 12px; }
+body[data-cognilab='exercise'] .cl-panel button:not([id*='diff']):not([id*='level']):not([id*='time']) { border-radius: 12px; }
+body[data-cognilab='shell'] { background: var(--cl-canvas); color: var(--cl-ink); }
+body[data-cognilab='shell'] .navbar { flex-wrap: wrap; gap: 14px; padding: 16px 24px; box-shadow: none; border-bottom: 1px solid var(--cl-line); }
+body[data-cognilab='shell'] .nav-right-cluster { flex-wrap: wrap; }
+body[data-cognilab='shell'] .exercise-workspace { padding: 20px; }
+.cl-exercise-heading { padding: 0 4px 16px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+.cl-exercise-heading h1 { font-size: 1.3rem; font-weight: 700; }
+.cl-exercise-heading a { color: var(--cl-primary); font-weight: 650; }
+@media (max-width: 680px) {
+  body[data-cognilab='hub'] .container { padding: 18px; }
+  body[data-cognilab='hub'] .navbar { padding: 14px; flex-wrap: wrap; gap: 12px; }
+  body[data-cognilab='hub'] .nav-right-cluster { flex-wrap: wrap; gap: 8px; }
+  body[data-cognilab='hub'] .grid-esercizi { grid-template-columns: 1fr; }
+  body[data-cognilab='exercise'] .cl-panel { padding: 24px !important; }
+  body[data-cognilab='shell'] .exercise-workspace { padding: 10px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  body[data-cognilab], body[data-cognilab] * { animation-duration: .01ms !important; animation-delay: 0ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+}

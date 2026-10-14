@@ -148,30 +148,12 @@
             opacity: 1;
         }
     </style>
+<link rel="stylesheet" href="shared/cognilab.css">
+<script src="shared/interface.js" defer></script>
 </head>
-<body>
+<body data-cognilab="shell">
 
-    <!-- SCRIPT IMMEDIATO: azzera il ritardo del timer stampando subito il valore salvato -->
-    <script>
-        (function() {
-            let globalStartTime = localStorage.getItem('global_timer_start');
-            if (!globalStartTime) {
-                globalStartTime = Date.now();
-                localStorage.setItem('global_timer_start', globalStartTime);
-            }
-            const elapsedSeconds = Math.floor((Date.now() - parseInt(globalStartTime)) / 1000);
-            const hrs = Math.floor(elapsedSeconds / 3600).toString().padStart(2, '0');
-            const mins = Math.floor((elapsedSeconds % 3600) / 60).toString().padStart(2, '0');
-            const secs = (elapsedSeconds % 60).toString().padStart(2, '0');
-            
-            document.addEventListener("DOMContentLoaded", () => {
-                const timerEl = document.getElementById('global-timer');
-                if (timerEl) {
-                    timerEl.innerHTML = `<i class="fa-regular fa-clock" style="color: var(--primary-light);"></i> ${hrs}:${mins}:${secs}`;
-                }
-            });
-        })();
-    </script>
+
 
     <!-- NAVBAR SINCRONIZZATA CON LA DASHBOARD -->
     <nav class="navbar">
@@ -191,85 +173,14 @@
 
     <!-- WORKSPACE ESERCIZIO -->
     <div class="exercise-workspace">
+        <div class="cl-exercise-heading"><h1 id="cl-exercise-title">Esercizio cognitivo</h1><a id="cl-direct-link" hidden>Apri a schermo intero</a></div>
+        <div id="cl-load-error" class="cl-notice" role="alert" hidden></div>
         <div class="iframe-container">
             <iframe id="exercise-frame" src="" title="Area Esercizio Cognitivo"></iframe>
         </div>
     </div>
 
-    <script>
-        // Effetto dissolvenza in entrata sulla pagina
-        window.addEventListener('DOMContentLoaded', () => {
-            document.body.classList.add('loaded');
-        });
-
-        // --- GESTIONE CRONOMETRO GLOBALE PERSISTENTE (Aggiornamento continuo) ---
-        function updateGlobalTimer() {
-            let globalStartTime = localStorage.getItem('global_timer_start');
-            if (!globalStartTime) {
-                globalStartTime = Date.now();
-                localStorage.setItem('global_timer_start', globalStartTime);
-            }
-            
-            const elapsedSeconds = Math.floor((Date.now() - parseInt(globalStartTime)) / 1000);
-            const hrs = Math.floor(elapsedSeconds / 3600).toString().padStart(2, '0');
-            const mins = Math.floor((elapsedSeconds % 3600) / 60).toString().padStart(2, '0');
-            const secs = (elapsedSeconds % 60).toString().padStart(2, '0');
-            
-            const timerEl = document.getElementById('global-timer');
-            if (timerEl) {
-                timerEl.innerHTML = `<i class="fa-regular fa-clock" style="color: var(--primary-light);"></i> ${hrs}:${mins}:${secs}`;
-            }
-        }
-
-        // Avvia l'intervallo regolare di aggiornamento ogni secondo
-        setInterval(updateGlobalTimer, 1000);
-
-        // --- CARICAMENTO DATI UTENTE E PARAMETRO ESERCIZIO ---
-        document.addEventListener("DOMContentLoaded", function() {
-            const username = localStorage.getItem('hub_username') || "Utente";
-            const modalita = localStorage.getItem('hub_mode');
-            
-            if (modalita === 'clinical') {
-                document.getElementById('user-display').innerText = `🩺 Clinico: ${username}`;
-            } else {
-                document.getElementById('user-display').innerText = `👤 Utente: ${username}`;
-            }
-
-            const iframe = document.getElementById('exercise-frame');
-
-            // Recupera il file dell'esercizio dai parametri URL
-            const urlParams = new URLSearchParams(window.location.search);
-            const exerciseFile = urlParams.get('file');
-
-            if (exerciseFile) {
-                iframe.src = decodeURIComponent(exerciseFile);
-            } else {
-                iframe.src = "Attenzione%20alternata.html"; 
-            }
-
-            // Attiva la dissolvenza dolce non appena l'iframe si carica
-            iframe.addEventListener('load', function() {
-                iframe.classList.add('loaded');
-            });
-        });
-
-        function tornaAllaDashboard(e) {
-            e.preventDefault();
-            document.body.classList.add('fade-out');
-            setTimeout(() => {
-                window.location.href = 'esercizi.html';
-            }, 400);
-        }
-
-        function terminaSessioneGlobale() {
-            if (confirm("Vuoi concludere l'allenamento di oggi e tornare alla schermata principale?")) {
-                localStorage.removeItem('global_timer_start');
-                document.body.classList.add('fade-out');
-                setTimeout(() => {
-                    window.location.href = 'index.html';
-                }, 400);
-            }
-        }
-    </script>
+    <script src="shared/catalog.js"></script>
+    <script src="shared/exercise-shell.js"></script>
 </body>
 </html>

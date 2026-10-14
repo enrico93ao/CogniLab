@@ -312,8 +312,10 @@
         .btn-cancel { background: #f1f5f9; color: var(--slate-800); border: 1px solid #cbd5e1; }
         .btn-cancel:hover { background: #e2e8f0; color: var(--slate-900); }
     </style>
+<link rel="stylesheet" href="shared/cognilab.css">
+<script src="shared/interface.js" defer></script>
 </head>
-<body>
+<body data-cognilab="hub">
 
     <div class="welcome-container">
         <!-- Logo Inserito in Cima -->
@@ -370,8 +372,7 @@
     </div>
 
     <script>
-        // Pulisce sessioni precedenti al caricamento della home
-        localStorage.clear();
+        // Returning home preserves session state, preferences and saved history.
 
         // --- EFFETTO FADE-IN AL CARICAMENTO DELLA PAGINA ---
         window.addEventListener('DOMContentLoaded', () => {
@@ -417,6 +418,7 @@
             localStorage.setItem('hub_mode', 'free_training');
             localStorage.setItem('hub_username', username);
             localStorage.setItem('free_session_start', new Date().toISOString());
+            localStorage.setItem('global_timer_start', String(Date.now()));
             localStorage.setItem('free_exercises_history', JSON.stringify([]));
 
             // Transizione fluida in uscita (Fade-out)

@@ -2,7 +2,7 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Esercizio di Stimolazione Cognitiva</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- SDK Firebase versione Compatibilità -->
@@ -124,8 +124,10 @@
         input:checked + .slider { background-color: #3b82f6; }
         input:checked + .slider:before { transform: translateX(22px); }
     </style>
+<link rel="stylesheet" href="shared/cognilab.css">
+<script src="shared/interface.js" defer></script>
 </head>
-<body>
+<body data-cognilab="exercise">
 
     <div id="start-screen" class="screen active">
         <div class="bg-white p-6 rounded-3xl shadow-2xl text-center max-w-md mx-4 border-t-8 border-blue-500 overflow-y-auto max-h-[95vh] w-full">

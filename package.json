@@ -15,7 +15,8 @@
     "start:local": "node scripts/serve.mjs",
     "test:exercises": "node tests/exercise-smoke.mjs",
     "assets:exercises": "node scripts/migration/build-assets.mjs",
-    "test:persistence": "node tests/persistence.mjs"
+    "test:persistence": "node tests/persistence.mjs",
+    "test:html": "node tests/html-regression.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",

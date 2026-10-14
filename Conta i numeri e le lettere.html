@@ -112,8 +112,10 @@
             box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
         }
     </style>
+<link rel="stylesheet" href="shared/cognilab.css">
+<script src="shared/interface.js" defer></script>
 </head>
-<body class="flex items-center justify-center p-6">
+<body data-cognilab="exercise" class="flex items-center justify-center p-6">
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
@@ -218,6 +220,7 @@
                 <input type="number" id="input-letters" class="w-full bg-purple-500/5 border border-purple-500/20 rounded-2xl p-5 text-4xl font-black text-purple-400 outline-none focus:border-purple-500/50 transition-all text-center" placeholder="0">
             </div>
         </div>
+        <p id="answer-validation" role="alert"></p>
         <button onclick="checkAnswers()" class="mt-10 btn-glow bg-white text-slate-950 w-full py-5 rounded-2xl font-black uppercase tracking-widest text-sm">
             Verifica Risultati
         </button>
@@ -288,12 +291,6 @@
         </button>
     </div>
 
-    <!-- Game Area, Answers, Results screens ... -->
-    <div id="game-area" class="fixed inset-0 pointer-events-none hidden opacity-0 transition-opacity duration-300"></div>
-    <div id="answer-screen" class="glass p-10 rounded-[32px] text-center max-w-md w-full z-50 screen-hidden"></div>
-    <div id="result-screen" class="glass p-10 rounded-[32px] text-center max-w-md w-full z-50 screen-hidden"></div>
-    <div id="summary-screen" class="glass p-10 rounded-[32px] text-center max-w-lg w-full z-[60] screen-hidden"></div>
-
     <script>
         let currentLevel = 1;
         let lives = 3;
@@ -350,13 +347,13 @@
             }
         }
 
-        /* ... existing game logic (updateLivesUI, startGame, checkAnswers) ... */
-        function updateLivesUI() { /* ... existing code ... */ }
-        function startGame() { /* ... existing code ... */ }
-        function checkAnswers() { /* ... existing code ... */ }
+
         function nextLevel() { currentLevel++; startGame(); }
         
         function showFinalSummary() {
+            clearTimeout(exposureTimeout);
+            countPhase = "summary";
+            document.getElementById("game-area").style.display = "none";
             document.getElementById('hud').style.opacity = '0';
             document.querySelectorAll('.glass').forEach(s => s.classList.add('screen-hidden'));
             
@@ -383,6 +380,8 @@
         }
 
         function resetToHome() {
+            clearTimeout(exposureTimeout);
+            countPhase = "setup";
             const urlParams = new URLSearchParams(window.location.search);
             if(urlParams.get('sessione') === 'true') {
                 window.location.href = 'index.html'; // Or relevant hub
@@ -393,5 +392,6 @@
             }
         }
     </script>
+<script src="shared/count-memory.js"></script>
 </body>
 </html>
