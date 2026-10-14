@@ -5,6 +5,7 @@
  import('./gym-gate.js').catch(()=>location.replace('accesso.html'));
 let active=null,finished=false,lastResult=null,savePromise=Promise.resolve(),saveResolver=null;let retryButton;
  const focusStyle=document.createElement('link');focusStyle.rel='stylesheet';focusStyle.href='shared/exercise-focus.css';document.head.append(focusStyle);
+ const responsiveStyle=document.createElement('link');responsiveStyle.rel='stylesheet';responsiveStyle.href='shared/responsive.css?v=devices1';document.head.append(responsiveStyle);
  const lifecycle=running=>{document.body.classList.toggle('cl-task-running',running);if(parent!==window)parent.postMessage({type:'cognilab-exercise-state',running},location.origin);};
  const status=document.createElement('p');status.className='cl-save-status';status.setAttribute('role','status');status.hidden=true;
  const mount=()=>{const host=document.getElementById('cl-exercise-save-status');if(host){host.append(status);}else document.body.append(status);};
