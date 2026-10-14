@@ -54,6 +54,8 @@
     </style>
 <link rel="stylesheet" href="shared/cognilab.css">
 <script src="shared/interface.js" defer></script>
+<script>window.CogniLabExercise={"id":"torre-lettere","title":"La torre delle lettere","category":"Funzioni esecutive","setup":"start-menu"};</script>
+<script src="shared/exercise-runtime.js"></script>
 </head>
 <body data-cognilab="exercise" class="min-h-screen flex flex-col items-center justify-center p-2 md:p-4">
 
@@ -203,6 +205,8 @@
         }
 
         function startGame(difficulty) {
+ window.CogniLabRun?.begin(typeof arguments === "undefined" ? null : arguments[0]);
+
             if (!sessionData.startTime) sessionData.startTime = new Date();
             currentLevelType = difficulty;
             nextLevel();
@@ -465,7 +469,9 @@
                     </div>
                 `).join('');
             }
-        }
+
+ window.CogniLabRun?.complete({correct:window.CogniLabRun.measure(()=>(null)),total:window.CogniLabRun.measure(()=>(null)),score:window.CogniLabRun.measure(()=>(sessionData.wordsCompleted)),scoreUnit:window.CogniLabRun.measure(()=>("parole"))});
+}
 
         function updateStats() {
             moveCounterDisplay.innerText = moves;

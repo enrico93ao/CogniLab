@@ -71,6 +71,8 @@
     </style>
 <link rel="stylesheet" href="shared/cognilab.css">
 <script src="shared/interface.js" defer></script>
+<script>window.CogniLabExercise={"id":"riordina-lettere","title":"Riordina le lettere","category":"Linguaggio","setup":"start-screen"};</script>
+<script src="shared/exercise-runtime.js"></script>
 </head>
 <body data-cognilab="exercise" class="min-h-screen flex flex-col items-center p-4">
 
@@ -324,6 +326,9 @@
         }
 
         function startGame() {
+ window.CogniLabRun?.begin(typeof arguments === "undefined" ? null : arguments[0]);
+
+ correctAnswers=0;attempts=0;score=0;
             wakeAudio();
             const selectedDuration = document.querySelector('input[name="duration"]:checked').value;
             initialTime = parseInt(selectedDuration);
@@ -446,7 +451,9 @@
             if (correctAnswers > 30) evalText = "Sei un maestro del linguaggio!";
             
             document.getElementById('final-evaluation').textContent = evalText;
-        }
+
+ window.CogniLabRun?.complete({correct:window.CogniLabRun.measure(()=>(correctAnswers)),total:window.CogniLabRun.measure(()=>(attempts)),errors:window.CogniLabRun.measure(()=>(Math.max(0,attempts-correctAnswers))),score:window.CogniLabRun.measure(()=>(score))});
+}
 
         startBtn.addEventListener('click', startGame);
         document.getElementById('check-btn').addEventListener('click', checkAnswer);

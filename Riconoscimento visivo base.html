@@ -43,6 +43,8 @@
     </style>
 <link rel="stylesheet" href="shared/cognilab.css">
 <script src="shared/interface.js" defer></script>
+<script>window.CogniLabExercise={"id":"riconoscimento-base","title":"Riconoscimento visivo base","category":"Visuospaziale","setup":"menu-screen"};</script>
+<script src="shared/exercise-runtime.js"></script>
 </head>
 <body data-cognilab="exercise" class="bg-slate-50 min-h-screen flex flex-col items-center justify-center p-4 font-sans text-slate-800">
 
@@ -195,6 +197,9 @@
         selectDuration(60);
 
         function startGame() {
+ window.CogniLabRun?.begin(typeof arguments === "undefined" ? null : arguments[0]);
+
+ window.cogAttempts=0;window.cogVisResolved=false;
             menuScreen.classList.add('hidden');
             gameScreen.classList.remove('hidden');
             score = 0;
@@ -210,6 +215,7 @@
         }
 
         function generateRound() {
+ window.cogVisResolved=false;
             let pool;
             switch(selectedLevel) {
                 case 'easy': pool = colors; break;
@@ -258,7 +264,10 @@
         }
 
         function checkAnswer(idx, btn) {
+ if(window.cogVisResolved)return;
+ window.cogAttempts++;
             if (idx === currentTargetIndex) {
+ window.cogVisResolved=true;
                 score++;
                 scoreDisplay.innerText = score;
                 btn.classList.add('correct');
@@ -274,7 +283,9 @@
             gameScreen.classList.add('hidden');
             resultScreen.classList.remove('hidden');
             document.getElementById('final-score').innerText = score;
-        }
+
+ window.CogniLabRun?.complete({correct:window.CogniLabRun.measure(()=>(score)),total:window.CogniLabRun.measure(()=>(window.cogAttempts)),errors:window.CogniLabRun.measure(()=>(Math.max(0,window.cogAttempts-score))),score:window.CogniLabRun.measure(()=>(score))});
+}
     </script>
 </body>
 </html>

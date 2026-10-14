@@ -59,6 +59,8 @@
     </style>
 <link rel="stylesheet" href="shared/cognilab.css">
 <script src="shared/interface.js" defer></script>
+<script>window.CogniLabExercise={"id":"relazioni-logiche","title":"Relazioni logiche","category":"Funzioni esecutive","setup":"menu-screen"};</script>
+<script src="shared/exercise-runtime.js"></script>
 </head>
 <body data-cognilab="exercise" class="flex items-center justify-center p-4 md:p-8">
 
@@ -261,6 +263,8 @@
         }
 
         function initGame() {
+ window.CogniLabRun?.begin(typeof arguments === "undefined" ? null : arguments[0]);
+
             state.score = 0;
             state.currentRound = 0;
             state.streak = 0;
@@ -394,7 +398,9 @@
                 `;
                 body.appendChild(tr);
             });
-        }
+
+ window.CogniLabRun?.complete({correct:window.CogniLabRun.measure(()=>(state.score)),total:window.CogniLabRun.measure(()=>(state.maxRounds)),responseTimeMs:window.CogniLabRun.measure(()=>(state.times.length?avg*1000:null))});
+}
 
         // Inizializzazione controlli menu
         selectDiff('easy');

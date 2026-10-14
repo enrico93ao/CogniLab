@@ -52,6 +52,8 @@
     </style>
 <link rel="stylesheet" href="shared/cognilab.css">
 <script src="shared/interface.js" defer></script>
+<script>window.CogniLabExercise={"id":"riordina-frase","title":"Riordina la frase","category":"Linguaggio","setup":"menu-screen"};</script>
+<script src="shared/exercise-runtime.js"></script>
 </head>
 <body data-cognilab="exercise" class="min-h-screen flex flex-col items-center justify-center p-4">
 
@@ -318,6 +320,9 @@
         }
 
         function startGame() {
+ window.CogniLabRun?.begin(typeof arguments === "undefined" ? null : arguments[0]);
+
+ window.cogCorrect=0;
             const source = database[config.difficulty];
             gameState.frasiSelezionate = [...source].sort(() => Math.random() - 0.5).slice(0, config.length);
             gameState.currentFraseIndex = 0;
@@ -381,6 +386,7 @@
             const nextExpected = gameState.fraseOriginale[gameState.paroleSelezionate.length];
 
             if (parola === nextExpected) {
+                window.cogCorrect++;
                 // Parola corretta
                 gameState.paroleRimanenti.splice(index, 1);
                 gameState.paroleSelezionate.push(parola);
@@ -436,7 +442,9 @@
             document.getElementById('stat-errors').innerText = gameState.stats.errors;
             const avgSpeed = (gameState.stats.totalTime / gameState.frasiSelezionate.length).toFixed(1);
             document.getElementById('stat-speed').innerText = avgSpeed + 's';
-        }
+
+ window.CogniLabRun?.complete({correct:window.CogniLabRun.measure(()=>(window.cogCorrect)),total:window.CogniLabRun.measure(()=>(window.cogCorrect+gameState.stats.errors)),errors:window.CogniLabRun.measure(()=>(gameState.stats.errors)),score:window.CogniLabRun.measure(()=>(gameState.frasiSelezionate.length)),scoreUnit:window.CogniLabRun.measure(()=>("frasi"))});
+}
 
         function quitToMenu() {
             const feedback = document.getElementById('feedback-area');

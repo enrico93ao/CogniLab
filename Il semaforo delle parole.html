@@ -62,6 +62,8 @@
     </style>
 <link rel="stylesheet" href="shared/cognilab.css">
 <script src="shared/interface.js" defer></script>
+<script>window.CogniLabExercise={"id":"semaforo-parole","title":"Il semaforo delle parole","category":"Funzioni esecutive","setup":"screen-menu"};</script>
+<script src="shared/exercise-runtime.js"></script>
 </head>
 <body data-cognilab="exercise" class="h-full flex flex-col justify-between text-slate-800">
 
@@ -484,6 +486,8 @@
         let currentUser = null;
 
         async function initFirebase() {
+ if(window.CogniLabRun)return; // Shared account pipeline owns persistence.
+
             if (!firebaseConfig) {
                 console.warn("Configurazione Firebase non trovata. Funzionamento solo in locale.");
                 return;
@@ -741,6 +745,8 @@
         }
 
         function startGame() {
+ window.CogniLabRun?.begin(typeof arguments === "undefined" ? null : arguments[0]);
+
             audioEngine.init();
             
             const name = document.getElementById('patientNameInput').value.trim();
@@ -1068,9 +1074,13 @@
             if (isSessione) {
                 await salvaDatiSuFirebase(accuracy, avgRt);
             }
-        }
+
+ window.CogniLabRun?.complete({correct:window.CogniLabRun.measure(()=>(state.stats.correctGo+state.stats.correctNoGo)),total:window.CogniLabRun.measure(()=>(state.stats.totalGo+state.stats.totalNoGo)),errors:window.CogniLabRun.measure(()=>(state.stats.incorrectGo+state.stats.falseAlarmNoGo)),omissions:window.CogniLabRun.measure(()=>(state.stats.omissionGo)),responseTimeMs:window.CogniLabRun.measure(()=>(avgRt>0?avgRt:null))});
+}
 
         async function salvaDatiSuFirebase(accuracy, avgRt) {
+ if(window.CogniLabRun)return; // Shared account pipeline owns persistence.
+
             if (!db || !currentUser) {
                 console.warn("Firebase non connesso o utente non autenticato. Salvataggio su Cloud saltato.");
                 showCloudStatus('error', 'Errore di Inizializzazione', 'Impossibile salvare sul Cloud: connessione non riuscita.');

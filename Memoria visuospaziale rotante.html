@@ -53,6 +53,8 @@
     </style>
 <link rel="stylesheet" href="shared/cognilab.css">
 <script src="shared/interface.js" defer></script>
+<script>window.CogniLabExercise={"id":"memoria-rotante","title":"Memoria visuospaziale rotante","category":"Visuospaziale","setup":"menu-section"};</script>
+<script src="shared/exercise-runtime.js"></script>
 </head>
 <body data-cognilab="exercise" class="min-h-screen text-slate-100 flex flex-col justify-between overflow-x-hidden select-none">
 
@@ -718,6 +720,8 @@
         }
 
         function startSession() {
+ window.CogniLabRun?.begin(typeof arguments === "undefined" ? null : arguments[0]);
+
             initAudioContext();
             gameState.currentRound = 1;
             gameState.score = 0;
@@ -1221,7 +1225,9 @@
             clinicalFeedbackText.innerHTML = clinicalFeedback;
             
             Synth.playGameComplete();
-        }
+
+ window.CogniLabRun?.complete({correct:window.CogniLabRun.measure(()=>(totalCorrect)),total:window.CogniLabRun.measure(()=>(totalTargets)),score:window.CogniLabRun.measure(()=>(gameState.score)),responseTimeMs:window.CogniLabRun.measure(()=>(gameState.responseTimes.length?Number(avgTime)*1000:null))});
+}
     </script>
 </body>
 </html>

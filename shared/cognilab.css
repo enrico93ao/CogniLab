@@ -59,3 +59,19 @@ body[data-cognilab='shell'] .exercise-workspace { padding: 20px; }
 @media (prefers-reduced-motion: reduce) {
   body[data-cognilab], body[data-cognilab] * { animation-duration: .01ms !important; animation-delay: 0ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
 }
+.cl-account { width: min(92vw, 460px); padding: 28px; border: 1px solid var(--cl-line); border-radius: 24px; color: var(--cl-ink); box-shadow: 0 24px 80px #18343e30; }
+.cl-account::backdrop { background: #132e3c80; backdrop-filter: blur(3px); }
+.cl-account h2 { margin-bottom: 12px; }
+.cl-account label { display: block; margin: 18px 0; font-weight: 650; }
+.cl-account input { display: block; width: 100%; margin-top: 8px; padding: 12px; border: 1px solid #bfd2d8; border-radius: 10px; }
+.cl-account-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+.cl-account button { padding: 10px 14px; border-radius: 10px; cursor: pointer; border: 1px solid var(--cl-line); }
+#cl-account-status, #cl-feedback-status { line-height: 1.5; margin: 14px 0; }
+.cl-progress { background: white; padding: 24px; margin: 28px 0; border: 1px solid var(--cl-line); border-radius: 24px; }
+.cl-progress h2 { margin-bottom: 12px; }
+.cl-progress select { max-width: 100%; padding: 10px; border: 1px solid #bfd2d8; border-radius: 10px; margin: 12px 0; }
+.cl-progress svg { width: 100%; height: auto; max-height: 310px; display: block; }
+.cl-progress table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+.cl-progress td,.cl-progress th { padding: 12px 8px; border-bottom: 1px solid var(--cl-line); text-align: left; }
+.cl-table-scroll { overflow-x: auto; }
+.cl-save-status { position: fixed; bottom: 12px; right: 12px; max-width: min(440px,90vw); background: white; color: var(--cl-ink); border: 1px solid #bfd2d8; padding: 14px; border-radius: 14px; z-index: 10000; box-shadow: var(--cl-shadow); }

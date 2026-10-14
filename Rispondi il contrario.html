@@ -102,6 +102,8 @@
     </style>
 <link rel="stylesheet" href="shared/cognilab.css">
 <script src="shared/interface.js" defer></script>
+<script>window.CogniLabExercise={"id":"rispondi-contrario","title":"Rispondi il contrario","category":"Funzioni esecutive","setup":"start-screen"};</script>
+<script src="shared/exercise-runtime.js"></script>
 </head>
 <body data-cognilab="exercise">
 
@@ -253,6 +255,8 @@
         }
 
         function initSession() {
+ window.CogniLabRun?.begin(typeof arguments === "undefined" ? null : arguments[0]);
+
             currentSessionQuestions = [...fullDatabase]
                 .sort(() => Math.random() - 0.5)
                 .slice(0, 15);
@@ -331,13 +335,17 @@
                     renderItem();
                 }
             }
-        }
+
+ if(currentIndex>=currentSessionQuestions.length) window.CogniLabRun?.complete({correct:window.CogniLabRun.measure(()=>(currentIndex)),total:window.CogniLabRun.measure(()=>(currentSessionQuestions.length)),errors:window.CogniLabRun.measure(()=>(0))});
+}
 
         function showFailure(msg) {
             clearInterval(timer);
             document.getElementById('fail-msg').innerText = msg;
             document.getElementById('fail-overlay').classList.remove('hidden');
-        }
+
+ window.CogniLabRun?.complete({correct:currentIndex,total:currentIndex+1,errors:msg.startsWith("Tempo")?0:1,omissions:msg.startsWith("Tempo")?1:0});
+}
 
         function restoreSession() {
             currentIndex = 0;

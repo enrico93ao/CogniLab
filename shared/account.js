@@ -1,0 +1,34 @@
+import {disconnectPresence} from './presence.js';
+import {createUserWithEmailAndPassword,signInWithEmailAndPassword,sendPasswordResetEmail,signOut,updateProfile,onAuthStateChanged,EmailAuthProvider,linkWithCredential} from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js';
+import {auth,authReady,friendlyError} from './firebase-client.js';
+import {retryPending} from './progress-store.js';
+const button=document.createElement('button');button.className='btn';button.textContent='Accedi / Registrati';
+const host=document.querySelector('.nav-right-cluster')||document.querySelector('.welcome-container');host?.append(button);
+const dialog=document.createElement('dialog');dialog.className='cl-account';
+dialog.innerHTML='<form id="cl-account-form"><h2>Il tuo spazio CogniLab</h2><p>Accedi per ritrovare sessioni e progressi anche su un altro dispositivo.</p><label>Nome<input name="name" autocomplete="name" maxlength="80"></label><label>Email<input name="email" type="email" required autocomplete="email"></label><label>Password<input name="password" type="password" required minlength="6" autocomplete="current-password"></label><p id="cl-account-status" role="status" aria-live="polite"></p><div class="cl-account-actions"><button class="btn" type="submit" name="action" value="login">Accedi</button><button class="btn" type="submit" name="action" value="register">Crea account</button><button type="button" id="cl-reset-password">Password dimenticata</button><button type="button" id="cl-close-account">Chiudi</button></div></form><div id="cl-signed-account" hidden><h2>Il tuo account</h2><p id="cl-account-name"></p><button id="cl-logout" class="btn">Esci dall’account</button><button id="cl-close-signed">Chiudi</button></div>';
+document.body.append(dialog);
+button.onclick=()=>dialog.showModal();window.CogniLabOpenAccount=()=>dialog.showModal();
+const form=dialog.querySelector('form'),status=document.getElementById('cl-account-status');
+const busy=value=>dialog.querySelectorAll('button').forEach(b=>b.disabled=value);
+form.addEventListener('submit',async event=>{
+ event.preventDefault();busy(true);status.textContent='Accesso in corso…';
+ const fields=new FormData(form);
+ try{
+  await authReady;
+  let credential;
+  if(event.submitter?.value==='register'){credential=auth.currentUser?.isAnonymous?await linkWithCredential(auth.currentUser,EmailAuthProvider.credential(fields.get('email').trim(),fields.get('password'))):await createUserWithEmailAndPassword(auth,fields.get('email').trim(),fields.get('password'));const name=fields.get('name').trim();if(name)await updateProfile(credential.user,{displayName:name});}
+  else credential=await signInWithEmailAndPassword(auth,fields.get('email').trim(),fields.get('password'));
+  form.reset();dialog.close();localStorage.setItem('hub_username',credential.user.displayName||'Utente');localStorage.setItem('hub_mode','free_training');
+  location.href='esercizi.html';
+ }catch(error){status.textContent=friendlyError(error);}finally{busy(false);}
+});
+document.getElementById('cl-reset-password').onclick=async()=>{const email=form.elements.email.value.trim();if(!email){status.textContent='Inserisci prima la tua email.';return;}busy(true);try{await sendPasswordResetEmail(auth,email);status.textContent='Se l’account esiste, riceverai le istruzioni per reimpostare la password.';}catch(e){status.textContent=friendlyError(e);}finally{busy(false);}};
+for(const id of ['cl-close-account','cl-close-signed'])document.getElementById(id).onclick=()=>dialog.close();
+document.getElementById('cl-logout').onclick=async()=>{try{await disconnectPresence().catch(()=>{});await signOut(auth);dialog.close();localStorage.setItem("hub_mode","free_training");localStorage.removeItem("hub_selected_patient_id");location.href="esercizi.html";}catch(e){status.textContent=friendlyError(e);}};
+onAuthStateChanged(auth,user=>{
+ const registered=Boolean(user&&!user.isAnonymous);button.textContent=registered?'Il mio account':'Accedi / Registrati';form.hidden=registered;document.getElementById('cl-signed-account').hidden=!registered;
+ document.getElementById('cl-account-name').textContent=user?.displayName||user?.email||'';
+ if(user){if(localStorage.getItem('cognilab.lastUser')!==user.uid)localStorage.removeItem('hub_selected_patient_id');localStorage.setItem('cognilab.lastUser',user.uid);localStorage.setItem('hub_username',user.displayName||'Utente');const display=document.getElementById('user-display');if(display)display.textContent=user.displayName||'Utente';retryPending().catch(()=>{});}
+ else{const display=document.getElementById('user-display');if(display)display.textContent='Ospite';}
+});
+window.addEventListener('online',()=>retryPending().catch(()=>{}));

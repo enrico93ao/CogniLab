@@ -47,6 +47,8 @@
     </style>
 <link rel="stylesheet" href="shared/cognilab.css">
 <script src="shared/interface.js" defer></script>
+<script>window.CogniLabExercise={"id":"memoria-visuospaziale-numeri","title":"Memoria visuospaziale con numeri","category":"Visuospaziale","setup":"screen-menu"};</script>
+<script src="shared/exercise-runtime.js"></script>
 </head>
 <body data-cognilab="exercise" class="bg-gradient-to-br from-[#f0f4f8] to-[#e2e8f0] min-h-screen text-slate-800 flex flex-col justify-between overflow-x-hidden">
 
@@ -514,6 +516,8 @@
 
         // Avvia una sessione di gioco da 10 round sul livello selezionato
         function startGame(level) {
+ window.CogniLabRun?.begin(typeof arguments === "undefined" ? null : arguments[0]);
+
             currentLevel = level;
             currentRound = 1;
             score = 0;
@@ -914,7 +918,9 @@
 
             document.getElementById('summary-cognitive-rating').textContent = rating;
             document.getElementById('summary-compliment').textContent = compliment;
-        }
+
+ window.CogniLabRun?.complete({correct:window.CogniLabRun.measure(()=>(score)),total:window.CogniLabRun.measure(()=>(10)),score:window.CogniLabRun.measure(()=>(score)),responseTimeMs:window.CogniLabRun.measure(()=>(validDurations.length?Number(avgTime)*1000:null))});
+}
 
     </script>
 </body>

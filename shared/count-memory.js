@@ -6,6 +6,7 @@ function switchScreen(_from, target) {
     if (target) document.getElementById(target).classList.remove('screen-hidden');
 }
 function initGame() {
+    window.CogniLabRun?.begin();
     clearTimeout(exposureTimeout);
     currentLevel = 1; lives = 3;
     stats = {maxLevel:1,totalStimuli:0,correctResponses:0,totalAttempts:0,errors:0,correctNums:0,totalNums:0,correctLets:0,totalLets:0};

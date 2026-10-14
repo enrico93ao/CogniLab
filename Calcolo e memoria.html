@@ -28,6 +28,8 @@
     </style>
 <link rel="stylesheet" href="shared/cognilab.css">
 <script src="shared/interface.js" defer></script>
+<script>window.CogniLabExercise={"id":"calcolo-memoria","title":"Calcolo e memoria","category":"Memoria","setup":"screen-menu,screen-start"};</script>
+<script src="shared/exercise-runtime.js"></script>
 </head>
 <body data-cognilab="exercise" class="flex items-center justify-center min-h-screen p-4">
 
@@ -162,6 +164,9 @@
         }
 
         function startGame() {
+ window.CogniLabRun?.begin(typeof arguments === "undefined" ? null : arguments[0]);
+
+ window.cogMathAttempts=0;
             availableWords = shuffleArray([...masterWordsList]);
             currentResult = Math.floor(Math.random() * 10) + 5; 
             timeLeft = 60;
@@ -226,6 +231,8 @@
             if (isWordPhase || timeLeft <= 0) return;
             const input = document.getElementById('answer-input');
             const userVal = parseInt(input.value);
+ if(!Number.isFinite(userVal))return;
+ window.cogMathAttempts++;
 
             if (userVal === currentTargetResult) {
                 correctAnswers++;
@@ -327,7 +334,9 @@
             document.getElementById('stat-math').innerText = correctAnswers;
             document.getElementById('stat-words').innerText = foundCount + '/' + storedWords.length;
             showScreen('results');
-        }
+
+ window.CogniLabRun?.complete({correct:window.CogniLabRun.measure(()=>(correctAnswers)),total:window.CogniLabRun.measure(()=>(window.cogMathAttempts)),errors:window.CogniLabRun.measure(()=>(window.cogMathAttempts-correctAnswers)),score:window.CogniLabRun.measure(()=>(correctAnswers))});
+}
     </script>
 </body>
 </html>

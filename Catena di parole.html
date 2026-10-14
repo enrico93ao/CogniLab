@@ -98,6 +98,8 @@
     </style>
 <link rel="stylesheet" href="shared/cognilab.css">
 <script src="shared/interface.js" defer></script>
+<script>window.CogniLabExercise={"id":"catena-parole","title":"Catena di parole","category":"Linguaggio","setup":"setup-container"};</script>
+<script src="shared/exercise-runtime.js"></script>
 </head>
 <body data-cognilab="exercise" class="text-slate-800 flex flex-col items-center justify-center min-h-screen p-4">
 
@@ -379,6 +381,8 @@
         };
 
         const initAuthAndApp = async () => {
+ if(window.CogniLabRun)return; // Shared account pipeline owns persistence.
+
             if (firebaseConfig && firebaseConfig.apiKey) {
                 try {
                     app = initializeApp(firebaseConfig);
@@ -443,6 +447,8 @@
         };
 
         window.startGame = (diff) => {
+ window.CogniLabRun?.begin(typeof arguments === "undefined" ? null : arguments[0]);
+
             if (audioCtx.state === 'suspended') audioCtx.resume();
             currentDiff = diff;
             stats.correct = 0;
@@ -535,6 +541,8 @@
         };
 
         const salvaRisultatiSuFirebase = async () => {
+ if(window.CogniLabRun)return; // Shared account pipeline owns persistence.
+
             if (!firebaseInitialized || !user) {
                 console.warn("Salvataggio saltato: Firebase offline o non autenticato.");
                 return;
@@ -632,7 +640,7 @@
 
         // Reindirizza mantenendo tutti i parametri di query intatti
         const goToDashboard = () => {
-            window.location.href = `index.html${window.location.search}`;
+            window.top.location.href = `esercizi.html${window.location.search}`;
         };
 
         window.finishSession = async () => {
@@ -652,7 +660,9 @@
 
             UI.game.classList.add('hidden');
             UI.report.classList.remove('hidden');
-        };
+
+ window.CogniLabRun?.complete({correct:window.CogniLabRun.measure(()=>(stats.correct)),total:window.CogniLabRun.measure(()=>(stats.correct+stats.wrong)),errors:window.CogniLabRun.measure(()=>(stats.wrong))});
+};
 
         window.confirmExit = () => {
             UI.confirmModal.classList.remove('hidden');

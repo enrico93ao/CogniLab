@@ -110,6 +110,8 @@
     </style>
 <link rel="stylesheet" href="shared/cognilab.css">
 <script src="shared/interface.js" defer></script>
+<script>window.CogniLabExercise={"id":"intruso-visivo","title":"Trova l'intruso","category":"Visuospaziale","setup":"menu-screen"};</script>
+<script src="shared/exercise-runtime.js"></script>
 </head>
 <body data-cognilab="exercise" class="bg-[#FDFBF7]">
 
@@ -314,6 +316,8 @@
         }
 
         function startGame() {
+ window.CogniLabRun?.begin(typeof arguments === "undefined" ? null : arguments[0]);
+
             initAudio();
             stats = {
                 foundCount: 0, errorCount: 0, timestamps: [], isActive: true,
@@ -566,7 +570,7 @@
                     btnMain.textContent = "PROSEGUI";
                     btnMain.disabled = false;
                     btnMain.onclick = () => {
-                        const redirectUrl = urlParams.get('redirectUrl') || localStorage.getItem('redirectUrl') || '../index.html';
+                        const redirectUrl = urlParams.get('redirectUrl') || localStorage.getItem('redirectUrl') || 'esercizi.html';
                         window.location.href = redirectUrl;
                     };
                 } catch (err) {
@@ -574,7 +578,7 @@
                     btnMain.textContent = "PROSEGUI (SENZA SALVATAGGIO)";
                     btnMain.disabled = false;
                     btnMain.onclick = () => {
-                        const redirectUrl = urlParams.get('redirectUrl') || localStorage.getItem('redirectUrl') || '../index.html';
+                        const redirectUrl = urlParams.get('redirectUrl') || localStorage.getItem('redirectUrl') || 'esercizi.html';
                         window.location.href = redirectUrl;
                     };
                 }
@@ -583,7 +587,9 @@
                 btnMain.onclick = startGame;
                 btnSec.style.display = 'block';
             }
-        }
+
+ window.CogniLabRun?.complete({correct:window.CogniLabRun.measure(()=>(stats.foundCount)),total:window.CogniLabRun.measure(()=>(totalAttempts)),errors:window.CogniLabRun.measure(()=>(stats.errorCount)),responseTimeMs:window.CogniLabRun.measure(()=>(stats.timestamps.length?Number(avgTime)*1000:null)),score:window.CogniLabRun.measure(()=>(stats.foundCount))});
+}
 
         function quitToMenu() {
             stats.isActive = false;

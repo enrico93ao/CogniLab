@@ -1,0 +1,218 @@
+[
+  {
+    "file": "Stroop.html",
+    "id": "stroop-original",
+    "startFound": 1,
+    "resultFound": 1
+  },
+  {
+    "file": "Attenzione alternata.html",
+    "id": "attenzione-alternata",
+    "startFound": 1,
+    "resultFound": 1
+  },
+  {
+    "file": "Calcolo e memoria.html",
+    "id": "calcolo-memoria",
+    "startFound": 1,
+    "resultFound": 1
+  },
+  {
+    "file": "Cancellazione di H.html",
+    "id": "cancellazione-h",
+    "startFound": 1,
+    "resultFound": 1
+  },
+  {
+    "file": "Catena di parole.html",
+    "id": "catena-parole",
+    "startFound": 1,
+    "resultFound": 1
+  },
+  {
+    "file": "Conta i numeri e le lettere.html",
+    "id": "conta-numeri-lettere",
+    "startFound": 1,
+    "resultFound": 1
+  },
+  {
+    "file": "Doppio compito e velocità.html",
+    "id": "doppio-compito",
+    "startFound": 1,
+    "resultFound": 1
+  },
+  {
+    "file": "Esplorazione visuospaziale multilivello.html",
+    "id": "esplorazione-visuospaziale",
+    "startFound": 1,
+    "resultFound": 1
+  },
+  {
+    "file": "Il cifrario.html",
+    "id": "cifrario",
+    "startFound": 1,
+    "resultFound": 1
+  },
+  {
+    "file": "Il semaforo delle parole.html",
+    "id": "semaforo-parole",
+    "startFound": 1,
+    "resultFound": 1
+  },
+  {
+    "file": "Inibizione e memoria di lavoro.html",
+    "id": "inibizione-memoria",
+    "startFound": 1,
+    "resultFound": 1
+  },
+  {
+    "file": "Intruso semantico.html",
+    "id": "intruso-semantico",
+    "startFound": 1,
+    "resultFound": 1
+  },
+  {
+    "file": "L'orologio invisibile.html",
+    "id": "orologio-invisibile",
+    "startFound": 1,
+    "resultFound": 1
+  },
+  {
+    "file": "La torre delle lettere.html",
+    "id": "torre-lettere",
+    "startFound": 1,
+    "resultFound": 1
+  },
+  {
+    "file": "Memoria di lavoro avanzato.html",
+    "id": "memoria-lavoro-avanzato",
+    "startFound": 1,
+    "resultFound": 1
+  },
+  {
+    "file": "Memoria di prosa con distrattori.html",
+    "id": "memoria-prosa",
+    "startFound": 1,
+    "resultFound": 1
+  },
+  {
+    "file": "Memoria visuospaziale con domande.html",
+    "id": "memoria-visuospaziale-domande",
+    "startFound": 1,
+    "resultFound": 1
+  },
+  {
+    "file": "Memoria visuospaziale con numeri.html",
+    "id": "memoria-visuospaziale-numeri",
+    "startFound": 1,
+    "resultFound": 1
+  },
+  {
+    "file": "Memoria visuospaziale il Giardino.html",
+    "id": "memoria-giardino",
+    "startFound": 1,
+    "resultFound": 1
+  },
+  {
+    "file": "Memoria visuospaziale rotante.html",
+    "id": "memoria-rotante",
+    "startFound": 1,
+    "resultFound": 1
+  },
+  {
+    "file": "N back semantico.html",
+    "id": "n-back-semantico",
+    "startFound": 1,
+    "resultFound": 1
+  },
+  {
+    "file": "N back.html",
+    "id": "n-back",
+    "startFound": 1,
+    "resultFound": 1
+  },
+  {
+    "file": "Orientamento temporale-spaziale.html",
+    "id": "orientamento",
+    "startFound": 1,
+    "resultFound": 1
+  },
+  {
+    "file": "Relazioni logiche.html",
+    "id": "relazioni-logiche",
+    "startFound": 1,
+    "resultFound": 1
+  },
+  {
+    "file": "Riconoscimento visivo base.html",
+    "id": "riconoscimento-base",
+    "startFound": 1,
+    "resultFound": 1
+  },
+  {
+    "file": "Riconoscimento visivo.html",
+    "id": "riconoscimento-visivo",
+    "startFound": 1,
+    "resultFound": 1
+  },
+  {
+    "file": "Riordina la frase.html",
+    "id": "riordina-frase",
+    "startFound": 1,
+    "resultFound": 1
+  },
+  {
+    "file": "Riordina le lettere.html",
+    "id": "riordina-lettere",
+    "startFound": 1,
+    "resultFound": 1
+  },
+  {
+    "file": "Riordina le parole in ordine alfabetico.html",
+    "id": "ordine-alfabetico",
+    "startFound": 1,
+    "resultFound": 1
+  },
+  {
+    "file": "Rispondi al contrario e ricorda la parola.html",
+    "id": "contrario-ricorda",
+    "startFound": 1,
+    "resultFound": 1
+  },
+  {
+    "file": "Rispondi il contrario.html",
+    "id": "rispondi-contrario",
+    "startFound": 1,
+    "resultFound": 1
+  },
+  {
+    "file": "Set shifting.html",
+    "id": "set-shifting",
+    "startFound": 1,
+    "resultFound": 1
+  },
+  {
+    "file": "Silhoutte.html",
+    "id": "silhouette",
+    "startFound": 1,
+    "resultFound": 1
+  },
+  {
+    "file": "Trova l'immagine corrispondente.html",
+    "id": "immagine-corrispondente",
+    "startFound": 1,
+    "resultFound": 1
+  },
+  {
+    "file": "Trova l'intruso.html",
+    "id": "intruso-visivo",
+    "startFound": 1,
+    "resultFound": 1
+  },
+  {
+    "file": "conta_cerchi_rossi.html",
+    "id": "cerchi-rossi",
+    "startFound": 1,
+    "resultFound": 1
+  }
+]

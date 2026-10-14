@@ -259,6 +259,8 @@
     </style>
 <link rel="stylesheet" href="shared/cognilab.css">
 <script src="shared/interface.js" defer></script>
+<script>window.CogniLabExercise={"id":"set-shifting","title":"Set shifting","category":"Funzioni esecutive","setup":"start-screen"};</script>
+<script src="shared/exercise-runtime.js"></script>
 </head>
 <body data-cognilab="exercise">
 
@@ -423,6 +425,8 @@
 
         // --- Logica del Task ---
         function startTask() {
+ window.CogniLabRun?.begin(typeof arguments === "undefined" ? null : arguments[0]);
+
             currentTrial = 0;
             trialsHistory = [];
             currentRule = Math.random() < 0.5 ? 'NUMBER' : 'LETTER';
@@ -437,7 +441,7 @@
             cancelAnimationFrame(animationFrameId);
             if (isSessionActive) {
                 // Se c'è una sessione attiva, torna all'Hub o Dashboard principale
-                window.location.href = `index.html?pazienteId=${pazienteId || ''}&sessioneId=${sessioneId || ''}&sessione=true`;
+                window.top.location.href = `esercizi.html?pazienteId=${pazienteId || ''}&sessioneId=${sessioneId || ''}&sessione=true`;
             } else {
                 showScreen('start-screen');
             }
@@ -626,7 +630,7 @@
                         
                         dbStatusText.innerHTML = "<span style='color: #22c55e;'>✓ Salvato! Reindirizzamento alla sessione...</span>";
                         setTimeout(() => {
-                            window.location.href = `index.html?pazienteId=${pazienteId}&sessioneId=${sessioneId}&sessione=true`;
+                            window.top.location.href = `esercizi.html?pazienteId=${pazienteId}&sessioneId=${sessioneId}&sessione=true`;
                         }, 1500);
                     } else {
                         throw new Error("Dati sessione pianificata mancanti o corrotti nell'URL.");
@@ -655,7 +659,9 @@
                 console.error("Errore Firebase:", error);
                 dbStatusText.innerHTML = `<span style='color: #ef4444;'>Errore durante il salvataggio: ${error.message}</span>`;
             }
-        }
+
+ window.CogniLabRun?.complete({correct:window.CogniLabRun.measure(()=>(correctTrials.length)),total:window.CogniLabRun.measure(()=>(total)),errors:window.CogniLabRun.measure(()=>(trialsHistory.filter(t=>!t.correct&&!t.timeout).length)),omissions:window.CogniLabRun.measure(()=>(trialsHistory.filter(t=>t.timeout).length))});
+}
     </script>
 </body>
 </html>

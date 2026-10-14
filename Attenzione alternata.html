@@ -159,6 +159,8 @@
     </style>
 <link rel="stylesheet" href="shared/cognilab.css">
 <script src="shared/interface.js" defer></script>
+<script>window.CogniLabExercise={"id":"attenzione-alternata","title":"Attenzione alternata","category":"Attenzione","setup":"main-menu"};</script>
+<script src="shared/exercise-runtime.js"></script>
 </head>
 <body data-cognilab="exercise">
 
@@ -316,6 +318,8 @@
         };
 
         window.startGame = (moving) => {
+ window.CogniLabRun?.begin(typeof arguments === "undefined" ? null : arguments[0]);
+
             state.isMoving = moving;
             state.isPlaying = true;
             state.showHint = document.getElementById('hint-toggle').checked;
@@ -531,7 +535,9 @@
             document.getElementById('res-time').innerText = timerEl.innerText;
             document.getElementById('res-errors').innerText = state.errors;
             resultsOverlay.classList.remove('hidden');
-        }
+
+ window.CogniLabRun?.complete({correct:window.CogniLabRun.measure(()=>(state.currentIndex)),total:window.CogniLabRun.measure(()=>(state.currentIndex+state.errors)),errors:window.CogniLabRun.measure(()=>(state.errors))});
+}
 
         window.resetGame = () => {
             state.isPlaying = false;

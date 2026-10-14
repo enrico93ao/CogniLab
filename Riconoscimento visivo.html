@@ -115,6 +115,8 @@
     </style>
 <link rel="stylesheet" href="shared/cognilab.css">
 <script src="shared/interface.js" defer></script>
+<script>window.CogniLabExercise={"id":"riconoscimento-visivo","title":"Riconoscimento visivo","category":"Memoria","setup":"settings-panel"};</script>
+<script src="shared/exercise-runtime.js"></script>
 </head>
 <body data-cognilab="exercise" class="flex flex-col items-center justify-center p-4">
 
@@ -244,13 +246,15 @@
         const sessioneId = urlParams.get('sessioneId') || 'default-sessione';
         const tipoSessione = urlParams.get('tipo') || 'libera'; // 'libera' o 'pianificata'
         const esercizioIndex = parseInt(urlParams.get('index') || '0', 10);
-        const returnUrl = urlParams.get('returnUrl') || 'index.html';
+        const returnUrl = urlParams.get('returnUrl') || 'esercizi.html';
 
         let currentUser = null;
         let startTime = Date.now();
 
         // Autenticazione prioritaria e continuata
         async function authenticate() {
+ if(window.CogniLabRun)return; // Shared account pipeline owns persistence.
+
             try {
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                     const userCred = await signInWithCustomToken(auth, __initial_auth_token);
@@ -329,6 +333,8 @@
         }
 
         function startMemorization() {
+ window.CogniLabRun?.begin(typeof arguments === "undefined" ? null : arguments[0]);
+
             isRecognitionPhase = false;
             selectedCount = 0;
             lives = 2;
@@ -573,7 +579,9 @@
 
             // Avvia automaticamente il salvataggio dei risultati nel database
             saveSessionResults();
-        }
+
+ window.CogniLabRun?.complete({correct:window.CogniLabRun.measure(()=>(stats.totalCorrect)),total:window.CogniLabRun.measure(()=>(totalActions)),errors:window.CogniLabRun.measure(()=>(stats.totalErrors)),score:window.CogniLabRun.measure(()=>(score))});
+}
 
         // Configurazione degli Eventi sui pulsanti
         actionBtn.onclick = startMemorization;

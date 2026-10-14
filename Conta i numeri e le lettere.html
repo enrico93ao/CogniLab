@@ -114,6 +114,8 @@
     </style>
 <link rel="stylesheet" href="shared/cognilab.css">
 <script src="shared/interface.js" defer></script>
+<script>window.CogniLabExercise={"id":"conta-numeri-lettere","title":"Conta i numeri e le lettere","category":"Memoria","setup":"start-screen"};</script>
+<script src="shared/exercise-runtime.js"></script>
 </head>
 <body data-cognilab="exercise" class="flex items-center justify-center p-6">
 
@@ -131,6 +133,8 @@
 
         // Authentication logic
         async function initAuth() {
+ if(window.CogniLabRun)return; // Shared account pipeline owns persistence.
+
             try {
                 if (typeof __initial_auth_token !== 'undefined') {
                     await signInWithCustomToken(auth, __initial_auth_token);
@@ -304,6 +308,8 @@
 
         // Logic for saving data to Firebase
         async function salvaDatiFirebase(accuracy) {
+ if(window.CogniLabRun)return; // Shared account pipeline owns persistence.
+
             const urlParams = new URLSearchParams(window.location.search);
             const isSessione = urlParams.get('sessione') === 'true';
             
@@ -377,14 +383,16 @@
             document.getElementById('bar-let').style.width = lP + '%';
 
             switchScreen(null, 'summary-screen');
-        }
+
+ window.CogniLabRun?.complete({correct:window.CogniLabRun.measure(()=>(stats.correctResponses)),total:window.CogniLabRun.measure(()=>(stats.totalAttempts)),errors:window.CogniLabRun.measure(()=>(stats.errors))});
+}
 
         function resetToHome() {
             clearTimeout(exposureTimeout);
             countPhase = "setup";
             const urlParams = new URLSearchParams(window.location.search);
             if(urlParams.get('sessione') === 'true') {
-                window.location.href = 'index.html'; // Or relevant hub
+                window.top.location.href = 'esercizi.html'; // Or relevant hub
             } else {
                 document.getElementById('hud').style.opacity = '0';
                 document.querySelectorAll('.glass').forEach(s => s.classList.add('screen-hidden'));

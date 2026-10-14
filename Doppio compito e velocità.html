@@ -138,6 +138,8 @@
     </style>
 <link rel="stylesheet" href="shared/cognilab.css">
 <script src="shared/interface.js" defer></script>
+<script>window.CogniLabExercise={"id":"doppio-compito","title":"Doppio compito e velocità","category":"Funzioni esecutive","setup":"menu"};</script>
+<script src="shared/exercise-runtime.js"></script>
 </head>
 <body data-cognilab="exercise" class="flex items-center justify-center min-h-screen">
 
@@ -474,6 +476,8 @@
         }
 
         function startGame() {
+ window.CogniLabRun?.begin(typeof arguments === "undefined" ? null : arguments[0]);
+
             getAudioContext();
             generateRandomRules();
             document.getElementById('menu').classList.add('hidden');
@@ -738,9 +742,13 @@
             if (isSessioneAttiva) {
                 salvaRisultatiFirebase();
             }
-        }
+
+ window.CogniLabRun?.complete({correct:window.CogniLabRun.measure(()=>(state.correct)),total:window.CogniLabRun.measure(()=>(state.correct+state.missed)),errors:window.CogniLabRun.measure(()=>(state.missed)),score:window.CogniLabRun.measure(()=>(state.score))});
+}
 
         function salvaRisultatiFirebase() {
+ if(window.CogniLabRun)return; // Shared account pipeline owns persistence.
+
             const totaleDomande = state.correct + state.missed;
             const percentualeAccuratezza = totaleDomande > 0 ? Math.round((state.correct / totaleDomande) * 100) : 0;
 
@@ -781,7 +789,7 @@
                     firebase.initializeApp(JSON.parse(localConfig));
                 }
 
-                const redirectUrl = urlParams.get('redirectUrl') || 'index.html';
+                const redirectUrl = urlParams.get('redirectUrl') || 'esercizi.html';
 
                 if (tipoSessione === 'pianificata') {
                     // Sessione Pianificata: salva nell'indice della sessione e reindirizza

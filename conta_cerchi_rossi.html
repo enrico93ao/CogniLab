@@ -89,6 +89,8 @@
     </style>
 <link rel="stylesheet" href="shared/cognilab.css">
 <script src="shared/interface.js" defer></script>
+<script>window.CogniLabExercise={"id":"cerchi-rossi","title":"Conta i cerchi rossi","category":"Attenzione","setup":"screen-menu"};</script>
+<script src="shared/exercise-runtime.js"></script>
 </head>
 <body data-cognilab="exercise" class="h-screen w-screen flex items-center justify-center p-3 sm:p-6">
 
@@ -309,6 +311,8 @@
         }
 
         function startGame() {
+ window.CogniLabRun?.begin(typeof arguments === "undefined" ? null : arguments[0]);
+
             initAudio();
             config.level = document.getElementById('select-level').value;
             config.presentation = document.getElementById('select-mode').value;
@@ -579,7 +583,9 @@
                 html = `<div class="mb-4 font-extrabold text-lg text-slate-800 bg-indigo-50 p-3 rounded-xl text-center">Riepilogo Conto Continuo: ${correctCount} su ${gameState.scoreLog.length} round corretti</div>` + html;
             }
             resultsContent.innerHTML = html;
-        }
+
+ window.CogniLabRun?.complete({correct:window.CogniLabRun.measure(()=>(correctCount)),total:window.CogniLabRun.measure(()=>(gameState.scoreLog.length)),errors:window.CogniLabRun.measure(()=>(gameState.scoreLog.length-correctCount))});
+}
     </script>
 </body>
 </html>

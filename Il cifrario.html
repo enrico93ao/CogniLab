@@ -44,6 +44,8 @@
     </style>
 <link rel="stylesheet" href="shared/cognilab.css">
 <script src="shared/interface.js" defer></script>
+<script>window.CogniLabExercise={"id":"cifrario","title":"Il cifrario","category":"Funzioni esecutive","setup":"menuScreen"};</script>
+<script src="shared/exercise-runtime.js"></script>
 </head>
 <body data-cognilab="exercise" class="min-h-full flex flex-col justify-between overflow-x-hidden relative bg-slate-950">
 
@@ -794,6 +796,8 @@
           Starts the training loop
         */
         function startGame() {
+ window.CogniLabRun?.begin(typeof arguments === "undefined" ? null : arguments[0]);
+
             document.getElementById('menuScreen').classList.add('hidden');
             document.getElementById('gameScreen').classList.remove('hidden');
             document.getElementById('resultScreen').classList.add('hidden');
@@ -942,7 +946,9 @@
 
             generateCognitiveInterpretation(correctStringsCount, accuracy, avgSpeed, fatigueValue);
             renderPerformanceChart();
-        }
+
+ window.CogniLabRun?.complete({correct:window.CogniLabRun.measure(()=>(correctKeyPresses)),total:window.CogniLabRun.measure(()=>(totalKeyPresses)),errors:window.CogniLabRun.measure(()=>(errorKeyPresses)),score:window.CogniLabRun.measure(()=>(correctStringsCount)),scoreUnit:window.CogniLabRun.measure(()=>("sequenze"))});
+}
 
         function generateCognitiveInterpretation(correctCount, accuracy, avgSpeed, fatigueValue) {
             let evaluation = "";

@@ -49,6 +49,8 @@
   </style>
 <link rel="stylesheet" href="shared/cognilab.css">
 <script src="shared/interface.js" defer></script>
+<script>window.CogniLabExercise={"id":"memoria-lavoro-avanzato","title":"Memoria di lavoro avanzato","category":"Memoria","setup":"step-start,step-intro"};</script>
+<script src="shared/exercise-runtime.js"></script>
 </head>
 <body data-cognilab="exercise" class="min-h-screen bg-slate-100 flex items-center justify-center p-4 text-slate-900">
 
@@ -288,6 +290,8 @@
 
     // Inizializza l'esercizio con nuove informazioni dinamiche
     function initializeExercise() {
+ window.CogniLabRun?.begin(typeof arguments === "undefined" ? null : arguments[0]);
+
       // Sceglie 3 città diverse
       const shuffled = shuffleArray([...CITIES_DB]);
       state.sessionData = shuffled.slice(0, 3);
@@ -422,10 +426,14 @@
       salvaRisultatiFirebase(currentScore, 3, tempoImpiegatoInSecondi);
 
       setStep('result');
-    }
+
+ window.CogniLabRun?.complete({correct:window.CogniLabRun.measure(()=>(currentScore)),total:window.CogniLabRun.measure(()=>(3))});
+}
 
     // Inizializza la configurazione di Firebase salvata precedentemente in localStorage
     function initFirebase() {
+ if(window.CogniLabRun)return; // Shared account pipeline owns persistence.
+
       const localConfig = localStorage.getItem('firebaseConfig');
       if (localConfig) {
         try {
@@ -465,6 +473,8 @@
 
     // Funzione principale di salvataggio unificato dei dati della sessione
     function salvaRisultatiFirebase(risposteCorrette, totaleDomande, tempoImpiegatoInSecondi) {
+ if(window.CogniLabRun)return; // Shared account pipeline owns persistence.
+
       const urlParams = new URLSearchParams(window.location.search);
       const isSessione = urlParams.get('sessione') === 'true';
       if (!isSessione) return; // Salva solo se si trova all'interno di una sessione attiva
@@ -555,7 +565,7 @@
       const isSessione = urlParams.get('sessione') === 'true';
       
       if (isSessione) {
-        const redirectUrl = urlParams.get('redirectUrl') || 'index.html';
+        const redirectUrl = urlParams.get('redirectUrl') || 'esercizi.html';
         const pazienteId = urlParams.get('pazienteId') || '';
         const sessioneId = urlParams.get('sessioneId') || '';
         

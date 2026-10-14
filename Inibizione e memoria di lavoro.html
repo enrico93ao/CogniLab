@@ -158,6 +158,8 @@
     </style>
 <link rel="stylesheet" href="shared/cognilab.css">
 <script src="shared/interface.js" defer></script>
+<script>window.CogniLabExercise={"id":"inibizione-memoria","title":"Inibizione e memoria di lavoro","category":"Funzioni esecutive","setup":"menu-screen"};</script>
+<script src="shared/exercise-runtime.js"></script>
 </head>
 <body data-cognilab="exercise">
 
@@ -438,6 +440,8 @@
         }
 
         function startGame() {
+ window.CogniLabRun?.begin(typeof arguments === "undefined" ? null : arguments[0]);
+
             if (audioCtx.state === 'suspended') audioCtx.resume();
             switchScreen('game-screen');
             gameState.timeLeft = config.durationMinutes * 60;
@@ -584,7 +588,9 @@
             document.getElementById('stat-streak').innerText = gameState.bestStreak + " 🔥";
 
             switchScreen('result-screen');
-        }
+
+ window.CogniLabRun?.complete({correct:window.CogniLabRun.measure(()=>(gameState.correct)),total:window.CogniLabRun.measure(()=>(gameState.correct+gameState.wrong+gameState.timeouts)),errors:window.CogniLabRun.measure(()=>(gameState.wrong)),omissions:window.CogniLabRun.measure(()=>(gameState.timeouts)),responseTimeMs:window.CogniLabRun.measure(()=>(gameState.responseCount?spd:null)),score:window.CogniLabRun.measure(()=>(gameState.score))});
+}
 
         function exitToMenu() {
             clearInterval(gameState.timerId);

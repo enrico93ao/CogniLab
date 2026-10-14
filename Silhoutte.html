@@ -79,6 +79,8 @@
     </style>
 <link rel="stylesheet" href="shared/cognilab.css">
 <script src="shared/interface.js" defer></script>
+<script>window.CogniLabExercise={"id":"silhouette","title":"Silhouette","category":"Visuospaziale","setup":"start-menu"};</script>
+<script src="shared/exercise-runtime.js"></script>
 </head>
 <body data-cognilab="exercise" class="h-screen flex flex-col overflow-hidden text-gray-800">
 
@@ -243,6 +245,8 @@
         }
 
         function startGame() {
+ window.CogniLabRun?.begin(typeof arguments === "undefined" ? null : arguments[0]);
+
             state.assetPool = shuffle([...ASSETS]);
             state.correct = 0;
             state.errors = 0;
@@ -351,7 +355,9 @@
 
             document.getElementById('stat-accuracy').textContent = `${accuracy}%`;
             document.getElementById('stat-speed').textContent = `${avgTime}s`;
-        }
+
+ window.CogniLabRun?.complete({correct:window.CogniLabRun.measure(()=>(state.correct)),total:window.CogniLabRun.measure(()=>(total)),errors:window.CogniLabRun.measure(()=>(state.errors)),responseTimeMs:window.CogniLabRun.measure(()=>(state.times.length?Number(avgTime)*1000:null))});
+}
 
         window.onload = () => {
             setDifficulty('easy');

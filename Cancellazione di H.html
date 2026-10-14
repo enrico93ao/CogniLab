@@ -222,6 +222,8 @@
     </style>
 <link rel="stylesheet" href="shared/cognilab.css">
 <script src="shared/interface.js" defer></script>
+<script>window.CogniLabExercise={"id":"cancellazione-h","title":"Cancellazione di H","category":"Attenzione","setup":"welcome-screen"};</script>
+<script src="shared/exercise-runtime.js"></script>
 </head>
 <body data-cognilab="exercise">
 
@@ -446,6 +448,8 @@
         }
 
         function startExercise() {
+ window.CogniLabRun?.begin(typeof arguments === "undefined" ? null : arguments[0]);
+
             initAudio();
             resetData();
             
@@ -772,7 +776,9 @@
                 savingStatus.textContent = "Modalità Offline: Dati non salvati su Firebase.";
                 savingStatus.style.color = "#ffc107";
             }
-        }
+
+ window.CogniLabRun?.complete({correct:window.CogniLabRun.measure(()=>(clickedTargets)),total:window.CogniLabRun.measure(()=>(totalTargets)),errors:window.CogniLabRun.measure(()=>(falsePositives)),omissions:window.CogniLabRun.measure(()=>(leftOmissions+rightOmissions)),score:window.CogniLabRun.measure(()=>(punteggioGrezzo))});
+}
 
         function handleSalvataggioSuccesso() {
             const savingStatus = document.getElementById('savingStatus');
@@ -797,7 +803,7 @@
             const sId = params.get('sessionId') || '';
             const sess = params.get('sessione') || '';
             
-            window.location.href = `esercizi.html?sessione=${sess}&pazienteId=${pId}&sessionId=${sId}`;
+            window.top.location.href = `esercizi.html?sessione=${sess}&pazienteId=${pId}&sessionId=${sId}`;
         }
 
         window.addEventListener('DOMContentLoaded', initFirebaseSafe);

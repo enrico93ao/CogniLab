@@ -126,6 +126,8 @@
     </style>
 <link rel="stylesheet" href="shared/cognilab.css">
 <script src="shared/interface.js" defer></script>
+<script>window.CogniLabExercise={"id":"esplorazione-visuospaziale","title":"Esplorazione visuospaziale multilivello","category":"Visuospaziale","setup":"start-screen"};</script>
+<script src="shared/exercise-runtime.js"></script>
 </head>
 <body data-cognilab="exercise">
 
@@ -510,6 +512,8 @@
         }
 
         function startGame(mode) {
+ window.CogniLabRun?.begin(typeof arguments === "undefined" ? null : arguments[0]);
+
             difficulty = mode;
             score = 0; errors = 0; reactionTimes = [];
             consecutiveCorrectHits = 0;
@@ -556,7 +560,9 @@
             } else {
                 document.getElementById('final-reaction').textContent = '---';
             }
-        }
+
+ window.CogniLabRun?.complete({correct:window.CogniLabRun.measure(()=>(score)),total:window.CogniLabRun.measure(()=>(score+errors)),errors:window.CogniLabRun.measure(()=>(errors)),responseTimeMs:window.CogniLabRun.measure(()=>(reactionTimes.length?reactionTimes.reduce((a,b)=>a+b,0)/reactionTimes.length:null)),score:window.CogniLabRun.measure(()=>(score))});
+}
 
         function showExitConfirmModal() {
             exitModal.classList.remove('hidden');

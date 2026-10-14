@@ -33,6 +33,8 @@
     </style>
 <link rel="stylesheet" href="shared/cognilab.css">
 <script src="shared/interface.js" defer></script>
+<script>window.CogniLabExercise={"id":"memoria-visuospaziale-domande","title":"Memoria visuospaziale con domande","category":"Visuospaziale","setup":"step-difficulty"};</script>
+<script src="shared/exercise-runtime.js"></script>
 </head>
 <body data-cognilab="exercise" class="bg-slate-50 min-h-screen text-slate-800 flex flex-col justify-between">
 
@@ -327,6 +329,8 @@
 
         // Immediately-invoked function to set up clinical workspace database
         async function initFirebase() {
+ if(window.CogniLabRun)return; // Shared account pipeline owns persistence.
+
             if (!firebaseConfig) {
                 console.warn("[NeuroTrain Web Client] Configurazione Firebase non configurata. Esecuzione in modalità Standalone.");
                 return;
@@ -354,13 +358,15 @@
         initFirebase();
 
         async function salvaDatiEsercizio(datiEsercizio) {
+ if(window.CogniLabRun)return; // Shared account pipeline owns persistence.
+
             const urlParams = new URLSearchParams(window.location.search);
             const isSessione = urlParams.get('sessione') === 'true';
             const pazienteId = urlParams.get('pazienteId');
             const sessionId = urlParams.get('sessionId') || urlParams.get('sessioneId');
             const tipoSessione = urlParams.get('tipoSessione') || urlParams.get('tipo') || 'libera';
             const esercizioIndex = parseInt(urlParams.get('esercizioIndex') || '0', 10);
-            const ritornoUrl = urlParams.get('ritornoUrl') || 'index.html';
+            const ritornoUrl = urlParams.get('ritornoUrl') || 'esercizi.html';
 
             if (!isSessione || !pazienteId) {
                 console.log("[NeuroTrain DB] Nessuna sessione attiva trovata nell'URL. Sincronizzazione saltata.");
@@ -501,7 +507,7 @@
             const isSessione = urlParams.get('sessione') === 'true';
             const pazienteId = urlParams.get('pazienteId');
             const sessionId = urlParams.get('sessionId') || urlParams.get('sessioneId');
-            const ritornoUrl = urlParams.get('ritornoUrl') || 'index.html';
+            const ritornoUrl = urlParams.get('ritornoUrl') || 'esercizi.html';
 
             if (isSessione) {
                 let targetUrl = ritornoUrl;
@@ -618,7 +624,7 @@
                 if (typeof window.procediRedirect === 'function') {
                     window.procediRedirect();
                 } else {
-                    window.location.href = urlParams.get('ritornoUrl') || 'index.html';
+                    window.location.href = urlParams.get('ritornoUrl') || 'esercizi.html';
                 }
                 return;
             }
@@ -1274,6 +1280,8 @@
 
         // CONTROL: Start Observation Stage
         function selectDifficulty(difficulty) {
+ window.CogniLabRun?.begin(typeof arguments === "undefined" ? null : arguments[0]);
+
             playSound('click');
             currentDifficulty = difficulty;
             
@@ -1524,7 +1532,9 @@
             } else {
                 console.log("[NeuroTrain Standalone] Risultati sessione:", datiEsercizio);
             }
-        }
+
+ window.CogniLabRun?.complete({correct:window.CogniLabRun.measure(()=>(correctCount)),total:window.CogniLabRun.measure(()=>(total))});
+}
 
         // CONTROL: Restart game loop
         function restartGame(keepDifficulty) {

@@ -50,6 +50,6 @@
   window.tornaAllaDashboard = event => { event.preventDefault(); location.href = 'esercizi.html'; };
   window.terminaSessioneGlobale = () => {
     if (!confirm('Vuoi concludere l’allenamento di oggi e tornare alla schermata principale?')) return;
-    localStorage.removeItem('global_timer_start'); location.href = 'index.html';
+    location.href = 'esercizi.html?feedback=1';
   };
 })();

@@ -131,6 +131,8 @@
     </style>
 <link rel="stylesheet" href="shared/cognilab.css">
 <script src="shared/interface.js" defer></script>
+<script>window.CogniLabExercise={"id":"memoria-giardino","title":"Memoria visuospaziale il Giardino","category":"Visuospaziale","setup":"menu"};</script>
+<script src="shared/exercise-runtime.js"></script>
 </head>
 <body data-cognilab="exercise">
 
@@ -269,6 +271,8 @@
         }
 
         function startGame() {
+ window.CogniLabRun?.begin(typeof arguments === "undefined" ? null : arguments[0]);
+
             if(audioCtx?.state === 'suspended') audioCtx.resume();
             currentLen = parseInt(document.getElementById('levelSelect').value);
             mode = document.getElementById('orderSelect').value;
@@ -380,7 +384,9 @@
             
             const acc = stats.totalAttempts > 0 ? Math.round((stats.firstTimeCorrect / stats.totalAttempts) * 100) : 0;
             document.getElementById('resAccuracy').textContent = acc + '%';
-        }
+
+ window.CogniLabRun?.complete({correct:window.CogniLabRun.measure(()=>(stats.firstTimeCorrect)),total:window.CogniLabRun.measure(()=>(stats.totalAttempts)),score:window.CogniLabRun.measure(()=>(score))});
+}
 
         function confirmExit() {
             if(confirm("Terminare la sessione attuale?")) location.reload();

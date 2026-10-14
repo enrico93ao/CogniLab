@@ -53,6 +53,8 @@
     </style>
 <link rel="stylesheet" href="shared/cognilab.css">
 <script src="shared/interface.js" defer></script>
+<script>window.CogniLabExercise={"id":"stroop-original","title":"Stroop","category":"Attenzione","setup":"main-menu"};</script>
+<script src="shared/exercise-runtime.js"></script>
 </head>
 <body data-cognilab="exercise" class="flex flex-col min-h-screen">
 
@@ -225,6 +227,8 @@
         }
 
         function startGame() {
+ window.CogniLabRun?.begin(typeof arguments === "undefined" ? null : arguments[0]);
+
             if (audioCtx.state === 'suspended') audioCtx.resume();
             mainMenu.classList.add('hidden');
             gameScreen.classList.remove('hidden');
@@ -330,7 +334,9 @@
 
             document.getElementById('rating-stars').innerText = stars;
             document.getElementById('performance-feedback').innerText = feedback;
-        }
+
+ window.CogniLabRun?.complete({correct:window.CogniLabRun.measure(()=>(score)),total:window.CogniLabRun.measure(()=>(totalAttempts)),errors:window.CogniLabRun.measure(()=>(errors)),responseTimeMs:window.CogniLabRun.measure(()=>(responseTimes.length?Number(avgTime)*1000:null)),score:window.CogniLabRun.measure(()=>(score))});
+}
 
         function resetApp() {
             resultsScreen.classList.add('hidden');

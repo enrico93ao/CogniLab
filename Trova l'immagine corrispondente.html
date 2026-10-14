@@ -87,6 +87,8 @@
     </style>
 <link rel="stylesheet" href="shared/cognilab.css">
 <script src="shared/interface.js" defer></script>
+<script>window.CogniLabExercise={"id":"immagine-corrispondente","title":"Trova l'immagine corrispondente","category":"Visuospaziale","setup":"setup-screen"};</script>
+<script src="shared/exercise-runtime.js"></script>
 </head>
 <body data-cognilab="exercise" class="flex flex-col">
 
@@ -246,6 +248,8 @@
         }
 
         function startGame() {
+ window.CogniLabRun?.begin(typeof arguments === "undefined" ? null : arguments[0]);
+
             score = 0;
             if (scoreDisplay) scoreDisplay.textContent = score;
             const durationSelect = document.getElementById('session-duration');
@@ -421,7 +425,9 @@
             document.getElementById('final-accuracy').textContent = accuracy + '%';
             document.getElementById('final-levels').textContent = stats.levelsCompleted;
             document.getElementById('final-errors').textContent = stats.clicksWrong;
-        }
+
+ window.CogniLabRun?.complete({correct:window.CogniLabRun.measure(()=>(stats.clicksCorrect)),total:window.CogniLabRun.measure(()=>(totalClicks)),errors:window.CogniLabRun.measure(()=>(stats.clicksWrong)),score:window.CogniLabRun.measure(()=>(score))});
+}
 
         function exitGame() {
             clearInterval(timerInterval);

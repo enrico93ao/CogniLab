@@ -26,6 +26,8 @@
     </style>
 <link rel="stylesheet" href="shared/cognilab.css">
 <script src="shared/interface.js" defer></script>
+<script>window.CogniLabExercise={"id":"orologio-invisibile","title":"L'orologio invisibile","category":"Attenzione","setup":"screen-setup"};</script>
+<script src="shared/exercise-runtime.js"></script>
 </head>
 <body data-cognilab="exercise" class="bg-slate-50 text-slate-800 min-h-screen flex flex-col justify-between">
 
@@ -571,6 +573,8 @@
 
         // --- PREPARAZIONE AMBIENTE DEL SINGOLO TENTATIVO ---
         function setupTrialEnvironment() {
+ window.CogniLabRun?.begin(typeof arguments === "undefined" ? null : arguments[0]);
+
             sessionState.isPlaying = false;
             sessionState.isRevealed = false;
 
@@ -869,7 +873,9 @@
 
             // 5. Rendering del Grafico SVG ad alta risoluzione
             drawSVGChart(data);
-        }
+
+ window.CogniLabRun?.complete({correct:window.CogniLabRun.measure(()=>(null)),total:window.CogniLabRun.measure(()=>(n)),score:window.CogniLabRun.measure(()=>(avgAbsError)),scoreUnit:window.CogniLabRun.measure(()=>("ms")),scoreDirection:window.CogniLabRun.measure(()=>("lower"))});
+}
 
         function generateClinicalReport(avgAbsError, biasType, countAnticipo, countRitardo, total) {
             const reportEl = document.getElementById('txt-clinical-report');

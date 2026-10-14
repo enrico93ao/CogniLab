@@ -121,6 +121,8 @@
     </style>
 <link rel="stylesheet" href="shared/cognilab.css">
 <script src="shared/interface.js" defer></script>
+<script>window.CogniLabExercise={"id":"orientamento","title":"Orientamento temporale-spaziale","category":"Orientamento","setup":"app-container"};</script>
+<script src="shared/exercise-runtime.js"></script>
 </head>
 <body data-cognilab="exercise" class="min-h-screen flex flex-col text-slate-900">
 
@@ -219,6 +221,8 @@
         const indicator = document.getElementById('sync-indicator');
 
         async function initFirebase() {
+ if(window.CogniLabRun)return; // Shared account pipeline owns persistence.
+
             if (!firebaseConfig) {
                 if (indicator) {
                     indicator.textContent = "Sincronizzazione Database disattivata (Configurazione assente)";
@@ -485,6 +489,8 @@
         }
 
         function setDifficulty(level) {
+ window.CogniLabRun?.begin(typeof arguments === "undefined" ? null : arguments[0]);
+
             state.difficulty = level;
             state.step = 'temporal';
             state.showHint = (level === 'super-easy' || level === 'base');
@@ -814,6 +820,8 @@
         }
 
         async function salvaRisultatiFirebase() {
+ if(window.CogniLabRun)return; // Shared account pipeline owns persistence.
+
             const numeroTotaleDomande = state.difficulty === 'super-easy' ? 7 : 8; 
             const accuratezzaPercentuale = Math.max(10, Math.min(100, Math.round((numeroTotaleDomande / state.metrics.totalAttempts) * 100)));
             const tempoImpiegatoInSecondi = Math.round((Date.now() - state.metrics.startTime) / 1000);
@@ -923,7 +931,9 @@
                 </div>
             `;
             salvaRisultatiFirebase();
-        }
+
+ window.CogniLabRun?.complete({correct:window.CogniLabRun.measure(()=>(state.difficulty==="super-easy"?7:8)),total:window.CogniLabRun.measure(()=>(state.metrics.totalAttempts)),errors:window.CogniLabRun.measure(()=>(Math.max(0,state.metrics.totalAttempts-(state.difficulty==="super-easy"?7:8))))});
+}
 
         function resetApp() {
             state.step = 'difficulty';

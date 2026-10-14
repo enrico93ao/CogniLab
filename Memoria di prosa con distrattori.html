@@ -100,6 +100,8 @@
     </style>
 <link rel="stylesheet" href="shared/cognilab.css">
 <script src="shared/interface.js" defer></script>
+<script>window.CogniLabExercise={"id":"memoria-prosa","title":"Memoria di prosa con distrattori","category":"Memoria","setup":"start-screen"};</script>
+<script src="shared/exercise-runtime.js"></script>
 </head>
 <body data-cognilab="exercise" class="min-h-screen flex flex-col items-center justify-center p-4">
 
@@ -275,9 +277,11 @@
         const sessionIdParam = urlParams.get('sessionId') || urlParams.get('sessioneId');
         const tipoSessione = urlParams.get('tipoSessione') || urlParams.get('tipo') || 'libera';
         const indiceEsercizio = parseInt(urlParams.get('indiceEsercizio') || urlParams.get('index') || '0', 10);
-        const nextUrl = urlParams.get('nextUrl') || 'index.html';
+        const nextUrl = urlParams.get('nextUrl') || 'esercizi.html';
 
         async function initFirebase() {
+ if(window.CogniLabRun)return; // Shared account pipeline owns persistence.
+
             if (typeof __firebase_config === 'undefined') {
                 console.warn("Configurazione Firebase non rilevata. Modalità offline attivata.");
                 return;
@@ -303,6 +307,8 @@
         }
 
         window.salvaSuFirebase = async function() {
+ if(window.CogniLabRun)return; // Shared account pipeline owns persistence.
+
             const overlay = document.getElementById('saving-overlay');
             overlay.classList.remove('hidden');
 
@@ -483,6 +489,8 @@
         let isCorrectList = [];
 
         function setupAndStart() {
+ window.CogniLabRun?.begin(typeof arguments === "undefined" ? null : arguments[0]);
+
             window.stats.startTime = Date.now();
             selectedStory = stories[Math.floor(Math.random() * stories.length)];
             activeIntrusoSet = [...intruderPairs].sort(() => Math.random() - 0.5).slice(0, 4);
@@ -693,7 +701,9 @@
                 evaluation = "Sessione completata. Si raccomanda di continuare l'allenamento per supportare la codifica e il recupero mnestico.";
             }
             document.getElementById('global-eval').innerText = evaluation;
-        }
+
+ window.CogniLabRun?.complete({correct:window.CogniLabRun.measure(()=>(window.stats.initialCorrectAnswers)),total:window.CogniLabRun.measure(()=>(window.stats.totalQuestions))});
+}
 
         let canvas, ctx, drawing = false;
         function initCanvas() {
