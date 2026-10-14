@@ -32,7 +32,8 @@ window.submitFeedbackForm=async()=>{
  try{
    await saveFeedback(ratings,{anonymous:document.getElementById('cl-feedback-anonymous').checked,submissionId:feedbackSubmissionId});
    feedbackSent=true;feedbackStatus.textContent='Questionario inviato. Grazie!';button.textContent='Risposte inviate';
-   await closeCurrentSession();
+   feedbackStatus.textContent='Questionario inviato. Ritorno alla home…';
+   await Promise.race([closeCurrentSession(),new Promise(resolve=>setTimeout(resolve,1500))]);
    location.href='index.html';
  }catch(error){
    const code=errorCode(error)||'errore-non-identificato';
