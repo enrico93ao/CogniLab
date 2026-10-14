@@ -6,38 +6,38 @@
       "users": {
         "$uid": {
           "profile": {
-            ".read": "auth != null && auth.uid === $uid",
-            ".write": "auth != null && auth.uid === $uid"
+            ".read": "(auth != null && auth.token.firebase.sign_in_provider !== 'anonymous' && (root.child('cognilab/access/publicRegistrationOpen').val() === true || root.child('cognilab/testers').child(auth.uid).val() === true || root.child('cognilab/professionals').child(auth.uid).val() === true)) && (auth != null && auth.uid === $uid)",
+            ".write": "(auth != null && auth.token.firebase.sign_in_provider !== 'anonymous' && (root.child('cognilab/access/publicRegistrationOpen').val() === true || root.child('cognilab/testers').child(auth.uid).val() === true || root.child('cognilab/professionals').child(auth.uid).val() === true)) && (auth != null && auth.uid === $uid)"
           },
           "sessions": {
-            ".read": "auth != null && auth.uid === $uid && (!root.child('cognilab/users').child($uid).child('clinical').exists() || root.child('cognilab/professionals').child($uid).val() === true)",
-            ".write": "auth != null && auth.uid === $uid",
+            ".read": "(auth != null && auth.token.firebase.sign_in_provider !== 'anonymous' && (root.child('cognilab/access/publicRegistrationOpen').val() === true || root.child('cognilab/testers').child(auth.uid).val() === true || root.child('cognilab/professionals').child(auth.uid).val() === true)) && (auth != null && auth.uid === $uid && (!root.child('cognilab/users').child($uid).child('clinical').exists() || root.child('cognilab/professionals').child($uid).val() === true))",
+            ".write": "(auth != null && auth.token.firebase.sign_in_provider !== 'anonymous' && (root.child('cognilab/access/publicRegistrationOpen').val() === true || root.child('cognilab/testers').child(auth.uid).val() === true || root.child('cognilab/professionals').child(auth.uid).val() === true)) && (auth != null && auth.uid === $uid)",
             "$session": {
               ".validate": "!newData.child('patientId').exists() && !data.child('patientId').exists()"
             }
           },
           "clinical": {
-            ".read": "auth != null && auth.uid === $uid && auth.token.firebase.sign_in_provider !== 'anonymous' && root.child('cognilab/professionals').child($uid).val() === true",
-            ".write": "auth != null && auth.uid === $uid && auth.token.firebase.sign_in_provider !== 'anonymous' && root.child('cognilab/professionals').child($uid).val() === true"
+            ".read": "(auth != null && auth.token.firebase.sign_in_provider !== 'anonymous' && (root.child('cognilab/access/publicRegistrationOpen').val() === true || root.child('cognilab/testers').child(auth.uid).val() === true || root.child('cognilab/professionals').child(auth.uid).val() === true)) && (auth != null && auth.uid === $uid && auth.token.firebase.sign_in_provider !== 'anonymous' && root.child('cognilab/professionals').child($uid).val() === true)",
+            ".write": "(auth != null && auth.token.firebase.sign_in_provider !== 'anonymous' && (root.child('cognilab/access/publicRegistrationOpen').val() === true || root.child('cognilab/testers').child(auth.uid).val() === true || root.child('cognilab/professionals').child(auth.uid).val() === true)) && (auth != null && auth.uid === $uid && auth.token.firebase.sign_in_provider !== 'anonymous' && root.child('cognilab/professionals').child($uid).val() === true)"
           }
         }
       },
       "presence": {
         "$uid": {
-          ".write": "auth != null && auth.uid === $uid",
+          ".write": "(auth != null && auth.token.firebase.sign_in_provider !== 'anonymous' && (root.child('cognilab/access/publicRegistrationOpen').val() === true || root.child('cognilab/testers').child(auth.uid).val() === true || root.child('cognilab/professionals').child(auth.uid).val() === true)) && (auth != null && auth.uid === $uid)",
           "$connection": {
             ".validate": "newData.val() === true"
           },
-          ".read": "auth != null && auth.uid === $uid"
+          ".read": "(auth != null && auth.token.firebase.sign_in_provider !== 'anonymous' && (root.child('cognilab/access/publicRegistrationOpen').val() === true || root.child('cognilab/testers').child(auth.uid).val() === true || root.child('cognilab/professionals').child(auth.uid).val() === true)) && (auth != null && auth.uid === $uid)"
         }
       },
       "activity": {
         "$uid": {
-          ".write": "auth != null && auth.uid === $uid",
+          ".write": "(auth != null && auth.token.firebase.sign_in_provider !== 'anonymous' && (root.child('cognilab/access/publicRegistrationOpen').val() === true || root.child('cognilab/testers').child(auth.uid).val() === true || root.child('cognilab/professionals').child(auth.uid).val() === true)) && (auth != null && auth.uid === $uid)",
           "$result": {
             ".validate": "newData.isBoolean()"
           },
-          ".read": "auth != null && auth.uid === $uid"
+          ".read": "(auth != null && auth.token.firebase.sign_in_provider !== 'anonymous' && (root.child('cognilab/access/publicRegistrationOpen').val() === true || root.child('cognilab/testers').child(auth.uid).val() === true || root.child('cognilab/professionals').child(auth.uid).val() === true)) && (auth != null && auth.uid === $uid)"
         }
       },
       "feedback": {
@@ -65,10 +65,24 @@
         }
       },
       "stats": {
-        ".read": "auth != null",
+        ".read": "(auth != null && auth.token.firebase.sign_in_provider !== 'anonymous' && (root.child('cognilab/access/publicRegistrationOpen').val() === true || root.child('cognilab/testers').child(auth.uid).val() === true || root.child('cognilab/professionals').child(auth.uid).val() === true)) && (auth != null)",
         ".write": false
       },
       "professionals": {
+        "$uid": {
+          ".read": "auth != null && auth.uid === $uid",
+          ".write": false,
+          ".validate": "newData.isBoolean()"
+        }
+      },
+      "access": {
+        "publicRegistrationOpen": {
+          ".read": true,
+          ".write": false,
+          ".validate": "newData.isBoolean()"
+        }
+      },
+      "testers": {
         "$uid": {
           ".read": "auth != null && auth.uid === $uid",
           ".write": false,
@@ -79,9 +93,9 @@
     "cognilab_v2": {
       "users": {
         "$uid": {
-          ".read": "auth != null && auth.uid === $uid",
+          ".read": "(auth != null && auth.token.firebase.sign_in_provider !== 'anonymous' && (root.child('cognilab/access/publicRegistrationOpen').val() === true || root.child('cognilab/testers').child(auth.uid).val() === true || root.child('cognilab/professionals').child(auth.uid).val() === true)) && (auth != null && auth.uid === $uid)",
           "profile": {
-            ".write": "auth != null && auth.uid === $uid",
+            ".write": "(auth != null && auth.token.firebase.sign_in_provider !== 'anonymous' && (root.child('cognilab/access/publicRegistrationOpen').val() === true || root.child('cognilab/testers').child(auth.uid).val() === true || root.child('cognilab/professionals').child(auth.uid).val() === true)) && (auth != null && auth.uid === $uid)",
             ".validate": "newData.hasChildren(['name', 'goal'])",
             "name": {
               ".validate": "newData.isString() && newData.val().length <= 50"
@@ -95,7 +109,7 @@
           },
           "results": {
             "$resultId": {
-              ".write": "auth != null && auth.uid === $uid && (!data.exists() || newData.child('payload').val() === data.child('payload').val())",
+              ".write": "(auth != null && auth.token.firebase.sign_in_provider !== 'anonymous' && (root.child('cognilab/access/publicRegistrationOpen').val() === true || root.child('cognilab/testers').child(auth.uid).val() === true || root.child('cognilab/professionals').child(auth.uid).val() === true)) && (auth != null && auth.uid === $uid && (!data.exists() || newData.child('payload').val() === data.child('payload').val()))",
               ".validate": "newData.hasChildren(['payload'])",
               "payload": {
                 ".validate": "newData.isString() && newData.val().length <= 500000"

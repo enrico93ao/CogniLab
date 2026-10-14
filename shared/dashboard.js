@@ -2,7 +2,7 @@ import {requireProfessional} from './clinical-access.js';
 import {errorCode} from './firebase-errors.js';
 import {onAuthStateChanged} from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js';
 import {ref,onValue,onDisconnect,set,remove} from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js';
-import {db,auth,friendlyError} from './firebase-client.js';
+import {db,auth,friendlyError,accessModeReady} from './firebase-client.js';
 import {saveFeedback,finishSession,pending,retryPending,ensurePrivateStorage} from './progress-store.js';
 import {onlineCount,completedCount,satisfaction,groupKey,comparableSeries,measurement,change} from './progress-model.mjs';
 const notice=document.createElement('p');notice.className='cl-notice';notice.hidden=true;notice.setAttribute('role','status');document.querySelector('.kpi-grid').after(notice);
@@ -12,7 +12,7 @@ feedbackOption.style.cssText='display:flex;gap:10px;align-items:center;margin:16
 feedbackOption.innerHTML='<input id="cl-feedback-anonymous" type="checkbox" checked> Invia senza collegare le risposte al mio account';
 document.querySelector('#feedback-modal .modal-card').insertBefore(feedbackOption,feedbackStatus);
 const help=document.createElement('p');
-help.textContent='Puoi rispondere senza creare un account. In questa modalità le risposte non contengono nome o email e non sono associate al tuo account personale.';
+help.textContent='Puoi inviare le risposte senza collegarle al tuo account personale. In questa modalità il questionario non contiene nome o email.';
 feedbackOption.after(help);
 let feedbackSubmissionId=crypto.randomUUID(),feedbackSent=false,closingSessionPromise=null;
 function returnToLanding(){

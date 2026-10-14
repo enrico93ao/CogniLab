@@ -1,13 +1,14 @@
 import {isPermissionDenied,errorCode} from './firebase-errors.js';
 import {initializeApp,getApps} from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js';
-import {getAuth,onAuthStateChanged,signInAnonymously} from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js';
-import {getDatabase} from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js';
+import {getAuth,onAuthStateChanged} from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js';
+import {getDatabase,get,ref} from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js';
 export const firebaseConfig={apiKey:'AIzaSyBBChH3sFfhwE4waQTzERtKGytJrucYEFM',authDomain:'hub-di-stimolazione-cognitiva.firebaseapp.com',databaseURL:'https://hub-di-stimolazione-cognitiva-default-rtdb.firebaseio.com',projectId:'hub-di-stimolazione-cognitiva',appId:'1:593673504352:web:9d4a194109ec7061e6e505'};
 export const app=getApps().find(a=>a.name==='[DEFAULT]')||initializeApp(firebaseConfig);
 export const auth=getAuth(app);
 export const db=getDatabase(app);
 auth.languageCode='it';
-export const authReady=new Promise(resolve=>{const stop=onAuthStateChanged(auth,async user=>{stop();if(!user){try{user=(await signInAnonymously(auth)).user;}catch{}}resolve(user);});});
+export const accessModeReady=get(ref(db,'cognilab/access/publicRegistrationOpen')).then(snapshot=>snapshot.val()===true).catch(()=>false);
+export const authReady=new Promise(resolve=>{const stop=onAuthStateChanged(auth,user=>{stop();resolve(user);});});
 export function friendlyError(error){
  const code=errorCode(error);
  if(isPermissionDenied(error))return 'Il servizio non autorizza questa operazione. Contatta il gestore della palestra.';

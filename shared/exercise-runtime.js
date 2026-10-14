@@ -1,5 +1,9 @@
 (() => {
- 'use strict';let active=null,finished=false,lastResult=null,savePromise=Promise.resolve(),saveResolver=null;let retryButton;
+ 'use strict';
+ document.documentElement.classList.add('gym-access-pending');
+ const gateStyle=document.createElement('style');gateStyle.textContent='html.gym-access-pending body{visibility:hidden!important}';document.head.append(gateStyle);
+ import('./gym-gate.js').catch(()=>location.replace('accesso.html'));
+let active=null,finished=false,lastResult=null,savePromise=Promise.resolve(),saveResolver=null;let retryButton;
  const focusStyle=document.createElement('link');focusStyle.rel='stylesheet';focusStyle.href='shared/exercise-focus.css';document.head.append(focusStyle);
  const lifecycle=running=>{document.body.classList.toggle('cl-task-running',running);if(parent!==window)parent.postMessage({type:'cognilab-exercise-state',running},location.origin);};
  const status=document.createElement('p');status.className='cl-save-status';status.setAttribute('role','status');status.hidden=true;
@@ -25,7 +29,7 @@
  };
  function showRetry(){if(!retryButton){retryButton=document.createElement('button');retryButton.className='btn';retryButton.textContent='Riprova il salvataggio';retryButton.onclick=()=>send(lastResult);status.after(retryButton);}retryButton.hidden=false;}
 
- window.CogniLabRun={begin(argument){if(active&&!finished)return;const start=Date.now();const config=settings();if(window.CogniLabExercise?.stimulusVersion)config.stimulusVersion=window.CogniLabExercise.stimulusVersion;if(['number','string','boolean'].includes(typeof argument))config.modalita=argument;active={id:crypto.randomUUID(),start,startedAt:new Date(start).toISOString(),settings:config};finished=false;lifecycle(true);status.hidden=true;if(retryButton)retryButton.hidden=true;},measure(callback){try{const value=callback();return typeof value==='number'&&Number.isFinite(value)?value:typeof value==='string'?value:null;}catch{return null;}},complete(metrics){return send(makeResult(metrics));},waitForSave(){return savePromise;},abort(){return makeResult({},'interrupted');}};
+ window.CogniLabRun={begin(argument){if(window.CogniLabGymAuthorized!==true)throw Error('Accesso alla palestra non autorizzato');if(active&&!finished)return;const start=Date.now();const config=settings();if(window.CogniLabExercise?.stimulusVersion)config.stimulusVersion=window.CogniLabExercise.stimulusVersion;if(['number','string','boolean'].includes(typeof argument))config.modalita=argument;active={id:crypto.randomUUID(),start,startedAt:new Date(start).toISOString(),settings:config};finished=false;lifecycle(true);status.hidden=true;if(retryButton)retryButton.hidden=true;},measure(callback){try{const value=callback();return typeof value==='number'&&Number.isFinite(value)?value:typeof value==='string'?value:null;}catch{return null;}},complete(metrics){return send(makeResult(metrics));},waitForSave(){return savePromise;},abort(){return makeResult({},'interrupted');}};
  document.addEventListener('click',event=>{const button=event.target.closest('button');if(!button||!/salva.*(Firebase|Dati)|save.*(Firebase|Database)/i.test(button.getAttribute('onclick')||''))return;event.preventDefault();event.stopImmediatePropagation();if(parent!==window)parent.postMessage({type:'cognilab-exit-v3'},location.origin);else location.href='esercizi.html';},true);
  window.addEventListener('message',event=>{if(event.source!==parent||event.origin!==location.origin||event.data?.type!=='cognilab-save-status')return;status.hidden=false;if(event.data.id&&event.data.id!==lastResult?.id)return;status.textContent=event.data.message;if(event.data.ok===false)showRetry();if(saveResolver){saveResolver(event.data.ok!==false);saveResolver=null;}});
 })();
