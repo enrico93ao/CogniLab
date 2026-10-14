@@ -21,7 +21,7 @@ Progetto: `hub-di-stimolazione-cognitiva`.
 
 1. In **Authentication → Sign-in method**, abilitare **Email/Password** e **Anonymous**. Anonymous permette alle persone che provano la palestra di inviare il questionario e poi convertire il proprio accesso in un account.
 2. In **Authentication → Settings → Authorized domains**, aggiungere `enrico93ao.github.io`. Il controllo del 14 ottobre 2026 ha rilevato che questo dominio non era presente.
-3. In **Realtime Database → Rules**, applicare le regole contenute in `firebase/cognilab.rules.json`, dopo aver confrontato le regole attuali e le integrazioni precedenti. Il file è una configurazione completa del nuovo spazio `cognilab`: non cancellare i dati esistenti. Non mantenere permessi di lettura/scrittura generali alla radice, perché prevalgono sui vincoli dei singoli account. Prima di pubblicarle, conservare le regole attuali per valutare eventuali integrazioni legacy che richiedano una migrazione.
+3. In **Realtime Database → Rules**, applicare le regole contenute in `firebase/cognilab.rules.json`, dopo aver confrontato le regole attuali e le integrazioni precedenti. Il file conserva senza modifiche le regole `cognilab_v2` fornite dall’utente e aggiunge lo spazio `cognilab`: non cancellare i dati esistenti. Non mantenere permessi di lettura/scrittura generali alla radice, perché prevalgono sui vincoli dei singoli account. Prima di pubblicarle, conservare le regole attuali per valutare eventuali integrazioni legacy che richiedano una migrazione.
 
 Il client esegue un controllo prima dei salvataggi personali: la lettura di uno spazio appartenente a un altro UID deve essere negata, mentre la lettura del proprio deve essere consentita. Se il controllo fallisce, i nuovi risultati restano nella coda locale e il sito chiede di configurare le regole. Il controllo non sostituisce la verifica delle regole amministrative.
 
@@ -33,9 +33,10 @@ Gli archivi preesistenti nei nodi globali `pazienti`, `storico_pazienti`, `sessi
 |---|---|---|
 | `cognilab/users/UID/sessions/SESSION/results/RESULT` | Risultati, impostazioni, misure e paziente selezionato | Solo proprietario |
 | `cognilab/users/UID/clinical` | Nuove schede pazienti e pianificazioni | Solo proprietario |
-| `cognilab/presence/UID/CONNECTION` | Connessioni attive senza nome/email | Lettura da utenti autenticati; scrittura del proprietario |
-| `cognilab/activity/UID/RESULT` | Indicatore booleano di completamento, senza dettagli dell’esercizio | Lettura da utenti autenticati; scrittura del proprietario |
-| `cognilab/feedback/UID/SESSION` | Tre valutazioni e timestamp, senza nome/email | Lettura da utenti autenticati; scrittura del proprietario |
+| `cognilab/presence/UID/CONNECTION` | Connessioni attive senza nome/email | Solo proprietario |
+| `cognilab/activity/UID/RESULT` | Indicatore booleano di completamento | Solo proprietario |
+| `cognilab/feedback/UID/SESSION` | Tre valutazioni e timestamp | Solo proprietario |
+| `cognilab/stats` | Soli conteggi e media globali, senza UID o risposte individuali | Lettura autenticata; scrittura esclusivamente backend |
 
 Le statistiche sono aggregate dai record salvati, ma restano dati inviati dai client: non costituiscono una misura anti-manomissione o una valutazione sanitaria certificata.
 
@@ -47,3 +48,7 @@ Le statistiche sono aggregate dai record salvati, ma restano dati inviati dai cl
 - Bridge esercizio/contenitore: un solo risultato per completamento, impostazioni congelate all’avvio, interruzioni distinte e contatori non disponibili mantenuti null.
 
 Non è stata completata una registrazione reale o una prova di scrittura nel database di produzione: servono prima i metodi di accesso e le regole corretti. Non è stata effettuata una partita completa in browser per ciascuno dei 36 esercizi. Eventuali misure mancanti vengono indicate come non misurate, senza costruire dati sostitutivi.
+
+## Statistiche aggregate lato server
+
+I client non leggono i record individuali di altri utenti. `firebase/functions/index.js` contiene la funzione server che calcola e aggiorna soltanto `onlineUsers`, `completedExercises`, `feedbackCount`, `satisfactionAverage` e `updatedAt`. La funzione deve essere distribuita separatamente nel progetto Firebase; caricare il codice su GitHub non la attiva. Finché non è attiva e non ha prodotto una statistica, il sito mostra un trattino anziché dati presunti. Le regole `stats` non permettono ai client di scrivere questi contatori.

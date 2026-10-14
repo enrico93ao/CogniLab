@@ -10,30 +10,80 @@
         }
       },
       "presence": {
-        ".read": "auth != null",
         "$uid": {
           ".write": "auth != null && auth.uid === $uid",
-          "$connection": { ".validate": "newData.val() === true" }
+          "$connection": {
+            ".validate": "newData.val() === true"
+          },
+          ".read": "auth != null && auth.uid === $uid"
         }
       },
       "activity": {
-        ".read": "auth != null",
         "$uid": {
           ".write": "auth != null && auth.uid === $uid",
-          "$result": { ".validate": "newData.isBoolean()" }
+          "$result": {
+            ".validate": "newData.isBoolean()"
+          },
+          ".read": "auth != null && auth.uid === $uid"
         }
       },
       "feedback": {
-        ".read": "auth != null",
         "$uid": {
           "$session": {
             ".write": "auth != null && auth.uid === $uid",
             ".validate": "newData.hasChildren(['q1', 'q2', 'q3', 'submittedAt'])",
-            "q1": { ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 5 && newData.val() % 1 === 0" },
-            "q2": { ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 5 && newData.val() % 1 === 0" },
-            "q3": { ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 5 && newData.val() % 1 === 0" },
-            "submittedAt": { ".validate": "newData.isNumber()" },
-            "$other": { ".validate": false }
+            "q1": {
+              ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 5 && newData.val() % 1 === 0"
+            },
+            "q2": {
+              ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 5 && newData.val() % 1 === 0"
+            },
+            "q3": {
+              ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 5 && newData.val() % 1 === 0"
+            },
+            "submittedAt": {
+              ".validate": "newData.isNumber()"
+            },
+            "$other": {
+              ".validate": false
+            }
+          },
+          ".read": "auth != null && auth.uid === $uid"
+        }
+      },
+      "stats": {
+        ".read": "auth != null",
+        ".write": false
+      }
+    },
+    "cognilab_v2": {
+      "users": {
+        "$uid": {
+          ".read": "auth != null && auth.uid === $uid",
+          "profile": {
+            ".write": "auth != null && auth.uid === $uid",
+            ".validate": "newData.hasChildren(['name', 'goal'])",
+            "name": {
+              ".validate": "newData.isString() && newData.val().length <= 50"
+            },
+            "goal": {
+              ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 7 && newData.val() % 1 === 0"
+            },
+            "$other": {
+              ".validate": false
+            }
+          },
+          "results": {
+            "$resultId": {
+              ".write": "auth != null && auth.uid === $uid && (!data.exists() || newData.child('payload').val() === data.child('payload').val())",
+              ".validate": "newData.hasChildren(['payload'])",
+              "payload": {
+                ".validate": "newData.isString() && newData.val().length <= 500000"
+              },
+              "$other": {
+                ".validate": false
+              }
+            }
           }
         }
       }

@@ -58,9 +58,14 @@ onAuthStateChanged(auth,async user=>{
  if(!user){document.getElementById('cl-progress-status').textContent='Accedi per conservare e visualizzare i tuoi progressi.';return;}
  notice.hidden=true;
  const watch=(path,render,element)=>stops.push(onValue(ref(db,path),snap=>render(snap.val()),error=>unavailable(element,error)));
- watch('cognilab/presence',value=>document.getElementById('kpi-utenti').textContent=onlineCount(value),document.getElementById('kpi-utenti'));
- watch('cognilab/activity',value=>document.getElementById('kpi-svolti').textContent=completedCount(value),document.getElementById('kpi-svolti'));
- watch('cognilab/feedback',value=>{const entries=Object.values(value||{}).flatMap(v=>Object.values(v));const avg=satisfaction(entries);document.getElementById('kpi-media-stelle').textContent=avg===null?'Nessun questionario':avg.toFixed(1)+' / 5 ('+entries.length+' questionari)';},document.getElementById('kpi-media-stelle'));
+ watch('cognilab/stats',value=>{
+   const count=v=>Number.isInteger(v)&&v>=0?v:'—';
+   document.getElementById('kpi-utenti').textContent=count(value?.onlineUsers);
+   document.getElementById('kpi-svolti').textContent=count(value?.completedExercises);
+   const average=value?.satisfactionAverage;
+   document.getElementById('kpi-media-stelle').textContent=typeof average==='number'&&average>=1&&average<=5?average.toFixed(1)+' / 5':'—';
+   if(!value){notice.hidden=false;notice.textContent='Le statistiche globali non sono ancora disponibili. Lo storico personale resta separato.';}
+ },document.getElementById('kpi-utenti'));
  try{await ensurePrivateStorage();}catch(error){unavailable(document.getElementById('cl-progress-status'),error);return;}
  if(auth.currentUser?.uid!==user.uid)return;
  watch(`cognilab/users/${user.uid}/sessions`,value=>renderResults(Object.values(value||{}).flatMap(s=>Object.values(s.results||{}))),document.getElementById('cl-progress-status'));
