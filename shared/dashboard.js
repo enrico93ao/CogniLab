@@ -32,7 +32,8 @@ window.submitFeedbackForm=async()=>{
  try{
    await saveFeedback(ratings,{anonymous:document.getElementById('cl-feedback-anonymous').checked,submissionId:feedbackSubmissionId});
    feedbackSent=true;feedbackStatus.textContent='Questionario inviato. Grazie!';button.textContent='Risposte inviate';
-   void closeCurrentSession();
+   await closeCurrentSession();
+   location.href='index.html';
  }catch(error){
    const code=errorCode(error)||'errore-non-identificato';
    const stage=error.feedbackStage==='authentication'?'accesso anonimo':error.feedbackStage==='database'?'salvataggio risposte':'invio';
