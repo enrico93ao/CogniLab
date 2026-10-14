@@ -1,3 +1,4 @@
+import {errorCode} from './firebase-errors.js';
 import {onAuthStateChanged} from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js';
 import {ref,onValue,onDisconnect,set,remove} from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js';
 import {db,auth,friendlyError} from './firebase-client.js';
@@ -31,7 +32,12 @@ window.submitFeedbackForm=async()=>{
    await saveFeedback(ratings,{anonymous:document.getElementById('cl-feedback-anonymous').checked,submissionId:feedbackSubmissionId});
    feedbackSent=true;feedbackStatus.textContent='Questionario inviato. Grazie!';button.textContent='Risposte inviate';
    void closeCurrentSession();
- }catch(error){feedbackStatus.textContent=friendlyError(error);button.disabled=false;}
+ }catch(error){
+   const code=errorCode(error)||'errore-non-identificato';
+   const stage=error.feedbackStage==='authentication'?'accesso anonimo':error.feedbackStage==='database'?'salvataggio risposte':'invio';
+   feedbackStatus.textContent=friendlyError(error)+' Dettaglio: '+stage+' ('+code+').';
+   button.disabled=false;
+ }
 };
 window.closeFeedbackModal=()=>{
  document.getElementById('feedback-modal').style.display='none';
