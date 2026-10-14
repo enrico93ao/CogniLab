@@ -1,3 +1,4 @@
+import {recordSessionResult} from './session-journal.js';
 import {requireProfessional} from './clinical-access.js';
 import {isPermissionDenied} from './firebase-errors.js';
 import {guestFeedbackClient} from './feedback-guest.js';
@@ -32,6 +33,7 @@ export async function saveResult(input){
  if(session.patientId)await requireProfessional();
  const result={...input,metrics:normalizeMetrics(input.metrics),sessionId:session.id,sessionStartedAt:session.startedAt,patientId:session.patientId||null};
  const queue=pending(user.uid);queue[result.id]=result;localStorage.setItem(queueKey(user.uid),JSON.stringify(queue));
+ recordSessionResult(user.uid,result,'pending');
  await ensurePrivateStorage();
  const values={};
  const base=`cognilab/users/${user.uid}/`+(session.patientId?'clinical/sessions/':'sessions/');
@@ -40,6 +42,7 @@ export async function saveResult(input){
  values[`${base}${session.id}/results/${result.id}`]=result;
  values[`cognilab/activity/${user.uid}/${result.id}`]=result.status==='completed';
  await update(ref(db),values);
+ recordSessionResult(user.uid,result,'saved');
  const latest=pending(user.uid);delete latest[result.id];localStorage.setItem(queueKey(user.uid),JSON.stringify(latest));
  return result;
 }

@@ -1,0 +1,18 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import vm from 'node:vm';
+import {normalizeMetrics} from '../shared/progress-model.mjs';
+import {isPermissionDenied} from '../shared/firebase-errors.js';
+import {recordSessionResult,currentSessionResults} from '../shared/session-journal.js';
+const storage=()=>{const map=new Map();return {getItem:k=>map.get(k)||null,setItem:(k,v)=>map.set(k,v),removeItem:k=>map.delete(k)};};
+globalThis.sessionStorage=storage();const localStorage=storage();let fail=true,writes=[];
+const auth={currentUser:{uid:'alice',isAnonymous:false}};
+const context=vm.createContext({recordSessionResult,normalizeMetrics,isPermissionDenied,sessionStorage,localStorage,auth,authReady:Promise.resolve(),db:{},crypto:{randomUUID:()=> 'session-12345678'},ref:(_db,path)=>path,get:async path=>{if(path.includes('__privacy_probe__'))throw {code:'PERMISSION_DENIED'};return {val:()=>null};},update:async(_ref,value)=>{if(fail)throw {code:'PERMISSION_DENIED'};writes.push(value);},requireProfessional:async()=>auth.currentUser});
+const source=fs.readFileSync(new URL('../shared/progress-store.js',import.meta.url),'utf8').replace(/^import .*;\s*$/gm,'').replace(/\bexport /g,'');vm.runInContext(source,context);
+const payload={id:'result-12345678',exerciseId:'lista-della-spesa',title:'Lista della spesa',startedAt:'2026-10-14T09:00:00Z',finishedAt:'2026-10-14T09:01:00Z',durationMs:60000,status:'completed',metrics:{correct:3,total:4,errors:1,omissions:1},settings:{'shopping-level':'easy'}};
+await assert.rejects(()=>context.saveResult(payload));let results=currentSessionResults('alice');assert.equal(results.length,1);assert.equal(results[0].syncState,'pending');assert.equal(results[0].metrics.accuracyPct,75);
+fail=false;await context.retryPending();results=currentSessionResults('alice');assert.equal(results.length,1);assert.equal(results[0].syncState,'saved');assert.equal(Object.keys(context.pending('alice')).length,0);
+assert.ok(Object.keys(writes[0]).some(path=>path.endsWith('/session-12345678/results/result-12345678')));
+assert.equal(currentSessionResults('bob').length,0);
+localStorage.setItem('hub_mode','clinical');localStorage.setItem('hub_selected_patient_id','patient-1');await context.saveResult({...payload,id:'result-87654321'});assert.ok(Object.keys(writes[1]).some(path=>path.includes('/clinical/sessions/')));
+console.log('PASS: result visible in current session during Firebase failure; retry updates same result; cloud sync state; account isolation; clinical session path.');

@@ -156,18 +156,8 @@
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             const username = localStorage.getItem('hub_username') || "Utente";
-            const cronologia = JSON.parse(localStorage.getItem('free_exercises_history')) || [];
-            
             document.getElementById('welcome-back').innerText = `Ottimo lavoro, ${username}!`;
-            document.getElementById('res-count').innerText = cronologia.length;
 
-            if(cronologia.length > 0) {
-                const somma = cronologia.reduce((acc, item) => acc + item.punteggio, 0);
-                const media = Math.round(somma / cronologia.length);
-                document.getElementById('res-score').innerText = `${media}%`;
-            } else {
-                document.getElementById('res-score').innerText = `N/D`;
-            }
         });
 
         function TornaAllaLanding() {
@@ -176,5 +166,6 @@
             window.top.location.href = 'esercizi.html';
         }
     </script>
+<script type="module" src="shared/session-summary.js"></script>
 </body>
 </html>
