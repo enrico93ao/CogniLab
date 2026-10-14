@@ -45,10 +45,14 @@ export async function saveFeedback(ratings,options={}){
  if(![ratings.q1,ratings.q2,ratings.q3].every(v=>Number.isInteger(v)&&v>=1&&v<=5))throw Error('Rispondi a tutte le domande.');
  await authReady;
  const withoutAccount=options.anonymous!==false||!auth.currentUser||auth.currentUser.isAnonymous;
- const client=withoutAccount?await guestFeedbackClient():{user:auth.currentUser,db};
+ let client;
+ try{client=withoutAccount?await guestFeedbackClient():{user:auth.currentUser,db};}
+ catch(error){throw Object.assign(new Error('Feedback authentication failed'),{code:error?.code||'feedback-auth-failed',feedbackStage:'authentication'});}
  const submissionId=options.submissionId||sessionFor(client.user.uid).id;
  if(!/^[a-z0-9-]{8,80}$/i.test(submissionId))throw Error('Invalid feedback identifier');
- await set(ref(client.db,`cognilab/feedback/${client.user.uid}/${submissionId}`),{q1:ratings.q1,q2:ratings.q2,q3:ratings.q3,submittedAt:serverTimestamp()});
+ try{
+   await set(ref(client.db,`cognilab/feedback/${client.user.uid}/${submissionId}`),{q1:ratings.q1,q2:ratings.q2,q3:ratings.q3,submittedAt:serverTimestamp()});
+ }catch(error){throw Object.assign(new Error('Feedback database write failed'),{code:isPermissionDenied(error)?'permission-denied':error?.code||'feedback-write-failed',feedbackStage:'database'});}
  return submissionId;
 }
 export async function resultsForUser(){await ensurePrivateStorage();const user=auth.currentUser;if(!user)return [];const snap=await get(ref(db,`cognilab/users/${user.uid}/sessions`));return Object.values(snap.val()||{}).flatMap(s=>Object.values(s.results||{}));}
