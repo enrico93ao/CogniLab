@@ -13,6 +13,9 @@ export function friendlyError(error){
  if(isPermissionDenied(error))return 'Il servizio non autorizza questa operazione. Contatta il gestore della palestra.';
  if(code==='auth/network-request-failed'||code==='network-request-failed')return 'Connessione al servizio non riuscita. Controlla la rete e riprova.';
  if(code==='auth/configuration-not-found')return 'Il servizio di accesso non è ancora configurato. Contatta il gestore della palestra.';
+ if(code==='auth/admin-restricted-operation')return 'Firebase blocca la creazione dell’accesso anonimo. Il gestore deve controllare Authentication e le restrizioni del progetto.';
+ if(code==='auth/invalid-api-key'||code==='auth/api-key-not-valid')return 'La configurazione di accesso Firebase non è valida.';
+ if(code==='auth/requests-to-this-api-identitytoolkit-method-google.cloud.identitytoolkit.v1.authenticationservice.signup-are-blocked')return 'La chiave Firebase non consente l’accesso anonimo. Controllare le restrizioni della chiave nel progetto.';
  if(code==='guest-feedback-disabled')return 'L’invio senza registrazione non è ancora attivo. Il gestore deve abilitare l’accesso Anonymous in Firebase Authentication.';
  if(code==='privacy-not-configured')return 'Le regole Firebase non isolano ancora gli account. Configurare le regole fornite prima di salvare lo storico personale.';
  if(code.includes('operation-not-allowed'))return 'Il metodo di accesso non è ancora abilitato. Attivare Email/Password in Firebase Authentication.';
