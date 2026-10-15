@@ -14,7 +14,8 @@ const professional={uid:'professional',isAnonymous:false};assert.equal((await ac
 assert.equal((await access(tester,true)()).uid,'tester');
 await assert.rejects(access(null,true));await assert.rejects(access({uid:'guest',isAnonymous:true},true));
 const rules=JSON.parse(read('firebase/cognilab.rules.json')).rules;
-assert.equal(rules.cognilab.testers.$uid['.write'],false);
+assert.match(rules.cognilab.testers.$uid['.write'],/auth.uid === 'eWoQhl1qwqVKRupDabTM6vfMyyI3'/);
+assert.match(rules.cognilab.testers.$uid['.write'],/professionals/);
 assert.equal(rules.cognilab.access.publicRegistrationOpen['.write'],false);
 assert.equal(rules.cognilab.access.publicRegistrationOpen['.read'],true);
 for(const value of [rules.cognilab.users.$uid.sessions['.read'],rules.cognilab.users.$uid.sessions['.write'],rules.cognilab_v2.users.$uid['.read']])assert.match(value,/testers/);

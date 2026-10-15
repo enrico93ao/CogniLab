@@ -85,9 +85,10 @@
       "testers": {
         "$uid": {
           ".read": "auth != null && auth.uid === $uid",
-          ".write": false,
+          ".write": "auth != null && auth.uid === 'eWoQhl1qwqVKRupDabTM6vfMyyI3' && root.child('cognilab/professionals').child(auth.uid).val() === true",
           ".validate": "newData.isBoolean()"
-        }
+        },
+        ".read": "auth != null && auth.uid === 'eWoQhl1qwqVKRupDabTM6vfMyyI3' && root.child('cognilab/professionals').child(auth.uid).val() === true"
       }
     },
     "cognilab_v2": {

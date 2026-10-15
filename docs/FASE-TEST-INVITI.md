@@ -1,25 +1,30 @@
-# Palestra in fase di test, accesso a inviti
+# Accesso di test semplificato
 
-La home rimane pubblica, con la presentazione del progetto e il collegamento alla valutazione neuropsicologica. L'accesso alla palestra richiede un account Firebase Email/Password autorizzato. Non vengono create identità anonime per accedere alla palestra. Il questionario può ancora usare un'identità separata per non collegare le risposte all'account del tester.
+## Configurazione iniziale, una sola volta
 
-## Attivazione nella console Firebase
+Pubblica il file completo `firebase/cognilab.rules.json` in Firebase → Realtime Database → Rules. Pubblicare il sito su GitHub non aggiorna le regole del database.
 
-1. Pubblica l'intero file `firebase/cognilab.rules.json` in Realtime Database → Rules. Le regole mantengono i rami users, professionals e cognilab_v2, e aggiungono la verifica dell'abilitazione. Non modificare o cancellare i dati esistenti.
-2. In Authentication → Users, aggiungi l'account del tester con la sua email e una password scelta, oppure usa l'account esistente. Per recuperare la password occorre un indirizzo email reale accessibile al tester.
-3. Copia l'UID di quell'account.
-4. In Realtime Database → Data, sotto `cognilab`, aggiungi `testers`. Sotto testers crea un figlio con nome UID e valore booleano `true`.
-5. Il tester accede da `accesso.html` con email e password. Il ruolo tester non concede accesso clinico. Per revocarlo imposta il valore a false.
+Il gestore Enrico deve avere il suo account Email/Password con UID `eWoQhl1qwqVKRupDabTM6vfMyyI3` e il valore booleano true in `cognilab/professionals/eWoQhl1qwqVKRupDabTM6vfMyyI3`. Questo requisito non viene assegnato dal sito.
 
-I professionisti già abilitati in `cognilab/professionals` possono usare anche la palestra senza essere duplicati nell'elenco testers. Gli altri account esistenti non vengono abilitati automaticamente. I nodi testers e professionals non sono scrivibili dai client.
+## Nuovo tester
 
-## Riapertura futura
+1. Accedi come Enrico dall'area professionisti.
+2. Apri **Gestisci accessi di test**, oppure `gestisci-tester.html`.
+3. Inserisci email e password da assegnare, poi premi **Crea e abilita**.
+4. Consegna le credenziali al tester: entrerà da `accesso.html`.
 
-L'impostazione `cognilab/access/publicRegistrationOpen` mancante o false mantiene la fase a inviti. Impostandola a true dalla console si riapre la creazione di account dal sito e l'accesso agli account registrati. Anche dopo la riapertura l'area clinica richiede il ruolo professionals. Il flag e i ruoli sono modificabili solo dall'amministratore, non dagli utenti del sito.
+Non occorre copiare UID o modificare il database per ogni nuovo tester. La password non viene salvata in Realtime Database o nel browser dal pannello. La creazione usa un'app Firebase separata con autenticazione solo in memoria, così la sessione del gestore rimane attiva. Se Firebase blocca la creazione di account, usa Authentication → Add user e abilita il codice dal pannello.
 
-## Limiti e controlli
+## Account esistente bloccato
 
-Pubblicare il sito non pubblica le regole Firebase: finché non vengono caricate, il blocco è solo nell'interfaccia. Le nuove regole bloccano dati di palestra e storico per gli account non autorizzati, compreso il ramo legacy cognilab_v2. Le risposte anonime al questionario restano separate e non concedono accesso allo storico o alla palestra.
+Il tester prova ad accedere con email e password. Se l'autenticazione riesce ma manca l'abilitazione, vede il proprio codice UID. Il gestore lo incolla nella sezione **Account già creato** e preme **Abilita account**. Il tester riprova. Non occorre conoscere la password dell'account esistente.
 
-GitHub Pages ospita file statici pubblici e il repository è pubblico. La schermata di accesso impedisce l'uso ordinario delle pagine, ma non rende segreti i sorgenti HTML e le immagini. Per impedire anche il download dei file servirà in futuro un hosting che verifichi la sessione sul server.
+Lo stesso campo permette di revocare l'abilitazione tester, senza eliminare storico e account. L'accesso professionale resta separato: la revoca tester non revoca il ruolo professionale.
 
-Verifica con un account non presente negli elenchi: deve ricevere un rifiuto. Verifica con un tester: deve entrare nella palestra, ma non nell'area clinica. Verifica con un professionista: deve poter entrare in entrambe. In Rules Playground, anche una scrittura diretta ai ruoli deve essere negata.
+Solo l'UID del gestore Enrico, già abilitato come professionista, può leggere l'elenco e scrivere le abilitazioni tester dal sito. Gli altri professionisti non possono gestire gli inviti. Il pannello non concede ruoli clinici e non legge lo storico degli altri utenti.
+
+## Riapertura futura e limiti
+
+Il valore mancante o false di `cognilab/access/publicRegistrationOpen` mantiene l'accesso a inviti. Impostandolo a true dalla console si riapre la registrazione e l'accesso agli account registrati. L'area clinica richiede sempre il ruolo professionale.
+
+Le risposte anonime al questionario usano un'identità separata e non concedono accesso alla palestra. GitHub Pages e il repository restano pubblici: l'accesso ai dati è protetto dalle regole Firebase, mentre i sorgenti HTML e le immagini sono scaricabili.
