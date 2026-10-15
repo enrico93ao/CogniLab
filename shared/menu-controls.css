@@ -1,0 +1,38 @@
+/* Shared native form controls. Hidden selects remain the source of settings. */
+.cl-menu-group{min-width:0;border:0;padding:0;margin:0 0 20px;text-align:left;grid-column:auto}
+.cl-menu-group legend{display:block;font:650 .9rem/1.5 system-ui,sans-serif;color:#36596c;margin:0 0 12px;padding:0}
+.cl-menu-options{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}
+.cl-menu-option,.cl-kind-option{position:relative;display:flex!important;align-items:center;gap:12px;padding:15px!important;border:2px solid #d5e3e9!important;border-radius:14px!important;background:#f9fbfc!important;cursor:pointer;color:#254a5e!important;font:600 .9rem/1.45 system-ui,sans-serif!important;min-height:62px;text-align:left!important;margin:0!important;min-width:0}
+.cl-menu-option:has(input:checked),.cl-kind-option:has(input:checked){background:#e8f6f2!important;border-color:#18867f!important;box-shadow:0 0 0 1px #18867f12!important}
+.cl-menu-option:has(input:disabled),.cl-kind-option:has(input:disabled){opacity:.5;cursor:not-allowed}
+.cl-menu-option input[type=radio],.cl-kind-option input[type=radio],input.cl-menu-check[type=checkbox]{appearance:auto!important;-webkit-appearance:auto!important;position:static!important;opacity:1!important;width:23px!important;height:23px!important;min-width:23px!important;min-height:23px!important;flex:0 0 23px;accent-color:#18867f;margin:0!important;transform:none!important;cursor:pointer}
+.cl-menu-icon{display:inline-flex;width:28px;height:28px;flex:0 0 28px;align-items:center;justify-content:center;color:#177e80;font:700 1.05rem system-ui,sans-serif}
+.cl-menu-icon svg{width:27px;height:27px;display:block}
+.cl-menu-option span:last-child,.cl-kind-option span:last-child{min-width:0;overflow-wrap:anywhere}
+.cl-menu-select-source[hidden]{display:none!important}
+label.cl-menu-switch{position:relative!important;display:inline-flex!important;width:auto!important;height:auto!important;align-items:center;gap:12px;min-height:44px;min-width:44px;cursor:pointer;margin:0}
+label.cl-menu-switch>.slider{display:none!important}
+.cl-menu-check-row{display:flex!important;align-items:center;gap:14px;padding:16px;border:1px solid #d2e3e8;border-radius:14px;background:#f5f9fa;margin:16px 0;line-height:1.6;color:#36596c;font-weight:600}
+.cl-menu-check-row:has(input:checked){border-color:#18867f;background:#edf8f4}
+.cl-menu-choice{position:relative;padding-right:42px!important;font-family:system-ui,sans-serif}
+.cl-menu-choice::after{content:'';position:absolute;right:12px;top:14px;width:21px;height:21px;border:2px solid #c3d6df;border-radius:50%;background:white;pointer-events:none}
+.cl-menu-choice.selected::after,.cl-menu-choice.selected-mode::after,.cl-menu-choice.active::after,.cl-menu-choice[aria-pressed=true]::after{content:'✓';display:grid;place-items:center;background:#18867f;color:white;border-color:#18867f;font:700 14px system-ui,sans-serif}
+.cl-menu-choice[aria-pressed=true]{border-color:#18867f!important;background:#e8f6f2!important;color:#254a5e!important}
+.cl-kind-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-bottom:24px}
+.cl-kind-option strong{display:block;font-size:.95rem;font-weight:700}.cl-kind-option small{display:block;font-size:.78rem;font-weight:400;color:#5e7b8c;margin-top:4px}
+.cl-menu-settings{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;align-items:start}
+.cl-menu-settings .cl-menu-check-row{margin:0}.cl-menu-settings .cl-menu-group{margin-bottom:0}
+.cl-trail-cue{position:fixed;top:0;bottom:0;width:16px;background:#e34545;z-index:25;pointer-events:none;animation:cl-menu-blink 1.5s ease-in-out infinite}
+.cl-trail-cue[hidden]{display:none!important}
+@keyframes cl-menu-blink{0%,100%{opacity:.15}50%{opacity:.75}}
+.cl-menu-group:focus-within,.cl-menu-check-row:focus-within,.cl-kind-option:focus-within{outline:3px solid #dca73e;outline-offset:3px}
+@media(max-width:680px){.cl-kind-grid,.cl-menu-settings{grid-template-columns:1fr}.cl-menu-options{grid-template-columns:repeat(2,minmax(0,1fr))}.cl-menu-option{padding:12px!important;gap:8px}.cl-menu-option .cl-menu-icon{display:none}.cl-menu-choice{padding-right:38px!important}}
+@media(prefers-reduced-motion:reduce){.cl-trail-cue{animation:none!important;opacity:.5}}
+.cl-choices .cl-menu-choice{padding-right:8px!important;padding-top:32px!important}
+.cl-choices .cl-menu-choice::after{right:7px;top:7px;width:18px;height:18px;font-size:12px}
+.time-btn.cl-menu-choice,.side-btn.cl-menu-choice{padding:12px 4px 32px!important;min-height:72px;text-align:center!important}
+.time-btn.cl-menu-choice::after,.side-btn.cl-menu-choice::after{top:auto;bottom:7px;right:calc(50% - 10px)}
+
+.cl-menu-option .cl-menu-icon{display:none}
+.cl-suite-legacy .cl-kind-option{min-height:76px;padding:12px!important}
+.config-group label.cl-menu-switch{display:flex!important;width:100%!important;padding:8px 0}

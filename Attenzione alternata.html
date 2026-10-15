@@ -160,8 +160,8 @@
 <link rel="stylesheet" href="shared/cognilab.css">
 <script src="shared/interface.js" defer></script>
 <script>window.CogniLabExercise={"id":"attenzione-alternata","title":"Attenzione alternata","category":"Attenzione","stimulusVersion":"training4","setup":"main-menu"};</script>
-<script src="shared/exercise-runtime.js"></script>
-<link rel="stylesheet" href="shared/training-suite.css?v=training4"><script type="module">import * as training from "./shared/training-model.mjs?v=resize5";window.CLTraining=training;</script></head>
+<script src="shared/exercise-runtime.js?v=controls6"></script>
+<link rel="stylesheet" href="shared/training-suite.css?v=training4"><script type="module">import * as training from "./shared/training-model.mjs?v=resize5";window.CLTraining=training;</script><link rel="stylesheet" href="shared/menu-controls.css?v=controls6"><script src="shared/menu-controls.js?v=controls6" defer></script></head>
 <body data-cognilab="exercise" class="cl-suite-legacy">
 
     <!-- Menu Iniziale -->
@@ -170,61 +170,11 @@
             <div class="text-center mb-6 md:mb-8">
                 <header class="suite-hero"><div><span class="suite-eyebrow">CogniLab · Allenamento cognitivo</span><h1>Attenzione alternata</h1><p>Collega gli elementi nell’ordine richiesto. Scegli lettere, numeri o un percorso alternato; poi imposta ordine e movimento.</p></div><div class="suite-mark" aria-hidden="true">↔</div></header></div>
             
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 mb-6 md:mb-8"><button type="button" onclick="selectType('letters')" id="type-letters" class="mode-card active cursor-pointer p-4 rounded-2xl bg-white shadow-sm"><strong>Base · Solo lettere</strong><p>A → P · 16 lettere</p></button><button type="button" onclick="selectType('numbers')" id="type-numbers" class="mode-card cursor-pointer p-4 rounded-2xl bg-white shadow-sm"><strong>Base · Solo numeri</strong><p>1 → 20 · 20 numeri</p></button>
-                <div onclick="selectType('alpha')" id="type-alpha" class="mode-card cursor-pointer p-4 rounded-2xl bg-white shadow-sm">
-                    <span class="text-[10px] font-bold text-indigo-600 uppercase">Classico</span>
-                    <p class="font-bold text-base md:text-lg">Numeri + Lettere</p>
-                    <p class="text-xs text-slate-400">1 - A - 2 - B...</p>
-                </div>
-                <div onclick="selectType('reverse')" id="type-reverse" class="mode-card cursor-pointer p-4 rounded-2xl bg-white shadow-sm">
-                    <span class="text-[10px] font-bold text-rose-600 uppercase">Inverso</span>
-                    <p class="font-bold text-base md:text-lg">Alfabeto Inv.</p>
-                    <p class="text-xs text-slate-400">1 - Z - 2 - Y...</p>
-                </div>
-                <div onclick="selectType('romans')" id="type-romans" class="mode-card cursor-pointer p-4 rounded-2xl bg-white shadow-sm">
-                    <span class="text-[10px] font-bold text-amber-600 uppercase">Storico</span>
-                    <p class="font-bold text-base md:text-lg">Num. Romani</p>
-                    <p class="text-xs text-slate-400">1 - I - 2 - II...</p>
-                </div>
-                <div onclick="selectType('months')" id="type-months" class="mode-card cursor-pointer p-4 rounded-2xl bg-white shadow-sm">
-                    <span class="text-[10px] font-bold text-emerald-600 uppercase">Temporale</span>
-                    <p class="font-bold text-base md:text-lg">Num. Mesi</p>
-                    <p class="text-xs text-slate-400">1 - Gen - 2 - Feb...</p>
-                </div>
-                <div onclick="selectType('days')" id="type-days" class="mode-card cursor-pointer p-4 rounded-2xl bg-white shadow-sm">
-                    <span class="text-[10px] font-bold text-sky-600 uppercase">Settimanale</span>
-                    <p class="font-bold text-base md:text-lg">Num. Giorni</p>
-                    <p class="text-xs text-slate-400">1 - Lun - 2 - Mar...</p>
-                </div>
-                <div onclick="selectType('compass')" id="type-compass" class="mode-card cursor-pointer p-4 rounded-2xl bg-white shadow-sm">
-                    <span class="text-[10px] font-bold text-purple-600 uppercase">Spaziale</span>
-                    <p class="font-bold text-base md:text-lg">Bussola</p>
-                    <p class="text-xs text-slate-400">1 - N - 2 - E...</p>
-                </div>
-            </div>
-
-            <input type="hidden" id="trail-type" value="letters"><input type="hidden" id="trail-motion" value="static"><label class="suite-note" style="display:block;margin-bottom:22px;font-weight:700" for="trail-order">Ordine del percorso<select id="trail-order" style="display:block;padding:12px;margin-top:8px;border:1px solid #bfd2d8;border-radius:12px;width:100%"><option value="direct">Diretto · A → P / 1 → 20</option><option value="inverse">Inverso · P → A / 20 → 1</option></select></label><div class="bg-slate-50 p-4 md:p-6 rounded-2xl border border-slate-200 mb-6 md:mb-8 flex items-center justify-between">
-                <div>
-                    <h3 class="font-bold text-slate-900 text-sm md:text-base">Suggerimento visivo</h3>
-                    <p class="text-xs md:text-sm text-slate-500">Evidenzia con un'animazione il prossimo cerchio da toccare</p>
-                </div>
-                <label class="toggle-switch">
-                    <input type="checkbox" id="hint-toggle" checked>
-                    <span class="slider"></span>
-                </label>
-            </div>
-
-            <div class="flex flex-col sm:flex-row gap-3 md:gap-4">
-                <button onclick="startGame(false)" class="flex-1 py-4 md:py-5 bg-slate-900 text-white font-black rounded-2xl hover:bg-slate-800 transition-all shadow-lg text-sm md:text-base">
-                    MODALITÀ STATICA
-                </button>
-                <button onclick="startGame(true)" class="flex-1 py-4 md:py-5 bg-indigo-600 text-white font-black rounded-2xl hover:bg-indigo-500 transition-all shadow-xl shadow-indigo-100 text-sm md:text-base">
-                    MODALITÀ DINAMICA
-                </button>
-            </div>
+<fieldset class="cl-menu-group"><legend>1. Scegli il percorso</legend><div class="cl-kind-grid"><label id="type-letters" class="mode-card cl-kind-option active"><input type="radio" data-ui-proxy="true" name="trail-kind" value="letters" checked onchange="selectType(this.value)"><span class="cl-menu-icon" aria-hidden="true">AB</span><span><strong>Base · Solo lettere</strong><small>A → P · 16 lettere</small></span></label><label id="type-numbers" class="mode-card cl-kind-option "><input type="radio" data-ui-proxy="true" name="trail-kind" value="numbers"  onchange="selectType(this.value)"><span class="cl-menu-icon" aria-hidden="true">123</span><span><strong>Base · Solo numeri</strong><small>1 → 20 · 20 numeri</small></span></label><label id="type-alpha" class="mode-card cl-kind-option "><input type="radio" data-ui-proxy="true" name="trail-kind" value="alpha"  onchange="selectType(this.value)"><span class="cl-menu-icon" aria-hidden="true">1A</span><span><strong>Numeri e lettere</strong><small>1 → A → 2 → B</small></span></label><label id="type-reverse" class="mode-card cl-kind-option "><input type="radio" data-ui-proxy="true" name="trail-kind" value="reverse"  onchange="selectType(this.value)"><span class="cl-menu-icon" aria-hidden="true">1Z</span><span><strong>Alfabeto inverso</strong><small>1 → Z → 2 → Y</small></span></label><label id="type-romans" class="mode-card cl-kind-option "><input type="radio" data-ui-proxy="true" name="trail-kind" value="romans"  onchange="selectType(this.value)"><span class="cl-menu-icon" aria-hidden="true">I II</span><span><strong>Numeri romani</strong><small>1 → I → 2 → II</small></span></label><label id="type-months" class="mode-card cl-kind-option "><input type="radio" data-ui-proxy="true" name="trail-kind" value="months"  onchange="selectType(this.value)"><span class="cl-menu-icon" aria-hidden="true">◷</span><span><strong>Mesi</strong><small>1 → Gen → 2 → Feb</small></span></label><label id="type-days" class="mode-card cl-kind-option "><input type="radio" data-ui-proxy="true" name="trail-kind" value="days"  onchange="selectType(this.value)"><span class="cl-menu-icon" aria-hidden="true">7</span><span><strong>Giorni</strong><small>1 → Lun → 2 → Mar</small></span></label><label id="type-compass" class="mode-card cl-kind-option "><input type="radio" data-ui-proxy="true" name="trail-kind" value="compass"  onchange="selectType(this.value)"><span class="cl-menu-icon" aria-hidden="true">N</span><span><strong>Bussola</strong><small>1 → N → 2 → E</small></span></label></div></fieldset><input type="hidden" id="trail-type" value="letters"><input type="hidden" id="trail-motion" value="static"><div class="cl-menu-settings"><label>2. Ordine del percorso<select id="trail-order"><option value="direct">Diretto · in avanti</option><option value="inverse">Inverso · all’indietro</option></select></label><label class="cl-menu-check-row"><input type="checkbox" id="trail-dynamic">Muovi gli elementi · modalità dinamica</label><label class="cl-menu-check-row"><input type="checkbox" id="hint-toggle" checked>Mostra il prossimo elemento da toccare</label><label class="cl-menu-check-row"><input type="checkbox" id="trail-bar-enabled">Attiva la barra rossa lampeggiante</label><label>Posizione della barra<select id="trail-bar-side" disabled><option value="left">Sinistra</option><option value="right">Destra</option></select></label></div><p class="suite-note" style="margin:20px 0">Senza la spunta “Muovi gli elementi” il percorso rimane statico.</p><button id="trail-start" onclick="startGame(document.getElementById('trail-dynamic').checked)" class="suite-btn" style="width:100%">Inizia il percorso →</button>
         </div>
     </div>
 
+    <div id="trail-flashing-bar" class="cl-trail-cue" hidden aria-hidden="true"></div>
     <!-- HUD di gioco superiore -->
     <div id="game-ui" class="fixed top-6 left-0 right-0 z-40 hidden flex justify-center items-center pointer-events-none">
         <div class="flex gap-2 p-2 glass-ui rounded-3xl shadow-xl pointer-events-auto">
@@ -310,13 +260,14 @@
         };
 
         window.selectType = (type) => {
-            state.currentType = type;document.getElementById("trail-type").value=type;
+            state.currentType = type;document.getElementById("trail-type").value=type;document.querySelectorAll("input[name=trail-kind]").forEach(input=>input.checked=input.value===type);
             document.querySelectorAll('.mode-card').forEach(el => el.classList.remove('active'));
             document.getElementById(`type-${type}`).classList.add('active');
         };
 
         window.startGame = (moving) => {
  document.getElementById("trail-motion").value=moving?"dynamic":"static";
+ const cue=document.getElementById('trail-flashing-bar');cue.hidden=!document.getElementById('trail-bar-enabled').checked;cue.style.left=document.getElementById('trail-bar-side').value==='left'?'0':'auto';cue.style.right=document.getElementById('trail-bar-side').value==='right'?'0':'auto';
  window.CogniLabRun?.begin(state.currentType);
 
             state.isMoving = moving;document.body.dataset.trailMovement=moving?'dynamic':'static';document.body.dataset.trailOrder=document.getElementById('trail-order').value;
@@ -342,13 +293,15 @@
             if (state.isMoving) updateNodesLoop();
         };
 
+        document.getElementById('trail-bar-enabled').addEventListener('change',event=>{document.getElementById('trail-bar-side').disabled=!event.target.checked;});
+        function fitTrailLayout(count){const padding=document.getElementById('trail-bar-enabled').checked?24:0;const layout=window.CLTraining.trailLayout(count,innerWidth-padding*2,innerHeight);layout.points.forEach(point=>point.x+=padding);return layout;}
         function initNodes() {
             const sequence = window.CLTraining.trailSequence(state.currentType,document.getElementById('trail-order').value==='inverse',DICTIONARIES[state.currentType]);
 
             const w = window.innerWidth;
             const h = window.innerHeight;
 
-            const layout=window.CLTraining.trailLayout(sequence.length,w,h);
+            const layout=fitTrailLayout(sequence.length);
             const size=layout.size,radius=size/2;document.documentElement.style.setProperty('--node-size',size+'px');
             sequence.forEach((label,index)=>{
                 const {x,y}=layout.points[index];
@@ -434,7 +387,7 @@
 
             const sizeAttr = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--node-size')) || 74;
             const radius = sizeAttr / 2;
-            const borderPad = radius + 8;
+            const borderPad = radius + 8 + (document.getElementById("trail-bar-enabled").checked?16:0);
 
             const hudWidth = Math.min(320, w - 20);
             const hudHeight = 110;
@@ -486,6 +439,7 @@
         }
 
         function endGame() {
+            document.getElementById("trail-flashing-bar").hidden=true;
             state.isPlaying = false;
             clearInterval(state.timerInterval);
             if (state.animationId) cancelAnimationFrame(state.animationId);
@@ -498,6 +452,7 @@
 }
 
         window.resetGame = async () => {
+            document.getElementById("trail-flashing-bar").hidden=true;
             if(state.isPlaying)window.CogniLabRun?.abort();
             else await window.CogniLabRun?.waitForSave();
             state.isPlaying = false;
@@ -514,7 +469,7 @@
         // same trial without clearing its sequence, timer, answers or errors.
         window.addEventListener('resize', () => {
             if(!state.isPlaying||!state.nodes.length)return;
-            const layout=window.CLTraining.trailLayout(state.nodes.length,innerWidth,innerHeight);
+            const layout=fitTrailLayout(state.nodes.length);
             document.documentElement.style.setProperty('--node-size',layout.size+'px');
             state.nodes.forEach((node,index)=>{
                 Object.assign(node,layout.points[index]);

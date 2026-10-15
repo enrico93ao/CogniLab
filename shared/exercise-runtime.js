@@ -12,7 +12,7 @@ let active=null,finished=false,lastResult=null,savePromise=Promise.resolve(),sav
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount,{once:true});else mount();
  const settings=()=>{const result={};const ids=(window.CogniLabExercise?.setup||'').split(',');
  for(const id of ids){const panel=document.getElementById(id);if(!panel)continue;
- for(const input of panel.querySelectorAll('input,select')){if(['password','text','email'].includes(input.type))continue;if(input.type==='radio'&&!input.checked)continue;const key=input.id||input.name;if(key)result[key]=input.type==='checkbox'?input.checked:input.value;}
+ for(const input of panel.querySelectorAll('input,select')){if(input.dataset?.uiProxy==='true')continue;if(['password','text','email'].includes(input.type))continue;if(input.type==='radio'&&!input.checked)continue;const key=input.id||input.name;if(key)result[key]=input.type==='checkbox'?input.checked:input.value;}
  for(const button of panel.querySelectorAll('button.selected,button.active,button.selected-mode,button[aria-pressed="true"],button.border-indigo-500,button.border-blue-500'))if(button.id)result[button.id]=true;
  }return result;};
  const makeResult=(metrics={},state='completed')=>{const meta=window.CogniLabExercise;if(!active||!meta||finished)return null;finished=true;lifecycle(false);const finishedAt=new Date().toISOString();return {schemaVersion:3,id:active.id,exerciseId:meta.id,title:meta.title,category:meta.category,exerciseVersion:meta.version||'3.0.0',startedAt:active.startedAt,finishedAt,durationMs:Math.max(0,Date.now()-active.start),settings:active.settings,status:state,metrics};};

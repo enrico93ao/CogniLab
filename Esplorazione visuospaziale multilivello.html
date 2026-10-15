@@ -124,8 +124,8 @@
 <link rel="stylesheet" href="shared/cognilab.css">
 <script src="shared/interface.js" defer></script>
 <script>window.CogniLabExercise={"id":"esplorazione-visuospaziale","title":"Esplorazione visuospaziale multilivello","category":"Visuospaziale","stimulusVersion":"training4","setup":"start-screen"};</script>
-<script src="shared/exercise-runtime.js"></script>
-<link rel="stylesheet" href="shared/training-suite.css?v=training4"><script type="module">import * as training from "./shared/training-model.mjs";window.CLTraining=training;</script></head>
+<script src="shared/exercise-runtime.js?v=controls6"></script>
+<link rel="stylesheet" href="shared/training-suite.css?v=training4"><script type="module">import * as training from "./shared/training-model.mjs";window.CLTraining=training;</script><link rel="stylesheet" href="shared/menu-controls.css?v=controls6"><script src="shared/menu-controls.js?v=controls6" defer></script></head>
 <body data-cognilab="exercise" class="cl-suite-legacy">
 
     <div id="start-screen" class="screen active">
@@ -176,27 +176,14 @@
                 <div id="bar-pos-container" class="opacity-50 pointer-events-none transition-opacity">
                     <p class="text-[10px] font-bold text-gray-400 uppercase mb-2 tracking-widest text-left">Posizione Barra</p>
                     <div class="grid grid-cols-3 gap-2">
-                        <button onclick="setBarSide('left')" class="option-btn side-btn selected" data-side="left">SX</button>
-                        <button onclick="setBarSide('right')" class="option-btn side-btn" data-side="right">DX</button>
-                        <button onclick="setBarSide('random')" class="option-btn side-btn" data-side="random">RND</button>
+                        <button onclick="setBarSide('left')" class="option-btn side-btn selected" data-side="left">Sinistra</button>
+                        <button onclick="setBarSide('right')" class="option-btn side-btn" data-side="right">Destra</button>
+                        <button onclick="setBarSide('random')" class="option-btn side-btn" data-side="random">Casuale</button>
                     </div>
                 </div>
             </div>
 
-            <div class="grid gap-2">
-                <button onclick="startGame('base')" class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-5 rounded-2xl shadow-md flex justify-between items-center border-b-4 border-green-700 active:scale-95 transition-all text-sm">
-                    <span>Livello Base (Solo Cerchi)</span> 🟢
-                </button>
-                <button onclick="startGame('intermedio')" class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-5 rounded-2xl shadow-md flex justify-between items-center border-b-4 border-orange-700 active:scale-95 transition-all text-sm">
-                    <span>Livello Intermedio</span> 🟡
-                </button>
-                <button onclick="startGame('difficile')" class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-5 rounded-2xl shadow-md flex justify-between items-center border-b-4 border-red-800 active:scale-95 transition-all text-sm">
-                    <span>Livello Difficile</span> 🔴
-                </button>
-                <button onclick="startGame('shifting')" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-5 rounded-2xl shadow-md flex justify-between items-center border-b-4 border-purple-800 active:scale-95 transition-all text-sm">
-                    <span>Livello Flessibilità (Shifting)</span> 🔵🔴
-                </button>
-            </div>
+<fieldset class="cl-menu-group"><legend>Scegli il livello</legend><div class="cl-menu-options"><label class="cl-menu-option"><input type="radio" name="exploration-mode" value="base" checked><span><strong>Base · Solo cerchi</strong><small style="display:block;font-weight:400">Un solo bersaglio</small></span></label><label class="cl-menu-option"><input type="radio" name="exploration-mode" value="intermedio" ><span><strong>Intermedio</strong><small style="display:block;font-weight:400">Cerchi e quadrati</small></span></label><label class="cl-menu-option"><input type="radio" name="exploration-mode" value="difficile" ><span><strong>Avanzato</strong><small style="display:block;font-weight:400">Tre forme</small></span></label><label class="cl-menu-option"><input type="radio" name="exploration-mode" value="shifting" ><span><strong>Set shifting</strong><small style="display:block;font-weight:400">Segui la consegna variabile</small></span></label></div></fieldset><button id="exploration-start" class="suite-btn" style="grid-column:1/-1" onclick="startGame(document.querySelector('input[name=exploration-mode]:checked').value)">Inizia la prova →</button>
         </div>
     </div>
 
