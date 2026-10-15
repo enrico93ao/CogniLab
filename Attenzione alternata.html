@@ -159,21 +159,19 @@
     </style>
 <link rel="stylesheet" href="shared/cognilab.css">
 <script src="shared/interface.js" defer></script>
-<script>window.CogniLabExercise={"id":"attenzione-alternata","title":"Attenzione alternata","category":"Attenzione","setup":"main-menu"};</script>
+<script>window.CogniLabExercise={"id":"attenzione-alternata","title":"Attenzione alternata","category":"Attenzione","stimulusVersion":"training4","setup":"main-menu"};</script>
 <script src="shared/exercise-runtime.js"></script>
-</head>
-<body data-cognilab="exercise">
+<link rel="stylesheet" href="shared/training-suite.css?v=training4"><script type="module">import * as training from "./shared/training-model.mjs";window.CLTraining=training;</script></head>
+<body data-cognilab="exercise" class="cl-suite-legacy">
 
     <!-- Menu Iniziale -->
     <div id="main-menu" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-50 overflow-y-auto">
         <div class="bg-white max-w-4xl w-full p-6 md:p-8 rounded-[2.5rem] shadow-2xl my-auto border border-slate-100">
             <div class="text-center mb-6 md:mb-8">
-                <h1 class="text-3xl md:text-4xl font-black text-slate-900 tracking-tight">Percorso Alternato</h1>
-                <p class="text-slate-500 mt-2 text-sm md:text-base">Allenamento cognitivo per l'attenzione divisa e flessibilità</p>
-            </div>
+                <header class="suite-hero"><div><span class="suite-eyebrow">CogniLab · Allenamento cognitivo</span><h1>Attenzione alternata</h1><p>Collega gli elementi nell’ordine richiesto. Scegli lettere, numeri o un percorso alternato; poi imposta ordine e movimento.</p></div><div class="suite-mark" aria-hidden="true">↔</div></header></div>
             
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 mb-6 md:mb-8">
-                <div onclick="selectType('alpha')" id="type-alpha" class="mode-card active cursor-pointer p-4 rounded-2xl bg-white shadow-sm">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 mb-6 md:mb-8"><button type="button" onclick="selectType('letters')" id="type-letters" class="mode-card active cursor-pointer p-4 rounded-2xl bg-white shadow-sm"><strong>Base · Solo lettere</strong><p>A → P · 16 lettere</p></button><button type="button" onclick="selectType('numbers')" id="type-numbers" class="mode-card cursor-pointer p-4 rounded-2xl bg-white shadow-sm"><strong>Base · Solo numeri</strong><p>1 → 20 · 20 numeri</p></button>
+                <div onclick="selectType('alpha')" id="type-alpha" class="mode-card cursor-pointer p-4 rounded-2xl bg-white shadow-sm">
                     <span class="text-[10px] font-bold text-indigo-600 uppercase">Classico</span>
                     <p class="font-bold text-base md:text-lg">Numeri + Lettere</p>
                     <p class="text-xs text-slate-400">1 - A - 2 - B...</p>
@@ -205,7 +203,7 @@
                 </div>
             </div>
 
-            <div class="bg-slate-50 p-4 md:p-6 rounded-2xl border border-slate-200 mb-6 md:mb-8 flex items-center justify-between">
+            <input type="hidden" id="trail-type" value="letters"><input type="hidden" id="trail-motion" value="static"><label class="suite-note" style="display:block;margin-bottom:22px;font-weight:700" for="trail-order">Ordine del percorso<select id="trail-order" style="display:block;padding:12px;margin-top:8px;border:1px solid #bfd2d8;border-radius:12px;width:100%"><option value="direct">Diretto · A → P / 1 → 20</option><option value="inverse">Inverso · P → A / 20 → 1</option></select></label><div class="bg-slate-50 p-4 md:p-6 rounded-2xl border border-slate-200 mb-6 md:mb-8 flex items-center justify-between">
                 <div>
                     <h3 class="font-bold text-slate-900 text-sm md:text-base">Suggerimento visivo</h3>
                     <p class="text-xs md:text-sm text-slate-500">Evidenzia con un'animazione il prossimo cerchio da toccare</p>
@@ -299,7 +297,7 @@
         const COLORS = ['#4f46e5', '#0ea5e9', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6', '#f43f5e', '#06b6d4', '#14b8a6', '#f97316'];
 
         let state = {
-            currentType: 'alpha',
+            currentType: 'letters',
             nodes: [],
             currentIndex: 0,
             startTime: null,
@@ -312,15 +310,16 @@
         };
 
         window.selectType = (type) => {
-            state.currentType = type;
+            state.currentType = type;document.getElementById("trail-type").value=type;
             document.querySelectorAll('.mode-card').forEach(el => el.classList.remove('active'));
             document.getElementById(`type-${type}`).classList.add('active');
         };
 
         window.startGame = (moving) => {
- window.CogniLabRun?.begin(typeof arguments === "undefined" ? null : arguments[0]);
+ document.getElementById("trail-motion").value=moving?"dynamic":"static";
+ window.CogniLabRun?.begin(state.currentType);
 
-            state.isMoving = moving;
+            state.isMoving = moving;document.body.dataset.trailMovement=moving?'dynamic':'static';document.body.dataset.trailOrder=document.getElementById('trail-order').value;
             state.isPlaying = true;
             state.showHint = document.getElementById('hint-toggle').checked;
             state.currentIndex = 0;
@@ -344,59 +343,22 @@
         };
 
         function initNodes() {
-            const sequence = [];
-            const secondary = DICTIONARIES[state.currentType];
-            const length = secondary.length;
-
-            for (let i = 0; i < length; i++) {
-                sequence.push((i + 1).toString());
-                sequence.push(secondary[i]);
-            }
+            const sequence = window.CLTraining.trailSequence(state.currentType,document.getElementById('trail-order').value==='inverse',DICTIONARIES[state.currentType]);
 
             const w = window.innerWidth;
             const h = window.innerHeight;
 
-            // Ridimensionamento adattivo dei nodi per schermi piccoli (mobile-friendly)
-            const minScreen = Math.min(w, h);
-            let size = 74;
-            if (minScreen < 600) {
-                size = 54;
-            } else if (minScreen < 900) {
-                size = 64;
-            }
-            document.documentElement.style.setProperty('--node-size', `${size}px`);
-
-            const radius = size / 2;
-            const pad = radius + 15; // padding dai bordi dinamico
-
-            // Calcolo larghezza/altezza HUD dinamica per evitare collisioni su ogni formato
-            const hudWidth = Math.min(320, w - 20);
-            const hudHeight = 110;
-
-            sequence.forEach((label, index) => {
-                let x, y, tooClose;
-                let attempts = 0;
-
-                do {
-                    tooClose = false;
-                    x = pad + Math.random() * (w - pad * 2);
-                    y = pad + Math.random() * (h - pad * 2);
-                    
-                    // Evita l'area occupata dal pannello di controllo superiore (HUD)
-                    if (y < hudHeight + radius && x > (w/2 - hudWidth/2 - radius) && x < (w/2 + hudWidth/2 + radius)) {
-                        tooClose = true;
-                    }
-
-                    // Evita la sovrapposizione tra cerchi usando la dimensione adattiva
-                    for (let n of state.nodes) {
-                        const d = Math.sqrt((x - n.x)**2 + (y - n.y)**2);
-                        if (d < (size * 1.45)) tooClose = true;
-                    }
-                    attempts++;
-                } while (tooClose && attempts < 400);
-
+            const top=104,bottom=12;const available=Math.max(180,h-top-bottom);
+            const columns=Math.max(3,Math.ceil(Math.sqrt(sequence.length*w/available)));
+            const rows=Math.ceil(sequence.length/columns);
+            const cellW=w/columns,cellH=available/rows;
+            const size=Math.max(32,Math.min(74,cellW-12,cellH-12));
+            const radius=size/2;document.documentElement.style.setProperty('--node-size',size+'px');
+            const slots=window.CLTraining.shuffle(Array.from({length:columns*rows},(_,i)=>i));
+            sequence.forEach((label,index)=>{
+                const slot=slots[index],x=(slot%columns+.5)*cellW,y=top+(Math.floor(slot/columns)+.5)*cellH;
                 const el = document.createElement('div');
-                el.className = 'node';
+                el.className = 'node';el.tabIndex=0;el.setAttribute('role','button');el.setAttribute('aria-label',label);el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();handleNodeClick(nodeData);}});
                 if (index === 0 && state.showHint) el.classList.add('hint-pulse');
                 el.innerText = label;
                 el.style.backgroundColor = COLORS[index % COLORS.length];
@@ -485,8 +447,9 @@
             state.nodes.forEach(n => {
                 if (n.el.classList.contains('correct')) return;
 
-                n.x += n.vx;
-                n.y += n.vy;
+                const candidateX=n.x+n.vx,candidateY=n.y+n.vy;
+                if(state.nodes.some(other=>other!==n&&Math.hypot(candidateX-other.x,candidateY-other.y)<sizeAttr+6)){n.vx=-n.vx;n.vy=-n.vy;}
+                else{n.x=candidateX;n.y=candidateY;}
 
                 // Rimbalzo dai bordi della finestra con tolleranza raggio
                 if (n.x < borderPad || n.x > w - borderPad) {
@@ -539,7 +502,9 @@
  window.CogniLabRun?.complete({correct:window.CogniLabRun.measure(()=>(state.currentIndex)),total:window.CogniLabRun.measure(()=>(state.currentIndex+state.errors)),errors:window.CogniLabRun.measure(()=>(state.errors))});
 }
 
-        window.resetGame = () => {
+        window.resetGame = async () => {
+            if(state.isPlaying)window.CogniLabRun?.abort();
+            else await window.CogniLabRun?.waitForSave();
             state.isPlaying = false;
             clearInterval(state.timerInterval);
             if (state.animationId) cancelAnimationFrame(state.animationId);

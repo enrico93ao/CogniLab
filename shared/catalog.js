@@ -1,4 +1,5 @@
 window.CogniLabCatalog = [
+  {"title":"Il pianoforte","file":"Il pianoforte.html"},
   {"title":"Lista della spesa","file":"Lista della spesa.html"},
   {
     "title": "Attenzione Alternata",
