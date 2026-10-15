@@ -1,5 +1,5 @@
 import {MONTHS,SEASONS,season,temporalTasks,shuffle} from './training-model.mjs';
-const el=id=>document.getElementById(id);
+const el=id=>document.getElementById(id);const taskClock=new window.CogniLabTaskClock();
 const labels={weekday:'Giorno della settimana',day:'Giorno',month:'Mese',year:'Anno',season:'Stagione'};
 const weekdays=['domenica','lunedì','martedì','mercoledì','giovedì','venerdì','sabato'];
 let running=false,level,date,city,step=0,questions=[],position=0,attempts=0,correct=0,errors=0,selected=[],useHint=false;
@@ -18,7 +18,7 @@ el('orientation-form').onsubmit=event=>{
  event.preventDefault();if(!event.currentTarget.reportValidity())return;
  city=el('orientation-city').value.trim();if(!city){el('orientation-city').focus();return;}
  const [y,m,d]=el('orientation-date').value.split('-').map(Number);date=new Date(y,m-1,d,12);level=el('orientation-level').value;useHint=level!=='advanced';
- step=0;attempts=correct=errors=0;questions=makeQuestions();running=true;window.CogniLabRun.begin(level);show('orientation-game');startQuestion();
+ step=0;attempts=correct=errors=0;questions=makeQuestions();taskClock.reset();running=true;window.CogniLabRun.begin(level);show('orientation-game');startQuestion();
 };
 function startQuestion(){position=0;selected=[];el('orientation-status').textContent='';render();}
 function render(){
@@ -37,7 +37,7 @@ function render(){
  for(const value of values)choices.append(button(value,b=>choose(value,b)));
 }
 function choose(value,b){
- if(!running)return;const q=questions[step];if(position>=q.answer.length)return;attempts++;
+ if(!running||taskClock.paused)return;const q=questions[step];if(position>=q.answer.length)return;attempts++;
  if(normalize(value)!==normalize(q.answer[position])){errors++;el('orientation-status').textContent='Riprova: il box evidenziato aspetta un’altra risposta.';b?.classList.add('wrong');return;}
  correct++;selected.push(String(value));position++;el('orientation-status').textContent=position===q.answer.length?'Attività completata. Puoi continuare.':'Corretto. Completa il prossimo box.';render();
 }
@@ -49,3 +49,5 @@ el('orientation-finish').onclick=finish;
 el('orientation-again').onclick=async()=>{await window.CogniLabRun.waitForSave();show('setup');};
 async function back(event){event.preventDefault();await window.CogniLabRun.waitForSave();if(parent!==window)parent.postMessage({type:'cognilab-exit-v3'},location.origin);else location.href='esercizi.html';}
 el('orientation-back').onclick=back;el('top-back').onclick=back;
+
+window.CogniLabAssist={isRunning:()=>running,pause:()=>taskClock.pause(),resume:()=>taskClock.resume(),finish,instruction:()=>questions[step]?.title||'Completa il box evidenziato scegliendo la risposta corretta.',sample:()=>({labels:['lunedì','giovedì','sabato'],boxLabel:'Giorno',order:[0],instruction:'Questo è un esempio: il giorno da inserire nel box è lunedì. Tocca la tessera corretta.'})};

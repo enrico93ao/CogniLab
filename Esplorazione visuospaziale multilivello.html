@@ -124,8 +124,8 @@
 <link rel="stylesheet" href="shared/cognilab.css">
 <script src="shared/interface.js" defer></script>
 <script>window.CogniLabExercise={"id":"esplorazione-visuospaziale","title":"Esplorazione visuospaziale multilivello","category":"Visuospaziale","stimulusVersion":"training4","setup":"start-screen"};</script>
-<script src="shared/exercise-runtime.js?v=controls6"></script>
-<link rel="stylesheet" href="shared/training-suite.css?v=training4"><script type="module">import * as training from "./shared/training-model.mjs";window.CLTraining=training;</script><link rel="stylesheet" href="shared/menu-controls.css?v=controls6"><script src="shared/menu-controls.js?v=controls6" defer></script></head>
+<script src="shared/task-clock.js?v=assist7"></script><script src="shared/exercise-runtime.js?v=assist7"></script>
+<link rel="stylesheet" href="shared/training-suite.css?v=training4"><script type="module">import * as training from "./shared/training-model.mjs";window.CLTraining=training;</script><link rel="stylesheet" href="shared/menu-controls.css?v=controls6"><script src="shared/menu-controls.js?v=controls6" defer></script><link rel="stylesheet" href="shared/assist-controls.css?v=assist7"><script src="shared/assist-controls.js?v=assist7" defer></script></head>
 <body data-cognilab="exercise" class="cl-suite-legacy">
 
     <div id="start-screen" class="screen active">
@@ -265,6 +265,7 @@
     </div>
 
     <script>
+        const taskClock=new window.CogniLabTaskClock();
         const startScreen = document.getElementById('start-screen');
         const gameScreen = document.getElementById('game-screen');
         const endScreen = document.getElementById('end-screen');
@@ -383,13 +384,13 @@
             feedback.style.display = 'block'; feedback.textContent = type === 'correct' ? '✔️' : '❌';
             feedback.style.color = type === 'correct' ? '#22c55e' : '#ef4444';
             playSound(type);
-            setTimeout(() => feedback.style.display = 'none', 400);
+            taskClock.setTimeout(() => feedback.style.display = 'none', 400);
         }
 
         function moveStimulus() {
             if (!gameActive) return;
             isTransitioning = false;
-            if (stimulusTimeout) clearTimeout(stimulusTimeout); 
+            if (stimulusTimeout) taskClock.clearTimeout(stimulusTimeout); 
             
             updateFlashingBar(); 
             updateInstructionBanner();
@@ -429,7 +430,7 @@
             let isCurrentTarget = (difficulty === 'shifting') ? (currentType === currentTargetType) : (currentType === 'circle');
             
             if (!isCurrentTarget && difficulty !== 'base') {
-                stimulusTimeout = setTimeout(() => {
+                stimulusTimeout = taskClock.setTimeout(() => {
                     if (gameActive && !isTransitioning) moveStimulus();
                 }, 4000);
             }
@@ -437,7 +438,7 @@
             // Calcolo coordinate sicure nel viewport
             const barPadding = distractorToggle.checked ? 30 : 16;
             const topPadding = difficulty === 'shifting' ? Math.min(210,window.innerHeight*.44) : 100; 
-            const bottomPadding = 16;
+            const bottomPadding = 88;
 
             const availW = Math.max(0, window.innerWidth - STIMULUS_SIZE - (barPadding * 2));
             const availH = Math.max(0, window.innerHeight - STIMULUS_SIZE - topPadding - bottomPadding);
@@ -465,12 +466,13 @@
             stimulus.style.top = `${newY}px`;
             stimulus.style.opacity = '1';stimulus.style.visibility='visible';
             
-            stimulusAppearanceTime = performance.now();
+            stimulusAppearanceTime = taskClock.now();
         }
 
         function startGame(mode) {
  window.CogniLabRun?.begin(typeof arguments === "undefined" ? null : arguments[0]);
 
+            taskClock.reset();
             difficulty = mode;
             score = 0; errors = 0; reactionTimes = [];
             currentTargetType = 'circle'; 
@@ -489,11 +491,11 @@
             updateInstructionBanner();
             moveStimulus();
             
-            const deadline=Date.now()+sessionDuration*1000;
+            const deadline=taskClock.now()+sessionDuration*1000;
             timerDisplay.textContent=Math.floor(sessionDuration/60)+':'+String(sessionDuration%60).padStart(2,'0');
-            clearInterval(timerInterval);
-            timerInterval = setInterval(() => {
-                timeLeft=Math.max(0,Math.ceil((deadline-Date.now())/1000));
+            taskClock.clearInterval(timerInterval);
+            timerInterval = taskClock.setInterval(() => {
+                timeLeft=Math.max(0,Math.ceil((deadline-taskClock.now())/1000));
                 const m = Math.floor(timeLeft / 60); 
                 const s = timeLeft % 60;
                 timerDisplay.textContent = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
@@ -502,9 +504,10 @@
         }
 
         function endGame() {
+            taskClock.cancelAll();
             gameActive = false; 
-            clearInterval(timerInterval);
-            if (stimulusTimeout) clearTimeout(stimulusTimeout);
+            taskClock.clearInterval(timerInterval);
+            if (stimulusTimeout) taskClock.clearTimeout(stimulusTimeout);
             
             gameScreen.classList.remove('active'); 
             endScreen.classList.add('active');
@@ -541,9 +544,10 @@
 
         function resetToMenu() {
             if(gameActive)window.CogniLabRun?.abort();
+            taskClock.cancelAll();
             gameActive = false; 
-            clearInterval(timerInterval);
-            if (stimulusTimeout) clearTimeout(stimulusTimeout);
+            taskClock.clearInterval(timerInterval);
+            if (stimulusTimeout) taskClock.clearTimeout(stimulusTimeout);
             
             gameScreen.classList.remove('active'); 
             endScreen.classList.remove('active');
@@ -557,10 +561,10 @@
         }
 
         function handleInteraction(e) {
-            if (!gameActive || isTransitioning) return;
+            if (!gameActive || isTransitioning||taskClock.paused) return;
             e.preventDefault();
             
-            if (stimulusTimeout) clearTimeout(stimulusTimeout);
+            if (stimulusTimeout) taskClock.clearTimeout(stimulusTimeout);
             
             isTransitioning = true;
             const rect = stimulus.getBoundingClientRect();
@@ -576,7 +580,7 @@
             if (isCorrect) {
                 score++; 
                 counterDisplay.textContent = score;
-                reactionTimes.push(performance.now() - stimulusAppearanceTime);
+                reactionTimes.push(taskClock.now() - stimulusAppearanceTime);
                 showFeedback('correct', rect.left + 50, rect.top);
                 
 
@@ -587,7 +591,7 @@
                         }
             }
             
-            setTimeout(() => { if(gameActive) moveStimulus(); }, 350);
+            taskClock.setTimeout(() => { if(gameActive) moveStimulus(); }, 350);
         }
 
         stimulus.addEventListener('pointerdown', handleInteraction);
@@ -601,4 +605,6 @@
             if(parent!==window)parent.postMessage({type:'cognilab-exit-v3'},location.origin);
             else location.href='esercizi.html';
         }
+
+        window.CogniLabAssist={isRunning:()=>gameActive,pause:()=>{taskClock.pause();audioCtx?.suspend();},resume:()=>{taskClock.resume();audioCtx?.resume();},finish:()=>endGame(),instruction:()=>difficulty==='shifting'?instructionBanner.textContent+' La consegna può cambiare a ogni nuovo stimolo.':'Tocca solo il cerchio rosso. Non toccare le altre forme.',sample:()=>({labels:['Cerchio rosso','Quadrato blu','Triangolo giallo'],shapes:['circle','square','triangle'],order:[0],instruction:'In questo esempio tocca solo il cerchio rosso.'})};
     </script></body></html>

@@ -160,8 +160,8 @@
 <link rel="stylesheet" href="shared/cognilab.css">
 <script src="shared/interface.js" defer></script>
 <script>window.CogniLabExercise={"id":"attenzione-alternata","title":"Attenzione alternata","category":"Attenzione","stimulusVersion":"training4","setup":"main-menu"};</script>
-<script src="shared/exercise-runtime.js?v=controls6"></script>
-<link rel="stylesheet" href="shared/training-suite.css?v=training4"><script type="module">import * as training from "./shared/training-model.mjs?v=resize5";window.CLTraining=training;</script><link rel="stylesheet" href="shared/menu-controls.css?v=controls6"><script src="shared/menu-controls.js?v=controls6" defer></script></head>
+<script src="shared/task-clock.js?v=assist7"></script><script src="shared/exercise-runtime.js?v=assist7"></script>
+<link rel="stylesheet" href="shared/training-suite.css?v=training4"><script type="module">import * as training from "./shared/training-model.mjs?v=resize5";window.CLTraining=training;</script><link rel="stylesheet" href="shared/menu-controls.css?v=controls6"><script src="shared/menu-controls.js?v=controls6" defer></script><link rel="stylesheet" href="shared/assist-controls.css?v=assist7"><script src="shared/assist-controls.js?v=assist7" defer></script></head>
 <body data-cognilab="exercise" class="cl-suite-legacy">
 
     <!-- Menu Iniziale -->
@@ -208,8 +208,8 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
                 </svg>
             </div>
-            <h2 class="text-3xl font-black text-slate-900 mb-2">Test Completato!</h2>
-            <p class="text-slate-500 text-sm mb-6">Ottima prestazione cognitiva.</p>
+            <h2 class="text-3xl font-black text-slate-900 mb-2">Prova conclusa</h2>
+            <p class="text-slate-500 text-sm mb-6">Ecco il risultato di questa prova di allenamento.</p>
             
             <div class="grid grid-cols-2 gap-4 my-6">
                 <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100">
@@ -228,6 +228,7 @@
     </div>
 
     <script>
+        const taskClock=new window.CogniLabTaskClock();
         const canvas = document.getElementById('game-canvas');
         const timerEl = document.getElementById('timer');
         const errorEl = document.getElementById('error-count');
@@ -270,6 +271,7 @@
  const cue=document.getElementById('trail-flashing-bar');cue.hidden=!document.getElementById('trail-bar-enabled').checked;cue.style.left=document.getElementById('trail-bar-side').value==='left'?'0':'auto';cue.style.right=document.getElementById('trail-bar-side').value==='right'?'0':'auto';
  window.CogniLabRun?.begin(state.currentType);
 
+            taskClock.reset();
             state.isMoving = moving;document.body.dataset.trailMovement=moving?'dynamic':'static';document.body.dataset.trailOrder=document.getElementById('trail-order').value;
             state.isPlaying = true;
             state.showHint = document.getElementById('hint-toggle').checked;
@@ -278,8 +280,8 @@
             state.startTime = null;
             state.nodes = [];
             
-            clearInterval(state.timerInterval);
-            if (state.animationId) cancelAnimationFrame(state.animationId);
+            taskClock.clearInterval(state.timerInterval);
+            if (state.animationId) taskClock.cancelAnimationFrame(state.animationId);
 
             mainMenu.classList.add('hidden');
             gameUI.classList.remove('hidden');
@@ -294,7 +296,7 @@
         };
 
         document.getElementById('trail-bar-enabled').addEventListener('change',event=>{document.getElementById('trail-bar-side').disabled=!event.target.checked;});
-        function fitTrailLayout(count){const padding=document.getElementById('trail-bar-enabled').checked?24:0;const layout=window.CLTraining.trailLayout(count,innerWidth-padding*2,innerHeight);layout.points.forEach(point=>point.x+=padding);return layout;}
+        function fitTrailLayout(count){const padding=document.getElementById('trail-bar-enabled').checked?24:0;const layout=window.CLTraining.trailLayout(count,innerWidth-padding*2,Math.max(240,innerHeight-76));layout.points.forEach(point=>point.x+=padding);return layout;}
         function initNodes() {
             const sequence = window.CLTraining.trailSequence(state.currentType,document.getElementById('trail-order').value==='inverse',DICTIONARIES[state.currentType]);
 
@@ -330,11 +332,11 @@
         }
 
         function handleNodeClick(node) {
-            if (!state.isPlaying) return;
+            if (!state.isPlaying||taskClock.paused) return;
 
             if (state.startTime === null) {
-                state.startTime = Date.now();
-                state.timerInterval = setInterval(updateTimer, 50);
+                state.startTime = taskClock.now();
+                state.timerInterval = taskClock.setInterval(updateTimer, 50);
             }
 
             if (node.index === state.currentIndex) {
@@ -422,12 +424,12 @@
                 if (prev && prev.line) updateLinePos(prev.line, prev, n);
             });
 
-            state.animationId = requestAnimationFrame(updateNodesLoop);
+            state.animationId = taskClock.requestAnimationFrame(updateNodesLoop);
         }
 
         function updateTimer() {
-            if (!state.isPlaying || !state.startTime) return;
-            const diff = (Date.now() - state.startTime) / 1000;
+            if (!state.isPlaying || state.startTime===null) return;
+            const diff = (taskClock.now() - state.startTime) / 1000;
             timerEl.innerText = diff.toFixed(2) + 's';
         }
 
@@ -435,29 +437,31 @@
             state.errors++;
             errorEl.innerText = state.errors;
             el.classList.add('error');
-            setTimeout(() => el.classList.remove('error'), 400);
+            taskClock.setTimeout(() => el.classList.remove('error'), 400);
         }
 
         function endGame() {
             document.getElementById("trail-flashing-bar").hidden=true;
+            taskClock.cancelAll();
             state.isPlaying = false;
-            clearInterval(state.timerInterval);
-            if (state.animationId) cancelAnimationFrame(state.animationId);
+            taskClock.clearInterval(state.timerInterval);
+            if (state.animationId) taskClock.cancelAnimationFrame(state.animationId);
             
             document.getElementById('res-time').innerText = timerEl.innerText;
             document.getElementById('res-errors').innerText = state.errors;
             resultsOverlay.classList.remove('hidden');
 
- window.CogniLabRun?.complete({correct:window.CogniLabRun.measure(()=>(state.currentIndex)),total:window.CogniLabRun.measure(()=>(state.currentIndex+state.errors)),errors:window.CogniLabRun.measure(()=>(state.errors))});
+ window.CogniLabRun?.complete({correct:window.CogniLabRun.measure(()=>(state.currentIndex)),total:window.CogniLabRun.measure(()=>(state.nodes.length+state.errors)),omissions:state.nodes.length-state.currentIndex,errors:window.CogniLabRun.measure(()=>(state.errors))});
 }
 
         window.resetGame = async () => {
             document.getElementById("trail-flashing-bar").hidden=true;
             if(state.isPlaying)window.CogniLabRun?.abort();
             else await window.CogniLabRun?.waitForSave();
+            taskClock.cancelAll();
             state.isPlaying = false;
-            clearInterval(state.timerInterval);
-            if (state.animationId) cancelAnimationFrame(state.animationId);
+            taskClock.clearInterval(state.timerInterval);
+            if (state.animationId) taskClock.cancelAnimationFrame(state.animationId);
             state.nodes = [];
             canvas.innerHTML = '';
             mainMenu.classList.remove('hidden');
@@ -478,4 +482,6 @@
             });
             state.nodes.forEach(node=>{if(node.line)updateLinePos(node.line,node,node.targetNode);});
         });
+
+        window.CogniLabAssist={isRunning:()=>state.isPlaying,pause:()=>taskClock.pause(),resume:()=>taskClock.resume(),finish:()=>endGame(),instruction:()=>`Collega gli elementi ${document.getElementById('trail-order').value==='inverse'?'in ordine inverso':'in ordine diretto'}. Tocca un elemento alla volta. ${state.isMoving?'Gli elementi si muovono.':''}`,sample:()=>{const values=window.CLTraining.trailSequence(state.currentType,document.getElementById('trail-order').value==='inverse',DICTIONARIES[state.currentType]).slice(0,3);return {labels:values,order:[0,1,2],instruction:'Tocca gli elementi nell’ordine indicato dal bordo verde.'};}};
     </script></body></html>
