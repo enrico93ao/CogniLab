@@ -1,3 +1,4 @@
+import {withAccessTimeout} from './access-timeout.js';
 import {isPermissionDenied,errorCode} from './firebase-errors.js';
 import {initializeApp,getApps} from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js';
 import {getAuth,onAuthStateChanged} from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js';
@@ -7,10 +8,13 @@ export const app=getApps().find(a=>a.name==='[DEFAULT]')||initializeApp(firebase
 export const auth=getAuth(app);
 export const db=getDatabase(app);
 auth.languageCode='it';
-export const accessModeReady=get(ref(db,'cognilab/access/publicRegistrationOpen')).then(snapshot=>snapshot.val()===true).catch(()=>false);
+export const accessModeReady=withAccessTimeout(get(ref(db,'cognilab/access/publicRegistrationOpen')),'access-mode-timeout',4000).then(snapshot=>snapshot.val()===true).catch(()=>false);
 export const authReady=new Promise(resolve=>{const stop=onAuthStateChanged(auth,user=>{stop();resolve(user);});});
 export function friendlyError(error){
  const code=errorCode(error);
+ if(code==='access-ready-timeout')return 'Il servizio di accesso non risponde. Ricarica la pagina e riprova.';
+ if(code==='access-login-timeout')return 'La verifica della password non ha risposto in tempo. Controlla la connessione e riprova.';
+ if(code==='access-reset-timeout')return 'Il servizio email non ha risposto in tempo. Riprova tra poco.';
  if(isPermissionDenied(error))return 'Il servizio non autorizza questa operazione. Contatta il gestore della palestra.';
  if(code==='auth/network-request-failed'||code==='network-request-failed')return 'Connessione al servizio non riuscita. Controlla la rete e riprova.';
  if(code==='auth/configuration-not-found')return 'Il servizio di accesso non è ancora configurato. Contatta il gestore della palestra.';

@@ -1,14 +1,16 @@
+import {withAccessTimeout} from './access-timeout.js';
 import {get,ref} from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js';
 import {auth,authReady,db,accessModeReady} from './firebase-client.js';
 export async function requireGymAccess(){
- const open=await accessModeReady;await authReady;
+ await withAccessTimeout(authReady,'access-ready-timeout');
  const user=auth.currentUser;
- if(open&&user&&!user.isAnonymous)return user;
  if(!user||user.isAnonymous)throw Object.assign(new Error('Invitation login required'),{code:'invitation-login-required'});
- const checks=await Promise.allSettled(['testers','professionals'].map(role=>get(ref(db,'cognilab/'+role+'/'+user.uid))));
- if(auth.currentUser?.uid!==user.uid||!checks.some(result=>result.status==='fulfilled'&&result.value.val()===true)){
-  throw Object.assign(new Error('Invitation required'),{code:checks.some(result=>result.status==='rejected')?'invitation-check-failed':'invitation-required'});
- }
+ const denied=()=>Object.assign(new Error('Invitation required'),{code:'invitation-required'});
+ const checks=['testers','professionals'].map(role=>withAccessTimeout(get(ref(db,'cognilab/'+role+'/'+user.uid)),'invitation-check-failed').then(snapshot=>{if(snapshot.val()!==true)throw denied();return true;}));
+ // One valid role is sufficient; a stalled unrelated read must not block it.
+ checks.push(accessModeReady.then(open=>{if(!open)throw denied();return true;}));
+ try{await Promise.any(checks);}catch(error){throw Object.assign(new Error('Invitation check failed'),{code:error.errors?.some(e=>e.code!=='invitation-required')?'invitation-check-failed':'invitation-required'});}
+ if(auth.currentUser?.uid!==user.uid)throw denied();
  return user;
 }
 export function invitationMessage(error){

@@ -1,3 +1,4 @@
+import {withAccessTimeout} from './access-timeout.js';
 import {signInWithEmailAndPassword,sendPasswordResetEmail} from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js';
 import {auth,authReady,friendlyError} from './firebase-client.js';
 import {requireProfessional,clinicalMessage} from './clinical-access.js';
@@ -7,12 +8,14 @@ const busy=value=>document.querySelectorAll('button').forEach(button=>button.dis
 form.onsubmit=async event=>{
  event.preventDefault();busy(true);status.textContent='Verifica delle credenziali…';
  try{
-  await authReady;
-  await signInWithEmailAndPassword(auth,form.elements.email.value.trim(),form.elements.password.value);
+  await withAccessTimeout(authReady,'access-ready-timeout');
+  status.textContent='Verifica della password…';
+  await withAccessTimeout(signInWithEmailAndPassword(auth,form.elements.email.value.trim(),form.elements.password.value),'access-login-timeout');
   form.elements.password.value='';
+  status.textContent='Password verificata. Controllo dell’abilitazione…';
   const user=await requireProfessional();
   localStorage.setItem('hub_mode','clinical');localStorage.setItem('hub_username',user.displayName||'Professionista');
   location.href='esercizi.html';
  }catch(error){status.textContent=error.code?.startsWith('clinical-')?clinicalMessage(error):friendlyError(error);}finally{busy(false);}
 };
-document.getElementById('reset').onclick=async()=>{const email=form.elements.email.value.trim();if(!email){status.textContent='Inserisci la tua email professionale.';return;}busy(true);try{await sendPasswordResetEmail(auth,email);status.textContent='Se l’account esiste, riceverai le istruzioni per reimpostare la password.';}catch(error){status.textContent=friendlyError(error);}finally{busy(false);}};
+document.getElementById('reset').onclick=async()=>{const email=form.elements.email.value.trim();if(!email){status.textContent='Inserisci la tua email professionale.';return;}busy(true);try{await withAccessTimeout(sendPasswordResetEmail(auth,email),'access-reset-timeout');status.textContent='Se l’account esiste, riceverai le istruzioni per reimpostare la password.';}catch(error){status.textContent=friendlyError(error);}finally{busy(false);}};

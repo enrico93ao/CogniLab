@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 const read=name=>fs.readFileSync(new URL('../'+name,import.meta.url),'utf8');
-const source=read('shared/gym-access.js').replace(/^import .*;\s*$/gm,'').replace(/\bexport /g,'');
+const source=read('shared/access-timeout.js').replace(/\bexport /g,'')+'\n'+read('shared/gym-access.js').replace(/^import .*;\s*$/gm,'').replace(/\bexport /g,'');
 function access(user,open=false,roles={}){
  const auth={currentUser:user};
  return new Function('auth','authReady','db','accessModeReady','ref','get',source+';return requireGymAccess;')(auth,Promise.resolve(),{},Promise.resolve(open),(_db,path)=>path,async path=>{if(roles[path]==='denied')throw Error('Permission denied');return {val:()=>roles[path]||null};});

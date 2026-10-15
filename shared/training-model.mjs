@@ -5,7 +5,27 @@ export const NOTES=['Do','Re','Mi','Fa','Sol','La','Si','Do'];
 export const FREQUENCIES=[261.6256,293.6648,329.6276,349.2282,391.9954,440,493.8833,523.2511];
 export function shuffle(values,rng=Math.random){const a=[...values];for(let i=a.length-1;i>0;i--){const j=Math.floor(rng()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 export function trailSequence(type,inverse=false,secondary=[]){let a=type==='letters'?[...LETTERS]:type==='numbers'?Array.from({length:20},(_,i)=>String(i+1)):secondary.flatMap((v,i)=>[String(i+1),v]);return inverse?a.reverse():a;}
-export function trailLayout(count,width,height,rng=Math.random){const top=104,bottom=12,available=Math.max(80,height-top-bottom),columns=Math.max(3,Math.ceil(Math.sqrt(count*width/available))),rows=Math.ceil(count/columns),cellW=width/columns,cellH=available/rows,size=Math.max(20,Math.min(74,cellW-12,cellH-12)),slots=shuffle(Array.from({length:columns*rows},(_,i)=>i),rng);return {size,points:slots.slice(0,count).map(slot=>({x:(slot%columns+.5)*cellW,y:top+(Math.floor(slot/columns)+.5)*cellH}))};}
+// Random best-candidate packing: no rows or columns, with bounded work.
+export function trailLayout(count,width,height,rng=Math.random){
+ const top=104,bottom=12,available=Math.max(40,height-top-bottom);
+ if(!count)return {size:0,points:[]};
+ let size=Math.min(74,Math.sqrt(width*available/count)*.67,width-16,available-16);
+ for(let attempt=0;attempt<40;attempt++,size*=.94){
+  const margin=size/2+6,points=[];
+  for(let i=0;i<count;i++){
+   let best=null,distance=-1;
+   for(let sample=0;sample<240;sample++){
+    const p={x:margin+rng()*Math.max(0,width-2*margin),y:top+margin+rng()*Math.max(0,available-2*margin)};
+    const gap=points.length?Math.min(...points.map(q=>Math.max(Math.abs(p.x-q.x),Math.abs(p.y-q.y)))):Infinity;
+    if(gap>distance){best=p;distance=gap;}
+   }
+   if(distance<size+8)break;
+   points.push(best);
+  }
+  if(points.length===count)return {size,points:shuffle(points,rng)};
+ }
+ throw new Error('Spazio insufficiente per gli stimoli');
+}
 export function nextTarget(current,rng=Math.random){if(rng()>=.35)return current;const others=['circle','square','triangle'].filter(x=>x!==current);return others[Math.floor(rng()*others.length)];}
 // Northern hemisphere meteorological seasons: fixed, explicit calendar boundaries.
 export function season(date){return SEASONS[Math.floor(((date.getMonth()+10)%12)/3)];}
