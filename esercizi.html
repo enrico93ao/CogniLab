@@ -355,6 +355,16 @@
 
     <div class="container">
 
+        <section id="cl-tester-management" hidden aria-labelledby="cl-tester-management-title" style="margin-bottom:24px;padding:24px;border:1px solid #b9dedb;border-radius:22px;background:linear-gradient(120deg,#eaf7f3,#eef5fc);display:none">
+            <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:20px">
+                <div style="flex:1 1 240px;min-width:0">
+                    <p style="font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:#147f80;font-weight:700;margin:0 0 8px">Pannello super user · Accessi alla palestra</p>
+                    <h2 id="cl-tester-management-title" style="font-size:1.4rem;color:#19384a;margin:0 0 8px"><i class="fa-solid fa-user-plus" aria-hidden="true"></i> Abilita nuovi utenti tester</h2>
+                    <p style="color:#526b7b;line-height:1.6;margin:0">Crea un account con email e password oppure abilita un utente già registrato. Gestisci anche la revoca dell’accesso.</p>
+                </div>
+                <a href="gestisci-tester.html" class="btn" style="display:inline-flex;align-items:center;justify-content:center;gap:10px;padding:14px 20px;text-decoration:none;white-space:normal;min-height:48px"><i class="fa-solid fa-user-gear" aria-hidden="true"></i> Gestisci tester</a>
+            </div>
+        </section>
         <div class="welcome-banner">
             <div class="welcome-text">
                 <h1 id="welcome-heading">Bentornato nel tuo Hub Cognitivo</h1>
@@ -400,7 +410,6 @@
                 <div id="panel-chevron"><i class="fa-solid fa-chevron-down"></i></div>
             </div>
             
-            <p><a href="gestisci-tester.html" style="color:#147f80;font-weight:600">Gestisci accessi di test (gestore)</a></p>
             <div id="panel-content-wrapper" class="panel-content-wrapper">
                 <div id="panel-content">
                     <div id="active-status-bar">
@@ -1035,7 +1044,7 @@
 
         await authReady;
         const clinicalMode=localStorage.getItem('hub_mode')==='clinical';
-        if(clinicalMode){try{await requireProfessional();document.getElementById('clinical-panel').style.display='block';}catch(error){localStorage.setItem('hub_mode','free_training');localStorage.removeItem('hub_selected_patient_id');location.replace('area-clinica.html');throw error;}}
+        if(clinicalMode){try{const professional=await requireProfessional();const testerPanel=document.getElementById('cl-tester-management');if(professional.uid==='eWoQhl1qwqVKRupDabTM6vfMyyI3'){testerPanel.hidden=false;testerPanel.style.display='block';}document.getElementById('clinical-panel').style.display='block';}catch(error){localStorage.setItem('hub_mode','free_training');localStorage.removeItem('hub_selected_patient_id');location.replace('area-clinica.html');throw error;}}
         const clinicalBase='cognilab/users/'+(auth.currentUser?.uid||'guest')+'/clinical/';
         const activeSessionRef = ref(db, clinicalBase+'sessione_attiva');
         if(clinicalMode)onValue(activeSessionRef, (snapshot) => {
