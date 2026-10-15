@@ -335,7 +335,7 @@
 <script src="shared/interface.js" defer></script>
 <link rel="stylesheet" href="shared/dashboard-icons.css?v=art2">
 <style>html.gym-access-pending body{visibility:hidden!important}</style><script>document.documentElement.classList.add('gym-access-pending');import('./shared/gym-gate.js').catch(()=>location.replace('accesso.html'));</script>
-<link rel="stylesheet" href="shared/responsive.css?v=devices1"></head>
+<link rel="stylesheet" href="shared/responsive.css?v=devices1"><link rel="stylesheet" href="shared/care-dashboard.css?v=care9"></head>
 <body data-cognilab="hub">
 
     <nav class="navbar">
@@ -376,6 +376,8 @@
             </div>
         </div>
         
+        <nav class="care-shortcuts" aria-label="Sezioni della palestra"><a href="#care-workspace">Programmi e pazienti</a><a href="#care-personal-progress">I progressi</a><a href="#care-exercise-catalog">Tutti gli esercizi</a></nav>
+        <section id="care-workspace" class="care-workspace" aria-label="Programmi e pazienti"></section>
         <div class="kpi-grid">
             <div class="kpi-card users">
                 <div class="kpi-icon"><i class="fa-solid fa-users"></i></div>
@@ -406,11 +408,11 @@
         <section id="cl-current-session" class="cl-progress" style="padding:24px;margin:24px 0;background:white;border-radius:20px;border:1px solid #dce7ed"></section>
         <div id="clinical-panel" style="display:none">
             <div class="panel-title" onclick="togglePanel()">
-                <h2><i class="fa-solid fa-user-doctor"></i> Area Clinica: Gestione Pazienti e Sessioni</h2>
+                <h2><i class="fa-solid fa-user-doctor"></i> Sessioni in studio · Anagrafica e attività</h2>
                 <div id="panel-chevron"><i class="fa-solid fa-chevron-down"></i></div>
             </div>
             
-            <div id="panel-content-wrapper" class="panel-content-wrapper">
+            <div id="panel-content-wrapper" class="panel-content-wrapper collapsed">
                 <div id="panel-content">
                     <div id="active-status-bar">
                         <div>
@@ -493,7 +495,7 @@
         </div>
 
         <!-- 1. ATTENZIONE -->
-        <section class="area-sezione area-attenzione">
+        <section id="care-exercise-catalog" class="area-sezione area-attenzione">
             <div class="area-header">
                 <i class="fa-solid fa-bullseye"></i>
                 <h2>Attenzione e Velocità di Elaborazione</h2>
@@ -1319,7 +1321,8 @@
         function tornaAllaHome() { window.top.location.href = 'esercizi.html'; }
     </script>
 <script type="module" src="shared/account.js?v=invitations1"></script>
-<script type="module" src="shared/dashboard.js?v=20261014-skip"></script>
+<script type="module" src="shared/dashboard.js?v=care9"></script>
+<script type="module" src="shared/care-dashboard.js?v=care9"></script>
 <script type="module" src="shared/session-summary.js"></script>
 <script src="shared/exercise-artwork.js?v=music4" defer></script>
 <script src="shared/dashboard-icons.js?v=art2" defer></script>

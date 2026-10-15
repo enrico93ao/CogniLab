@@ -89,6 +89,107 @@
           ".validate": "newData.isBoolean()"
         },
         ".read": "auth != null && auth.uid === 'eWoQhl1qwqVKRupDabTM6vfMyyI3' && root.child('cognilab/professionals').child(auth.uid).val() === true"
+      },
+      "careInvites": {
+        "$patient": {
+          ".read": "((auth != null && auth.token.firebase.sign_in_provider !== 'anonymous' && (root.child('cognilab/access/publicRegistrationOpen').val() === true || root.child('cognilab/testers').child(auth.uid).val() === true || root.child('cognilab/professionals').child(auth.uid).val() === true)) && auth.uid === $patient)",
+          "$professional": {
+            ".read": "(auth != null && auth.token.firebase.sign_in_provider !== 'anonymous' && root.child('cognilab/professionals').child(auth.uid).val() === true) && auth.uid === $professional",
+            ".write": "(auth != null && auth.token.firebase.sign_in_provider !== 'anonymous' && root.child('cognilab/professionals').child(auth.uid).val() === true) && auth.uid === $professional && auth.uid !== $patient && newData.exists()",
+            ".validate": "newData.hasChildren(['professionalName', 'createdAt'])",
+            "professionalName": {
+              ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 80"
+            },
+            "createdAt": {
+              ".validate": "newData.isNumber()"
+            },
+            "$other": {
+              ".validate": false
+            }
+          }
+        }
+      },
+      "careLinks": {
+        "$patient": {
+          ".read": "auth != null && auth.token.firebase.sign_in_provider !== 'anonymous' && auth.uid === $patient",
+          "$professional": {
+            ".read": "(auth != null && auth.token.firebase.sign_in_provider !== 'anonymous' && root.child('cognilab/professionals').child(auth.uid).val() === true) && auth.uid === $professional",
+            ".write": "auth != null && auth.token.firebase.sign_in_provider !== 'anonymous' && auth.uid === $patient && (!newData.exists() || ((auth != null && auth.token.firebase.sign_in_provider !== 'anonymous' && (root.child('cognilab/access/publicRegistrationOpen').val() === true || root.child('cognilab/testers').child(auth.uid).val() === true || root.child('cognilab/professionals').child(auth.uid).val() === true)) && root.child('cognilab/professionals').child($professional).val() === true && root.child('cognilab/careInvites').child($patient).child($professional).exists()))",
+            ".validate": "newData.val() === true"
+          }
+        }
+      },
+      "carePrograms": {
+        "$patient": {
+          ".read": "((auth != null && auth.token.firebase.sign_in_provider !== 'anonymous' && (root.child('cognilab/access/publicRegistrationOpen').val() === true || root.child('cognilab/testers').child(auth.uid).val() === true || root.child('cognilab/professionals').child(auth.uid).val() === true)) && auth.uid === $patient)",
+          "$program": {
+            ".read": "((auth != null && auth.token.firebase.sign_in_provider !== 'anonymous' && root.child('cognilab/professionals').child(auth.uid).val() === true) && root.child('cognilab/carePrograms').child($patient).child($program).child('professionalId').val() === auth.uid && root.child('cognilab/careLinks').child($patient).child(auth.uid).val() === true)",
+            ".write": "(auth != null && auth.token.firebase.sign_in_provider !== 'anonymous' && root.child('cognilab/professionals').child(auth.uid).val() === true) && !data.exists() && newData.exists() && newData.child('professionalId').val() === auth.uid && newData.child('status').val() === 'active' && root.child('cognilab/careLinks').child($patient).child(auth.uid).val() === true",
+            ".validate": "newData.hasChildren(['professionalId','professionalName','name','totalSessions','exercises','createdAt','status','version'])",
+            "professionalId": {
+              ".validate": "newData.isString() && (!data.exists() || newData.val() === data.val())"
+            },
+            "professionalName": {
+              ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 80"
+            },
+            "name": {
+              ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 80"
+            },
+            "instructions": {
+              ".validate": "newData.isString() && newData.val().length <= 1000"
+            },
+            "totalSessions": {
+              ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 60 && newData.val() % 1 === 0"
+            },
+            "exercises": {
+              ".validate": "newData.hasChild('0') && (!newData.hasChild('1') || newData.hasChild('0')) && (!newData.hasChild('2') || newData.hasChild('1')) && (!newData.hasChild('3') || newData.hasChild('2')) && (!newData.hasChild('4') || newData.hasChild('3')) && (!newData.hasChild('5') || newData.hasChild('4')) && (!newData.hasChild('6') || newData.hasChild('5')) && (!newData.hasChild('7') || newData.hasChild('6')) && (!newData.hasChild('8') || newData.hasChild('7')) && (!newData.hasChild('9') || newData.hasChild('8')) && (!newData.hasChild('10') || newData.hasChild('9')) && (!newData.hasChild('11') || newData.hasChild('10')) && (!newData.hasChild('12') || newData.hasChild('11')) && (!newData.hasChild('13') || newData.hasChild('12')) && (!newData.hasChild('14') || newData.hasChild('13')) && (!newData.hasChild('15') || newData.hasChild('14')) && (!newData.hasChild('16') || newData.hasChild('15')) && (!newData.hasChild('17') || newData.hasChild('16')) && (!newData.hasChild('18') || newData.hasChild('17')) && (!newData.hasChild('19') || newData.hasChild('18'))",
+              "$slot": {
+                ".validate": "$slot.matches(/^(0|[1-9]|1[0-9])$/) && newData.isString() && (newData.val() === 'il-pianoforte' || newData.val() === 'lista-della-spesa' || newData.val() === 'attenzione-alternata' || newData.val() === 'cancellazione-h' || newData.val() === 'cerchi-rossi' || newData.val() === 'conta-numeri-lettere' || newData.val() === 'doppio-compito' || newData.val() === 'semaforo-parole' || newData.val() === 'stroop-original' || newData.val() === 'calcolo-memoria' || newData.val() === 'inibizione-memoria' || newData.val() === 'memoria-lavoro-avanzato' || newData.val() === 'memoria-prosa' || newData.val() === 'memoria-visuospaziale-domande' || newData.val() === 'memoria-visuospaziale-numeri' || newData.val() === 'memoria-giardino' || newData.val() === 'contrario-ricorda' || newData.val() === 'cifrario' || newData.val() === 'n-back' || newData.val() === 'n-back-semantico' || newData.val() === 'relazioni-logiche' || newData.val() === 'rispondi-contrario' || newData.val() === 'set-shifting' || newData.val() === 'intruso-visivo' || newData.val() === 'catena-parole' || newData.val() === 'intruso-semantico' || newData.val() === 'torre-lettere' || newData.val() === 'riordina-frase' || newData.val() === 'riordina-lettere' || newData.val() === 'ordine-alfabetico' || newData.val() === 'esplorazione-visuospaziale' || newData.val() === 'memoria-rotante' || newData.val() === 'riconoscimento-base' || newData.val() === 'riconoscimento-visivo' || newData.val() === 'silhouette' || newData.val() === 'immagine-corrispondente' || newData.val() === 'orologio-invisibile' || newData.val() === 'orientamento')"
+              }
+            },
+            "createdAt": {
+              ".validate": "newData.isNumber()"
+            },
+            "status": {
+              ".write": "((auth != null && auth.token.firebase.sign_in_provider !== 'anonymous' && root.child('cognilab/professionals').child(auth.uid).val() === true) && root.child('cognilab/carePrograms').child($patient).child($program).child('professionalId').val() === auth.uid && root.child('cognilab/careLinks').child($patient).child(auth.uid).val() === true) && data.val() === 'active' && newData.val() === 'archived'",
+              ".validate": "newData.val() === 'active' || newData.val() === 'archived'"
+            },
+            "version": {
+              ".validate": "newData.val() === 1"
+            },
+            "$other": {
+              ".validate": false
+            }
+          }
+        }
+      },
+      "careSessions": {
+        "$patient": {
+          "$program": {
+            ".read": "(((auth != null && auth.token.firebase.sign_in_provider !== 'anonymous' && (root.child('cognilab/access/publicRegistrationOpen').val() === true || root.child('cognilab/testers').child(auth.uid).val() === true || root.child('cognilab/professionals').child(auth.uid).val() === true)) && auth.uid === $patient) && root.child('cognilab/careLinks').child($patient).child(root.child('cognilab/carePrograms').child($patient).child($program).child('professionalId').val()).val() === true) || ((auth != null && auth.token.firebase.sign_in_provider !== 'anonymous' && root.child('cognilab/professionals').child(auth.uid).val() === true) && root.child('cognilab/carePrograms').child($patient).child($program).child('professionalId').val() === auth.uid && root.child('cognilab/careLinks').child($patient).child(auth.uid).val() === true)",
+            "$session": {
+              ".write": "((auth != null && auth.token.firebase.sign_in_provider !== 'anonymous' && (root.child('cognilab/access/publicRegistrationOpen').val() === true || root.child('cognilab/testers').child(auth.uid).val() === true || root.child('cognilab/professionals').child(auth.uid).val() === true)) && auth.uid === $patient) && (root.child('cognilab/carePrograms').child($patient).child($program).child('status').val() === 'active' || (root.child('cognilab/carePrograms').child($patient).child($program).child('status').val() === 'archived' && data.exists())) && root.child('cognilab/careLinks').child($patient).child(root.child('cognilab/carePrograms').child($patient).child($program).child('professionalId').val()).val() === true && newData.exists()",
+              ".validate": "newData.hasChildren(['startedAt'])",
+              "startedAt": {
+                ".validate": "newData.isString() && newData.val().length <= 40"
+              },
+              "finishedAt": {
+                ".validate": "newData.isString() && newData.val().length <= 40"
+              },
+              "status": {
+                ".validate": "newData.val() === 'completed' || newData.val() === 'interrupted'"
+              },
+              "results": {
+                "$result": {
+                  ".validate": "newData.hasChildren(['id','exerciseId','programId','programOwnerId','programSlot','status','finishedAt']) && newData.child('id').val() === $result && newData.child('programId').val() === $program && newData.child('programOwnerId').val() === root.child('cognilab/carePrograms').child($patient).child($program).child('professionalId').val() && newData.child('sessionId').val() === $session && newData.child('programSlot').isString() && root.child('cognilab/carePrograms').child($patient).child($program).child('exercises').child(newData.child('programSlot').val()).val() === newData.child('exerciseId').val() && (newData.child('status').val() === 'completed' || newData.child('status').val() === 'interrupted')"
+                }
+              },
+              "$other": {
+                ".validate": false
+              }
+            }
+          }
+        }
       }
     },
     "cognilab_v2": {

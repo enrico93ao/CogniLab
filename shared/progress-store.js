@@ -1,3 +1,5 @@
+import {sessionProgress} from './care-model.mjs';
+import {withAccessTimeout} from './access-timeout.js';
 import {recordSessionResult} from './session-journal.js';
 import {requireProfessional} from './clinical-access.js';
 import {isPermissionDenied} from './firebase-errors.js';
@@ -29,9 +31,10 @@ export async function saveResult(input){
  if(!user)throw Object.assign(new Error('Accedi per salvare i risultati nel tuo account.'),{code:'login-required'});
  if(input?.sessionId&&!/^[a-z0-9-]{8,80}$/i.test(input.sessionId))throw Error('Invalid session');
  if(!input?.id||!/^[a-z0-9-]{8,80}$/i.test(input.id)||typeof input.exerciseId!=='string'||!input.startedAt||!input.finishedAt)throw Error('Invalid exercise result');
- const session=input.sessionId?{id:input.sessionId,startedAt:input.sessionStartedAt,patientId:input.patientId||null}:sessionFor(user.uid);
+ const session=input.sessionId?{id:input.sessionId,startedAt:input.sessionStartedAt,patientId:input.patientId||null,programId:input.programId,programOwnerId:input.programOwnerId,programSlot:input.programSlot}:sessionFor(user.uid);
  if(session.patientId)await requireProfessional();
  const result={...input,metrics:normalizeMetrics(input.metrics),sessionId:session.id,sessionStartedAt:session.startedAt,patientId:session.patientId||null};
+ if(!session.patientId&&session.programId&&(!session.programExercises||session.programExercises[Number(session.programSlot)]===input.exerciseId)){result.programId=session.programId;result.programOwnerId=session.programOwnerId;result.programSlot=String(session.programSlot);}
  const queue=pending(user.uid);queue[result.id]=result;localStorage.setItem(queueKey(user.uid),JSON.stringify(queue));
  recordSessionResult(user.uid,result,'pending');
  await ensurePrivateStorage();
@@ -42,18 +45,33 @@ export async function saveResult(input){
  values[`${base}${session.id}/results/${result.id}`]=result;
  values[`cognilab/activity/${user.uid}/${result.id}`]=result.status==='completed';
  await update(ref(db),values);
- recordSessionResult(user.uid,result,'saved');
+ let sharingState='none';
+ if(result.programId){try{await shareCareResult(user.uid,result);sharingState='saved';}catch{sharingState='pending';}}
+ recordSessionResult(user.uid,{...result,sharingState},'saved');
  const latest=pending(user.uid);delete latest[result.id];localStorage.setItem(queueKey(user.uid),JSON.stringify(latest));
- return result;
+ return {...result,sharingState};
 }
-export async function retryPending(){await authReady;const user=auth.currentUser;if(!user)return;for(const result of Object.values(pending(user.uid)))await saveResult(result);}
+export async function retryPending(){await authReady;const user=auth.currentUser;if(!user)return;for(const result of Object.values(pending(user.uid)))await saveResult(result);let sharingError;for(const result of Object.values(pendingCare(user.uid))){try{await shareCareResult(user.uid,result);}catch(error){sharingError=error;}}if(sharingError)throw sharingError;}
+export function pendingCare(uid){try{return JSON.parse(localStorage.getItem('cognilab.carePending.'+uid))||{};}catch{return {};}}
+async function shareCareResult(uid,result){
+ if(auth.currentUser?.uid!==uid)throw Error('Account changed');
+ const key='cognilab.carePending.'+uid,queue=pendingCare(uid);queue[result.id]=result;localStorage.setItem(key,JSON.stringify(queue));
+ const values={},base=`cognilab/careSessions/${uid}/${result.programId}/${result.sessionId}`;
+ values[base+'/startedAt']=result.sessionStartedAt;values[base+'/results/'+result.id]=result;
+ await withAccessTimeout(update(ref(db),values),'care-timeout',10000);
+ const latest=pendingCare(uid);delete latest[result.id];localStorage.setItem(key,JSON.stringify(latest));
+}
 export async function finishSession(){
- await authReady;const user=auth.currentUser;if(!user)return;await ensurePrivateStorage();const session=sessionFor(user.uid);
+ await authReady;const user=auth.currentUser;if(!user)return;
+ let existing;try{existing=JSON.parse(sessionStorage.getItem('cognilab.session.'+user.uid));}catch{}if(!existing?.id)return;
+ await ensurePrivateStorage();const session=sessionFor(user.uid);
  if(session.patientId||localStorage.getItem('hub_mode')==='clinical')await requireProfessional();
  const base=`cognilab/users/${user.uid}/`+(session.patientId?'clinical/sessions/':'sessions/');const values={};
  values[`${base}${session.id}/status`]='completed';values[`${base}${session.id}/finishedAt`]=new Date().toISOString();
  if(localStorage.getItem('hub_mode')==='clinical')values[`cognilab/users/${user.uid}/clinical/sessione_attiva`]=null;
- await update(ref(db),values);sessionStorage.removeItem('cognilab.session.'+user.uid);sessionStorage.removeItem('cognilab.plan.'+user.uid);
+ await update(ref(db),values);
+ if(session.programId&&session.programExercises){try{const path=`cognilab/careSessions/${user.uid}/${session.programId}/${session.id}`;const saved=(await withAccessTimeout(get(ref(db,path)),'care-timeout')).val()||{};if(saved.startedAt)await withAccessTimeout(update(ref(db,path),{status:sessionProgress({exercises:session.programExercises},saved).complete?'completed':'interrupted',finishedAt:new Date().toISOString()}),'care-timeout');}catch{/* Personal session closure succeeds even if sharing was revoked. */}}
+ sessionStorage.removeItem('cognilab.session.'+user.uid);sessionStorage.removeItem('cognilab.plan.'+user.uid);
 }
 export async function saveFeedback(ratings,options={}){
  if(![ratings.q1,ratings.q2,ratings.q3].every(v=>Number.isInteger(v)&&v>=1&&v<=5))throw Error('Rispondi a tutte le domande.');

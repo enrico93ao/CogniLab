@@ -1,3 +1,4 @@
+import {createProgressView} from './progress-view.js';
 import {requireProfessional} from './clinical-access.js';
 import {errorCode} from './firebase-errors.js';
 import {onAuthStateChanged} from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js';
@@ -61,41 +62,17 @@ window.terminaSessioneGlobale=()=>{
 };
 window.tornaAllaHome=()=>{location.href='esercizi.html';};
 if(new URLSearchParams(location.search).get('feedback')==='1')window.terminaSessioneGlobale();
-const progress=document.createElement('section');progress.className='cl-progress';
-progress.innerHTML='<h2>I miei progressi</h2><p id="cl-progress-status" role="status">Accedi per visualizzare le sessioni salvate nel tuo account.</p><label for="cl-progress-exercise">Esercizio e impostazioni confrontabili</label><br><select id="cl-progress-exercise" hidden></select><p id="cl-trend"></p><div id="cl-progress-chart"></div><div class="cl-table-scroll"><table><thead><tr><th scope="col">Data</th><th scope="col">Esercizio</th><th scope="col">Risultato</th><th scope="col">Durata</th><th scope="col">Stato</th></tr></thead><tbody id="cl-progress-rows"></tbody></table></div>';
-notice.after(progress);
-const selector=document.getElementById('cl-progress-exercise');let allResults=[],rawResults=[];
-const svgNS='http://www.w3.org/2000/svg';
-function draw(){
- const series=comparableSeries(allResults,selector.value).filter(r=>measurement(r)).slice(-20);
- const host=document.getElementById('cl-progress-chart');host.replaceChildren();const trend=document.getElementById('cl-trend');trend.textContent='';
- if(series.length<2){trend.textContent='Servono almeno due risultati dello stesso esercizio con le stesse impostazioni per mostrare l’andamento.';return;}
- const last=measurement(series.at(-1));const comparable=series.filter(r=>measurement(r).unit===last.unit&&measurement(r).direction===last.direction);
- if(comparable.length<2)return;
- const delta=change(comparable[0],comparable.at(-1));trend.textContent=`Andamento ${delta.trend}: ${delta.delta>0?'+':''}${delta.delta.toFixed(1)} ${delta.unit==='%'?'punti percentuali':delta.unit}. Confronto tra risultati a impostazioni uguali, senza interpretazione clinica automatica.`;
- const svg=document.createElementNS(svgNS,'svg');svg.setAttribute('viewBox','0 0 700 280');svg.setAttribute('role','img');svg.setAttribute('aria-label','Andamento cronologico: '+trend.textContent);
- const values=comparable.map(r=>measurement(r).value);let min=last.unit==='%'?0:Math.min(...values),max=last.unit==='%'?100:Math.max(...values);if(max===min){max+=1;min=Math.max(0,min-1);}
- const points=values.map((v,i)=>({x:65+i*600/(values.length-1),y:220-(v-min)*170/(max-min)}));
- const line=document.createElementNS(svgNS,'polyline');line.setAttribute('points',points.map(p=>`${p.x},${p.y}`).join(' '));line.setAttribute('fill','none');line.setAttribute('stroke','#087e8b');line.setAttribute('stroke-width','3');svg.append(line);
- const text=(x,y,value)=>{const el=document.createElementNS(svgNS,'text');el.setAttribute('x',x);el.setAttribute('y',y);el.setAttribute('font-size','13');el.setAttribute('fill','#536d77');el.textContent=value;svg.append(el);};
- text(5,52,max.toFixed(1)+' '+last.unit);text(5,222,min.toFixed(1)+' '+last.unit);text(65,255,new Date(comparable[0].finishedAt).toLocaleDateString('it-IT'));text(575,255,new Date(comparable.at(-1).finishedAt).toLocaleDateString('it-IT'));
- points.forEach((point,i)=>{const circle=document.createElementNS(svgNS,'circle');circle.setAttribute('cx',point.x);circle.setAttribute('cy',point.y);circle.setAttribute('r','5');circle.setAttribute('fill','#087e8b');const title=document.createElementNS(svgNS,'title');title.textContent=new Date(comparable[i].finishedAt).toLocaleString('it-IT')+': '+values[i]+' '+last.unit;circle.append(title);svg.append(circle);});host.append(svg);
-}
-selector.onchange=draw;
+const progress=document.createElement('section');progress.id='care-personal-progress';notice.after(progress);
+const progressView=createProgressView(progress);progress.querySelector('.care-load-status').id='cl-progress-status';
+let rawResults=[];
 function renderResults(source){
  rawResults=source;const patientId=localStorage.getItem('hub_mode')==='clinical'?document.getElementById('patient-select')?.value:null;
  const results=source.filter(r=>patientId?r.patientId===patientId:!r.patientId);
- document.querySelector('.cl-progress h2').textContent=patientId?'Andamento del paziente':'I miei progressi';
- allResults=results;document.getElementById('cl-progress-status').textContent=results.length?`${results.length} risultati salvati. I confronti distinguono esercizio e impostazioni.`:'Nessun risultato salvato. Completa un esercizio per iniziare il tuo storico.';
- const selected=selector.value;selector.replaceChildren();const groups=new Map();
- for(const result of results.filter(r=>r.status==='completed'))groups.set(groupKey(result),result);
- for(const [key,result] of groups){const option=document.createElement('option');option.value=key;option.textContent=result.title+' — '+(Object.entries(result.settings||{}).map(([k,v])=>`${k}: ${v}`).join(', ')||'impostazioni predefinite');selector.append(option);}
- selector.hidden=!groups.size;if(groups.has(selected))selector.value=selected;
- const rows=document.getElementById('cl-progress-rows');rows.replaceChildren();
- for(const result of [...results].sort((a,b)=>b.finishedAt.localeCompare(a.finishedAt)).slice(0,100)){const row=document.createElement('tr');const value=measurement(result);for(const content of [new Date(result.finishedAt).toLocaleString('it-IT'),result.title,value?`${value.value.toFixed(1)} ${value.unit}`:'Non misurato',Math.round(result.durationMs/1000)+' s',result.status==='completed'?'Completato':'Interrotto']){const cell=document.createElement('td');cell.textContent=content;row.append(cell);}rows.append(row);}draw();
+ progress.hidden=localStorage.getItem('hub_mode')==='clinical'&&!patientId;
+ progressView.setTitle(patientId?'Progressi delle sessioni in studio':'I miei progressi');progressView.render(results);
 }
 let stops=[],presenceRef;
-function unavailable(element,error){element.textContent='—';notice.hidden=false;notice.textContent=friendlyError(error);}
+function unavailable(element,error){if(element.id==='cl-progress-status'){element.textContent='Lo storico non è disponibile. '+friendlyError(error);progress.querySelectorAll('.care-stat strong').forEach(n=>n.textContent='—');}else element.textContent='—';notice.hidden=false;notice.textContent=friendlyError(error);}
 onAuthStateChanged(auth,async user=>{
  stops.forEach(stop=>stop());stops=[];if(presenceRef){remove(presenceRef).catch(()=>{});presenceRef=null;}
  document.getElementById('kpi-utenti').textContent='—';document.getElementById('kpi-svolti').textContent='—';document.getElementById('kpi-media-stelle').textContent='—';renderResults([]);

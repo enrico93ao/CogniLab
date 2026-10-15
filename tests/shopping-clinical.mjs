@@ -16,7 +16,7 @@ for(const [level,config] of Object.entries(LEVELS)){
 }
 assert.deepEqual(scoreShopping(['Pane','Latte'],['Pane','Pane','Riso']),{correct:1,total:2,errors:1,omissions:1});
 assert.throws(()=>createShoppingRound('missing'));
-const code=source('shared/clinical-access.js').replace(/^import .*;\s*$/gm,'').replace(/\bexport /g,'');
+const code=source('shared/access-timeout.js').replace(/\bexport /g,'')+'\n'+source('shared/clinical-access.js').replace(/^import .*;\s*$/gm,'').replace(/\bexport /g,'');
 const auth={currentUser:null};let approved=false,reads=0;
 const check=new Function('auth','authReady','db','ref','get',code+';return requireProfessional;')(auth,Promise.resolve(),{},(_db,path)=>path,async()=>{reads++;return {val:()=>approved};});
 await assert.rejects(check,error=>error.code==='clinical-login-required');
