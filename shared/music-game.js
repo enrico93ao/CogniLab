@@ -2,7 +2,7 @@ import {NOTES,FREQUENCIES,cellFrequency,melody,extendMelody} from './training-mo
 const el=id=>document.getElementById(id),piano=document.body.dataset.instrument==='piano';
 let audio,playing=false,accepting=false,generation=0,deadline=0,timer,phrase=[],expected=[],cursor=0,length=1,roundErrors=0,stats;
 const keys=[];
-function tone(index){try{audio??=new (window.AudioContext||window.webkitAudioContext)();audio.resume().catch(()=>{});const now=audio.currentTime,osc=audio.createOscillator(),gain=audio.createGain();osc.type='triangle';osc.frequency.value=piano?FREQUENCIES[index]:cellFrequency(index);gain.gain.setValueAtTime(0,now);gain.gain.linearRampToValueAtTime(.16,now+.015);gain.gain.exponentialRampToValueAtTime(.001,now+.48);osc.connect(gain);gain.connect(audio.destination);osc.start(now);osc.stop(now+.5);}catch{el('audio-note').hidden=false;}}
+function tone(index,step=0){try{audio??=new (window.AudioContext||window.webkitAudioContext)();audio.resume().catch(()=>{});const now=audio.currentTime,osc=audio.createOscillator(),gain=audio.createGain();osc.type='triangle';osc.frequency.value=piano?FREQUENCIES[index]:cellFrequency(step);gain.gain.setValueAtTime(0,now);gain.gain.linearRampToValueAtTime(.16,now+.015);gain.gain.exponentialRampToValueAtTime(.001,now+.48);osc.connect(gain);gain.connect(audio.destination);osc.start(now);osc.stop(now+.5);}catch{el('audio-note').hidden=false;}}
 function clearKeys(){keys.forEach(k=>k.classList.remove('active','correct','wrong'));}
 function valid(token){return playing&&token===generation&&Date.now()<deadline;}
 const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
@@ -10,14 +10,14 @@ function show(id){for(const section of ['setup','music-game','music-results'])el
 async function demonstrate(token){
  accepting=false;cursor=0;clearKeys();el('music-status').textContent=roundErrors?'Riguarda la stessa sequenza, poi riprova.':'Guarda e ascolta la sequenza.';
  await sleep(650);if(!valid(token))return;
- for(const index of phrase){if(!valid(token))return;keys[index].classList.add('active');tone(index);await sleep(460);keys[index].classList.remove('active');if(!valid(token))return;await sleep(150);}
+ for(const [step,index] of phrase.entries()){if(!valid(token))return;keys[index].classList.add('active');tone(index,step);await sleep(460);keys[index].classList.remove('active');if(!valid(token))return;await sleep(150);}
  if(!valid(token))return;accepting=true;el('music-status').textContent=el('music-order')?.value==='inverse'?'Ripeti la sequenza al contrario.':'Ora tocca a te: ripeti la sequenza.';
 }
 function newRound(){if(!playing)return;roundErrors=0;stats.roundsStarted++;phrase=piano?(phrase.length?extendMelody(phrase).slice(0,length):melody(length)):Array.from({length},()=>Math.floor(Math.random()*16));expected=el('music-order')?.value==='inverse'?[...phrase].reverse():[...phrase];el('music-span').textContent=length+' '+(length===1?'nota':'note');demonstrate(generation);}
 async function press(index){
  if(!playing||!accepting)return;
  if(Date.now()>=deadline){finish();return;}
- const token=generation;tone(index);clearKeys();
+ const token=generation;tone(index,el('music-order')?.value==='inverse'?phrase.length-1-cursor:cursor);clearKeys();
  if(index!==expected[cursor]){stats.errors++;roundErrors++;accepting=false;keys[index].classList.add('wrong');el('music-status').textContent='Riproviamo insieme: ascolta di nuovo la stessa sequenza.';await sleep(850);if(valid(token))demonstrate(token);return;}
  stats.correctNotes++;keys[index].classList.add('active');cursor++;
  if(cursor<expected.length){await sleep(180);if(valid(token))keys[index].classList.remove('active');return;}
@@ -29,7 +29,7 @@ async function press(index){
 const count=piano?8:16,host=el('music-keys');
 for(let i=0;i<count;i++){
  const key=document.createElement('button');key.type='button';key.className=piano?'piano-key':'garden-cell';
- key.setAttribute('aria-label',piano?NOTES[i]+' · tasto '+(i+1):'Casella '+(i+1)+' · '+NOTES[i%7]);
+ key.setAttribute('aria-label',piano?NOTES[i]+' · tasto '+(i+1):'Casella '+(i+1));
  const name=document.createElement('span');name.textContent=piano?NOTES[i]:String(i+1);key.append(name);
  if(piano){const n=document.createElement('span');n.className='key-number';n.textContent=i+1;key.append(n);}
  key.onclick=()=>press(i);host.append(key);keys.push(key);

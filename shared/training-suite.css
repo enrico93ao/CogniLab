@@ -45,3 +45,7 @@ body.cl-task-running.suite .suite-main{width:100%;max-width:1300px;padding-top:1
 @media(max-width:680px){.suite-main{padding:14px}.suite-hero{padding:24px 20px;border-radius:20px}.suite-mark{display:none}.suite-panel{padding:20px 16px}.suite-config{grid-template-columns:1fr;gap:18px}.suite-hud{padding:12px;gap:10px}.garden-grid{width:min(100%,480px)}.piano-case{padding:18px 8px 12px}.cl-suite-legacy #start-screen,.cl-suite-legacy #main-menu{padding:12px}.cl-suite-legacy #start-screen>div,.cl-suite-legacy #main-menu>div{padding:18px!important}.cl-suite-legacy #instruction-banner{top:76px;padding:12px;font-size:1.1rem}.suite-slots{gap:8px}.suite-slot{flex-basis:100px}.suite-actions>*{flex:1 1 180px}}
 @media(prefers-reduced-motion:reduce){.suite *{transition:none!important;animation:none!important}}
 @media(prefers-reduced-motion:reduce){.cl-suite-legacy #flashing-bar{animation:none!important;opacity:.5}}
+/* Fit the garden to the actual iframe height, not a fixed desktop canvas. */
+body.cl-task-running.suite[data-instrument='garden'] .suite-top{display:none}
+body.cl-task-running.suite[data-instrument='garden'] .garden-grid{width:max(220px,min(100%,640px,calc(100dvh - 230px)));margin:14px auto}
+@media(max-height:650px){body.cl-task-running.suite[data-instrument='garden'] .suite-hud{padding:10px 14px;margin-bottom:12px}body.cl-task-running.suite[data-instrument='garden'] .suite-live{margin:12px 0}}

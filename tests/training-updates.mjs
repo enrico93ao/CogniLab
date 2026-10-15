@@ -42,9 +42,11 @@ function clock(w){let now=0,id=0;const jobs=new Map();w.Date.now=()=>now;w.setTi
 }
 // Garden inverse recall and manual finish use the same safe timed controller.
 {
- const p=page('Memoria visuospaziale il Giardino.html'),w=p.w,advance=clock(w);Object.assign(w,model);let index=0;w.Math.random=()=>[.01,.08,.14][index++%3];
+ const p=page('Memoria visuospaziale il Giardino.html'),w=p.w,advance=clock(w);Object.assign(w,model);let index=0;w.Math.random=()=>[.73,.16,.92][index++%3];
+ const tones=[];w.AudioContext=class{currentTime=0;resume(){return Promise.resolve();}close(){return Promise.resolve();}createOscillator(){return {frequency:{set value(v){tones.push(v);}},connect(){},start(){},stop(){}};}createGain(){return {gain:{setValueAtTime(){},linearRampToValueAtTime(){},exponentialRampToValueAtTime(){}},connect(){}};}};
  evaluate(p,'shared/music-game.js');w.document.getElementById('music-order').value='inverse';w.document.getElementById('music-start').click();await advance(2480);
- const keys=w.document.querySelectorAll('.garden-cell');assert.equal(keys.length,16);for(const i of [2,1,0])keys[i].click();await advance(850);assert.equal(w.document.getElementById('music-count').textContent,'1');
+ assert.deepEqual(tones,model.FREQUENCIES.slice(0,3));
+ const keys=w.document.querySelectorAll('.garden-cell');assert.equal(keys.length,16);for(const i of [14,2,11])keys[i].click();assert.deepEqual(tones.slice(3),model.FREQUENCIES.slice(0,3).reverse());await advance(850);assert.equal(w.document.getElementById('music-count').textContent,'1');
  w.document.getElementById('music-finish').click();assert.equal(p.saved.length,1);assert.equal(p.saved[0].sequencesCompleted,1);await advance(3000);assert.equal(w.document.querySelectorAll('.garden-cell.active').length,0);w.close();
 }
 // Actual exploration controller: triangle shifting target, cue side in base
@@ -73,12 +75,15 @@ function clock(w){let now=0,id=0;const jobs=new Map();w.Date.now=()=>now;w.setTi
  assert.equal(p.saved.length,1);assert.equal(p.saved[0].errors,1);assert.equal(p.saved[0].activitiesCompleted,8);assert.equal(p.saved[0].total,p.saved[0].correct+1);w.close();
 }
 // Legacy controller execution: all combinations of base trail and direction.
-for(const type of ['letters','numbers'])for(const inverse of [false,true])for(const moving of [false,true]){
+const secondary={alpha:'ABCDEFGHIJKLM'.split(''),reverse:'ZYXWVUTSRQPON'.split(''),months:['Gen','Feb','Mar','Apr','Mag','Giu','Lug','Ago','Set'],days:['Lun','Mar','Mer','Gio','Ven','Sab','Dom','Lun','Mar'],romans:['I','II','III','IV','V','VI','VII','VIII','IX'],compass:['N','E','S','O','NE','SE','SO','NO','N']};
+for(const type of ['letters','numbers',...Object.keys(secondary)])for(const inverse of [false,true])for(const moving of [false,true]){
  const p=page('Attenzione alternata.html'),w=p.w;clock(w);w.requestAnimationFrame=()=>1;w.cancelAnimationFrame=()=>{};
  for(const script of w.document.querySelectorAll('script:not([src]):not([type="module"])'))w.eval(script.textContent);
  w.selectType(type);w.document.getElementById('trail-order').value=inverse?'inverse':'direct';w.startGame(moving);
- const nodes=[...w.document.querySelectorAll('.node')];assert.equal(nodes.length,type==='letters'?16:20);
- assert.deepEqual(nodes.map(n=>n.innerText),model.trailSequence(type,inverse));
- for(const node of nodes)node.dispatchEvent(new w.Event('pointerdown',{cancelable:true}));assert.equal(p.saved.length,1);assert.equal(p.saved[0].errors,0);w.close();
+ const nodes=[...w.document.querySelectorAll('.node')];assert.equal(nodes.length,model.trailSequence(type,inverse,secondary[type]).length);
+ assert.deepEqual(nodes.map(n=>n.innerText),model.trailSequence(type,inverse,secondary[type]));
+ nodes[0].dispatchEvent(new w.Event('pointerdown',{cancelable:true}));
+ w.innerHeight=900;w.dispatchEvent(new w.Event('resize'));assert.equal(w.document.getElementById('main-menu').classList.contains('hidden'),true);assert.equal(w.document.querySelectorAll('.node.correct').length,1);assert.equal(w.document.querySelectorAll('.node').length,nodes.length);
+ for(const node of nodes.slice(1))node.dispatchEvent(new w.Event('pointerdown',{cancelable:true}));assert.equal(p.saved.length,1);assert.equal(p.saved[0].errors,0);w.close();
 }
-console.log('PASS: 8 trail configurations; three randomized shifting targets; calendar/leap-year boundaries; real orientation completion; piano exact retry, progressive length and timeout cancellation.');
+console.log('PASS: 32 trail configurations retain progress on resize; C-major audio sequence verified; three randomized shifting targets; calendar/leap-year boundaries; real orientation completion; piano exact retry, progressive length and timeout cancellation.');

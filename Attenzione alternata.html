@@ -161,7 +161,7 @@
 <script src="shared/interface.js" defer></script>
 <script>window.CogniLabExercise={"id":"attenzione-alternata","title":"Attenzione alternata","category":"Attenzione","stimulusVersion":"training4","setup":"main-menu"};</script>
 <script src="shared/exercise-runtime.js"></script>
-<link rel="stylesheet" href="shared/training-suite.css?v=training4"><script type="module">import * as training from "./shared/training-model.mjs";window.CLTraining=training;</script></head>
+<link rel="stylesheet" href="shared/training-suite.css?v=training4"><script type="module">import * as training from "./shared/training-model.mjs?v=resize5";window.CLTraining=training;</script></head>
 <body data-cognilab="exercise" class="cl-suite-legacy">
 
     <!-- Menu Iniziale -->
@@ -348,15 +348,10 @@
             const w = window.innerWidth;
             const h = window.innerHeight;
 
-            const top=104,bottom=12;const available=Math.max(180,h-top-bottom);
-            const columns=Math.max(3,Math.ceil(Math.sqrt(sequence.length*w/available)));
-            const rows=Math.ceil(sequence.length/columns);
-            const cellW=w/columns,cellH=available/rows;
-            const size=Math.max(32,Math.min(74,cellW-12,cellH-12));
-            const radius=size/2;document.documentElement.style.setProperty('--node-size',size+'px');
-            const slots=window.CLTraining.shuffle(Array.from({length:columns*rows},(_,i)=>i));
+            const layout=window.CLTraining.trailLayout(sequence.length,w,h);
+            const size=layout.size,radius=size/2;document.documentElement.style.setProperty('--node-size',size+'px');
             sequence.forEach((label,index)=>{
-                const slot=slots[index],x=(slot%columns+.5)*cellW,y=top+(Math.floor(slot/columns)+.5)*cellH;
+                const {x,y}=layout.points[index];
                 const el = document.createElement('div');
                 el.className = 'node';el.tabIndex=0;el.setAttribute('role','button');el.setAttribute('aria-label',label);el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();handleNodeClick(nodeData);}});
                 if (index === 0 && state.showHint) el.classList.add('hint-pulse');
@@ -515,12 +510,17 @@
             resultsOverlay.classList.add('hidden');
         };
 
-        // Gestione del ridimensionamento schermo per mantenere giocabilità senza crash
+        // The shell resizes the iframe when it enters focus mode. Reflow the
+        // same trial without clearing its sequence, timer, answers or errors.
         window.addEventListener('resize', () => {
-            if (state.isPlaying) {
-                resetGame();
-            }
+            if(!state.isPlaying||!state.nodes.length)return;
+            const layout=window.CLTraining.trailLayout(state.nodes.length,innerWidth,innerHeight);
+            document.documentElement.style.setProperty('--node-size',layout.size+'px');
+            state.nodes.forEach((node,index)=>{
+                Object.assign(node,layout.points[index]);
+                node.el.style.left=(node.x-layout.size/2)+'px';
+                node.el.style.top=(node.y-layout.size/2)+'px';
+            });
+            state.nodes.forEach(node=>{if(node.line)updateLinePos(node.line,node,node.targetNode);});
         });
-    </script>
-</body>
-</html>
+    </script></body></html>

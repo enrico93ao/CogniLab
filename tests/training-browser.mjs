@@ -14,7 +14,7 @@ try{
  const context=await browser.newContext();
  // Layout fixtures bypass Firebase authentication and result writes; actual
  // access and persistence are verified by their separate regression tests.
- await context.route('**/shared/exercise-runtime.js',route=>route.fulfill({contentType:'text/javascript',body:`window.CogniLabGymAuthorized=true;window.qaSaved=[];window.CogniLabRun={begin(){document.body.classList.add('cl-task-running')},complete(m){window.qaSaved.push(m);document.body.classList.remove('cl-task-running')},measure:f=>f(),waitForSave:async()=>{},abort(){document.body.classList.remove('cl-task-running')}};`}));
+ await context.route('**/shared/exercise-runtime.js',route=>route.fulfill({contentType:'text/javascript',body:`window.CogniLabGymAuthorized=true;window.qaSaved=[];function lifecycle(running){document.body.classList.toggle('cl-task-running',running);if(parent!==window)parent.postMessage({type:'cognilab-exercise-state',running},location.origin)}window.CogniLabRun={begin(){lifecycle(true)},complete(m){window.qaSaved.push(m);lifecycle(false)},measure:f=>f(),waitForSave:async()=>{},abort(){lifecycle(false)}};`}));
  await context.route('https://**',route=>{if(route.request().url().startsWith('https://cdn.tailwindcss.com')&&process.env.COGNILAB_QA_TAILWIND){const css=fs.readFileSync(process.env.COGNILAB_QA_TAILWIND,'utf8');return route.fulfill({contentType:'text/javascript',body:`const style=document.createElement('style');style.textContent=${JSON.stringify(css)};document.head.append(style);`});}return route.abort();});
  const page=await context.newPage();const errors=[];page.on('pageerror',error=>errors.push(error.message));
  const files=['Esplorazione visuospaziale multilivello.html','Attenzione alternata.html','Orientamento temporale-spaziale.html','Memoria visuospaziale il Giardino.html','Il pianoforte.html'];
@@ -33,5 +33,15 @@ try{
    if(process.env.COGNILAB_QA_SCREENSHOTS)await page.screenshot({path:process.env.COGNILAB_QA_SCREENSHOTS+'/'+width+'-'+index+'-game.png',fullPage:true});
   }
  }
- assert.deepEqual(errors,[]);console.log('PASS: five exercise menus and play areas at phone, tablet and desktop widths; centered target instruction; bounded stimuli and non-overlapping trail nodes; no browser script errors.');
+ await context.route('**/qa-host.html',route=>route.fulfill({contentType:'text/html',body:`<!doctype html><html><body style="margin:0"><iframe title="Exercise" style="display:block;width:100%;height:420px;border:0" src="Attenzione%20alternata.html"></iframe><script>onmessage=event=>{if(event.data?.type==='cognilab-exercise-state')document.querySelector('iframe').style.height=(event.data.running?innerHeight-40:420)+'px'}</script></body></html>`}));
+ await page.setViewportSize({width:1280,height:768});
+ for(const type of ['letters','numbers','alpha','reverse','romans','months','days','compass'])for(const moving of [false,true]){
+  await page.goto(base+'qa-host.html');const frame=page.frameLocator('iframe');await frame.locator('#type-'+type).click();await frame.locator('#trail-order').selectOption('inverse');await frame.getByText(moving?'MODALITÀ DINAMICA':'MODALITÀ STATICA',{exact:true}).click();await page.waitForTimeout(180);
+  assert.ok(await frame.locator('.node').count());assert.equal(await frame.locator('#main-menu').isVisible(),false,'iframe resize reset '+type);
+  await page.setViewportSize({width:1200,height:700});await page.waitForTimeout(80);assert.equal(await frame.locator('#main-menu').isVisible(),false,'viewport resize reset '+type);
+ }
+ for(const [width,height] of [[1280,600],[1366,768],[1024,600]]){
+  await page.setViewportSize({width,height});await page.goto(base+encodeURIComponent('Memoria visuospaziale il Giardino.html'));await page.locator('#music-start').click();await page.waitForTimeout(100);const grid=await page.locator('.garden-grid').boundingBox();assert.ok(grid.y+grid.height<=height,'garden exceeds desktop window '+width+'x'+height);assert.ok(await page.locator('#music-finish').isVisible());
+ }
+ assert.deepEqual(errors,[]);console.log('PASS: responsive layouts; all trail modes survive shell iframe and window resizing; garden fits standard desktop heights; no browser script errors.');
 }finally{await browser.close();await new Promise(resolve=>server.close(resolve));}
