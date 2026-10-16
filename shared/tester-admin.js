@@ -10,13 +10,13 @@ async function requireManager(){const user=await requireProfessional();if(user.u
 const permissionError=error=>String(error?.code||error?.message).toLowerCase().includes('permission');
 function message(error){
  if(permissionError(error))return 'Le regole Firebase non consentono ancora la gestione dei tester. Pubblica il file di regole aggiornato in Realtime Database → Rules, poi riprova.';
- if(error.code==='manager-required')return error.message;
+ if(error.code==='manager-required')return 'Questo account non corrisponde al super user abilitato. Account attuale: '+(auth.currentUser?.email||'email non disponibile')+'. Codice account: '+(auth.currentUser?.uid||'nessuno')+'. Accedi con l’account del gestore; se il problema persiste comunica questo codice al gestore.';
  if(error.code==='auth/email-already-in-use')return 'Questa email ha già un account. Usa “Account già creato”: il tester trova il suo codice provando ad accedere alla palestra.';
  if(error.code==='auth/admin-restricted-operation')return 'Firebase non consente di creare account dal sito. Crea l’utente in Authentication e abilitalo qui con il suo UID.';
  return friendlyError(error);
 }
 async function setAccess(uid,enabled){await requireManager();if(!/^[A-Za-z0-9_-]{1,128}$/.test(uid))throw Error('Codice tester non valido');await set(ref(db,'cognilab/testers/'+uid),enabled);}
-try{await requireManager();management.hidden=false;document.getElementById('permission').textContent='Accesso riservato al gestore Enrico.';status.textContent='Pronto. Per il primo utilizzo pubblica le regole Firebase aggiornate.';}catch(error){document.getElementById('permission').textContent='Accesso riservato al gestore.';status.textContent=message(error);}
+try{await requireManager();management.hidden=false;document.getElementById('permission').textContent='Accesso super user verificato: '+(auth.currentUser?.email||'Enrico')+'.';status.textContent='Pronto. Per il primo utilizzo pubblica le regole Firebase aggiornate.';}catch(error){document.getElementById('permission').textContent='Accesso riservato al gestore.';status.textContent=message(error);}
 document.getElementById('create-tester').onsubmit=async event=>{
  event.preventDefault();busy(true);status.textContent='Creazione dell’accesso…';let secondary,secondaryAuth,created,enabled=false;
  const form=event.currentTarget;
@@ -29,7 +29,7 @@ document.getElementById('create-tester').onsubmit=async event=>{
   created=(await createUserWithEmailAndPassword(secondaryAuth,form.elements.email.value.trim(),form.elements.password.value)).user;
   await setAccess(created.uid,true);enabled=true;
   document.querySelector('#enable-tester input').value=created.uid;
-  status.textContent='Tester creato e abilitato. Può entrare nella palestra con email e password assegnate. Il tuo accesso professionale resta attivo.';
+  status.textContent='Account paziente creato e abilitato. Può accedere alla palestra con email e password assegnate. Il tuo accesso professionale resta attivo.';
  }catch(error){
   status.textContent=message(error);
   if(created&&!enabled){try{await deleteUser(created);}catch{status.textContent+=' L’account è stato creato ma non abilitato. Per recuperarlo usa il codice: '+created.uid;}}
