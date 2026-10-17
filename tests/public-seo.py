@@ -27,7 +27,7 @@ class Page(HTMLParser):
 sitemap=ET.parse(root/'sitemap.xml').getroot()
 assert sitemap.tag=='{http://www.sitemaps.org/schemas/sitemap/0.9}urlset'
 urls=[node.text for node in sitemap.findall('{*}url/{*}loc')]
-assert len(urls)==len(set(urls))==19,urls
+assert len(urls)==len(set(urls))==23,urls
 assert urls[0]==base
 assert not any(unquote(url.removeprefix(base)) in ['accesso.html','esercizi.html','esercizio.html','Lista della spesa.html','gestisci-tester.html','riepilogo.html'] for url in urls)
 public_files={url.removeprefix(base) or 'index.html' for url in urls}
@@ -79,4 +79,4 @@ for name in ['esercizi.html','esercizio.html','Lista della spesa.html']:
  assert Page(root/name).meta['robots']=='noindex,follow',name
 assert pages['index.html'].meta['google-site-verification']=='bEkxlHc3_DURFJVy0Xt7UZ7wFnCF1w1vWFB7Qd3uOTo'
 assert 'http-equiv="refresh"' in (root/'catalogo-esercizi.html').read_text()
-print('PASS: 19 canonical public URLs, unique metadata, valid JSON-LD, 38 exercise cards, native links and fragments, no orphan pages, no Firebase dependency on new pages, private entry points noindex; verification token retained.')
+print('PASS: 23 canonical public URLs, unique metadata, valid JSON-LD, 38 exercise cards, native links and fragments, no orphan pages, no Firebase dependency on new pages, private entry points noindex; verification token retained.')

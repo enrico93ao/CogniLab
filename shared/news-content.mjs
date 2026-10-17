@@ -1,6 +1,8 @@
+import {wellbeingArticles} from './news-wellbeing-content.mjs';
 // Editorial content: public sources, no patient data or clinical outcome promises.
 const ref=n=>`<a href="#fonte-${n}" class="pub-cite" aria-label="Fonte ${n}">[${n}]</a>`;
 export const newsArticles=[
+...wellbeingArticles,
 {
  id:'disturbo-neurocognitivo-lieve-maggiore',file:'news-disturbo-neurocognitivo-lieve-maggiore.html',category:'Capire la diagnosi',title:'Disturbo neurocognitivo lieve e maggiore: che cosa cambia davvero?',description:'Le differenze tra disturbo neurocognitivo lieve e maggiore: autonomia, profilo cognitivo e valutazione clinica, oltre il singolo punteggio di memoria.',image:'neurocognitivo.jpg',alt:'Persona anziana davanti a una finestra, con un albero luminoso che sfuma nella nebbia',takeaway:'La distinzione centrale riguarda l’impatto delle difficoltà cognitive sull’indipendenza quotidiana. “Maggiore” non significa necessariamente “grave”.',
  sections:[

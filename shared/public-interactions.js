@@ -20,3 +20,15 @@
  });
  for(const button of document.querySelectorAll('[data-copy-mail]'))button.onclick=async()=>{const host=button.closest('.pub-mail-result'),text=host.querySelector('[data-mail-copy]'),status=host.querySelector('[data-copy-status]');try{await navigator.clipboard.writeText(text.value);status.textContent='Testo copiato.';}catch{text.focus();text.select();status.textContent='Seleziona e copia il testo con i comandi del dispositivo.';}};
 })();
+
+(()=>{
+ const menu=document.querySelector('#public-main-nav'),button=document.querySelector('.pub-menu-toggle');
+ if(!menu||!button)return;
+ document.documentElement.classList.add('pub-menu-ready');button.hidden=false;
+ const close=()=>{menu.classList.remove('is-open');button.setAttribute('aria-expanded','false');};
+ button.addEventListener('click',()=>{const open=button.getAttribute('aria-expanded')!=='true';menu.classList.toggle('is-open',open);button.setAttribute('aria-expanded',String(open));});
+ const more=menu.querySelector('details');
+ document.addEventListener('keydown',event=>{if(event.key!=='Escape')return;if(more?.open){more.open=false;more.querySelector('summary').focus();}else if(button.getAttribute('aria-expanded')==='true'){close();button.focus();}});
+ document.addEventListener('click',event=>{if(more?.open&&!more.contains(event.target))more.open=false;});
+ window.matchMedia?.('(max-width: 1000px)').addEventListener?.('change',close);
+})();
