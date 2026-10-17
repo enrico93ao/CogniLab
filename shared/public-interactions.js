@@ -1,0 +1,22 @@
+(()=>{
+ 'use strict';
+ // Informational notice only: no optional trackers are loaded by these pages.
+ const key='cognilab.cookieNotice.v1';let seen=false;try{seen=sessionStorage.getItem(key)==='read';}catch{}
+ if(!seen){const notice=document.createElement('aside');notice.className='pub-cookie-notice';notice.setAttribute('aria-label','Cookie e privacy');const text=document.createElement('p');text.textContent='Queste pagine non usano tracciamento pubblicitario. La palestra utilizza dati tecnici per accesso, preferenze e sessioni. ';const link=document.createElement('a');link.href='cookie.html';link.textContent='Cookie e dati locali';text.append(link);const dismiss=document.createElement('button');dismiss.type='button';dismiss.textContent='Ho capito';dismiss.onclick=()=>{try{sessionStorage.setItem(key,'read');}catch{}notice.remove();};notice.append(text,dismiss);document.body.append(notice);}
+ for(const section of document.querySelectorAll('[data-carousel]')){
+  const track=section.querySelector('.pub-carousel-track'),controls=section.querySelector('.pub-carousel-controls'),toggle=section.querySelector('[data-carousel-toggle]');controls.hidden=false;
+  const reduced=window.matchMedia?.('(prefers-reduced-motion: reduce)');let paused=Boolean(reduced?.matches),timer,hover=false,focused=false;
+  function stop(){clearInterval(timer);timer=null;}
+  function move(direction){const end=track.scrollWidth-track.clientWidth;const amount=(track.querySelector('article')?.getBoundingClientRect().width||280)+18;track.scrollTo({left:direction>0&&track.scrollLeft>=end-4?0:Math.max(0,Math.min(end,track.scrollLeft+direction*amount)),behavior:reduced?.matches?'instant':'smooth'});}
+  function sync(){stop();toggle.textContent=paused?'Avvia lo scorrimento':'Ferma lo scorrimento';toggle.setAttribute('aria-pressed',String(paused));if(!paused&&!hover&&!focused&&!document.hidden)timer=setInterval(()=>move(1),4500);}
+  toggle.onclick=()=>{paused=!paused;sync();};section.querySelector('[data-carousel-prev]').onclick=()=>{paused=true;move(-1);sync();};section.querySelector('[data-carousel-next]').onclick=()=>{paused=true;move(1);sync();};
+  section.addEventListener('pointerenter',()=>{hover=true;sync();});section.addEventListener('pointerleave',()=>{hover=false;sync();});section.addEventListener('focusin',()=>{focused=true;sync();});section.addEventListener('focusout',event=>{focused=section.contains(event.relatedTarget);sync();});track.addEventListener('pointerdown',()=>{paused=true;sync();});track.addEventListener('keydown',event=>{if(['ArrowLeft','ArrowRight'].includes(event.key)){event.preventDefault();paused=true;move(event.key==='ArrowRight'?1:-1);sync();}});document.addEventListener('visibilitychange',sync);reduced?.addEventListener('change',()=>{if(reduced.matches)paused=true;sync();});window.addEventListener('pagehide',stop,{once:true});sync();
+ }
+ for(const form of document.querySelectorAll('[data-mail-form]'))form.addEventListener('submit',event=>{
+  event.preventDefault();if(!form.reportValidity())return;const data=new FormData(form),review=form.dataset.mailForm==='review',clean=name=>String(data.get(name)||'').trim().replace(/[\r\n]+/g,' ');
+  const subject=review?'CogniLab · Recensione proposta':'CogniLab · Richiesta di informazioni';
+  const body=review?`Nome pubblico: ${clean('nomePubblico')}\nEmail privata: ${clean('email')}\nValutazione: ${clean('stelle')}/5\n\n${String(data.get('commento')||'').trim()}\n\nAutorizzo la pubblicazione di nome pubblico, voto e commento su CogniLab. Ho letto l’informativa privacy. Posso chiedere la rimozione al gestore.`:`Nome: ${clean('nome')}\nCognome: ${clean('cognome')}\nEmail di risposta: ${clean('email')}\n\n${String(data.get('messaggio')||'').trim()}\n\nHo letto l’informativa privacy di CogniLab.`;
+  const result=form.parentElement.querySelector('.pub-mail-result');result.hidden=false;result.querySelector('[data-mail-copy]').value=subject+'\n\n'+body;result.focus();window.location.href='mailto:enrico.ao@gmail.com?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body);
+ });
+ for(const button of document.querySelectorAll('[data-copy-mail]'))button.onclick=async()=>{const host=button.closest('.pub-mail-result'),text=host.querySelector('[data-mail-copy]'),status=host.querySelector('[data-copy-status]');try{await navigator.clipboard.writeText(text.value);status.textContent='Testo copiato.';}catch{text.focus();text.select();status.textContent='Seleziona e copia il testo con i comandi del dispositivo.';}};
+})();
