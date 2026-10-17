@@ -49,7 +49,7 @@
 <link rel="stylesheet" href="shared/cognilab.css">
 <script src="shared/interface.js" defer></script>
 <script>window.CogniLabExercise={"id":"contrario-ricorda","title":"Rispondi al contrario e ricorda la parola","category":"Funzioni esecutive","setup":"screen-start"};</script>
-<script src="shared/exercise-runtime.js"></script>
+<script src="shared/exercise-runtime.js?v=ux12"></script>
 </head>
 <body data-cognilab="exercise" class="min-h-screen bg-[#F1F5F9] flex flex-col items-center justify-center p-4 text-slate-900 selection:bg-indigo-100">
 
@@ -422,7 +422,7 @@
 
     // Registra la risposta logica dell'utente e passa alla successiva o alla memoria
     function handleLogicAnswer(answer) {
-      const isCorrect = answer === currentQuestions[currentIndex].expected;
+      const isCorrect = answer === currentQuestions[currentIndex].expected;window.CogniLabAudio?.feedback(isCorrect);
       userAnswers.push({
         ...currentQuestions[currentIndex],
         userAnswer: answer,

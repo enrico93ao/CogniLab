@@ -42,7 +42,7 @@
 <link rel="stylesheet" href="shared/cognilab.css">
 <script src="shared/interface.js" defer></script>
 <script>window.CogniLabExercise={"id":"n-back-semantico","title":"N back semantico","category":"Memoria","setup":"start-menu"};</script>
-<script src="shared/exercise-runtime.js"></script>
+<script src="shared/exercise-runtime.js?v=ux12"></script>
 </head>
 <body data-cognilab="exercise" class="min-h-screen flex flex-col items-center justify-center p-4">
 
@@ -183,7 +183,7 @@
 
     <script>
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        function playTone(freq, type, duration) {
+        function playTone(freq, type, duration) {if(window.CogniLabAudio){window.CogniLabAudio?.feedback(freq>=400);return;}
             if (audioCtx.state === 'suspended') audioCtx.resume();
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();

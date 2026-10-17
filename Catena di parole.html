@@ -99,7 +99,7 @@
 <link rel="stylesheet" href="shared/cognilab.css">
 <script src="shared/interface.js" defer></script>
 <script>window.CogniLabExercise={"id":"catena-parole","title":"Catena di parole","category":"Linguaggio","setup":"setup-container"};</script>
-<script src="shared/exercise-runtime.js"></script>
+<script src="shared/exercise-runtime.js?v=ux12"></script>
 </head>
 <body data-cognilab="exercise" class="text-slate-800 flex flex-col items-center justify-center min-h-screen p-4">
 
@@ -264,6 +264,7 @@
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
         function playSound(type) {
+            if(window.CogniLabAudio?.handles(type)){window.CogniLabAudio.feedback(type);return;}
             const oscillator = audioCtx.createOscillator();
             const gainNode = audioCtx.createGain();
             

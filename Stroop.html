@@ -54,7 +54,7 @@
 <link rel="stylesheet" href="shared/cognilab.css">
 <script src="shared/interface.js" defer></script>
 <script>window.CogniLabExercise={"id":"stroop-original","title":"Stroop","category":"Attenzione","setup":"main-menu"};</script>
-<script src="shared/exercise-runtime.js"></script>
+<script src="shared/exercise-runtime.js?v=ux12"></script>
 </head>
 <body data-cognilab="exercise" class="flex flex-col min-h-screen">
 
@@ -177,6 +177,7 @@
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
         function playSound(type) {
+            if(window.CogniLabAudio?.handles(type)){window.CogniLabAudio.feedback(type);return;}
             if (audioCtx.state === 'suspended') audioCtx.resume();
             const oscillator = audioCtx.createOscillator();
             const gainNode = audioCtx.createGain();

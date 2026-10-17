@@ -45,7 +45,7 @@
 <link rel="stylesheet" href="shared/cognilab.css">
 <script src="shared/interface.js" defer></script>
 <script>window.CogniLabExercise={"id":"cifrario","title":"Il cifrario","category":"Funzioni esecutive","setup":"menuScreen"};</script>
-<script src="shared/exercise-runtime.js"></script>
+<script src="shared/exercise-runtime.js?v=ux12"></script>
 </head>
 <body data-cognilab="exercise" class="min-h-full flex flex-col justify-between overflow-x-hidden relative bg-slate-950">
 
@@ -271,6 +271,7 @@
         let audioCtx = null;
 
         function playSound(type) {
+            if(window.CogniLabAudio?.handles(type)){window.CogniLabAudio.feedback(type);return;}
             if (!audioCtx) {
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             }

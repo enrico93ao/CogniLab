@@ -1,5 +1,6 @@
 (() => {
  'use strict';
+ const audioScript=document.createElement('script');audioScript.src='shared/response-feedback.js?v=ux12';document.head.append(audioScript);
  document.documentElement.classList.add('gym-access-pending');
  const gateStyle=document.createElement('style');gateStyle.textContent='html.gym-access-pending body{visibility:hidden!important}';document.head.append(gateStyle);
  import('./gym-gate.js').catch(()=>location.replace('accesso.html'));
@@ -32,6 +33,6 @@ let active=null,finished=false,lastResult=null,savePromise=Promise.resolve(),sav
 
  window.CogniLabRun={begin(argument){if(window.CogniLabGymAuthorized!==true)throw Error('Accesso alla palestra non autorizzato');if(active&&!finished)return;const start=Date.now();const config=settings();if(window.CogniLabExercise?.stimulusVersion)config.stimulusVersion=window.CogniLabExercise.stimulusVersion;if(['number','string','boolean'].includes(typeof argument))config.modalita=argument;active={id:crypto.randomUUID(),pausedMs:0,pauseStart:null,start,startedAt:new Date(start).toISOString(),settings:config};finished=false;lifecycle(true);status.hidden=true;if(retryButton)retryButton.hidden=true;},measure(callback){try{const value=callback();return typeof value==='number'&&Number.isFinite(value)?value:typeof value==='string'?value:null;}catch{return null;}},complete(metrics){return send(makeResult(metrics));},waitForSave(){return savePromise;},abort(){return makeResult({},'interrupted');}};
  window.addEventListener('cognilab-task-pause',event=>{if(!active||finished)return;if(event.detail?.paused&&active.pauseStart==null)active.pauseStart=Date.now();else if(!event.detail?.paused&&active.pauseStart!=null){active.pausedMs+=Date.now()-active.pauseStart;active.pauseStart=null;}});
- document.addEventListener('click',event=>{const button=event.target.closest('button');if(!button||!/salva.*(Firebase|Dati)|save.*(Firebase|Database)/i.test(button.getAttribute('onclick')||''))return;event.preventDefault();event.stopImmediatePropagation();if(parent!==window)parent.postMessage({type:'cognilab-exit-v3'},location.origin);else location.href='esercizi.html';},true);
+ document.addEventListener('click',event=>{const button=event.target.closest('button');if(button?.dataset.localMenu==='true')return;if(!button||!/salva.*(Firebase|Dati)|save.*(Firebase|Database)/i.test(button.getAttribute('onclick')||''))return;event.preventDefault();event.stopImmediatePropagation();if(parent!==window)parent.postMessage({type:'cognilab-exit-v3'},location.origin);else location.href='esercizi.html';},true);
  window.addEventListener('message',event=>{if(event.source!==parent||event.origin!==location.origin||event.data?.type!=='cognilab-save-status')return;status.hidden=false;if(event.data.id&&event.data.id!==lastResult?.id)return;status.textContent=event.data.message;if(event.data.ok===false)showRetry();if(saveResolver){saveResolver(event.data.ok!==false);saveResolver=null;}});
 })();

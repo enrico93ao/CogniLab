@@ -24,7 +24,7 @@
 <link rel="stylesheet" href="shared/cognilab.css">
 <script src="shared/interface.js" defer></script>
 <script>window.CogniLabExercise={"id":"ordine-alfabetico","title":"Riordina le parole in ordine alfabetico","category":"Linguaggio","setup":"menu-screen"};</script>
-<script src="shared/exercise-runtime.js"></script>
+<script src="shared/exercise-runtime.js?v=ux12"></script>
 </head>
 <body data-cognilab="exercise" class="min-h-screen flex items-center justify-center p-4">
 
@@ -316,7 +316,7 @@
             });
 
             const header = document.getElementById('result-header');
-            if (isCorrect) {
+            window.CogniLabAudio?.feedback(isCorrect);if (isCorrect) {
                 gameState.score++;
                 header.innerHTML = `
                     <div class="text-5xl mb-2">✨</div>

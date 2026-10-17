@@ -18,10 +18,10 @@ async function press(index){
  if(!playing||!accepting||taskClock.paused)return;
  if(taskClock.now()>=deadline){finish();return;}
  const token=generation;tone(index,el('music-order')?.value==='inverse'?phrase.length-1-cursor:cursor);clearKeys();
- if(index!==expected[cursor]){stats.errors++;roundErrors++;accepting=false;keys[index].classList.add('wrong');el('music-status').textContent='Riproviamo insieme: ascolta di nuovo la stessa sequenza.';await sleep(850);if(valid(token))demonstrate(token);return;}
+ if(index!==expected[cursor]){stats.errors++;window.CogniLabAudio?.feedback(false);roundErrors++;accepting=false;keys[index].classList.add('wrong');el('music-status').textContent='Riproviamo insieme: ascolta di nuovo la stessa sequenza.';await sleep(850);if(valid(token))demonstrate(token);return;}
  stats.correctNotes++;keys[index].classList.add('active');cursor++;
  if(cursor<expected.length){await sleep(180);if(valid(token))keys[index].classList.remove('active');return;}
- accepting=false;stats.completed++;stats.maxSpan=Math.max(stats.maxSpan,length);if(!roundErrors)stats.firstTry++;
+ accepting=false;stats.completed++;window.CogniLabAudio?.feedback(true);stats.maxSpan=Math.max(stats.maxSpan,length);if(!roundErrors)stats.firstTry++;
  el('music-count').textContent=stats.completed;el('music-status').textContent='Sequenza corretta!';
  if(piano)length=Math.min(32,length+1);else if(!roundErrors&&stats.firstTry%3===0)length=Math.min(24,length+1);
  await sleep(850);if(valid(token))newRound();

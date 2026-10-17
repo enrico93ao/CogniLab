@@ -27,7 +27,7 @@
 <link rel="stylesheet" href="shared/cognilab.css">
 <script src="shared/interface.js" defer></script>
 <script>window.CogniLabExercise={"id":"orologio-invisibile","title":"L'orologio invisibile","category":"Attenzione","setup":"screen-setup"};</script>
-<script src="shared/exercise-runtime.js"></script>
+<script src="shared/exercise-runtime.js?v=ux12"></script>
 </head>
 <body data-cognilab="exercise" class="bg-slate-50 text-slate-800 min-h-screen flex flex-col justify-between">
 
@@ -749,7 +749,7 @@
             let titleText = "";
             let descriptionText = "";
 
-            const absErr = result.erroreAssoluto;
+            const absErr = result.erroreAssoluto;window.CogniLabAudio?.feedback(absErr<=350);
 
             if (absErr <= 150) { // Ottima precisione cognitiva
                 feedbackClass = "bg-emerald-50 border-emerald-200 text-emerald-800";

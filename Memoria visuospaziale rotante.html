@@ -54,7 +54,7 @@
 <link rel="stylesheet" href="shared/cognilab.css">
 <script src="shared/interface.js" defer></script>
 <script>window.CogniLabExercise={"id":"memoria-rotante","title":"Memoria visuospaziale rotante","category":"Visuospaziale","setup":"menu-section"};</script>
-<script src="shared/exercise-runtime.js"></script>
+<script src="shared/exercise-runtime.js?v=ux12"></script>
 </head>
 <body data-cognilab="exercise" class="min-h-screen text-slate-100 flex flex-col justify-between overflow-x-hidden select-none">
 
@@ -426,6 +426,7 @@
             },
             playSuccess() {
                 if (!audioEnabled) return;
+ if(window.CogniLabAudio){window.CogniLabAudio.feedback(true);return;}
                 initAudioContext();
                 const now = audioCtx.currentTime;
                 // Arpeggio Maggiore Ascendente
@@ -445,6 +446,7 @@
             },
             playFail() {
                 if (!audioEnabled) return;
+ if(window.CogniLabAudio){window.CogniLabAudio.feedback(false);return;}
                 initAudioContext();
                 const now = audioCtx.currentTime;
                 // Accordo dissonante calante

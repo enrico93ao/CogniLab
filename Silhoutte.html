@@ -80,7 +80,7 @@
 <link rel="stylesheet" href="shared/cognilab.css">
 <script src="shared/interface.js" defer></script>
 <script>window.CogniLabExercise={"id":"silhouette","title":"Silhouette","category":"Visuospaziale","setup":"start-menu"};</script>
-<script src="shared/exercise-runtime.js"></script>
+<script src="shared/exercise-runtime.js?v=ux12"></script>
 </head>
 <body data-cognilab="exercise" class="h-screen flex flex-col overflow-hidden text-gray-800">
 
@@ -322,8 +322,7 @@
             if (!state.isActive) return;
 
             if (id === state.targetItem.id) {
-                playTone(523, 'sine', 0.1); 
-                setTimeout(() => playTone(659, 'sine', 0.2), 100);
+                if(window.CogniLabAudio){window.CogniLabAudio.feedback(true);}else{playTone(523,'sine',.1);setTimeout(()=>playTone(659,'sine',.2),100);}
                 
                 state.isActive = false;
                 state.correct++;
@@ -338,7 +337,7 @@
                     nextLevel();
                 }, 800);
             } else {
-                playTone(180, 'sawtooth', 0.3);
+                if(window.CogniLabAudio)window.CogniLabAudio.feedback(false);else playTone(180,'sawtooth',.3);
                 state.errors++;
                 element.classList.add('animate-error');
                 setTimeout(() => element.classList.remove('animate-error'), 400);

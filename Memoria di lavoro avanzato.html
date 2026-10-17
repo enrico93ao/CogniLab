@@ -50,7 +50,7 @@
 <link rel="stylesheet" href="shared/cognilab.css">
 <script src="shared/interface.js" defer></script>
 <script>window.CogniLabExercise={"id":"memoria-lavoro-avanzato","title":"Memoria di lavoro avanzato","category":"Memoria","setup":"step-start,step-intro"};</script>
-<script src="shared/exercise-runtime.js"></script>
+<script src="shared/exercise-runtime.js?v=ux12"></script>
 </head>
 <body data-cognilab="exercise" class="min-h-screen bg-slate-100 flex items-center justify-center p-4 text-slate-900">
 
@@ -417,7 +417,7 @@
       }
 
       state.results = newResults;
-      state.score = currentScore;
+      state.score = currentScore;window.CogniLabAudio?.feedback(currentScore === 3);
 
       // Calcola tempo impiegato in secondi
       const tempoImpiegatoInSecondi = Math.round((Date.now() - state.startTime) / 1000);

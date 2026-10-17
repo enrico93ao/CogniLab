@@ -72,7 +72,7 @@
 <link rel="stylesheet" href="shared/cognilab.css">
 <script src="shared/interface.js" defer></script>
 <script>window.CogniLabExercise={"id":"riordina-lettere","title":"Riordina le lettere","category":"Linguaggio","setup":"start-screen"};</script>
-<script src="shared/exercise-runtime.js"></script>
+<script src="shared/exercise-runtime.js?v=ux12"></script>
 </head>
 <body data-cognilab="exercise" class="min-h-screen flex flex-col items-center p-4">
 
@@ -392,8 +392,8 @@
             attempts++;
             const correct = wordList[currentIndex].c;
             
-            if (guess === correct) {
-                playTick(550, 0.2, 'sine', 0.4); // Successo
+            if (guess === correct) {window.CogniLabAudio?.feedback(true);
+                if(!window.CogniLabAudio)playTick(550, 0.2, 'sine', 0.4); // Successo
                 correctAnswers++;
                 score += Math.max(10, (correct.length * 2) - (hintGiven * 5));
                 correctDisplay.textContent = correctAnswers;
@@ -403,7 +403,7 @@
                 currentIndex++;
                 loadNextWord();
             } else {
-                playTick(90, 0.4, 'sawtooth', 0.2); // Errore
+                if(window.CogniLabAudio)window.CogniLabAudio.feedback(false);else playTick(90,.4,'sawtooth',.2);
                 userInput.classList.add('shake');
                 setTimeout(() => userInput.classList.remove('shake'), 500);
             }

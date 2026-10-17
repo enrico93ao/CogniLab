@@ -111,7 +111,7 @@
 <link rel="stylesheet" href="shared/cognilab.css">
 <script src="shared/interface.js" defer></script>
 <script>window.CogniLabExercise={"id":"intruso-visivo","title":"Trova l'intruso","category":"Visuospaziale","setup":"menu-screen"};</script>
-<script src="shared/exercise-runtime.js"></script>
+<script src="shared/exercise-runtime.js?v=ux12"></script>
 </head>
 <body data-cognilab="exercise" class="bg-[#FDFBF7]">
 
@@ -434,7 +434,7 @@
             }, 150);
         }
 
-        function playFeedback(isCorrect) {
+        function playFeedback(isCorrect) {if(window.CogniLabAudio){window.CogniLabAudio?.feedback(isCorrect);return;}
             if (!audioCtx) return;
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();

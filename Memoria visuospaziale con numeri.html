@@ -48,7 +48,7 @@
 <link rel="stylesheet" href="shared/cognilab.css">
 <script src="shared/interface.js" defer></script>
 <script>window.CogniLabExercise={"id":"memoria-visuospaziale-numeri","title":"Memoria visuospaziale con numeri","category":"Visuospaziale","setup":"screen-menu"};</script>
-<script src="shared/exercise-runtime.js"></script>
+<script src="shared/exercise-runtime.js?v=ux12"></script>
 </head>
 <body data-cognilab="exercise" class="bg-gradient-to-br from-[#f0f4f8] to-[#e2e8f0] min-h-screen text-slate-800 flex flex-col justify-between overflow-x-hidden">
 
@@ -424,12 +424,12 @@
         }
 
         // Suoni dedicati
-        function playSoundCorrectClick() {
+        function playSoundCorrectClick() {if(window.CogniLabAudio){window.CogniLabAudio?.feedback(true);return;}
             // Nota singola dolce, alta e breve
             playTone(880, 'sine', 0.15, 0.1); 
         }
 
-        function playSoundErrorClick() {
+        function playSoundErrorClick() {if(window.CogniLabAudio){window.CogniLabAudio?.feedback(false);return;}
             // Due toni bassi e vellutati in successione per non frustrare
             playTone(220, 'triangle', 0.3, 0.15);
             setTimeout(() => playTone(180, 'triangle', 0.4, 0.15), 100);

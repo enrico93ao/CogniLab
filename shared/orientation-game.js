@@ -38,8 +38,8 @@ function render(){
 }
 function choose(value,b){
  if(!running||taskClock.paused)return;const q=questions[step];if(position>=q.answer.length)return;attempts++;
- if(normalize(value)!==normalize(q.answer[position])){errors++;el('orientation-status').textContent='Riprova: il box evidenziato aspetta un’altra risposta.';b?.classList.add('wrong');return;}
- correct++;selected.push(String(value));position++;el('orientation-status').textContent=position===q.answer.length?'Attività completata. Puoi continuare.':'Corretto. Completa il prossimo box.';render();
+ if(normalize(value)!==normalize(q.answer[position])){errors++;window.CogniLabAudio?.feedback(false);el('orientation-status').textContent='Riprova: il box evidenziato aspetta un’altra risposta.';b?.classList.add('wrong');return;}
+ correct++;window.CogniLabAudio?.feedback(true);selected.push(String(value));position++;el('orientation-status').textContent=position===q.answer.length?'Attività completata. Puoi continuare.':'Corretto. Completa il prossimo box.';render();
 }
 el('orientation-number-form').onsubmit=event=>{event.preventDefault();if(event.currentTarget.reportValidity())choose(String(Number(el('orientation-number').value)));};
 el('orientation-hint-toggle').onclick=()=>{useHint=!useHint;render();};

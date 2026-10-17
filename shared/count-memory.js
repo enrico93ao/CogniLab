@@ -69,7 +69,7 @@ function checkAnswers() {
     countPhase = 'result';
     const correctNumber = Number(inputs[0].value) === countNumbers;
     const correctLetter = Number(inputs[1].value) === countLetters;
-    const correct = Number(correctNumber) + Number(correctLetter);
+    const correct = Number(correctNumber) + Number(correctLetter);window.CogniLabAudio?.feedback(correct===2);
     stats.totalAttempts += 2; stats.correctResponses += correct; stats.errors += 2 - correct;
     stats.totalNums++; stats.totalLets++; stats.correctNums += Number(correctNumber); stats.correctLets += Number(correctLetter);
     if (correct < 2) lives--;

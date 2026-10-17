@@ -124,8 +124,8 @@
 <link rel="stylesheet" href="shared/cognilab.css">
 <script src="shared/interface.js" defer></script>
 <script>window.CogniLabExercise={"id":"esplorazione-visuospaziale","title":"Esplorazione visuospaziale multilivello","category":"Visuospaziale","stimulusVersion":"training4","setup":"start-screen"};</script>
-<script src="shared/task-clock.js?v=assist7"></script><script src="shared/exercise-runtime.js?v=assist7"></script>
-<link rel="stylesheet" href="shared/training-suite.css?v=training4"><script type="module">import * as training from "./shared/training-model.mjs";window.CLTraining=training;</script><link rel="stylesheet" href="shared/menu-controls.css?v=controls6"><script src="shared/menu-controls.js?v=controls6" defer></script><link rel="stylesheet" href="shared/assist-controls.css?v=assist7"><script src="shared/assist-controls.js?v=assist7" defer></script></head>
+<script src="shared/task-clock.js?v=ux12"></script><script src="shared/exercise-runtime.js?v=ux12"></script>
+<link rel="stylesheet" href="shared/training-suite.css?v=training4"><script type="module">import * as training from "./shared/training-model.mjs";window.CLTraining=training;</script><link rel="stylesheet" href="shared/menu-controls.css?v=controls6"><script src="shared/menu-controls.js?v=controls6" defer></script><link rel="stylesheet" href="shared/assist-controls.css?v=ux12"><script src="shared/assist-controls.js?v=ux12" defer></script></head>
 <body data-cognilab="exercise" class="cl-suite-legacy">
 
     <div id="start-screen" class="screen active">
@@ -235,8 +235,8 @@
             </div>
 
             <!-- Pulsante che scatena il salvataggio standardizado su Firebase -->
-            <button id="btn-save-data" onclick="completaESalvaEsercizio()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-10 rounded-full text-xl active:scale-95 shadow-md w-full transition-transform">
-                Invia e Continua
+            <button id="btn-save-data" data-local-menu="true" onclick="tornaAlMenuEsercizio()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-10 rounded-full text-xl active:scale-95 shadow-md w-full transition-transform">
+                Torna alle impostazioni
             </button>
         </div>
     </div>
@@ -299,6 +299,7 @@
 
         let audioCtx = null;
         function playSound(type) {
+            if(window.CogniLabAudio?.handles(type)){window.CogniLabAudio.feedback(type);return;}
             try {
                 if (type === 'correct' && !soundCorrectToggle.checked) return;
                 if (type === 'error' && !soundErrorToggle.checked) return;
@@ -600,10 +601,9 @@
             if (gameActive) moveStimulus();
         });
 
-        async function completaESalvaEsercizio() {
+        async function tornaAlMenuEsercizio() {
             await window.CogniLabRun.waitForSave();
-            if(parent!==window)parent.postMessage({type:'cognilab-exit-v3'},location.origin);
-            else location.href='esercizi.html';
+            resetToMenu();
         }
 
         window.CogniLabAssist={isRunning:()=>gameActive,pause:()=>{taskClock.pause();audioCtx?.suspend();},resume:()=>{taskClock.resume();audioCtx?.resume();},finish:()=>endGame(),instruction:()=>difficulty==='shifting'?instructionBanner.textContent+' La consegna può cambiare a ogni nuovo stimolo.':'Tocca solo il cerchio rosso. Non toccare le altre forme.',sample:()=>({labels:['Cerchio rosso','Quadrato blu','Triangolo giallo'],shapes:['circle','square','triangle'],order:[0],instruction:'In questo esempio tocca solo il cerchio rosso.'})};

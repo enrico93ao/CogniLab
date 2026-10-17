@@ -53,7 +53,7 @@
 <link rel="stylesheet" href="shared/cognilab.css">
 <script src="shared/interface.js" defer></script>
 <script>window.CogniLabExercise={"id":"riordina-frase","title":"Riordina la frase","category":"Linguaggio","setup":"menu-screen"};</script>
-<script src="shared/exercise-runtime.js"></script>
+<script src="shared/exercise-runtime.js?v=ux12"></script>
 </head>
 <body data-cognilab="exercise" class="min-h-screen flex flex-col items-center justify-center p-4">
 
@@ -281,12 +281,12 @@
             osc.stop(audioCtx.currentTime + duration);
         }
 
-        function playCorrectSound() {
+        function playCorrectSound() {if(window.CogniLabAudio){window.CogniLabAudio?.feedback(true);return;}
             playSound(523.25, 'sine', 0.2); // C5
             setTimeout(() => playSound(659.25, 'sine', 0.3), 100); // E5
         }
 
-        function playErrorSound() {
+        function playErrorSound() {if(window.CogniLabAudio){window.CogniLabAudio?.feedback(false);return;}
             playSound(150, 'sawtooth', 0.3);
         }
 

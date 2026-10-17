@@ -3,12 +3,13 @@
  const make=(tag,text,className)=>{const node=document.createElement(tag);if(text)node.textContent=text;if(className)node.className=className;return node;};
  const adapter=()=>window.CogniLabAssist;
  const intro=make('div',null,'cl-assist-demo');intro.append(make('span','Vuoi provare prima di iniziare?'));const demo=make('button','Mostrami come si fa');demo.type='button';demo.id='cl-demo-open';intro.append(demo);start.before(intro);
- const bar=make('nav',null,'cl-assist-bar');bar.hidden=true;bar.setAttribute('aria-label','Comandi dell’esercizio');const pause=make('button','Ⅱ Pausa'),help=make('button','Ripeti la consegna'),end=make('button','Concludi');pause.id='cl-task-pause';help.id='cl-task-help';end.id='cl-task-end';bar.append(pause,help,end);document.body.append(bar);document.body.classList.add('cl-assist-enabled');
+ const bar=make('details',null,'cl-assist-bar');bar.hidden=true;bar.id='cl-assist-drawer';const handle=make('summary','Comandi');handle.setAttribute('aria-label','Apri i comandi dell’esercizio');const commands=make('nav',null,'cl-assist-commands');commands.setAttribute('aria-label','Comandi dell’esercizio');const pause=make('button','Ⅱ Pausa'),help=make('button','Ripeti la consegna'),end=make('button','Concludi');pause.id='cl-task-pause';help.id='cl-task-help';end.id='cl-task-end';commands.append(pause,help,end);bar.append(handle,commands);document.body.append(bar);document.body.classList.add('cl-assist-enabled');
+ let hoverOpen=false;bar.addEventListener('pointerenter',event=>{if(event.pointerType==='mouse'&&!bar.open){bar.open=true;hoverOpen=true;}});bar.addEventListener('pointerleave',()=>{if(hoverOpen&&!bar.contains(document.activeElement)){bar.open=false;hoverOpen=false;}});bar.addEventListener('keydown',event=>{if(event.key==='Escape'){bar.open=false;hoverOpen=false;handle.focus();}});document.addEventListener('pointerdown',event=>{if(!bar.contains(event.target)){bar.open=false;hoverOpen=false;}});
  const dialog=make('dialog',null,'cl-assist-dialog');dialog.id='cl-assist-dialog';dialog.setAttribute('aria-labelledby','cl-assist-title');document.body.append(dialog);
  let revision=0,paused=false;
  function setPaused(value){if(paused===value)return;paused=value;document.body.classList.toggle('cl-assist-paused',value);if(value)adapter()?.pause();else adapter()?.resume();window.dispatchEvent(new CustomEvent('cognilab-task-pause',{detail:{paused:value}}));}
  function close(){revision++;dialog.close();if(paused)setPaused(false);}
- function open(title){revision++;const alreadyOpen=dialog.open;dialog.replaceChildren();const heading=make('h2',title);heading.id='cl-assist-title';dialog.append(heading);if(!alreadyOpen)dialog.showModal();return revision;}
+ function open(title){bar.open=false;revision++;const alreadyOpen=dialog.open;dialog.replaceChildren();const heading=make('h2',title);heading.id='cl-assist-title';dialog.append(heading);if(!alreadyOpen)dialog.showModal();return revision;}
  function action(text,callback,primary=false){const button=make('button',text,primary?'primary':'');button.type='button';button.onclick=callback;return button;}
  function readInstructions(){return adapter()?.instruction()||'Segui la consegna dell’esercizio e procedi con calma.';}
  function showHelp(){if(adapter()?.isRunning())setPaused(true);open('La consegna');dialog.append(make('p',readInstructions()),make('p','Il gioco resta fermo mentre leggi.'));const actions=make('div',null,'cl-assist-actions');if('speechSynthesis' in window)actions.append(action('Ascolta la consegna',()=>{speechSynthesis.cancel();const utterance=new SpeechSynthesisUtterance(readInstructions());utterance.lang='it-IT';utterance.rate=.85;speechSynthesis.speak(utterance);}));actions.append(action('Riprendi',close,true));dialog.append(actions);}
@@ -16,7 +17,7 @@
  help.onclick=showHelp;
  end.onclick=()=>{setPaused(true);open('Concludere la prova?');dialog.append(make('p','Verranno salvati i risultati delle risposte già date.'));const actions=make('div',null,'cl-assist-actions');actions.append(action('Continua la prova',close),action('Concludi e salva',()=>{close();adapter()?.finish();sync();},true));dialog.append(actions);};
  dialog.addEventListener('cancel',event=>{event.preventDefault();close();});dialog.addEventListener('close',()=>{revision++;if('speechSynthesis' in window)speechSynthesis.cancel();if(paused)setPaused(false);});
- function sync(){const running=Boolean(adapter()?.isRunning());bar.hidden=!running;if(!running&&paused)close();}
+ function sync(){const running=Boolean(adapter()?.isRunning());bar.hidden=!running;if(!running)bar.open=false;if(!running&&paused)close();}
  new MutationObserver(sync).observe(document.body,{attributes:true,attributeFilter:['class']});
  demo.onclick=()=>{
   const current=adapter();if(!current)return;

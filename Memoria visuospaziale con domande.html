@@ -34,7 +34,7 @@
 <link rel="stylesheet" href="shared/cognilab.css">
 <script src="shared/interface.js" defer></script>
 <script>window.CogniLabExercise={"id":"memoria-visuospaziale-domande","title":"Memoria visuospaziale con domande","category":"Visuospaziale","setup":"step-difficulty"};</script>
-<script src="shared/exercise-runtime.js"></script>
+<script src="shared/exercise-runtime.js?v=ux12"></script>
 </head>
 <body data-cognilab="exercise" class="bg-slate-50 min-h-screen text-slate-800 flex flex-col justify-between">
 
@@ -547,6 +547,7 @@
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
         function playSound(type) {
+            if(window.CogniLabAudio?.handles(type)){window.CogniLabAudio.feedback(type);return;}
             try {
                 if (audioCtx.state === 'suspended') {
                     audioCtx.resume();

@@ -29,7 +29,7 @@
 <link rel="stylesheet" href="shared/cognilab.css">
 <script src="shared/interface.js" defer></script>
 <script>window.CogniLabExercise={"id":"calcolo-memoria","title":"Calcolo e memoria","category":"Memoria","setup":"screen-menu,screen-start"};</script>
-<script src="shared/exercise-runtime.js"></script>
+<script src="shared/exercise-runtime.js?v=ux12"></script>
 </head>
 <body data-cognilab="exercise" class="flex items-center justify-center min-h-screen p-4">
 
@@ -234,14 +234,14 @@
  if(!Number.isFinite(userVal))return;
  window.cogMathAttempts++;
 
-            if (userVal === currentTargetResult) {
+            if (userVal === currentTargetResult) {window.CogniLabAudio?.feedback(true);
                 correctAnswers++;
                 operationsCount++;
                 currentResult = currentTargetResult;
                 showFeedback(true);
                 if (operationsCount % 4 === 0) showWord(); else generateOperation();
             } else {
-                consecutiveErrors++;
+                consecutiveErrors++;window.CogniLabAudio?.feedback(false);
                 showFeedback(false);
                 if (consecutiveErrors >= 2) showHint();
                 input.value = '';

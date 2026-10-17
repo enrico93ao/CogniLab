@@ -103,7 +103,7 @@
 <link rel="stylesheet" href="shared/cognilab.css">
 <script src="shared/interface.js" defer></script>
 <script>window.CogniLabExercise={"id":"rispondi-contrario","title":"Rispondi il contrario","category":"Funzioni esecutive","setup":"start-screen"};</script>
-<script src="shared/exercise-runtime.js"></script>
+<script src="shared/exercise-runtime.js?v=ux12"></script>
 </head>
 <body data-cognilab="exercise">
 
@@ -322,7 +322,7 @@
         }
 
         function processAnswer(val) {
-            const currentItem = currentSessionQuestions[currentIndex];
+            const currentItem = currentSessionQuestions[currentIndex];window.CogniLabAudio?.feedback(val !== currentItem.impulse);
             
             if (val === currentItem.impulse) {
                 showFailure(`Hai scelto "${val}". Questa è la risposta logica/vera! Devi invece inibire l'istinto e scegliere quella errata.`);

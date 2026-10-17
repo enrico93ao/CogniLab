@@ -90,7 +90,7 @@
 <link rel="stylesheet" href="shared/cognilab.css">
 <script src="shared/interface.js" defer></script>
 <script>window.CogniLabExercise={"id":"cerchi-rossi","title":"Conta i cerchi rossi","category":"Attenzione","setup":"screen-menu"};</script>
-<script src="shared/exercise-runtime.js"></script>
+<script src="shared/exercise-runtime.js?v=ux12"></script>
 </head>
 <body data-cognilab="exercise" class="h-screen w-screen flex items-center justify-center p-3 sm:p-6">
 
@@ -250,6 +250,7 @@
         }
 
         function playSound(type) {
+            if(window.CogniLabAudio?.handles(type)){window.CogniLabAudio.feedback(type);return;}
             try {
                 initAudio();
                 if (!audioCtx) return;

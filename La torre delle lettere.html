@@ -55,7 +55,7 @@
 <link rel="stylesheet" href="shared/cognilab.css">
 <script src="shared/interface.js" defer></script>
 <script>window.CogniLabExercise={"id":"torre-lettere","title":"La torre delle lettere","category":"Funzioni esecutive","setup":"start-menu"};</script>
-<script src="shared/exercise-runtime.js"></script>
+<script src="shared/exercise-runtime.js?v=ux12"></script>
 </head>
 <body data-cognilab="exercise" class="min-h-screen flex flex-col items-center justify-center p-2 md:p-4">
 
@@ -402,7 +402,7 @@
 
             // LOGICA DI INCASTRO: 
             // Un pezzo può stare sopra un altro solo se il suo RANGO è MAGGIORE (appare dopo nella parola obiettivo)
-            if (topOnTarget && letterObj.rank < topOnTarget.rank) {
+            if (topOnTarget && letterObj.rank < topOnTarget.rank) {window.CogniLabAudio?.feedback(false);
                 showFeedback(`Incastro impossibile! L'ordine non coincide.`);
                 return;
             }
@@ -425,7 +425,7 @@
             const lastTower = gameState[gameState.length - 1];
             if (lastTower.length === targetWord.length) {
                 const currentStr = lastTower.map(l => l.char).join('');
-                if (currentStr === targetWord) {
+                if (currentStr === targetWord) {window.CogniLabAudio?.feedback(true);
                     sessionData.log.push({ word: targetWord, moves: moves });
                     sessionData.wordsCompleted++;
                     sessionData.totalMoves += moves;

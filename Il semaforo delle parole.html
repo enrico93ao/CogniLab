@@ -63,7 +63,7 @@
 <link rel="stylesheet" href="shared/cognilab.css">
 <script src="shared/interface.js" defer></script>
 <script>window.CogniLabExercise={"id":"semaforo-parole","title":"Il semaforo delle parole","category":"Funzioni esecutive","setup":"screen-menu"};</script>
-<script src="shared/exercise-runtime.js"></script>
+<script src="shared/exercise-runtime.js?v=ux12"></script>
 </head>
 <body data-cognilab="exercise" class="h-full flex flex-col justify-between text-slate-800">
 
@@ -621,6 +621,7 @@
 
             play(type) {
                 if (!state.soundEnabled) return;
+ if(window.CogniLabAudio?.handles(type)){window.CogniLabAudio.feedback(type);return;}
                 try {
                     this.init();
                     const osc = this.ctx.createOscillator();

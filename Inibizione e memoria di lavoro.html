@@ -159,7 +159,7 @@
 <link rel="stylesheet" href="shared/cognilab.css">
 <script src="shared/interface.js" defer></script>
 <script>window.CogniLabExercise={"id":"inibizione-memoria","title":"Inibizione e memoria di lavoro","category":"Funzioni esecutive","setup":"menu-screen"};</script>
-<script src="shared/exercise-runtime.js"></script>
+<script src="shared/exercise-runtime.js?v=ux12"></script>
 </head>
 <body data-cognilab="exercise">
 
@@ -555,7 +555,7 @@
             ui.style.animation = 'feedbackPop 0.6s ease-out forwards';
         }
 
-        function playSound(freq, dur, type = 'sine') {
+        function playSound(freq, dur, type = 'sine') {if(window.CogniLabAudio){window.CogniLabAudio?.feedback(freq>=400);return;}
             const osc = audioCtx.createOscillator();
             const g = audioCtx.createGain();
             osc.type = type; osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
