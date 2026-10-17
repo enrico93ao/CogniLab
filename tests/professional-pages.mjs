@@ -6,4 +6,5 @@ for(const item of ['CBT-I','Crocetta','San Camillo','Beauregard','265','enrico-d
 for(const item of ['neurologo','geriatra','Stimolazione','Riabilitazione','fonte-7'])assert.ok(guide.includes(item));
 assert.ok(fs.statSync(new URL('../assets/professionista/enrico-dalessandro.jpg',import.meta.url)).size<250000);
 for(const file of ['index.html','progetto-enrico-dalessandro.html']){const html=read(file);assert.ok(html.includes('dott-enrico-dalessandro.html'));assert.ok(html.includes('valutazione-neuropsicologica.html'));}
+assert.ok(profile.includes('Sono Enrico D’Alessandro'));assert.ok(profile.includes('Prima di tutto, dare spazio alla tua storia'));assert.ok(!profile.includes('Nel CV')&&!profile.includes('il CV')&&!profile.includes('documentato nel curriculum'));
 console.log('PASS: sourced professional facts; private CV details excluded; compact portrait; medical stages, sources and navigation.');
