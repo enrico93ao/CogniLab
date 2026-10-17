@@ -23,3 +23,6 @@
 @media(max-width:480px){.pub-nav{padding:10px 16px;gap:8px}.pub-brand-label strong{font-size:1.45rem}.pub-brand .pub-brand-label>span{font-size:.55rem}.pub-brand img{width:70px;height:36px}.pub-creator{font-size:.65rem;padding:5px 10px}}
 
 .pub-menu-toggle{display:none}
+
+/* Preserve the full editorial photograph in article covers. */
+.pub-article-cover img{height:auto;max-height:none;object-fit:initial}.pub-article-cover figcaption{color:#45636e;line-height:1.65}.pub-article-cover figcaption a{color:#155d67}
