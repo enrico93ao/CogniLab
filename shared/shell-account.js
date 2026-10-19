@@ -39,7 +39,7 @@ window.addEventListener('message',async event=>{
    const result=await Promise.race([saveResult(event.data.result),new Promise((_,reject)=>setTimeout(()=>reject({code:'sync-pending'}),15000))]);
    ok=result.sharingState!=='pending';
    message=ok?'Risultato salvato nella sessione e sincronizzato con il tuo account.':'Risultato salvato nel tuo account. La condivisione con il professionista è in attesa: riprova il salvataggio o torna alla dashboard per sincronizzare.';
-  }catch(error){message=error.code==='login-required'?'Accedi alla palestra per conservare i risultati.':friendlyError(error)+' Se registrato nella coda locale, il risultato verrà ritentato dalla palestra.';}
+  }catch(error){message=error.code==='login-required'?'Accedi alla palestra per conservare i risultati.':friendlyError(error)+(error.code==='save-memory-only'?'':' Se registrato nella coda locale, il risultato verrà ritentato dalla palestra.');}
   if(nextButton&&auth.currentUser&&ok&&event.data.result.status==='completed'){
    if(!plan.completedSlots.includes(plan.index))plan.completedSlots.push(plan.index);
    sessionStorage.setItem(planKey,JSON.stringify(plan));nextButton.disabled=false;

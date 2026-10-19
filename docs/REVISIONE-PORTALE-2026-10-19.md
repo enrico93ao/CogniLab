@@ -41,3 +41,14 @@ Regole Firebase effettivamente pubblicate; configurazione MFA e politiche di acc
 
 ## Esito dei controlli automatici
 14 gruppi di test superati: SEO e navigazione pubblica, regole (valutatore locale), flusso assegnazione/salvataggio, simulazione quattro sessioni, configurazioni, dashboard, progressi, gestione account, template e client notifiche, modifiche UX degli esercizi, regressione HTML e analisi statica dei 38 esercizi. Nessuna scrittura su pazienti reali.
+
+## Primo blocco di correzioni — 19 ottobre 2026
+- Il salvataggio cloud procede anche quando localStorage o sessionStorage non sono disponibili. Le code hanno un ripiego in memoria isolato per account; se cloud e memoria persistente non funzionano, il messaggio invita a non chiudere la pagina. Il browser viene avvisato prima della chiusura in presenza di dati conservati soltanto in memoria (la visualizzazione del dialogo dipende dal browser).
+- Il logout tenta prima la sincronizzazione e mostra un messaggio visibile se ci sono risultati o condivisioni pendenti. Quando questi sono conservati in modo persistente, offre una scelta esplicita per uscire lasciandoli sul dispositivo; se sono solo in memoria, invita prima a sincronizzarli. Dopo la sincronizzazione rimuove code, diario e riferimenti della sessione dal dispositivo. Non cancella automaticamente risultati non sincronizzati.
+- Aggiunto un test specifico per memoria bloccata/piena, salvataggio online, errore offline, recupero, condivisione assegnata e isolamento degli account. Simulazione locale, senza scritture sul Firebase reale.
+- Ripristinati i comandi di avvio statico con server locale Node e i comandi build per generare pagine pubbliche e servizio notifiche. Le dipendenze del precedente progetto framework restano da ripulire separatamente, senza cambiare la pubblicazione GitHub Pages.
+
+### Avvio riproducibile del portale statico
+Con Node 22.13 o successivo: `npm run dev` (nessuna dipendenza richiesta per il server), quindi aprire `http://127.0.0.1:4173/`. `PORT` permette una porta differente. `npm run build` rigenera i file pubblici nel repository; non crea una cartella dist. `npm run test:storage` verifica il nuovo percorso di salvataggio. I test che usano JSDOM richiedono le dipendenze di sviluppo installate.
+
+Restano aperti gli altri punti della revisione: consolidamento CSS e risorse esterne, notifiche incerte, gestione completa dei dati e verifica su dispositivi reali.

@@ -12,6 +12,8 @@ export const accessModeReady=withAccessTimeout(get(ref(db,'cognilab/access/publi
 export const authReady=new Promise(resolve=>{const stop=onAuthStateChanged(auth,user=>{stop();resolve(user);});});
 export function friendlyError(error){
  const code=errorCode(error);
+ if(code==='save-memory-only')return error.message;
+ if(code==='result-save-timeout')return 'Sincronizzazione non confermata. Il risultato resta in attesa: riprova dalla palestra.';
  if(code==='access-ready-timeout')return 'Il servizio di accesso non risponde. Ricarica la pagina e riprova.';
  if(code==='access-login-timeout')return 'La verifica della password non ha risposto in tempo. Controlla la connessione e riprova.';
  if(code==='access-reset-timeout')return 'Il servizio email non ha risposto in tempo. Riprova tra poco.';
