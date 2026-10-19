@@ -50,3 +50,13 @@ main p:not(.pub-eyebrow):not(.pub-small):not(.pub-home-author):not(.pub-article-
 main .pub-article-text p,main .pub-reading p,main .pub-intro-box p,main .pub-hero p:not(.pub-eyebrow):not(.pub-home-author):not(.pub-small),main .pub-platform-story>div>p:not(.pub-eyebrow){text-align:justify;text-align-last:start;hyphens:auto;overflow-wrap:break-word}
 .pub-article-text .pub-article-takeaway p:not(.pub-eyebrow){text-align:justify}
 @media(max-width:600px){main .pub-article-text p,main .pub-reading p,main .pub-intro-box p,main .pub-hero p:not(.pub-eyebrow):not(.pub-home-author):not(.pub-small),main .pub-platform-story>div>p:not(.pub-eyebrow){text-align:justify;hyphens:auto}}
+/* Keep horizontal browsing inside carousels and tables, never in the page gutter. */
+html,body{max-inline-size:100%;overflow-x:hidden;overscroll-behavior-x:none}
+@supports(overflow:clip){html,body{overflow-x:clip}}
+main,.pub-nav,.pub-footer,main>section,main>article,.pub-hero>*,.pub-section>*,.pub-article-layout>*,.pub-platform-story>*,.pub-area-grid>*,.pub-exercise-grid>*,.pub-news-grid>*{min-inline-size:0;max-inline-size:100%}
+.pub-carousel-track{inline-size:100%;max-inline-size:100%;min-inline-size:0;contain:inline-size;overscroll-behavior-x:contain}
+.pub-carousel-controls,.pub-chips,.pub-hero-actions{max-inline-size:100%;flex-wrap:wrap}
+.pub-button{max-inline-size:100%;white-space:normal;overflow-wrap:anywhere}
+.pub-footer a,.pub-creator a,.pub-article-text a{overflow-wrap:anywhere}
+@media(max-width:650px){.pub-nav>nav>a{white-space:normal}.pub-exercise{grid-template-columns:minmax(0,1fr)}.pub-exercise .pub-art{max-width:100%}.pub-hero-art{min-width:0}.pub-cookie-notice{max-width:calc(100% - 16px)}}
+main,.pub-nav,.pub-footer{max-inline-size:min(100%,1200px)}

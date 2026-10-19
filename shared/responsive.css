@@ -82,3 +82,8 @@ body.cl-running.cl-show-controls .navbar{top:44px}
  .cl-modern-match #target-container{margin:6px 0;padding:8px}
  .cl-modern-match #target-container .cl-object-photo{width:64px;height:64px}
 }
+/* Page-level gutters must not become horizontally scrollable on touch devices. */
+html,body{max-inline-size:100%;overflow-x:hidden;overscroll-behavior-x:none}
+@supports(overflow:clip){html,body{overflow-x:clip}}
+.care-workspace,.care-progress,.care-grid>*{min-width:0;max-width:100%}
+.care-table-scroll,.cl-table-scroll,.patient-mgmt-container{overscroll-behavior-x:contain}
