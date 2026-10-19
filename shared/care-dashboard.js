@@ -3,7 +3,7 @@ import {auth} from './firebase-client.js';
 import {currentCareUser,patientWorkspace,checkCareStorage,professionalPatients,professionalPatient,registerManagedPatient,invitePatient,setConnection,assignProgram,setPatientNotificationEmail,sendAssignmentNotification,archiveProgram,startAssignedProgram,careError} from './care-store.js';
 import {programProgress,resultsFromCare} from './care-model.mjs';
 import {exercises,exerciseById} from './exercise-catalog.mjs';
-import {createProgressView} from './progress-view.js';
+import {createProgressView} from './progress-view.js?v=areas23';
 import {pendingCare,retryPending} from './progress-store.js';
 import {requireProfessional} from './clinical-access.js';
 const el=(tag,text,cls)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;if(cls)n.className=cls;return n;};

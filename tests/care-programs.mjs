@@ -1,3 +1,4 @@
+import {exerciseById} from '../shared/exercise-catalog.mjs';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
@@ -28,10 +29,12 @@ const saved=await context.saveResult(payload);assert.equal(saved.sharingState,'p
 sharingDenied=false;sessionStorage.removeItem('cognilab.session.patient');await context.retryPending();assert.equal(Object.keys(context.pendingCare('patient')).length,0);const shared=writes.at(-1);assert.ok(Object.keys(shared).some(p=>p.includes('/careSessions/patient/program-12345678/session-12345678/results/result-12345678')));assert.equal(Object.values(shared).find(v=>v?.id===payload.id).programSlot,'0');
 auth.currentUser={uid:'different',isAnonymous:false};await context.retryPending();assert.equal(writes.length,2);
 // Render real progress UI: no fabricated values, distinct configurations and accessible graph data.
-const dom=new JSDOM('<main></main>',{runScripts:'outside-only',url:'https://example.test/'}),w=dom.window;w.groupKey=groupKey;w.summarizeResults=summarizeResults;w.eval(read('shared/progress-view.js').replace(/^import .*;\s*$/gm,'').replace(/\bexport /g,''));
+const dom=new JSDOM('<main></main>',{runScripts:'outside-only',url:'https://example.test/'}),w=dom.window;w.exerciseById=exerciseById;w.groupKey=groupKey;w.summarizeResults=summarizeResults;w.eval(read('shared/progress-view.js').replace(/^import .*;\s*$/gm,'').replace(/\bexport /g,''));
 const view=w.createProgressView(w.document.querySelector('main'));
 const base={...payload,metrics:{accuracyPct:70,errors:3},settings:{level:1},exerciseVersion:'3'};
 view.render([base,{...base,id:'b',finishedAt:'2026-10-16T09:00:00Z',metrics:{accuracyPct:90,errors:1}},{...base,id:'c',settings:{level:2}}]);
 assert.equal(w.document.querySelectorAll('select').item(0).options.length,2);assert.equal(w.document.querySelectorAll('svg').length,1);assert.match(w.document.querySelector('.care-trend').textContent,/positivo/);assert.match(w.document.querySelector('.care-chart-values').textContent,/90/);
+view.render([{...base,exerciseId:'attenzione-alternata'},{...base,exerciseId:'attenzione-alternata',id:'later',finishedAt:'2026-10-18T09:00:00Z',metrics:{accuracyPct:90}},{...base,exerciseId:'attenzione-alternata',settings:{level:2}},{...base,exerciseId:'attenzione-alternata',status:'interrupted',finishedAt:'2026-10-19T09:00:00Z',metrics:{accuracyPct:0}}]);
+assert.match(w.document.querySelector('.care-area-overview').textContent,/In aumento: 1 configurazioni/);assert.match(w.document.querySelector('.care-area-overview').textContent,/1 configurazioni con dati ancora insufficienti/);w.document.querySelector('.care-area-tile button').click();assert.equal(w.document.activeElement.tagName,'SELECT');
 view.render([]);assert.equal(w.document.querySelectorAll('svg').length,0);assert.match(w.document.querySelector('.care-load-status').textContent,/primo esercizio/);w.close();
 console.log('PASS: programs validate; partial/duplicate/interrupted results do not inflate session counts; sharing failure preserves personal results; retries retain session and slot; account isolation; chart groups and accessible values.');
