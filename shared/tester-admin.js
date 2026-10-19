@@ -1,5 +1,5 @@
 import {initializeApp,deleteApp} from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js';
-import {initializeAuth,inMemoryPersistence,createUserWithEmailAndPassword,deleteUser,signOut} from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js';
+import {initializeAuth,inMemoryPersistence,createUserWithEmailAndPassword,sendEmailVerification,deleteUser,signOut} from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js';
 import {ref,get,set} from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js';
 import {auth,db,firebaseConfig,friendlyError} from './firebase-client.js';
 import {requireProfessional} from './clinical-access.js';
@@ -29,7 +29,10 @@ document.getElementById('create-tester').onsubmit=async event=>{
   created=(await createUserWithEmailAndPassword(secondaryAuth,form.elements.email.value.trim(),form.elements.password.value)).user;
   await setAccess(created.uid,true);enabled=true;
   document.querySelector('#enable-tester input').value=created.uid;
-  status.textContent='Account paziente creato e abilitato. Può accedere alla palestra con email e password assegnate. Il tuo accesso professionale resta attivo.';
+  let emailMessage;
+  try{await sendEmailVerification(created,{url:'https://enrico93ao.github.io/CogniLab/esercizi.html',handleCodeInApp:false});emailMessage=' Richiesto l’invio dell’email di conferma: controllare anche lo spam.';}
+  catch(error){emailMessage=' Non è stato possibile richiedere l’email di conferma. Il paziente può riprovare da Il mio account → Reinvia email di conferma. Dettaglio: '+friendlyError(error);}
+  status.textContent='Account paziente creato e abilitato. Può accedere alla palestra con email e password assegnate. Il tuo accesso professionale resta attivo.'+emailMessage;
  }catch(error){
   status.textContent=message(error);
   if(created&&!enabled){try{await deleteUser(created);}catch{status.textContent+=' L’account è stato creato ma non abilitato. Per recuperarlo usa il codice: '+created.uid;}}

@@ -12,7 +12,7 @@ assert.equal(allowed('tester',false),false);
 assert.equal(rules.cognilab.professionals.$uid['.write'],false);
 assert.equal(rules.cognilab.testers.$uid['.validate'],'newData.isBoolean()');
 const source=read('shared/tester-admin.js').replace(/^import .*;\s*$/gm,'');
-async function scenario({probeDenied=false,writeDenied=false}={}){
+async function scenario({probeDenied=false,writeDenied=false,emailDenied=false}={}){
  const calls=[];
  const form={elements:{email:{value:'tester@example.com'},password:{value:'test-password'}}};
  const elements={status:{},management:{querySelectorAll:()=>[]},permission:{},'create-tester':form,'enable-tester':{},revoke:{}};
@@ -20,13 +20,14 @@ async function scenario({probeDenied=false,writeDenied=false}={}){
  const document={getElementById:id=>elements[id],querySelector:()=>input};
  const mainAuth={currentUser:{uid:owner}};
  const AsyncFunction=Object.getPrototypeOf(async function(){}).constructor;
- await new AsyncFunction('document','auth','db','firebaseConfig','friendlyError','requireProfessional','initializeApp','deleteApp','initializeAuth','inMemoryPersistence','createUserWithEmailAndPassword','deleteUser','signOut','ref','get','set','crypto',source)(document,mainAuth,{}, {},()=> 'Error',async()=>mainAuth.currentUser,()=>{calls.push('secondary-app');return {};},async()=>calls.push('cleanup-app'),(_app,options)=>{assert.equal(options.persistence,'memory');return 'secondary-auth';},'memory',async secondary=>{assert.equal(secondary,'secondary-auth');calls.push('create');return {user:{uid:'new-tester'}};},async()=>calls.push('rollback'),async secondary=>{assert.equal(secondary,'secondary-auth');calls.push('secondary-signout');},(_db,path)=>path,async()=>{if(probeDenied)throw {code:'PERMISSION_DENIED'};},async(path,value)=>{calls.push('authorize');assert.equal(path,'cognilab/testers/new-tester');assert.equal(value,true);if(writeDenied)throw {code:'PERMISSION_DENIED'};},{randomUUID:()=> 'unique'});
+ await new AsyncFunction('document','auth','db','firebaseConfig','friendlyError','requireProfessional','initializeApp','deleteApp','initializeAuth','inMemoryPersistence','createUserWithEmailAndPassword','deleteUser','sendEmailVerification','signOut','ref','get','set','crypto',source)(document,mainAuth,{}, {},()=> 'Error',async()=>mainAuth.currentUser,()=>{calls.push('secondary-app');return {};},async()=>calls.push('cleanup-app'),(_app,options)=>{assert.equal(options.persistence,'memory');return 'secondary-auth';},'memory',async secondary=>{assert.equal(secondary,'secondary-auth');calls.push('create');return {user:{uid:'new-tester'}};},async()=>calls.push('rollback'),async(user,options)=>{assert.equal(user.uid,'new-tester');assert.equal(options.url,'https://enrico93ao.github.io/CogniLab/esercizi.html');calls.push('verification');if(emailDenied)throw {code:'auth/too-many-requests'};},async secondary=>{assert.equal(secondary,'secondary-auth');calls.push('secondary-signout');},(_db,path)=>path,async()=>{if(probeDenied)throw {code:'PERMISSION_DENIED'};},async(path,value)=>{calls.push('authorize');assert.equal(path,'cognilab/testers/new-tester');assert.equal(value,true);if(writeDenied)throw {code:'PERMISSION_DENIED'};},{randomUUID:()=> 'unique'});
  await form.onsubmit({preventDefault(){},currentTarget:form});
  assert.equal(mainAuth.currentUser.uid,owner);
  assert.equal(form.elements.password.value,'');
  return calls;
 }
-assert.deepEqual(await scenario(),['secondary-app','create','authorize','secondary-signout','cleanup-app']);
+assert.deepEqual(await scenario(),['secondary-app','create','authorize','verification','secondary-signout','cleanup-app']);
+assert.deepEqual(await scenario({emailDenied:true}),['secondary-app','create','authorize','verification','secondary-signout','cleanup-app']);
 assert.deepEqual(await scenario({probeDenied:true}),[]);
 assert.deepEqual(await scenario({writeDenied:true}),['secondary-app','create','authorize','rollback','secondary-signout','cleanup-app']);
 console.log('PASS: only approved owner manages testers; separate memory-only login; main session preserved; denied rules prevent creation; failed authorization rolls back new account.');
