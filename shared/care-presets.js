@@ -15,7 +15,7 @@
   for(const item of config.buttons||[]){const panel=allowed.get(item.panel),b=panel?.querySelectorAll('button')[item.index];if(!b||!safeButton(b)||(item.label&&item.label!==b.textContent.trim()))throw Error('Le opzioni del menu sono cambiate: aggiorna la configurazione.');if(!selected(b))b.click();}
   for(const item of config.controls){const panel=allowed.get(item.panel),c=panel&&controls(panel)[item.index];if(!c||(item.key&&item.key!==(c.id||c.name||c.type)))throw Error('Il menu è cambiato: chiedi al professionista di aggiornare la configurazione.');
    if(c.tagName==='SELECT'&&![...c.options].some(o=>o.value===String(item.value)))throw Error('Opzione non più disponibile');
-   if(['checkbox','radio'].includes(c.type))c.checked=item.checked===true;else c.value=String(item.value);
+   if(['checkbox','radio'].includes(c.type)){const desired=item.checked===true;if(c.checked!==desired&&(c.type==='checkbox'||desired))c.click();c.checked=desired;}else c.value=String(item.value);
    if(c.type!=='radio'||c.checked){c.dispatchEvent(new Event('input',{bubbles:true}));c.dispatchEvent(new Event('change',{bubbles:true}));}
   }
  }
