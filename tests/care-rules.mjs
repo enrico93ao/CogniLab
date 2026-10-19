@@ -52,4 +52,16 @@ db.cognilab.users[manager].clinical.registeredPatients.patient.autoLinkInitializ
 assert.equal(write('cognilab/careLinks/patient/'+manager,true,user(manager)),false,'automatic linking cannot override later patient revocation');
 db.cognilab.users[manager].clinical.registeredPatients.patient.autoLinkInitialized=false;db.cognilab.testers.patient=false;
 assert.equal(write('cognilab/careLinks/patient/'+manager,true,user(manager)),false,'disabled patient denied');
+// Only the authenticated email can be synchronized; only linked professionals see it.
+db.cognilab.testers.patient=true;db.cognilab.careLinks.patient.pro=true;
+const patientWithEmail=user('patient');patientWithEmail.token.email='patient@example.test';
+assert.equal(write('cognilab/users/patient/profile/email','patient@example.test',patientWithEmail),true);
+assert.equal(write('cognilab/users/patient/profile/email','someone-else@example.test',patientWithEmail),false);
+assert.equal(read('cognilab/users/patient/profile/email',user('pro')),true);
+assert.equal(read('cognilab/users/patient/profile',user('pro')),false);
+assert.equal(read('cognilab/users/patient/profile/email',user('otherPro')),false);
+assert.equal(read('cognilab/users/patient/profile/email',user('stranger')),false);
+assert.equal(read('cognilab/users/patient/profile/email',user('pro',true)),false);
+delete db.cognilab.careLinks.patient.pro;
+assert.equal(read('cognilab/users/patient/profile/email',user('pro')),false);
 console.log('PASS: actual rule expressions deny strangers, anonymous users, unconsented links, personal history reads, plan tampering and incorrect exercise slots; revocation stops shared access. Fixture evaluator, not live Firebase/emulator.');

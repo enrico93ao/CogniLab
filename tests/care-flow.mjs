@@ -21,3 +21,7 @@ data=await context.patientWorkspace();assert.equal(programProgress(data.programs
 auth.currentUser={uid:'pro',isAnonymous:false};const roster=await context.professionalPatients(),details=await context.professionalPatient('patient',roster.patient);assert.equal(details.programs.length,1);assert.equal(programProgress(details.programs[0],details.programs[0].sessions).completed,2);
 await context.archiveProgram('patient',id);auth.currentUser={uid:'patient',isAnonymous:false};await assert.rejects(()=>context.startAssignedProgram(id),/non è più attivo/);
 console.log('PASS: invite → patient acceptance → ordered assignment → save → resume from cloud → two completed sessions → target reached → professional monitoring → archive. In-memory Firebase adapter.');
+
+// Automatic contact recovery from the patient account, without a clinician input.
+auth.currentUser={uid:'patient',email:'patient@example.test',isAnonymous:false};await context.currentCareUser();assert.equal(at('cognilab/users/patient/profile/email'),'patient@example.test');
+auth.currentUser={uid:'pro',isAnonymous:false};const contact={name:'Patient',programs:{}};put('cognilab/careLinks/patient/pro',true);await context.professionalPatient('patient',contact);assert.equal(contact.notificationEmail,'patient@example.test');assert.equal(at('cognilab/users/pro/clinical/registeredPatients/patient/notificationEmail'),'patient@example.test');

@@ -38,3 +38,6 @@ Fonti ufficiali consultate il 19 ottobre 2026:
 - https://developers.google.com/apps-script/guides/services/quotas
 - https://developers.google.com/apps-script/guides/web
 - https://developers.google.com/apps-script/reference/mail/mail-app
+
+## Recupero automatico del recapito (19 ottobre 2026)
+La dashboard non richiede più di inserire il recapito. Gli account creati dal gestore lo salvano già alla creazione. Il paziente sincronizza la propria email autenticata in `cognilab/users/UID/profile/email` quando accede alla dashboard; il professionista attivamente collegato può leggere solo quel campo e copiarlo nel proprio elenco privato per il servizio email esistente. Le regole aggiornate in `firebase/cognilab.rules.json` devono essere pubblicate nella console Realtime Database. Non è necessario ridistribuire Apps Script. Gli account precedenti senza un recapito già salvato richiedono un nuovo accesso del paziente dopo l'aggiornamento del sito e delle regole. Se manca il recapito, il programma resta assegnato e la notifica segnala il mancato invio.

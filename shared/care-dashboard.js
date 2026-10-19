@@ -1,6 +1,6 @@
 import {onAuthStateChanged} from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js';
 import {auth} from './firebase-client.js';
-import {currentCareUser,patientWorkspace,checkCareStorage,professionalPatients,professionalPatient,registerManagedPatient,invitePatient,setConnection,assignProgram,setPatientNotificationEmail,sendAssignmentNotification,archiveProgram,startAssignedProgram,careError} from './care-store.js';
+import {currentCareUser,patientWorkspace,checkCareStorage,professionalPatients,professionalPatient,registerManagedPatient,invitePatient,setConnection,assignProgram,sendAssignmentNotification,archiveProgram,startAssignedProgram,careError} from './care-store.js?v=autoemail24';
 import {programProgress,resultsFromCare} from './care-model.mjs';
 import {exercises,exerciseById} from './exercise-catalog.mjs';
 import {createProgressView} from './progress-view.js?v=areas23';
@@ -106,8 +106,7 @@ async function professionalView(user){
    const automatic=button('Account creato da me: collega automaticamente',()=>{if(!confirm('Confermi di aver creato tu questo account? Il collegamento consentirà l’assegnazione dei programmi e la consultazione dei relativi risultati senza accettazione del paziente.'))return;action(automatic,async()=>{await registerManagedPatient(selected);await loadRoster();await loadSelected();},'Account del gestore collegato automaticamente.');},'primary');content.append(automatic);
   }
   if(!data.accepted){content.append(empty('Il paziente deve accettare il collegamento nella propria dashboard. I suoi risultati non sono accessibili fino a quel momento.'));return;}
-  const emailContact=el('input');emailContact.type='email';emailContact.value=records[selected].notificationEmail||'';emailContact.placeholder='Email del paziente';
-  const saveContact=button('Salva email notifiche',()=>action(saveContact,async()=>{await setPatientNotificationEmail(selected,emailContact.value);await loadRoster();await loadSelected();},'Email del paziente salvata per le notifiche.'));content.append(field('Recapito del paziente per i programmi assegnati',emailContact),saveContact);
+  content.append(el('p',records[selected].notificationEmail?'Notifiche inviate automaticamente all’email dell’account: '+records[selected].notificationEmail:'Email dell’account non ancora disponibile: verrà sincronizzata al prossimo accesso del paziente, con le regole Firebase aggiornate.','care-muted'));
   if(!data.programs.length)content.append(empty('Nessun programma assegnato. Prepara il primo qui sotto.'));
   for(const program of data.programs.sort((a,b)=>b.createdAt-a.createdAt))content.append(programCard(program,{professional:true,patientUid:selected,onChange:async()=>{await loadRoster();await loadSelected();}}));
   chart.render(data.programs.flatMap(p=>resultsFromCare(p.sessions)));
@@ -119,7 +118,6 @@ async function professionalView(user){
   const wrap=el('div',undefined,'care-builder');wrap.append(el('h3','Crea un programma'));
   const f=el('form'),title=input('title','Es. Attenzione e memoria · primo percorso'),sessions=input('sessions','',2);sessions.type='number';sessions.min='1';sessions.max='60';sessions.value='6';
   const row=el('div',undefined,'care-inline');row.append(field('Titolo del programma',title),field('Numero di sessioni',sessions));f.append(row);
-  const email=input('notificationEmail','Email del paziente per ricevere il programma',254);email.type='email';email.required=false;email.value=records[patientUid]?.notificationEmail||(/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(records[patientUid]?.name||'')?records[patientUid].name:'');f.append(field('Email del paziente per la notifica',email));
   const instructions=el('textarea');instructions.maxLength=1000;instructions.placeholder='Indicazioni pratiche per svolgere il programma';f.append(field('Indicazioni per il paziente (facoltative)',instructions));
   f.append(el('p','Ogni sessione ripete la sequenza qui sotto. Configura ogni esercizio dal suo menu e indica quante volte ripeterlo. Le impostazioni saranno predisposte per il paziente. I grafici separeranno le configurazioni diverse.','care-muted'));
   const fs=el('fieldset');fs.append(el('legend','Scegli gli esercizi (massimo 20)'));const search=input('search','Cerca un esercizio',100);search.type='search';search.required=false;fs.append(field('Cerca nel catalogo',search));const catalog=el('div',undefined,'care-catalog');fs.append(catalog);f.append(fs);
@@ -144,7 +142,7 @@ async function professionalView(user){
   }
   search.oninput=()=>{const term=search.value.toLocaleLowerCase('it');for(const label of catalog.children)label.hidden=!label.textContent.toLocaleLowerCase('it').includes(term);};sessions.oninput=()=>{renderOrder();renderCalendar();};
   const b=el('button','Assegna programma','primary');b.type='submit';f.append(b);f.onsubmit=event=>{event.preventDefault();action(b,async()=>{const sequence=[],configurations=[];for(const id of chosen){const times=repetitions.get(id)||1;if(!Number.isInteger(times)||times<1||times>10)throw Error('Scegli da 1 a 10 ripetizioni per esercizio.');if(!presets.has(id))throw Error('Configura '+exerciseById.get(id).title+' prima di assegnare il programma.');for(let n=0;n<times;n++){sequence.push(id);configurations.push(presets.get(id));}}
-   await assignProgram(patientUid,{name:title.value,instructions:instructions.value,totalSessions:sessions.value,notificationEmail:email.value,exercises:sequence,configurations,schedule:dates.value.split(/\s+/).filter(Boolean)});await loadRoster();await reload();},'Programma assegnato. È disponibile nella dashboard del paziente.');};wrap.append(f);return wrap;
+   await assignProgram(patientUid,{name:title.value,instructions:instructions.value,totalSessions:sessions.value,exercises:sequence,configurations,schedule:dates.value.split(/\s+/).filter(Boolean)});await loadRoster();await reload();},'Programma assegnato. È disponibile nella dashboard del paziente.');};wrap.append(f);return wrap;
  }
  await loadRoster();await loadSelected();await checkCareStorage();message('Elenco pazienti aggiornato.');
 }

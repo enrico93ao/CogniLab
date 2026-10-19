@@ -9,7 +9,12 @@ import {exerciseById} from './exercise-catalog.mjs';
 const read=async path=>(await withAccessTimeout(get(ref(db,path)),'care-timeout')).val();
 const write=(path,value)=>withAccessTimeout(set(ref(db,path),value),'care-timeout');
 const patch=values=>withAccessTimeout(update(ref(db),values),'care-timeout');
-export async function currentCareUser(){await withAccessTimeout(authReady,'access-ready-timeout');return requireGymAccess();}
+export async function currentCareUser(){
+ await withAccessTimeout(authReady,'access-ready-timeout');const user=await requireGymAccess();
+ // The patient's authenticated email is published only in their private profile.
+ if(user.email&&!user.isAnonymous)try{await write(`cognilab/users/${user.uid}/profile/email`,user.email);}catch{/* Old rules must not block access to prescribed sessions. */}
+ return user;
+}
 export function careError(error){
  if(error?.code==='PERMISSION_DENIED'||error?.code==='permission-denied')return 'Il servizio non autorizza questa operazione. Il gestore deve verificare le regole Firebase per programmi e collegamenti.';
  if(error?.code?.includes('timeout'))return 'Il servizio non ha risposto in tempo. I dati già salvati restano disponibili: riprova.';
@@ -69,10 +74,18 @@ export async function professionalPatient(patientUid,record){
  const user=await requireProfessional();if(!validUid(patientUid))throw Error('Codice paziente non valido.');
  const accepted=await read(`cognilab/careLinks/${patientUid}/${user.uid}`)===true;
  if(!accepted)return {accepted:false,programs:[]};
+ await recoverPatientEmail(patientUid,record);
  const programs=await Promise.all(Object.keys(record.programs||{}).map(async id=>{
   const program=await read(`cognilab/carePrograms/${patientUid}/${id}`);if(!program||program.professionalId!==user.uid)return null;
   return {id,...program,notification:record.notifications?.[id]||null,sessions:await read(`cognilab/careSessions/${patientUid}/${id}`)||{}};
  }));return {accepted,programs:programs.filter(Boolean)};
+}
+async function recoverPatientEmail(patientUid,record){
+ // Only this exact contact field is shared with an actively linked professional.
+ let email;try{email=await read(`cognilab/users/${patientUid}/profile/email`);}catch{}
+ if(!email&&/^\S+@\S+\.\S+$/.test(record.name||''))email=record.name;
+ if(typeof email==='string'&&email!==record.notificationEmail){await setPatientNotificationEmail(patientUid,email);record.notificationEmail=email;}
+ return record.notificationEmail||null;
 }
 export async function setPatientNotificationEmail(patientUid,email){
  const user=await requireProfessional();email=String(email||'').trim();
@@ -82,12 +95,12 @@ export async function setPatientNotificationEmail(patientUid,email){
 }
 export async function sendAssignmentNotification(patientUid,id){
  const user=await requireProfessional();if(!validUid(patientUid)||!validUid(id))throw Error('Paziente o programma non valido.');let result;
- try{result=await notifyAssignment(patientUid,id);}catch{result={state:'failed',message:'Programma salvato, ma email non inviata o conferma non disponibile. Puoi riprovare la notifica.'};}
+ try{const record=await read(`cognilab/users/${user.uid}/clinical/registeredPatients/${patientUid}`);if(record)await recoverPatientEmail(patientUid,record);result=await notifyAssignment(patientUid,id);}catch{result={state:'failed',message:'Programma salvato, ma email non inviata o conferma non disponibile. Puoi riprovare la notifica.'};}
  const status={...result,updatedAt:Date.now()};
  await patch({[`cognilab/users/${user.uid}/clinical/registeredPatients/${patientUid}/notifications/${id}`]:status});return status;
 }
 export async function assignProgram(patientUid,input){
- const user=await requireProfessional(),fields=validateProgram(input);if(input.notificationEmail)await setPatientNotificationEmail(patientUid,input.notificationEmail);if(!validUid(patientUid))throw Error('Seleziona un paziente.');
+ const user=await requireProfessional(),fields=validateProgram(input);if(!validUid(patientUid))throw Error('Seleziona un paziente.');
  if(await read(`cognilab/careLinks/${patientUid}/${user.uid}`)!==true)throw Error('Il paziente deve prima accettare il collegamento dalla propria dashboard.');
  const id=crypto.randomUUID(),program={...fields,professionalId:user.uid,professionalName:String(user.displayName||user.email||'Professionista CogniLab').slice(0,80),createdAt:Date.now(),status:'active',version:1};
  await patch({[`cognilab/carePrograms/${patientUid}/${id}`]:program,[`cognilab/users/${user.uid}/clinical/registeredPatients/${patientUid}/programs/${id}`]:true});try{await sendAssignmentNotification(patientUid,id);}catch{/* Assignment remains saved even if notification status cannot be written. */}return id;
