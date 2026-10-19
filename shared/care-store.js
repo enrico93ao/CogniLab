@@ -36,13 +36,30 @@ export async function patientWorkspace(){
  return {user,invites:invites||{},links:links||{},programs:list.filter(Boolean)};
 }
 export async function checkCareStorage(){const user=await requireProfessional();await read(`cognilab/careLinks/${user.uid}/${user.uid}`);}
+export async function connectManagedPatient(patientUid){
+ const user=await requireProfessional();
+ if(user.uid!=='eWoQhl1qwqVKRupDabTM6vfMyyI3'||!validUid(patientUid)||patientUid===user.uid)throw Error('Collegamento automatico non autorizzato.');
+ const base=`cognilab/users/${user.uid}/clinical/registeredPatients/${patientUid}`;
+ const record=await read(base);if(!record)throw Error('Paziente non presente nel tuo elenco.');
+ if(record.managedAccount!==true)throw Error('Conferma prima che questo account è stato creato dal gestore.');
+ if(record.autoLinkInitialized===true)return;
+ if(await read(`cognilab/testers/${patientUid}`)!==true)throw Error('Account paziente non abilitato.');
+ await patch({[`cognilab/careLinks/${patientUid}/${user.uid}`]:true,[base+'/autoLinkInitialized']:true});
+}
+export async function registerManagedPatient(patientUid){
+ const user=await requireProfessional();if(user.uid!=='eWoQhl1qwqVKRupDabTM6vfMyyI3'||!validUid(patientUid)||patientUid===user.uid)throw Error('Operazione riservata al gestore.');
+ const base=`cognilab/users/${user.uid}/clinical/registeredPatients/${patientUid}`;
+ if(!await read(base)||await read(`cognilab/testers/${patientUid}`)!==true)throw Error('Seleziona un account paziente già presente e abilitato.');
+ await patch({[base+'/managedAccount']:true});await connectManagedPatient(patientUid);
+}
 export async function professionalPatients(){
  const user=await requireProfessional(),records=await read(`cognilab/users/${user.uid}/clinical/registeredPatients`)||{};
  // Only the account manager can enumerate the testers it provisions.
  if(user.uid==='eWoQhl1qwqVKRupDabTM6vfMyyI3'){
   const testers=await read('cognilab/testers')||{};
-  for(const [uid,enabled] of Object.entries(testers))if(enabled===true&&uid!==user.uid&&!records[uid]){
-   const name='Paziente test · '+uid.slice(0,8);await invitePatient(uid,name);records[uid]={name};
+  for(const [uid,enabled] of Object.entries(testers))if(enabled===true&&uid!==user.uid){
+   if(!records[uid]){const name='Paziente test · '+uid.slice(0,8);await invitePatient(uid,name);records[uid]={name};}
+   if(records[uid].managedAccount===true&&records[uid].autoLinkInitialized!==true){await connectManagedPatient(uid);records[uid].autoLinkInitialized=true;}
   }
  }
  return records;

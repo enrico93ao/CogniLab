@@ -1,6 +1,6 @@
 import {onAuthStateChanged} from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js';
 import {auth} from './firebase-client.js';
-import {currentCareUser,patientWorkspace,checkCareStorage,professionalPatients,professionalPatient,invitePatient,setConnection,assignProgram,archiveProgram,startAssignedProgram,careError} from './care-store.js';
+import {currentCareUser,patientWorkspace,checkCareStorage,professionalPatients,professionalPatient,registerManagedPatient,invitePatient,setConnection,assignProgram,archiveProgram,startAssignedProgram,careError} from './care-store.js';
 import {programProgress,resultsFromCare} from './care-model.mjs';
 import {exercises,exerciseById} from './exercise-catalog.mjs';
 import {createProgressView} from './progress-view.js';
@@ -98,7 +98,10 @@ async function professionalView(user){
   if(!selected){content.append(empty('Seleziona un paziente per vedere i suoi programmi o crearne uno nuovo.'));linkStatus.textContent='';return;}
   linkStatus.textContent='Verifica del collegamento…';const data=await professionalPatient(selected,records[selected]);
   if(current!==revision||auth.currentUser?.uid!==user.uid)return;
-  chart.setTitle('Progressi di '+records[selected].name);linkStatus.textContent=data.accepted?'Collegamento accettato: puoi assegnare un programma.':'In attesa di accettazione, oppure collegamento interrotto dal paziente.';
+  chart.setTitle('Progressi di '+records[selected].name);linkStatus.textContent=data.accepted?'Collegamento attivo: puoi assegnare un programma.':'In attesa di accettazione, oppure collegamento interrotto dal paziente.';
+  if(!data.accepted&&user.uid==='eWoQhl1qwqVKRupDabTM6vfMyyI3'&&records[selected].managedAccount!==true){
+   const automatic=button('Account creato da me: collega automaticamente',()=>{if(!confirm('Confermi di aver creato tu questo account? Il collegamento consentirà l’assegnazione dei programmi e la consultazione dei relativi risultati senza accettazione del paziente.'))return;action(automatic,async()=>{await registerManagedPatient(selected);await loadRoster();await loadSelected();},'Account del gestore collegato automaticamente.');},'primary');content.append(automatic);
+  }
   if(!data.accepted){content.append(empty('Il paziente deve accettare il collegamento nella propria dashboard. I suoi risultati non sono accessibili fino a quel momento.'));return;}
   if(!data.programs.length)content.append(empty('Nessun programma assegnato. Prepara il primo qui sotto.'));
   for(const program of data.programs.sort((a,b)=>b.createdAt-a.createdAt))content.append(programCard(program,{professional:true,patientUid:selected,onChange:loadSelected}));

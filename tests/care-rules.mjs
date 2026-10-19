@@ -41,4 +41,15 @@ assert.equal(write('cognilab/careSessions/patient/plan/s1',{startedAt:'2026-10-1
 delete db.cognilab.careLinks.patient.pro;
 assert.equal(read('cognilab/carePrograms/patient/plan',user('pro')),false);assert.equal(read('cognilab/careSessions/patient/plan',user('pro')),false);
 assert.equal(write('cognilab/careSessions/patient/plan/s1',{startedAt:'2026-10-15'},user('patient')),false);
+const manager='eWoQhl1qwqVKRupDabTM6vfMyyI3';
+db.cognilab.professionals[manager]=true;db.cognilab.users={[manager]:{clinical:{registeredPatients:{patient:{name:'Test',managedAccount:true}}}}};
+assert.equal(write('cognilab/careLinks/patient/'+manager,true,user(manager)),true,'manager can initialize a registered enabled patient link');
+assert.equal(write('cognilab/careLinks/patient/'+manager,true,user(manager,true)),false,'anonymous manager denied');
+assert.equal(write('cognilab/careLinks/patient/'+manager,true,user('otherPro')),false,'other professional denied');
+assert.equal(write('cognilab/careLinks/patient/'+manager,null,user(manager)),false,'manager cannot revoke through initialization path');
+db.cognilab.users[manager].clinical.registeredPatients.patient.managedAccount=false;assert.equal(write('cognilab/careLinks/patient/'+manager,true,user(manager)),false,'unmarked external account denied');db.cognilab.users[manager].clinical.registeredPatients.patient.managedAccount=true;
+db.cognilab.users[manager].clinical.registeredPatients.patient.autoLinkInitialized=true;
+assert.equal(write('cognilab/careLinks/patient/'+manager,true,user(manager)),false,'automatic linking cannot override later patient revocation');
+db.cognilab.users[manager].clinical.registeredPatients.patient.autoLinkInitialized=false;db.cognilab.testers.patient=false;
+assert.equal(write('cognilab/careLinks/patient/'+manager,true,user(manager)),false,'disabled patient denied');
 console.log('PASS: actual rule expressions deny strangers, anonymous users, unconsented links, personal history reads, plan tampering and incorrect exercise slots; revocation stops shared access. Fixture evaluator, not live Firebase/emulator.');
