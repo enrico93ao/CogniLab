@@ -6,4 +6,21 @@ answerTarget(12);w.appendDigit(1);w.appendDigit(2);assert.equal(field.value,'12'
 answerTarget(20);w.appendDigit(2);w.appendDigit(9);w.eraseDigit();w.appendDigit(0);assert.equal(field.value,'20');field.dispatchEvent(new w.KeyboardEvent('keydown',{key:'Enter',bubbles:true,cancelable:true}));assert.equal(run('gameState.scoreLog[0].user'),20);
 answerTarget(3,'reset');w.submitNumber();assert.equal(run('gameState.scoreLog.length'),0);for(const bad of ['-1','2.5','abc','1e2']){field.value=bad;w.submitNumber();assert.equal(run('gameState.scoreLog.length'),0);}w.clearAnswer();assert.equal(field.value,'');w.appendDigit(4);w.submitNumber();assert.equal(run('gameState.scoreLog[0].correct'),false);
 const pending=[...timers.values()].find(t=>t.delay===900);assert.ok(pending);w.returnToMenu();pending.fn();assert.equal(run('gameState.phase'),'menu','feedback must not reopen a round after menu');assert.equal(w.document.getElementById('feedback-overlay').style.display,'none');
-answerTarget(123);w.appendDigit(1);w.appendDigit(2);w.appendDigit(3);w.submitNumber();assert.equal(run('gameState.scoreLog[0].correct'),true);const late=[...timers.values()].find(t=>t.delay===900);w.endContinuousSession();late.fn();assert.equal(run('gameState.phase'),'results');assert.equal(saved.length,1);assert.equal(saved[0].correct,1);assert.equal(saved[0].total,1);assert.ok(aborts>0);dom.window.close();console.log('PASS: multi-digit totals 12/20/123, keypad editing, Enter, validation, no premature/double submission, menu/expiry cancellation and result metrics.');
+answerTarget(123);w.appendDigit(1);w.appendDigit(2);w.appendDigit(3);w.submitNumber();assert.equal(run('gameState.scoreLog[0].correct'),true);const late=[...timers.values()].find(t=>t.delay===900);w.endContinuousSession();late.fn();assert.equal(run('gameState.phase'),'results');assert.equal(saved.length,1);assert.equal(saved[0].correct,1);assert.equal(saved[0].total,1);assert.ok(aborts>0);
+// Dense and narrow play areas, including a constant RNG that forces the fallback.
+for (const [width,height] of [[240,180],[280,260],[320,300],[700,300],[1024,500]]) {
+ for (let count=2;count<=10;count++) {
+  for (let repeat=0;repeat<15;repeat++) {
+   const original=w.Math.random;if(repeat===0)w.Math.random=()=>0.5;
+   const layout=w.stimulusLayout(count,width,height);
+   const points=w.generateNonOverlappingPositions(count,layout.size,width,height);
+   w.Math.random=original;assert.equal(points.length,count);
+   for(let i=0;i<points.length;i++){
+    const p=points[i];assert.ok(p.x>=0&&p.y>=0&&p.x+layout.size<=width&&p.y+layout.size<=height,'stimulus inside area');
+    for(let j=0;j<i;j++)assert.ok(Math.abs(p.x-points[j].x)>=layout.size||Math.abs(p.y-points[j].y)>=layout.size,'no overlapping boxes');
+   }
+  }
+ }
+}
+assert.ok(w.document.getElementById('select-gameplay').textContent.includes('5 prove, massimo 2 minuti'));
+dom.window.close();console.log('PASS: multi-digit totals 12/20/123, keypad editing, Enter, validation, no premature/double submission, menu/expiry cancellation result metrics and 675 non-overlapping layouts (including forced fallback).');

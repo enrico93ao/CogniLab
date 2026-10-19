@@ -14,21 +14,22 @@ const execute = (window, name) => vm.runInContext(read(name), contexts.get(windo
 let nativeScripts = 0;
 for (const name of fs.readdirSync(root).filter(name => name.endsWith('.html'))) {
   const page = dom(name);
-  for (const script of page.window.document.querySelectorAll('script:not([src]):not([type="module"]):not([type="application/json"])')) {
+  for (const script of page.window.document.querySelectorAll('script:not([src]):not([type="module"]):not([type="application/json"]):not([type="application/ld+json"])')) {
     new vm.Script(script.textContent, {filename:name}); nativeScripts++;
   }
-  assert.ok(page.window.document.querySelector('link[href="shared/cognilab.css"]'), name);
+  if (name === 'catalogo-esercizi.html') assert.ok(page.window.document.querySelector('meta[http-equiv="refresh"]'), 'catalog alias redirects');
+  else assert.ok([...page.window.document.querySelectorAll('link[rel="stylesheet"]')].some(link => /^shared\/(cognilab|public-catalog)\.css(?:\?|$)/.test(link.getAttribute('href'))), name);
   assert.ok(!read(name).includes('localStorage.clear()'), name + ': no global storage erasure');
   page.window.close();
 }
 const catalogContext = {window:{}}; vm.runInNewContext(read('shared/catalog.js'), catalogContext);
 const catalog = catalogContext.window.CogniLabCatalog;
-assert.equal(catalog.length, 36);
+assert.equal(catalog.length, 38);
 for (const item of catalog) assert.ok(fs.existsSync(path.join(root,item.file)), item.file);
 {
   const page = dom('index.html'); const w = page.window;
   w.localStorage.setItem('saved-history','keep-me');
-  for (const script of w.document.querySelectorAll('script:not([src])')) vm.runInContext(script.textContent, contexts.get(w));
+  for (const script of w.document.querySelectorAll('script:not([src]):not([type="application/ld+json"]):not([type="module"])')) vm.runInContext(script.textContent, contexts.get(w));
   assert.equal(w.localStorage.getItem('saved-history'),'keep-me'); w.close();
 }
 for (const [param, valid] of [
@@ -56,7 +57,7 @@ for (const [param, valid] of [
   assert.ok([...w.document.querySelectorAll('.card')].every(card => card.hidden));
   assert.equal(w.document.querySelector('.cl-empty').hidden,false);
   input.value = ''; input.dispatchEvent(new w.Event('input'));
-  assert.equal([...w.document.querySelectorAll('.card')].filter(card => !card.hidden).length,36);
+  assert.equal([...w.document.querySelectorAll('.card')].filter(card => !card.hidden).length,38);
   assert.equal(w.document.getElementById('kpi-utenti').textContent,'—');
   assert.equal(w.document.querySelector('.card').getAttribute('role'),'link');
   w.close();
@@ -86,4 +87,4 @@ for (const [param, valid] of [
   w.showFinalSummary(); exposure(); assert.equal(w.eval('countPhase'),'summary','Cancelled exposure cannot reopen answers');
   w.close();
 }
-console.log(`PASS: ${nativeScripts} native scripts; 36 exercise links; shared theme; home persistence; safe iframe URLs; timer recovery; catalog search; counting game lifecycle and metrics.`);
+console.log(`PASS: ${nativeScripts} native scripts; 38 exercise links; shared theme; home persistence; safe iframe URLs; timer recovery; catalog search; counting game lifecycle and metrics.`);

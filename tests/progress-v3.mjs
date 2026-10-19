@@ -1,4 +1,6 @@
 import assert from 'node:assert/strict';
+import {recordSessionResult} from '../shared/session-journal.js';
+import {isPermissionDenied} from '../shared/firebase-errors.js';
 import fs from 'node:fs';import vm from 'node:vm';import path from 'node:path';import {fileURLToPath} from 'node:url';
 import {normalizeMetrics,groupKey,comparableSeries,change,onlineCount,completedCount,satisfaction} from '../shared/progress-model.mjs';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
@@ -15,7 +17,8 @@ assert.equal(groupKey(a),groupKey(b));assert.equal(comparableSeries([other,b,a],
 assert.equal(change({...a,metrics:{score:400,scoreUnit:'ms',scoreDirection:'lower'}},{...b,metrics:{score:300,scoreUnit:'ms',scoreDirection:'lower'}}).trend,'positivo');
 function storage(){const m=new Map();return {getItem:key=>m.get(key)||null,setItem:(key,value)=>m.set(key,value),removeItem:key=>m.delete(key)};}
 const auth={currentUser:{uid:'alice'}},localStorage=storage(),sessionStorage=storage();let writes=[],fail=false,privateRules=true;
-const context=vm.createContext({crypto:{randomUUID:()=> 'run-'+Math.random().toString(16).slice(2)},auth,authReady:Promise.resolve(),db:{},localStorage,sessionStorage,normalizeMetrics,ref:(_db,p='')=>p,
+globalThis.sessionStorage=sessionStorage;
+const context=vm.createContext({recordSessionResult,isPermissionDenied,crypto:{randomUUID:()=> 'run-'+Math.random().toString(16).slice(2)},auth,authReady:Promise.resolve(),db:{},localStorage,sessionStorage,normalizeMetrics,ref:(_db,p='')=>p,
  get:async p=>{if(p.includes('__privacy_probe__')&&privateRules)throw {code:'PERMISSION_DENIED'};return {val:()=>null};},
  update:async(p,value)=>{if(fail)throw {code:'PERMISSION_DENIED'};writes.push({p,value});},set:async(p,value)=>writes.push({p,value}),serverTimestamp:()=>123,console});
 let code=fs.readFileSync(path.join(root,'shared/progress-store.js'),'utf8').replace(/^import .+\n/gm,'').replace(/export /g,'');vm.runInContext(code,context);
@@ -29,8 +32,8 @@ auth.currentUser=null;await assert.rejects(()=>context.saveResult(payload),error
 console.log('PASS: real KPI aggregation; comparable trend groups; missing metrics; lower-is-better scores; durable retries; session identity; account isolation; privacy gate; login requirement.');
 const {createRequire}=await import('node:module');const require=createRequire(import.meta.url);const {JSDOM}=require(process.env.COGNILAB_QA_JSDOM||'jsdom');
 const page=new JSDOM('<body><div id="setup"><input id="duration" type="number" value="60"></div></body>',{url:'https://example.test/CogniLab/Stroop.html',runScripts:'outside-only'});
-const w=page.window,messages=[];Object.defineProperty(w,'parent',{value:{postMessage:message=>messages.push(message)}});w.CogniLabExercise={id:'stroop',title:'Stroop',category:'Attenzione',setup:'setup'};
-w.eval(fs.readFileSync(path.join(root,'shared/exercise-runtime.js'),'utf8'));w.CogniLabRun.begin();w.document.getElementById('duration').value='120';w.CogniLabRun.complete({correct:3,total:4});w.CogniLabRun.complete({correct:9,total:10});
+const w=page.window,messages=[];Object.defineProperty(w,'parent',{value:{postMessage:message=>{if(message.type==='cognilab-result-v3')messages.push(message)}}});w.CogniLabGymAuthorized=true;w.CogniLabExercise={id:'stroop',title:'Stroop',category:'Attenzione',setup:'setup'};
+w.eval(fs.readFileSync(path.join(root,'shared/exercise-runtime.js'),'utf8').replace("import('./gym-gate.js')","Promise.resolve()"));w.CogniLabRun.begin();w.document.getElementById('duration').value='120';w.CogniLabRun.complete({correct:3,total:4});w.CogniLabRun.complete({correct:9,total:10});
 assert.equal(messages.length,1,'Completion is emitted once');assert.equal(messages[0].result.settings.duration,'60','Settings reflect exercise start');assert.equal(w.CogniLabRun.abort(),null,'No second interrupted record after completion');
 w.CogniLabRun.begin();assert.equal(w.CogniLabRun.abort().status,'interrupted');assert.equal(w.CogniLabRun.measure(()=>missingVariable),null,'Unavailable metrics never become invented zeroes');w.close();
 console.log('PASS: exercise-to-shell bridge; completion deduplication; settings snapshot; interrupted runs; unavailable counters.');

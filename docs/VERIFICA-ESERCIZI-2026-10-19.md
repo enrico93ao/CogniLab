@@ -12,14 +12,14 @@ Tutti i **38 esercizi** sono stati verificati per sintassi degli script incorpor
 
 Sono passate inoltre 17 suite esistenti su accessi, navigazione, assegnazioni, condivisione, recupero errori, sessioni, menu, timer, Lista della spesa, attenzione alternata, esplorazione, orientamento, Giardino, Pianoforte e feedback visivi/sonori. I test usano DOM, modelli e adattatori simulati: non certificano il rendering reale, la riproduzione audio su dispositivi o la configurazione Firebase pubblicata.
 
-## Correzioni e verifiche consigliate
+## Interventi completati dopo la verifica
 
-| Priorità | Ambito | Evidenza | Intervento consigliato |
-|---|---|---|---|
-| Media | Conta i cerchi, disposizione delle figure | `generateNonOverlappingPositions` accetta comunque una posizione al tentativo 200, anche se collide. Gli stimoli simultanei hanno dimensione fissa di 76 px. | Prevedere un ripiego senza sovrapposizioni e adattare le dimensioni all’area disponibile; controllare soprattutto i telefoni. È una possibilità rilevata nel codice, non un difetto grafico osservato in browser. |
-| Da chiarire | Conta i cerchi, modalità continua | La sessione termina sia al quinto round sia alla scadenza di 120 secondi. | Rendere esplicito “5 prove, massimo 2 minuti” oppure scegliere un unico criterio di durata. L’attuale comportamento non impedisce le risposte a due cifre dopo questa correzione. |
-| Media, manutenzione | Test automatici storici | `progress-v3.mjs` rimuove gli import senza simulare il nuovo `recordSessionResult`; fallisce per ReferenceError. `html-regression.mjs` impone il CSS della palestra anche alle pagine pubbliche e conserva conteggi di 36 esercizi. | Aggiornare questi test alla struttura attuale. I test più recenti `session-save`, `care-flow` e `care-dashboard` passano. Non sono errori di esecuzione dei giochi dimostrati. |
-| Media, manutenzione | Comandi di test | `package.json` richiama `tests/exercise-smoke.mjs` e `tests/persistence.mjs`, assenti. | Collegare i comandi alle suite esistenti e alla nuova verifica del catalogo. |
+- **Figure senza sovrapposizioni:** dimensioni adattate all’area disponibile; collocazione casuale con verifica dei rettangoli (anche per i quadrati), e ripiego in celle separate con ordine e posizione variabili. Nessuna posizione in collisione viene accettata dopo il limite di tentativi. Il test copre 675 disposizioni, da 240×180 a 1024×500, comprese estrazioni casuali costanti che forzano il ripiego; controlla numero di figure, contenimento e assenza di sovrapposizioni. Questo non sostituisce una prova visiva sui dispositivi.
+- **Durata esplicita:** la modalità continua mostra “5 prove, massimo 2 minuti”. Il criterio di conclusione rimane invariato, evitando di modificare la durata dei training esistenti.
+- **Test storici aggiornati:** la suite HTML riconosce il tema pubblico, il reindirizzamento del vecchio catalogo, i dati strutturati JSON-LD e i 38 esercizi. Il test dei progressi usa il diario di sessione, simula l’autorizzazione ed esamina soltanto i messaggi dei risultati, distinguendoli dagli eventi di stato.
+- **Comandi ripristinati:** `test:exercises` esegue la verifica del catalogo e il test di Conta i cerchi; `test:persistence` esegue salvataggio e percorso dei programmi. Eliminati i richiami a file di test assenti.
+
+Verifiche superate dopo le modifiche: `test:exercises`, `test:html`, `test:progress` e `test:persistence`. I test dei dati usano adattatori simulati, senza modificare Firebase reale.
 
 ## Elenco completo
 

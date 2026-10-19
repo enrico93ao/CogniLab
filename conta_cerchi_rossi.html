@@ -156,7 +156,7 @@
                         </label>
                         <select id="select-gameplay" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
                             <option value="reset">Round Singoli (Quanti visti)</option>
-                            <option value="continuous">Conto Continuo (Somma progressiva)</option>
+                            <option value="continuous">Conto Continuo (5 prove, massimo 2 minuti)</option>
                         </select>
                     </div>
 
@@ -378,24 +378,47 @@
             }
         }
 
+        function stimulusLayout(count, areaWidth, areaHeight) {
+            const padding = 12, gap = 12;
+            const width = Math.max(1, areaWidth - padding * 2);
+            const height = Math.max(1, areaHeight - padding * 2);
+            let best = { size: 0, columns: 1, rows: count };
+            for (let columns = 1; columns <= count; columns++) {
+                const rows = Math.ceil(count / columns);
+                const size = Math.min(76, width / columns - gap, height / rows - gap);
+                if (size > best.size) best = { size, columns, rows };
+            }
+            return { ...best, size: Math.max(1, Math.floor(best.size)), padding, gap, width, height };
+        }
+
         function generateNonOverlappingPositions(count, size, areaWidth, areaHeight) {
-            let positions = [];
-            let maxAttempts = 200;
-            let padding = 15;
+            const layout = stimulusLayout(count, areaWidth, areaHeight);
+            size = Math.min(size, layout.size);
+            const {padding, gap} = layout;
+            const positions = [];
             for (let i = 0; i < count; i++) {
-                let placed = false, attempts = 0, x = 0, y = 0;
-                while (!placed && attempts < maxAttempts) {
-                    attempts++;
-                    x = Math.random() * (areaWidth - size - (padding * 2)) + padding;
-                    y = Math.random() * (areaHeight - size - (padding * 2)) + padding;
-                    let overlap = false;
-                    for (let p of positions) {
-                        let dx = p.x - x, dy = p.y - y;
-                        if (Math.sqrt(dx * dx + dy * dy) < size + 16) { overlap = true; break; }
+                let placed = false;
+                for (let attempt = 0; attempt < 200; attempt++) {
+                    const x = padding + Math.random() * Math.max(0, areaWidth - size - 2 * padding);
+                    const y = padding + Math.random() * Math.max(0, areaHeight - size - 2 * padding);
+                    if (positions.every(p => Math.abs(p.x - x) >= size + gap || Math.abs(p.y - y) >= size + gap)) {
+                        positions.push({x, y}); placed = true; break;
                     }
-                    if (!overlap || attempts >= maxAttempts) placed = true;
                 }
-                positions.push({ x, y });
+                if (!placed) {
+                    // Restart with separate cells: never accept a colliding position.
+                    const cellWidth = layout.width / layout.columns;
+                    const cellHeight = layout.height / layout.rows;
+                    const slots = Array.from({length: layout.columns * layout.rows}, (_, n) => n);
+                    for (let n = slots.length - 1; n > 0; n--) {
+                        const j = Math.floor(Math.random() * (n + 1));
+                        [slots[n], slots[j]] = [slots[j], slots[n]];
+                    }
+                    return slots.slice(0, count).map(n => ({
+                        x: padding + (n % layout.columns) * cellWidth + gap / 2 + Math.random() * Math.max(0, cellWidth - size - gap),
+                        y: padding + Math.floor(n / layout.columns) * cellHeight + gap / 2 + Math.random() * Math.max(0, cellHeight - size - gap)
+                    }));
+                }
             }
             return positions;
         }
@@ -404,7 +427,7 @@
             const area = document.getElementById('stimulus-area');
             area.innerHTML = '';
             let shapesConfig = [], targetCount = 0;
-            const size = 76;
+            let size = 76;
 
             if (config.level === 'base') {
                 targetCount = Math.floor(Math.random() * 4) + 2;
@@ -431,6 +454,7 @@
             shapesConfig.sort(() => Math.random() - 0.5);
 
             let areaWidth = area.clientWidth || 700, areaHeight = area.clientHeight || 300;
+            size = stimulusLayout(shapesConfig.length, areaWidth, areaHeight).size;
             let positions = generateNonOverlappingPositions(shapesConfig.length, size, areaWidth, areaHeight);
             let currentTargetIndex = 1;
 
@@ -446,7 +470,7 @@
                 if (config.helper === 'on' && item.isTarget) {
                     el.innerText = currentTargetIndex;
                     el.style.color = '#ffffff';
-                    el.style.fontSize = '2rem';
+                    el.style.fontSize = `${Math.min(32, size * 0.48)}px`;
                     currentTargetIndex++;
                 }
                 area.appendChild(el);

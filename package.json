@@ -13,9 +13,9 @@
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
     "db:generate": "drizzle-kit generate",
     "start:local": "node scripts/serve.mjs",
-    "test:exercises": "node tests/exercise-smoke.mjs",
+    "test:exercises": "node --experimental-vm-modules tests/exercise-audit.mjs && node tests/circle-answer.mjs",
     "assets:exercises": "node scripts/migration/build-assets.mjs",
-    "test:persistence": "node tests/persistence.mjs",
+    "test:persistence": "node tests/session-save.mjs && node tests/care-flow.mjs",
     "test:html": "node tests/html-regression.mjs",
     "test:progress": "node tests/progress-v3.mjs"
   },
