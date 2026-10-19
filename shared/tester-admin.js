@@ -1,4 +1,4 @@
-import {invitePatient,registerManagedPatient} from './care-store.js';
+import {invitePatient,registerManagedPatient,setPatientNotificationEmail} from './care-store.js';
 import {initializeApp,deleteApp} from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js';
 import {initializeAuth,inMemoryPersistence,createUserWithEmailAndPassword,sendEmailVerification,deleteUser,signOut} from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js';
 import {ref,get,set} from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js';
@@ -31,7 +31,7 @@ document.getElementById('create-tester').onsubmit=async event=>{
   await setAccess(created.uid,true);enabled=true;
   document.querySelector('#enable-tester input').value=created.uid;
   let rosterMessage;
-  try{await invitePatient(created.uid,form.elements.patientName?.value.trim()||form.elements.email.value.trim());await registerManagedPatient(created.uid);rosterMessage=' Paziente aggiunto al tuo elenco e collegato automaticamente: puoi assegnare il programma senza altri passaggi.';}catch(error){rosterMessage=' Account attivo, ma collegamento all’elenco non riuscito: usa il codice '+created.uid+' in Collega un paziente. '+friendlyError(error);}
+  try{await invitePatient(created.uid,form.elements.patientName?.value.trim()||form.elements.email.value.trim());await registerManagedPatient(created.uid);await setPatientNotificationEmail(created.uid,form.elements.email.value.trim());rosterMessage=' Paziente aggiunto al tuo elenco e collegato automaticamente: puoi assegnare il programma senza altri passaggi.';}catch(error){rosterMessage=' Account attivo, ma collegamento all’elenco non riuscito: usa il codice '+created.uid+' in Collega un paziente. '+friendlyError(error);}
   let emailMessage;
   try{await sendEmailVerification(created,{url:'https://enrico93ao.github.io/CogniLab/esercizi.html',handleCodeInApp:false});emailMessage=' Richiesto l’invio dell’email di conferma: controllare anche lo spam.';}
   catch(error){emailMessage=' Non è stato possibile richiedere l’email di conferma. Il paziente può riprovare da Il mio account → Reinvia email di conferma. Dettaglio: '+friendlyError(error);}

@@ -8,7 +8,7 @@
  const clicked=new Map();
  const group=b=>{const handler=b.getAttribute('onclick')||'';const match=handler.match(/^\s*([\w.]+)\s*\(/);return match?match[1]+(handler.match(/\(\s*(['"])(.*?)\1\s*,/)?.[2]||''):(b.className.match(/\b[\w-]+-(?:btn|option)\b/)?.[0]||b.parentElement?.id||b.parentElement?.className||'options');};
  if(preview)document.addEventListener('click',event=>{const b=event.target.closest('button');if(!b||!safeButton(b))return;const panel=panels().find(p=>p.contains(b));if(panel)clicked.set(panel.id+'|'+group(b),{panel:panel.id,index:[...panel.querySelectorAll('button')].indexOf(b),label:b.textContent.trim()});},true);
- const capture=()=>({format:1,controls:panels().flatMap(panel=>controls(panel).map((c,index)=>({panel:panel.id,index,key:c.id||c.name||c.type,value:c.value,checked:c.checked===true}))),buttons:[...clicked.values(),...panels().flatMap(panel=>[...panel.querySelectorAll('button')].flatMap((b,index)=>selected(b)&&safeButton(b)&&!clicked.has(panel.id+'|'+group(b))?[{panel:panel.id,index,label:b.textContent.trim()}]:[]))]});
+ const capture=()=>({format:1,controls:panels().flatMap(panel=>controls(panel).map((c,index)=>({panel:panel.id,index,key:c.id||c.name||c.type,type:c.type,value:c.value,checked:c.checked===true}))),buttons:[...clicked.values(),...panels().flatMap(panel=>[...panel.querySelectorAll('button')].flatMap((b,index)=>selected(b)&&safeButton(b)&&!clicked.has(panel.id+'|'+group(b))?[{panel:panel.id,index,label:b.textContent.trim()}]:[]))]});
  function apply(config){
   if(!config||config.format!==1||!Array.isArray(config.controls))throw Error('Configurazione non valida');
   const allowed=new Map(panels().map(p=>[p.id,p]));
