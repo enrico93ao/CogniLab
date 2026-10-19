@@ -4,9 +4,14 @@ export function validateProgram(input){
  const name=String(input.name||'').trim(),instructions=String(input.instructions||'').trim(),totalSessions=Number(input.totalSessions),exercises=Array.from(input.exercises||[]);
  if(!name||name.length>80)throw Error('Inserisci un titolo di massimo 80 caratteri.');
  if(!Number.isInteger(totalSessions)||totalSessions<1||totalSessions>60)throw Error('Scegli un numero di sessioni da 1 a 60.');
- if(!exercises.length||exercises.length>20||exercises.some(id=>!exerciseById.has(id)))throw Error('Scegli da 1 a 20 esercizi dal catalogo.');
+ if(!exercises.length||exercises.length>100||exercises.some(id=>!exerciseById.has(id)))throw Error('Scegli da 1 a 100 prove dal catalogo.');
  if(instructions.length>1000)throw Error('Le indicazioni possono contenere al massimo 1000 caratteri.');
- return {name,instructions,totalSessions,exercises};
+ const configurations=Array.from(input.configurations||exercises.map(()=>JSON.stringify({format:1,controls:[],buttons:[]})));
+ if(configurations.length!==exercises.length||configurations.some(c=>typeof c!=='string'||c.length>16000||(()=>{try{const parsed=JSON.parse(c);return parsed?.format!==1||!Array.isArray(parsed.controls)||parsed.controls.length>200||!Array.isArray(parsed.buttons)||parsed.buttons.length>100;}catch{return true;}})()))throw Error('Configurazioni degli esercizi non valide.');
+ const schedule=Array.from(input.schedule||[]);
+ if(schedule.length&&schedule.length!==totalSessions)throw Error('Inserisci una data per ogni sessione prevista.');
+ if(schedule.some((day,i)=>typeof day!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(day)||Number.isNaN(Date.parse(day+'T12:00:00Z'))||new Date(day+'T12:00:00Z').toISOString().slice(0,10)!==day||(i>0&&day<schedule[i-1])))throw Error('Le date devono essere valide e in ordine cronologico.');
+ return {name,instructions,totalSessions,exercises,...(input.configurations?{configurations}:{}),...(schedule.length?{schedule}:{})};
 }
 export function sessionProgress(program,session={}){
  const sequence=Array.from(program.exercises||[]),completed=new Set();

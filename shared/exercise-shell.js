@@ -36,7 +36,7 @@
     frame.addEventListener('load', () => { clearTimeout(timeout); frame.classList.add('loaded'); error.hidden = true; });
     frame.addEventListener('error', () => { clearTimeout(timeout); showError('Impossibile caricare l’esercizio. Torna alla dashboard e riprova.'); });
     // Same-origin, catalog-only targets; no arbitrary remote iframe URLs.
-    frame.src = direct.getAttribute('href');
+    frame.src = direct.getAttribute('href') + (new URLSearchParams(location.search).has('configure')?'?configure=1':'');
   }
   const username = localStorage.getItem('hub_username') || 'Ospite';
   document.getElementById('user-display').textContent = (localStorage.getItem('hub_mode') === 'clinical' ? 'Clinico: ' : 'Utente: ') + username;

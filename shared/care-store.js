@@ -36,7 +36,17 @@ export async function patientWorkspace(){
  return {user,invites:invites||{},links:links||{},programs:list.filter(Boolean)};
 }
 export async function checkCareStorage(){const user=await requireProfessional();await read(`cognilab/careLinks/${user.uid}/${user.uid}`);}
-export async function professionalPatients(){const user=await requireProfessional();return await read(`cognilab/users/${user.uid}/clinical/registeredPatients`)||{};}
+export async function professionalPatients(){
+ const user=await requireProfessional(),records=await read(`cognilab/users/${user.uid}/clinical/registeredPatients`)||{};
+ // Only the account manager can enumerate the testers it provisions.
+ if(user.uid==='eWoQhl1qwqVKRupDabTM6vfMyyI3'){
+  const testers=await read('cognilab/testers')||{};
+  for(const [uid,enabled] of Object.entries(testers))if(enabled===true&&uid!==user.uid&&!records[uid]){
+   const name='Paziente test · '+uid.slice(0,8);await invitePatient(uid,name);records[uid]={name};
+  }
+ }
+ return records;
+}
 export async function professionalPatient(patientUid,record){
  const user=await requireProfessional();if(!validUid(patientUid))throw Error('Codice paziente non valido.');
  const accepted=await read(`cognilab/careLinks/${patientUid}/${user.uid}`)===true;
@@ -61,10 +71,10 @@ export async function startAssignedProgram(id){
  validateProgram(program);
  const sessions=await read(`cognilab/careSessions/${user.uid}/${id}`)||{},progress=programProgress(program,sessions);
  if(!progress.remaining)throw Error('Hai completato tutte le sessioni previste per questo programma.');
- const resume=progress.resume,session={id:resume?.id||crypto.randomUUID(),startedAt:resume?.startedAt||new Date().toISOString(),patientId:null,programId:id,programOwnerId:program.professionalId,programSlot:String(resume?.progress.nextSlot??0),programExercises:Array.from(program.exercises)};
- await write(`cognilab/careSessions/${user.uid}/${id}/${session.id}/startedAt`,session.startedAt);
+ const resume=progress.resume,session={id:resume?.id||crypto.randomUUID(),startedAt:resume?.startedAt||new Date().toISOString(),patientId:null,programId:id,programOwnerId:program.professionalId,programSlot:String(resume?.progress.nextSlot??0),programExercises:Array.from(program.exercises),programConfigurations:program.configurations||[],scheduledDate:program.schedule?.[progress.completed]||null};
+ await patch({[`cognilab/careSessions/${user.uid}/${id}/${session.id}/startedAt`]:session.startedAt,...(session.scheduledDate?{[`cognilab/careSessions/${user.uid}/${id}/${session.id}/scheduledDate`]:session.scheduledDate}:{})});
  const completed=resume?Object.keys(resume.results||{}).map(key=>resume.results[key]).filter(r=>r.status==='completed').map(r=>Number(r.programSlot)):[];
- const plan={programId:id,files:program.exercises.map(exerciseId=>exerciseById.get(exerciseId).file),index:Number(session.programSlot),completedSlots:completed};
+ const plan={programId:id,configurations:program.configurations||[],files:program.exercises.map(exerciseId=>exerciseById.get(exerciseId).file),index:Number(session.programSlot),completedSlots:completed};
  sessionStorage.setItem('cognilab.session.'+user.uid,JSON.stringify(session));sessionStorage.setItem('cognilab.plan.'+user.uid,JSON.stringify(plan));
  localStorage.setItem('hub_mode','free_training');localStorage.removeItem('hub_selected_patient_id');
  return 'esercizio.html?file='+encodeURIComponent(plan.files[plan.index]);

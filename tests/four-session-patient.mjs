@@ -16,7 +16,7 @@ const correctBySession=[[6,5,7],[7,6,7],[8,7,6],[9,8,5]];
 await context.invitePatient(patient,'Paziente TEST — dati simulati');
 auth.currentUser={uid:patient,isAnonymous:false};await context.setConnection('pro',true);
 auth.currentUser={uid:'pro',displayName:'Professionista TEST',isAnonymous:false};
-const programId=await context.assignProgram(patient,{name:'TEST — 4 sessioni, 3 esercizi',totalSessions:4,exercises:exerciseIds});
+const programId=await context.assignProgram(patient,{name:'TEST — 4 sessioni, 3 esercizi',totalSessions:4,exercises:exerciseIds,configurations:exerciseIds.map(()=>JSON.stringify({format:1,controls:[],buttons:[]})),schedule:['2026-10-20','2026-10-22','2026-10-24','2026-10-26']});
 auth.currentUser={uid:patient,isAnonymous:false};
 const sessionIds=new Set(),rows=[];let retried=false;
 for(let day=0;day<4;day++){
@@ -26,7 +26,7 @@ for(let day=0;day<4;day++){
   sessionStorage.removeItem('cognilab.plan.'+patient);sessionStorage.removeItem('cognilab.session.'+patient);
   await context.startAssignedProgram(programId);
   const session=JSON.parse(sessionStorage.getItem('cognilab.session.'+patient));
-  assert.equal(Number(session.programSlot),slot,'Persisted next slot');
+  assert.equal(Number(session.programSlot),slot,'Persisted next slot');assert.equal(session.programConfigurations.length,3);assert.equal(session.scheduledDate,['2026-10-20','2026-10-22','2026-10-24','2026-10-26'][day]);
   if(slot===0){sessionId=session.id;assert.ok(!sessionIds.has(sessionId));sessionIds.add(sessionId);}
   assert.equal(session.id,sessionId,'One identity for all exercises of a session');
   const exerciseId=exerciseIds[slot],date='2026-10-'+String(12+day*2).padStart(2,'0');

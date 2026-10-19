@@ -17,3 +17,5 @@ body[data-cognilab='hub'] .kpi-grid{gap:12px;margin-bottom:20px}body[data-cognil
 .care-shortcuts{display:flex;flex-wrap:wrap;gap:10px;margin:20px 0}.care-shortcuts a{color:#1b6f78;text-decoration:none;background:#fff;border:1px solid #d4e2e7;border-radius:30px;padding:11px 18px;font-size:.87rem;font-weight:650;min-height:44px;display:inline-flex;align-items:center}.care-shortcuts a:hover{background:#eaf5f3}.care-shortcuts a:focus-visible{outline:3px solid #f7b955;outline-offset:3px}.care-progress[hidden]{display:none!important}#care-workspace,#care-personal-progress,#care-exercise-catalog,#care-registered-progress{scroll-margin-top:110px}
 
 .care-chart{overflow-x:auto}.care-chart svg{min-width:540px}.care-action-status{font-size:.86rem;margin:10px 0!important}
+
+.care-config-dialog{width:min(1100px,96vw);max-height:95vh;border:0;border-radius:20px;padding:20px}.care-config-dialog::backdrop{background:#0f172abf}.care-config-dialog iframe{width:100%;height:65vh;border:1px solid #cbd5e1;border-radius:12px}.care-actions label{display:flex;flex-direction:column;gap:4px}.care-actions input[type=number]{width:90px}
