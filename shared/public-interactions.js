@@ -30,5 +30,5 @@
  const more=menu.querySelector('details');
  document.addEventListener('keydown',event=>{if(event.key!=='Escape')return;if(more?.open){more.open=false;more.querySelector('summary').focus();}else if(button.getAttribute('aria-expanded')==='true'){close();button.focus();}});
  document.addEventListener('click',event=>{if(more?.open&&!more.contains(event.target))more.open=false;});
- window.matchMedia?.('(max-width: 1000px)').addEventListener?.('change',close);
+ window.matchMedia?.('(max-width: 1200px)').addEventListener?.('change',close);
 })();

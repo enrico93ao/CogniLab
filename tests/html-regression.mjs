@@ -17,8 +17,7 @@ for (const name of fs.readdirSync(root).filter(name => name.endsWith('.html'))) 
   for (const script of page.window.document.querySelectorAll('script:not([src]):not([type="module"]):not([type="application/json"]):not([type="application/ld+json"])')) {
     new vm.Script(script.textContent, {filename:name}); nativeScripts++;
   }
-  if (name === 'catalogo-esercizi.html') assert.ok(page.window.document.querySelector('meta[http-equiv="refresh"]'), 'catalog alias redirects');
-  else assert.ok([...page.window.document.querySelectorAll('link[rel="stylesheet"]')].some(link => /^shared\/(cognilab|public-catalog)\.css(?:\?|$)/.test(link.getAttribute('href'))), name);
+  assert.ok([...page.window.document.querySelectorAll('link[rel="stylesheet"]')].some(link => /^shared\/(cognilab|public-catalog)\.css(?:\?|$)/.test(link.getAttribute('href'))), name);
   assert.ok(!read(name).includes('localStorage.clear()'), name + ': no global storage erasure');
   page.window.close();
 }

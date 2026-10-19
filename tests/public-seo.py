@@ -27,7 +27,7 @@ class Page(HTMLParser):
 sitemap=ET.parse(root/'sitemap.xml').getroot()
 assert sitemap.tag=='{http://www.sitemaps.org/schemas/sitemap/0.9}urlset'
 urls=[node.text for node in sitemap.findall('{*}url/{*}loc')]
-assert len(urls)==len(set(urls))==23,urls
+assert len(urls)==len(set(urls))==25,urls
 assert urls[0]==base
 assert not any(unquote(url.removeprefix(base)) in ['accesso.html','esercizi.html','esercizio.html','Lista della spesa.html','gestisci-tester.html','riepilogo.html'] for url in urls)
 public_files={url.removeprefix(base) or 'index.html' for url in urls}
@@ -70,7 +70,7 @@ while queue:
   if path in public_files and path not in seen:queue.append(path)
 assert seen==public_files,('orphan public pages',public_files-seen)
 model=(root/'shared/exercise-catalog.mjs').read_text();exercises=json.loads(model.split('export const exercises=')[1].split(';\n')[0]);ids={e['id'] for e in exercises}
-catalog=pages['index.html'];assert len(catalog.catalog)==38
+catalog=pages['catalogo-esercizi.html'];assert len(catalog.catalog)==38
 assert {item[0] for item in catalog.catalog}==ids
 areas=[p for name,p in pages.items() if name.startswith('esercizi-')]
 category_ids=[id for p in areas for id in p.ids if id in ids]
@@ -78,5 +78,7 @@ assert len(category_ids)==38 and set(category_ids)==ids
 for name in ['esercizi.html','esercizio.html','Lista della spesa.html']:
  assert Page(root/name).meta['robots']=='noindex,follow',name
 assert pages['index.html'].meta['google-site-verification']=='bEkxlHc3_DURFJVy0Xt7UZ7wFnCF1w1vWFB7Qd3uOTo'
-assert 'http-equiv="refresh"' in (root/'catalogo-esercizi.html').read_text()
-print('PASS: 23 canonical public URLs, unique metadata, valid JSON-LD, 38 exercise cards, native links and fragments, no orphan pages, no Firebase dependency on new pages, private entry points noindex; verification token retained.')
+assert 'http-equiv="refresh"' not in (root/'catalogo-esercizi.html').read_text()
+assert len(pages['index.html'].catalog)==0
+assert 'professionisti.html' in pages['index.html'].links
+print('PASS: 25 canonical public URLs, unique metadata, valid JSON-LD, 38 exercise cards, native links and fragments, no orphan pages, no Firebase dependency on new pages, private entry points noindex; verification token retained.')
