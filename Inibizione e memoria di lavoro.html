@@ -158,9 +158,9 @@
     </style>
 <link rel="stylesheet" href="shared/cognilab.css">
 <script src="shared/interface.js" defer></script>
-<script>window.CogniLabExercise={"id":"inibizione-memoria","title":"Inibizione e memoria di lavoro","category":"Funzioni esecutive","setup":"menu-screen"};</script>
+<script>window.CogniLabExercise={"id":"inibizione-memoria","title":"Inibizione e memoria di lavoro","category":"Funzioni esecutive","setup":"menu-screen","version":"3.1.0"};</script>
 <script src="shared/exercise-runtime.js?v=ux12"></script>
-</head>
+<link rel="stylesheet" href="shared/object-images.css"><script src="shared/object-images.js"></script><style>.object-display{background:radial-gradient(circle at 35% 25%,#fff,#edf4fc)!important;box-shadow:0 20px 50px #1c456320,inset 0 0 0 6px #ffffff;border-radius:32px!important;position:relative;overflow:hidden;width:clamp(180px,30vw,330px);height:clamp(180px,30vw,330px)}.object-display .cl-object-photo{width:88%;border-radius:24px}.stimulus-name{display:block;font:700 clamp(14px,2vw,20px) system-ui;color:#334155;text-align:center;margin-top:12px}#special-rules-list{background:#f0f7ff;border-radius:18px;padding:18px}#game-screen{max-width:1400px}</style></head>
 <body data-cognilab="exercise">
 
     <div id="feedback-ui" class="feedback-overlay"></div>
@@ -318,18 +318,33 @@
 
     <script>
         const baseItems = [
-            { weight: "light", icon: "☁️", category: "nature" },
-            { weight: "light", icon: "🍎", category: "food" },
-            { weight: "light", icon: "🎈", category: "object" },
-            { weight: "light", icon: "🌸", category: "nature" },
-            { weight: "light", icon: "🐜", category: "animal" },
-            { weight: "light", icon: "🐝", category: "animal" },
-            { weight: "heavy", icon: "⚓", category: "tool" },
-            { weight: "heavy", icon: "📦", category: "tool" },
-            { weight: "heavy", icon: "🚗", category: "vehicle" },
-            { weight: "heavy", icon: "🐘", category: "animal" },
-            { weight: "heavy", icon: "🚛", category: "vehicle" },
-            { weight: "heavy", icon: "🚜", category: "vehicle" }
+            { weight: "light", icon: "☁️", name: "Nuvola", category: "nature" },
+            { weight: "light", icon: "🍎", name: "Mela", category: "food" },
+            { weight: "light", icon: "🎈", name: "Palloncino", category: "object" },
+            { weight: "light", icon: "🌸", name: "Fiore", category: "nature" },
+            { weight: "light", icon: "🐜", name: "Formica", category: "animal" },
+            { weight: "light", icon: "🐝", name: "Ape", category: "animal" },
+            { weight: "heavy", icon: "⚓", name: "Ancora", category: "tool" },
+            { weight: "heavy", icon: "📦", name: "Cassa", category: "tool" },
+            { weight: "heavy", icon: "🚗", name: "Auto", category: "vehicle" },
+            { weight: "heavy", icon: "🐘", name: "Elefante", category: "animal" },
+            { weight: "heavy", icon: "🚛", name: "Camion", category: "vehicle" },
+            { weight: "heavy", icon: "🚜", name: "Trattore", category: "vehicle" }
+,
+            {"weight": "light", "icon": "🪶", "name": "Piuma", "category": "nature"},
+            {"weight": "light", "icon": "🍃", "name": "Foglia", "category": "nature"},
+            {"weight": "light", "icon": "🦋", "name": "Farfalla", "category": "animal"},
+            {"weight": "light", "icon": "🐞", "name": "Coccinella", "category": "animal"},
+            {"weight": "light", "icon": "🍓", "name": "Fragola", "category": "food"},
+            {"weight": "light", "icon": "🍋", "name": "Limone", "category": "food"},
+            {"weight": "light", "icon": "✉️", "name": "Busta", "category": "object"},
+            {"weight": "light", "icon": "🧦", "name": "Calza", "category": "object"},
+            {"weight": "heavy", "icon": "🚌", "name": "Autobus", "category": "vehicle"},
+            {"weight": "heavy", "icon": "🚂", "name": "Locomotiva", "category": "vehicle"},
+            {"weight": "heavy", "icon": "🦏", "name": "Rinoceronte", "category": "animal"},
+            {"weight": "heavy", "icon": "🦛", "name": "Ippopotamo", "category": "animal"},
+            {"weight": "heavy", "icon": "🗄️", "name": "Schedario", "category": "tool"},
+            {"weight": "heavy", "icon": "🛢️", "name": "Fusto", "category": "tool"}
         ];
 
         const colors = [
@@ -480,7 +495,11 @@
             gameState.currentObject = {...selected, hex: cData.hex};
 
             const disp = document.getElementById('object-display');
-            disp.textContent = selected.icon;
+            disp.replaceChildren();
+            const photo=window.CogniLabObjects?.markup(selected.name);
+            if(photo)disp.innerHTML=photo;else disp.textContent=selected.icon;
+            disp.setAttribute('role','img');disp.setAttribute('aria-label',selected.name);
+            let caption=document.getElementById('stimulus-name');if(!caption){caption=document.createElement('p');caption.id='stimulus-name';caption.className='stimulus-name';disp.after(caption);}caption.textContent=selected.name;
             disp.style.borderColor = cData.hex;
             disp.classList.add('pop');
             setTimeout(() => disp.classList.remove('pop'), 150);

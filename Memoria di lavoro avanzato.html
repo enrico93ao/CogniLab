@@ -51,7 +51,7 @@
 <script src="shared/interface.js" defer></script>
 <script>window.CogniLabExercise={"id":"memoria-lavoro-avanzato","title":"Memoria di lavoro avanzato","category":"Memoria","setup":"step-start,step-intro"};</script>
 <script src="shared/exercise-runtime.js?v=ux12"></script>
-</head>
+<link rel="stylesheet" href="shared/signed-keypad.css"><script src="shared/signed-keypad.js" defer></script></head>
 <body data-cognilab="exercise" class="min-h-screen bg-slate-100 flex items-center justify-center p-4 text-slate-900">
 
   <!-- Contenitore Principale dell'Applicazione -->
@@ -119,7 +119,7 @@
           </div>
           <input 
             type="number"
-            id="math-input"
+            id="math-input" data-signed-keypad
             class="text-center text-3xl p-3 border-4 rounded-2xl w-40 outline-none transition-all border-purple-200 focus:border-purple-500"
             required
           />

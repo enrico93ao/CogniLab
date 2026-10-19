@@ -3,7 +3,7 @@ import {auth} from './firebase-client.js';
 import {currentCareUser,patientWorkspace,checkCareStorage,professionalPatients,professionalPatient,registerManagedPatient,invitePatient,setConnection,assignProgram,sendAssignmentNotification,archiveProgram,startAssignedProgram,careError} from './care-store.js?v=autoemail24';
 import {programProgress,resultsFromCare} from './care-model.mjs';
 import {exercises,exerciseById} from './exercise-catalog.mjs';
-import {createProgressView} from './progress-view.js?v=areas23';
+import {createProgressView} from './progress-view.js?v=ux25';
 import {pendingCare,retryPending} from './progress-store.js';
 import {requireProfessional} from './clinical-access.js';
 const el=(tag,text,cls)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;if(cls)n.className=cls;return n;};
@@ -46,11 +46,11 @@ async function patientView(user){
  const shortcut=document.querySelector('.care-shortcuts a[href="#care-workspace"]');if(shortcut)shortcut.textContent='Il mio programma';
  const top=card('Il tuo allenamento, un passo alla volta','IL TUO PERCORSO');top.classList.add('care-hero');top.append(el('p','Qui trovi i programmi del professionista. Puoi riprendere una sessione lasciata a metà e ritrovare i risultati anche da un altro dispositivo.'));
  const refresh=button('Aggiorna programmi',()=>action(refresh,load));top.append(refresh);workspace.append(top);
- const grid=el('div',undefined,'care-grid'),programHost=card('I programmi assegnati','DA SVOLGERE'),account=card('Collegati al professionista','IL TUO ACCOUNT');grid.append(programHost,account);workspace.append(grid);
+ const grid=el('div',undefined,'care-grid'),programHost=card('I programmi assegnati','DA SVOLGERE'),account=card('Un percorso su misura per te','SUPPORTO PROFESSIONALE');grid.append(programHost,account);workspace.append(grid);
  const list=el('div');programHost.append(list);
- account.append(el('p','Comunica questo codice al tuo professionista. Serve a identificare il tuo account senza comunicare la password.','care-muted'));
- const code=el('code',user.uid,'care-code');account.append(code);
- const copy=button('Copia codice account',async()=>{try{await navigator.clipboard.writeText(user.uid);message('Codice account copiato.');}catch{message('Seleziona e copia il codice mostrato nel riquadro.');}});account.append(copy);
+ account.append(el('p','Richiedi il supporto di un professionista per costruire il tuo percorso di stimolazione personalizzato.','care-muted'));
+ const support=el('a','Invia richiesta di supporto','primary');support.href='contatti.html?richiesta=percorso-personalizzato';account.append(support);
+ const accountDetails=el('details');accountDetails.append(el('summary','Il mio codice account'),el('code',user.uid,'care-code'));account.append(accountDetails);
  const invites=el('div');account.append(invites);
  let version=0;
  async function load(){
@@ -59,7 +59,7 @@ async function patientView(user){
   if(data.programs.some(p=>p.status==='active')){const copy=document.getElementById('welcome-subtext');if(copy)copy.textContent='Segui il programma assegnato dal professionista oppure scegli un esercizio dalla palestra.';}
   for(const program of data.programs.sort((a,b)=>b.createdAt-a.createdAt))list.append(programCard(program));
   invites.replaceChildren();
-  if(!Object.keys(data.invites).length)invites.append(el('p','Gli inviti del professionista compariranno qui.','care-muted'));
+  if(!Object.keys(data.invites).length)invites.append(el('p','Il professionista ti guiderà nella scelta degli esercizi e dei livelli più adatti.','care-muted'));
   for(const [uid,invite] of Object.entries(data.invites)){
    const connected=data.links[uid]===true,n=el('div',undefined,'care-invite');n.append(el('h3',invite.professionalName));
    n.append(el('p',connected?'Collegamento attivo. Il professionista vede i risultati dei programmi che ti ha assegnato.':'Accettando permetti a questo professionista di assegnarti programmi e di vedere i risultati di quei programmi. Gli altri esercizi del tuo storico restano privati.','care-muted'));

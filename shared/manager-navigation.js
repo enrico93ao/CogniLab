@@ -1,7 +1,7 @@
 import {onAuthStateChanged} from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js';
 import {auth} from './firebase-client.js';
 import {requireProfessional} from './clinical-access.js';
-// Navigation visibility is independent of training/clinical mode; Firebase still enforces access.
+// Patient access creation belongs only to the approved owner’s clinical workspace.
 const ownerUid='eWoQhl1qwqVKRupDabTM6vfMyyI3';
 const panel=document.getElementById('cl-tester-management');
 let revision=0;
@@ -9,7 +9,7 @@ onAuthStateChanged(auth,async user=>{
  const current=++revision;
  if(panel){panel.hidden=true;panel.style.display='none';}
  document.getElementById('cl-create-patient-access')?.remove();
- if(user?.uid!==ownerUid)return;
+ if(user?.uid!==ownerUid||localStorage.getItem('hub_mode')!=='clinical')return;
  try{
   const professional=await requireProfessional();
   if(current!==revision||auth.currentUser?.uid!==professional.uid||professional.uid!==ownerUid)return;

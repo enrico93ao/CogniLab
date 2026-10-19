@@ -89,7 +89,7 @@
     </style>
 <link rel="stylesheet" href="shared/cognilab.css">
 <script src="shared/interface.js" defer></script>
-<script>window.CogniLabExercise={"id":"cerchi-rossi","title":"Conta i cerchi rossi","category":"Attenzione","setup":"screen-menu"};</script>
+<script>window.CogniLabExercise={"id":"cerchi-rossi","title":"Conta i cerchi rossi","category":"Attenzione","setup":"screen-menu","version":"3.1.0"};</script>
 <script src="shared/exercise-runtime.js?v=ux12"></script>
 </head>
 <body data-cognilab="exercise" class="h-screen w-screen flex items-center justify-center p-3 sm:p-6">
@@ -339,6 +339,7 @@
 
             gameState.currentRound = 0;
             gameState.scoreLog = [];
+            gameState.sumErrorStreak=0;gameState.sumHint=null;
             gameState.continuousRunningTotal = 0;
             gameState.continuousTargetSum = 0;
 
@@ -369,7 +370,7 @@
 
             const instructionBox = document.getElementById('instruction-box');
             instructionBox.className = "bg-gradient-to-r from-indigo-50 to-blue-50 border-2 border-indigo-200 text-indigo-950 p-4 font-extrabold text-lg sm:text-xl rounded-2xl text-center mb-4 shadow-sm";
-            instructionBox.innerText = "Osserva attentamente gli stimoli...";
+            instructionBox.innerText = config.gameplay === 'continuous' && gameState.sumHint !== null ? `Ripartiamo insieme: il totale corretto precedente era ${gameState.sumHint}. Aggiungi i cerchi rossi di questa prova.` : 'Osserva attentamente gli stimoli...';
 
             if (config.presentation === 'simultaneous') {
                 generateSimultaneousStimuli();
@@ -553,7 +554,7 @@
             document.getElementById('stimulus-area').innerHTML = '';
             const instructionBox = document.getElementById('instruction-box');
             instructionBox.className = "bg-emerald-50 border-2 border-emerald-300 text-emerald-900 p-4 font-extrabold text-lg sm:text-xl rounded-2xl text-center mb-4 shadow-sm";
-            instructionBox.innerText = config.gameplay === 'reset' ? "Quanti cerchi rossi hai visto in questo round?" : `Totale accumulato fino ad ora (Round ${gameState.currentRound}):`;
+            instructionBox.innerText = config.gameplay === 'reset' ? "Quanti cerchi rossi hai visto in questo round?" : `Totale accumulato fino ad ora (Round ${gameState.currentRound}):` + (gameState.sumHint !== null ? ` Il totale precedente era ${gameState.sumHint}: aggiungi i cerchi appena visti.` : '');
 
             const numpad = document.getElementById('numpad-section');
             numpad.style.display = 'flex';
@@ -630,6 +631,8 @@
                 gameState.continuousRunningTotal = num;
                 let correct = (gameState.continuousRunningTotal === gameState.continuousTargetSum);
                 gameState.scoreLog.push({ round: gameState.currentRound, target: gameState.continuousTargetSum, user: num, correct: correct });
+                gameState.sumErrorStreak=correct?0:(gameState.sumErrorStreak||0)+1;
+                gameState.sumHint=gameState.sumErrorStreak>=2?gameState.continuousTargetSum:null;
                 showFeedbackOverlay(correct, () => {
                     if (gameState.currentRound >= gameState.maxRounds) endSession();
                     else startRound();

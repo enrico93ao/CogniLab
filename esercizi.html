@@ -335,7 +335,7 @@
 <script src="shared/interface.js" defer></script>
 <link rel="stylesheet" href="shared/dashboard-icons.css?v=art2">
 <style>html.gym-access-pending body{visibility:hidden!important}</style><script>document.documentElement.classList.add('gym-access-pending');import('./shared/gym-gate.js').catch(()=>location.replace('accesso.html'));</script>
-<link rel="stylesheet" href="shared/responsive.css?v=devices1"><link rel="stylesheet" href="shared/care-dashboard.css?v=areas23"><meta name="robots" content="noindex,follow"></head>
+<link rel="stylesheet" href="shared/responsive.css?v=devices1"><link rel="stylesheet" href="shared/care-dashboard.css?v=ux25"><meta name="robots" content="noindex,follow"></head>
 <body data-cognilab="hub">
 
     <nav class="navbar">
@@ -378,33 +378,6 @@
         
         <nav class="care-shortcuts" aria-label="Sezioni della palestra"><a href="#care-workspace">Programmi e pazienti</a><a href="#care-personal-progress">I progressi</a><a href="#care-exercise-catalog">Tutti gli esercizi</a></nav>
         <section id="care-workspace" class="care-workspace" aria-label="Programmi e pazienti"></section>
-        <div class="kpi-grid">
-            <div class="kpi-card users">
-                <div class="kpi-icon"><i class="fa-solid fa-users"></i></div>
-                <div class="kpi-info">
-                    <h4 title="Account e identità ospite connessi ora; più schede dello stesso account contano una volta">Utenti Collegati</h4>
-                    <p id="kpi-utenti">—</p>
-                </div>
-            </div>
-            <div class="kpi-card done">
-                <div class="kpi-icon"><i class="fa-solid fa-circle-check"></i></div>
-                <div class="kpi-info">
-                    <h4 title="Risultati completati salvati con il nuovo sistema di sessioni">Esercizi salvati</h4>
-                    <p id="kpi-svolti">—</p>
-                </div>
-            </div>
-            <div class="kpi-card satisfaction">
-                <div class="kpi-icon"><i class="fa-solid fa-star"></i></div>
-                <div class="kpi-info">
-                    <h4>Media Soddisfazione</h4>
-                    <div id="kpi-media-stelle" class="kpi-stars-container">
-                        <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
-                        <span class="kpi-avg-text">-</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <section id="cl-current-session" class="cl-progress" style="padding:24px;margin:24px 0;background:white;border-radius:20px;border:1px solid #dce7ed"></section>
         <div id="clinical-panel" style="display:none">
             <div class="panel-title" onclick="togglePanel()">
@@ -1039,7 +1012,7 @@
             } else if (modalita === 'clinical') {
                 document.getElementById('user-display').innerText = `🩺 Dott. ${username}`;
                 // Clinical panel opens only after server-side role verification. 
-                document.getElementById('kpi-svolti').innerText = "-"; 
+                 
 
                 document.getElementById('welcome-heading').innerText = `Pannello Clinico, Dott. ${username}`;
                 document.getElementById('welcome-subtext').innerText = "Gestisci i pazienti registrati, crea pianificazioni di esercizi personalizzate e monitora i grafici di andamento clinico.";
@@ -1321,9 +1294,9 @@
         function tornaAllaHome() { window.top.location.href = 'esercizi.html'; }
     </script>
 <script type="module" src="shared/account.js?v=invitations1"></script>
-<script type="module" src="shared/dashboard.js?v=areas23"></script>
-<script type="module" src="shared/manager-navigation.js?v=manager10"></script>
-<script type="module" src="shared/care-dashboard.js?v=autoemail24"></script>
+<script type="module" src="shared/dashboard.js?v=ux25"></script>
+<script type="module" src="shared/manager-navigation.js?v=ux25"></script>
+<script type="module" src="shared/care-dashboard.js?v=ux25"></script>
 <script type="module" src="shared/session-summary.js"></script>
 <script src="shared/exercise-artwork.js?v=music4" defer></script>
 <script src="shared/dashboard-icons.js?v=art2" defer></script>

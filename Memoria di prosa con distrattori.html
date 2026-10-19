@@ -710,19 +710,14 @@
             canvas = document.getElementById('drawing-canvas');
             ctx = canvas.getContext('2d');
             ctx.lineWidth = 4; ctx.lineCap = 'round'; ctx.strokeStyle = '#6366f1';
-            const start = (e) => { drawing = true; draw(e); };
-            const stop = () => { drawing = false; ctx.beginPath(); };
-            const draw = (e) => {
-                if (!drawing) return;
-                const rect = canvas.getBoundingClientRect();
-                const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
-                const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
-                ctx.lineTo(x, y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(x, y);
-            };
-            canvas.onmousedown = start; canvas.onmousemove = draw; window.onmouseup = stop;
-            canvas.ontouchstart = (e) => { e.preventDefault(); start(e); };
-            canvas.ontouchmove = (e) => { e.preventDefault(); draw(e); };
-            canvas.ontouchend = stop;
+            canvas.style.cursor='crosshair';canvas.style.touchAction='none';
+            let pointer=document.getElementById('drawing-pointer');if(!pointer){pointer=document.createElement('span');pointer.id='drawing-pointer';pointer.setAttribute('aria-hidden','true');pointer.style.cssText='position:fixed;width:16px;height:16px;border:2px solid #4338ca;border-radius:50%;background:#ffffff99;pointer-events:none;z-index:9999;display:none;transform:translate(-50%,-50%)';document.body.append(pointer);}
+            const showPointer=e=>{pointer.style.display='block';pointer.style.left=e.clientX+'px';pointer.style.top=e.clientY+'px';};canvas.onpointerenter=showPointer;canvas.onpointerleave=()=>{if(!drawing)pointer.style.display='none';};
+            const point=e=>{const r=canvas.getBoundingClientRect();return {x:(e.clientX-r.left)*canvas.width/r.width,y:(e.clientY-r.top)*canvas.height/r.height};};
+            canvas.onpointerdown=e=>{e.preventDefault();drawing=true;canvas.setPointerCapture(e.pointerId);const p=point(e);ctx.beginPath();ctx.moveTo(p.x,p.y);};
+            canvas.onpointermove=e=>{showPointer(e);if(!drawing)return;e.preventDefault();const p=point(e);ctx.lineTo(p.x,p.y);ctx.stroke();};
+            const stop=()=>{drawing=false;pointer.style.display='none';ctx.beginPath();};canvas.onpointerup=stop;canvas.onpointercancel=stop;canvas.onlostpointercapture=stop;
+
         }
 
         function clearCanvas() { ctx.clearRect(0, 0, canvas.width, canvas.height); }

@@ -688,6 +688,18 @@
             }
         }
 
+        function enhanceScene(container){
+            const svg=container.querySelector('svg');if(!svg)return;
+            svg.style.cssText='display:block;width:100%;height:auto;max-height:65vh;min-height:230px;background:#f8fafc;border-radius:22px;box-shadow:0 16px 40px #243b5320';
+            svg.setAttribute('role','img');svg.setAttribute('aria-label','Scena da osservare e memorizzare');
+            const ns='http://www.w3.org/2000/svg',defs=document.createElementNS(ns,'defs');
+            defs.innerHTML='<linearGradient id="scene-wall" x2="0" y2="1"><stop stop-color="#f8fafc"/><stop offset="1" stop-color="#dfe8f1"/></linearGradient><linearGradient id="scene-wood" x2="0" y2="1"><stop stop-color="#d1945b"/><stop offset=".45" stop-color="#b6753e"/><stop offset="1" stop-color="#85502e"/></linearGradient><filter id="scene-shadow" x="-30%" y="-30%" width="160%" height="170%"><feDropShadow dx="0" dy="3" stdDeviation="2" flood-color="#243b53" flood-opacity=".18"/></filter>';
+            svg.prepend(defs);
+            const background=svg.querySelector('rect[width="100%"]');if(background)background.setAttribute('fill','url(#scene-wall)');
+            for(const node of svg.querySelectorAll('g[transform]'))if(node.parentElement===svg)node.setAttribute('filter','url(#scene-shadow)');
+            for(const node of svg.querySelectorAll('rect[fill="#b45309"]'))node.setAttribute('fill','url(#scene-wood)');
+        }
+
         // GENERATOR: FACILE
         function generateFacileScene(container) {
             // Expanded variety of shapes and colors
@@ -726,7 +738,7 @@
             }
 
             let svgContent = `
-                <svg width="100%" height="280" viewBox="0 0 600 300" xmlns="http://www.w3.org/2000/svg" class="drop-shadow-lg">
+                <svg width="100%" height="400" viewBox="0 0 600 300" xmlns="http://www.w3.org/2000/svg" class="drop-shadow-lg">
                     <defs>${patternDef}</defs>
                     <rect width="100%" height="100%" fill="${chosenPattern === 'solid' ? '#f8fafc' : 'url(#facile-pattern)'}" rx="16" />
             `;
@@ -794,6 +806,7 @@
 
             svgContent += `</svg>`;
             container.innerHTML = svgContent;
+            enhanceScene(container);
 
             // Generate randomized target question templates
             const generatedQuestions = [
@@ -878,7 +891,7 @@
             const clockHandRotation = timeAngleMap[selectedTime];
 
             let svgContent = `
-                <svg width="100%" height="280" viewBox="0 0 600 300" xmlns="http://www.w3.org/2000/svg" class="drop-shadow-md">
+                <svg width="100%" height="400" viewBox="0 0 600 300" xmlns="http://www.w3.org/2000/svg" class="drop-shadow-md">
                     <rect width="100%" height="100%" fill="#f1f5f9" rx="16" />
                     <line x1="50" y1="230" x2="550" y2="230" stroke="#cbd5e1" stroke-width="4" />
                     
@@ -974,6 +987,7 @@
             `;
 
             container.innerHTML = svgContent;
+            enhanceScene(container);
 
             const generatedQuestions = [
                 {
@@ -991,7 +1005,7 @@
                 {
                     domain: 'attention',
                     text: `Di che colore è il paralume della **lampada da tavolo**?`,
-                    options: shuffle([colorTranslations[selectedLampColor], 'Grigio ferro', 'Viola scuro', 'Rosa confetto']),
+                    options: shuffle([colorTranslations[selectedLampColor], ...Object.values(colorTranslations).filter(c=>c!==colorTranslations[selectedLampColor]).slice(0,3)]),
                     correct: colorTranslations[selectedLampColor]
                 },
                 {
@@ -1030,7 +1044,7 @@
             const months = ['GENNAIO', 'MARZO', 'GIUGNO', 'LUGLIO', 'SETTEMBRE', 'OTTOBRE', 'DICEMBRE'];
             const chosenMonth = months[Math.floor(Math.random() * months.length)];
 
-            const days = ['03', '07', '12', '18', '24', '29', '31'];
+            const days = ['03', '07', '12', '18', '24', '29', ...(['GIUGNO','SETTEMBRE'].includes(chosenMonth)?[]:['31'])];
             const chosenDay = days[Math.floor(Math.random() * days.length)];
 
             const codeWords = ['FOCUS', 'MIND2', 'ATTENZ', 'NEURO', 'SENSORY', 'BRAIN', 'COGNIT'];
@@ -1069,7 +1083,7 @@
             };
 
             let svgContent = `
-                <svg width="100%" height="280" viewBox="0 0 600 300" xmlns="http://www.w3.org/2000/svg" class="drop-shadow-lg">
+                <svg width="100%" height="400" viewBox="0 0 600 300" xmlns="http://www.w3.org/2000/svg" class="drop-shadow-lg">
                     <rect width="100%" height="100%" fill="#eaeef3" rx="16" />
                     <line x1="300" y1="0" x2="300" y2="300" stroke="#d1d5db" stroke-width="1.5" stroke-dasharray="4" />
 
@@ -1196,6 +1210,7 @@
             `;
 
             container.innerHTML = svgContent;
+            enhanceScene(container);
 
             const f1Color = colorTranslations[shuffledFiles[0]];
             const f2Color = colorTranslations[shuffledFiles[1]];

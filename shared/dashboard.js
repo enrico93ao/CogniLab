@@ -1,4 +1,4 @@
-import {createProgressView} from './progress-view.js?v=areas23';
+import {createProgressView} from './progress-view.js?v=ux25';
 import {requireProfessional} from './clinical-access.js';
 import {errorCode} from './firebase-errors.js';
 import {onAuthStateChanged} from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js';
@@ -6,7 +6,7 @@ import {ref,onValue,onDisconnect,set,remove} from 'https://www.gstatic.com/fireb
 import {db,auth,friendlyError,accessModeReady} from './firebase-client.js';
 import {saveFeedback,finishSession,pending,retryPending,ensurePrivateStorage} from './progress-store.js';
 import {onlineCount,completedCount,satisfaction,groupKey,comparableSeries,measurement,change} from './progress-model.mjs';
-const notice=document.createElement('p');notice.className='cl-notice';notice.hidden=true;notice.setAttribute('role','status');document.querySelector('.kpi-grid').after(notice);
+const notice=document.createElement('p');notice.className='cl-notice';notice.hidden=true;notice.setAttribute('role','status');document.getElementById('care-workspace').after(notice);
 const feedbackStatus=document.createElement('p');feedbackStatus.id='cl-feedback-status';feedbackStatus.setAttribute('role','status');document.querySelector('#feedback-modal .modal-card').append(feedbackStatus);
 const feedbackOption=document.createElement('label');
 feedbackOption.style.cssText='display:flex;gap:10px;align-items:center;margin:16px 0';
@@ -75,18 +75,10 @@ let stops=[],presenceRef;
 function unavailable(element,error){if(element.id==='cl-progress-status'){element.textContent='Lo storico non è disponibile. '+friendlyError(error);progress.querySelectorAll('.care-stat strong').forEach(n=>n.textContent='—');}else element.textContent='—';notice.hidden=false;notice.textContent=friendlyError(error);}
 onAuthStateChanged(auth,async user=>{
  stops.forEach(stop=>stop());stops=[];if(presenceRef){remove(presenceRef).catch(()=>{});presenceRef=null;}
- document.getElementById('kpi-utenti').textContent='—';document.getElementById('kpi-svolti').textContent='—';document.getElementById('kpi-media-stelle').textContent='—';renderResults([]);
+ renderResults([]);
  if(!user){document.getElementById('cl-progress-status').textContent='Accedi per conservare e visualizzare i tuoi progressi.';return;}
  notice.hidden=true;
  const watch=(path,render,element)=>stops.push(onValue(ref(db,path),snap=>render(snap.val()),error=>unavailable(element,error)));
- watch('cognilab/stats',value=>{
-   const count=v=>Number.isInteger(v)&&v>=0?v:'—';
-   document.getElementById('kpi-utenti').textContent=count(value?.onlineUsers);
-   document.getElementById('kpi-svolti').textContent=count(value?.completedExercises);
-   const average=value?.satisfactionAverage;
-   document.getElementById('kpi-media-stelle').textContent=typeof average==='number'&&average>=1&&average<=5?average.toFixed(1)+' / 5':'—';
-   if(!value){notice.hidden=false;notice.textContent='Le statistiche globali non sono ancora disponibili. Lo storico personale resta separato.';}
- },document.getElementById('kpi-utenti'));
  try{await ensurePrivateStorage();}catch(error){unavailable(document.getElementById('cl-progress-status'),error);return;}
  if(auth.currentUser?.uid!==user.uid)return;
  const clinicalMode=localStorage.getItem('hub_mode')==='clinical';

@@ -7,6 +7,11 @@ answerTarget(20);w.appendDigit(2);w.appendDigit(9);w.eraseDigit();w.appendDigit(
 answerTarget(3,'reset');w.submitNumber();assert.equal(run('gameState.scoreLog.length'),0);for(const bad of ['-1','2.5','abc','1e2']){field.value=bad;w.submitNumber();assert.equal(run('gameState.scoreLog.length'),0);}w.clearAnswer();assert.equal(field.value,'');w.appendDigit(4);w.submitNumber();assert.equal(run('gameState.scoreLog[0].correct'),false);
 const pending=[...timers.values()].find(t=>t.delay===900);assert.ok(pending);w.returnToMenu();pending.fn();assert.equal(run('gameState.phase'),'menu','feedback must not reopen a round after menu');assert.equal(w.document.getElementById('feedback-overlay').style.display,'none');
 answerTarget(123);w.appendDigit(1);w.appendDigit(2);w.appendDigit(3);w.submitNumber();assert.equal(run('gameState.scoreLog[0].correct'),true);const late=[...timers.values()].find(t=>t.delay===900);w.endContinuousSession();late.fn();assert.equal(run('gameState.phase'),'results');assert.equal(saved.length,1);assert.equal(saved[0].correct,1);assert.equal(saved[0].total,1);assert.ok(aborts>0);
+// Two wrong cumulative rounds expose the previous correct subtotal on the next round.
+answerTarget(5);field.value='0';w.submitNumber();assert.equal(run('gameState.sumHint'),null);
+run("gameState.phase='answer';gameState.continuousTargetSum=9");field.value='0';w.submitNumber();assert.equal(run('gameState.sumHint'),9);assert.equal(run('gameState.scoreLog.filter(r=>r.correct).length'),0);
+w.startRound();assert.match(w.document.getElementById('instruction-box').innerText,/precedente era 9/);w.showQuestionPrompt();assert.match(w.document.getElementById('instruction-box').innerText,/precedente era 9/);
+run("gameState.phase='answer'");field.value=String(run('gameState.continuousTargetSum'));w.submitNumber();assert.equal(run('gameState.sumHint'),null);
 // Dense and narrow play areas, including a constant RNG that forces the fallback.
 for (const [width,height] of [[240,180],[280,260],[320,300],[700,300],[1024,500]]) {
  for (let count=2;count<=10;count++) {

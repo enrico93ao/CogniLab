@@ -58,7 +58,7 @@ for (const [param, valid] of [
   assert.equal(w.document.querySelector('.cl-empty').hidden,false);
   input.value = ''; input.dispatchEvent(new w.Event('input'));
   assert.equal([...w.document.querySelectorAll('.card')].filter(card => !card.hidden).length,38);
-  assert.equal(w.document.getElementById('kpi-utenti').textContent,'—');
+  assert.equal(w.document.querySelector('.kpi-grid'),null);
   assert.equal(w.document.querySelector('.card').getAttribute('role'),'link');
   w.close();
 }

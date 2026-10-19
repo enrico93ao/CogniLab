@@ -22,6 +22,7 @@ export function createProgressView(host,{title='I miei progressi'}={}){
  const settings=el('p',undefined,'care-settings'),trend=el('p',undefined,'care-trend'),chart=el('div',undefined,'care-chart');chart.setAttribute('aria-live','polite');host.append(settings,trend,chart);
  const details=el('details',undefined,'care-history');details.append(el('summary','Storico delle prove'));const scroll=el('div',undefined,'care-table-scroll'),table=el('table'),thead=el('thead'),tr=el('tr');
  for(const text of ['Data','Esercizio','Accuratezza','Errori','Durata','Stato']){const th=el('th',text);th.scope='col';tr.append(th);}thead.append(tr);const tbody=el('tbody');table.append(thead,tbody);scroll.append(table);details.append(scroll);host.append(details);
+ const detailPanel=el('details',undefined,'care-progress-details');detailPanel.append(el('summary','Esplora i risultati e lo storico'));for(const n of [description,filters,settings,trend,chart,details])detailPanel.append(n);host.append(detailPanel);
  let results=[];
  function draw(){
   const selected=results.filter(r=>r.status==='completed'&&groupKey(r)===group.value),latest=selected.at(-1);
@@ -49,7 +50,7 @@ export function createProgressView(host,{title='I miei progressi'}={}){
  }
  for(const select of [group,metric,period])select.onchange=draw;
  function renderAreas(){
-  areas.replaceChildren(el('h3','Le aree che stai allenando'),el('p','Accuratezza: confronto tra le ultime due prove completate dello stesso esercizio, versione e impostazioni. Ogni configurazione conta una volta. I colori descrivono le prestazioni negli esercizi, non cambiamenti clinici.','care-muted'));
+  areas.replaceChildren(el('h3','Le aree che stai allenando'),el('p','Le ultime due prove a confronto, a parità di esercizio e impostazioni.','care-muted'));
   const buckets=new Map();
   for(const r of results){
    const area=exerciseById.get(r.exerciseId)?.category;if(!area||r.status!=='completed')continue;
@@ -64,16 +65,16 @@ export function createProgressView(host,{title='I miei progressi'}={}){
    for(const rows of groups.values()){if(rows.length<2){pending++;continue;}const delta=rows.at(-1).metrics.accuracyPct-rows.at(-2).metrics.accuracyPct;counts[delta>0?0:delta===0?1:2]++;}
    const tile=el('article',undefined,'care-area-tile');tile.append(el('h4',area));const total=counts.reduce((a,b)=>a+b,0);
    if(total){const bar=el('div',undefined,'care-area-bar');bar.setAttribute('aria-hidden','true');counts.forEach((count,i)=>{if(count){const segment=el('span',undefined,['up','same','down'][i]);segment.style.width=(count/total*100)+'%';bar.append(segment);}});tile.append(bar);
-    const labels=['↗ In aumento','→ Stabile','↘ In diminuzione'];counts.forEach((count,i)=>tile.append(el('p',labels[i]+': '+count+' configurazioni','care-area-count')));
+    const labels=['↗ In aumento','→ Stabile','↘ In diminuzione'];counts.forEach((count,i)=>tile.append(el('p',labels[i]+': '+count,'care-area-count')));
    }else tile.append(el('p','In attesa di due prove confrontabili.','care-muted'));
    if(pending)tile.append(el('p',pending+' configurazioni con dati ancora insufficienti.','care-muted'));
-   const open=el('button','Esplora '+area);open.type='button';open.onclick=()=>{const match=[...group.options].find(o=>buckets.get(area).has(o.value));if(match){group.value=match.value;metric.value='accuracy';period.value='all';draw();group.focus();}};tile.append(open);grid.append(tile);
+   const open=el('button','Esplora '+area);open.type='button';open.onclick=()=>{const match=[...group.options].find(o=>buckets.get(area).has(o.value));if(match){group.value=match.value;metric.value='accuracy';period.value='all';draw();detailPanel.open=true;group.focus();}};tile.append(open);grid.append(tile);
   }
  }
  function render(source){
-  results=[...source].sort((a,b)=>String(a.finishedAt||'').localeCompare(String(b.finishedAt||'')));status.textContent=results.length?results.length+' prove salvate, comprese quelle interrotte.':'Il tuo storico inizierà dal primo esercizio salvato.';
+  results=[...source].sort((a,b)=>String(a.finishedAt||'').localeCompare(String(b.finishedAt||'')));status.textContent=results.length?'Il tuo percorso si aggiorna dopo ogni attività.':'Il tuo storico inizierà dal primo esercizio salvato.';
   renderAreas();
-  const summary=summarizeResults(results);stats.replaceChildren();for(const [value,label] of [[summary.sessions,'Sessioni con esercizi completati'],[summary.exercises,'Esercizi completati'],[summary.minutes,'Minuti di attività'],[summary.days,'Giorni di allenamento']]){const tile=el('div',undefined,'care-stat');tile.append(el('strong',String(value)),el('span',label));stats.append(tile);}
+  const summary=summarizeResults(results);stats.replaceChildren();for(const [value,label] of [[summary.sessions,'Sessioni con esercizi completati'],[summary.exercises,'Esercizi completati'],[summary.minutes,'Minuti di attività']]){const tile=el('div',undefined,'care-stat');tile.append(el('strong',String(value)),el('span',label));stats.append(tile);}
   const previous=group.value,groups=new Map();for(const r of results.filter(r=>r.status==='completed'))groups.set(groupKey(r),r);group.replaceChildren();const versions=new Map();
   for(const [key,r] of groups){const number=(versions.get(r.exerciseId)||0)+1;versions.set(r.exerciseId,number);const option=el('option',r.title+' · configurazione '+number);option.value=key;group.append(option);}if(groups.has(previous))group.value=previous;filters.hidden=!groups.size;
   tbody.replaceChildren();for(const r of [...results].reverse().slice(0,100)){const row=el('tr'),accuracy=measure(r,'accuracy'),errors=measure(r,'errors');for(const content of [formatDate(r.finishedAt),r.title,accuracy?accuracy.value+'%':'—',errors?String(errors.value):'—',Number.isFinite(r.durationMs)?Math.round(r.durationMs/1000)+' s':'—',r.status==='completed'?'Completato':'Interrotto'])row.append(el('td',content));tbody.append(row);}

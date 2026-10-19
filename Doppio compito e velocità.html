@@ -39,7 +39,7 @@
             border-radius: 1rem;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
             z-index: 10;
-            transition: opacity 0.3s ease, filter 0.3s ease, transform 0.1s ease, border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+            transition: opacity 0.3s ease, filter 0.3s ease, border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
         }
 
         .word-item-bold {
@@ -135,10 +135,12 @@
             font-variant-numeric: tabular-nums;
             transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-    </style>
+    
+#menu{max-height:calc(100dvh - 24px);overflow:auto}#game-container{height:100dvh;min-height:0}#game-container>div:first-child{top:8px;gap:clamp(4px,2vw,24px);padding:6px clamp(6px,2vw,24px);max-width:calc(100% - 16px)}#game-container>div:first-child>div{min-width:0}#play-area{top:82px;bottom:100px;left:12px;right:12px}#game-container>.dual-controls{bottom:10px;gap:10px}#controls-hint{gap:10px}.dual-side-bar{position:absolute;top:82px;bottom:100px;width:10px;background:#e4364f;z-index:80;animation:dual-blink 1.4s ease-in-out infinite;pointer-events:none}.dual-side-bar.left{left:0}.dual-side-bar.right{right:0}@keyframes dual-blink{0%,100%{opacity:1}50%{opacity:.2}}@media(max-height:500px){#play-area{top:66px;bottom:78px}.dual-side-bar{top:66px;bottom:78px}#game-container>div:first-child{padding:3px 8px}#controls-hint button{padding:6px!important;min-height:44px}}
+</style>
 <link rel="stylesheet" href="shared/cognilab.css">
 <script src="shared/interface.js" defer></script>
-<script>window.CogniLabExercise={"id":"doppio-compito","title":"Doppio compito e velocità","category":"Funzioni esecutive","setup":"menu"};</script>
+<script>window.CogniLabExercise={"id":"doppio-compito","title":"Doppio compito e velocità","category":"Funzioni esecutive","setup":"menu","version":"3.1.0"};</script>
 <script src="shared/exercise-runtime.js?v=ux12"></script>
 </head>
 <body data-cognilab="exercise" class="flex items-center justify-center min-h-screen">
@@ -187,6 +189,12 @@
                 </div>
             </div>
 
+<fieldset class="space-y-3 border border-slate-200 rounded-2xl p-4"><legend class="font-bold text-slate-700">Aiuti e zona di risposta</legend>
+<label for="response-band-size" class="block font-semibold">Ampiezza fascia verde <output id="response-band-value">25%</output></label>
+<input id="response-band-size" type="range" min="15" max="50" step="5" value="25" class="w-full" oninput="document.getElementById('response-band-value').textContent=this.value+'%'">
+<p class="text-sm text-slate-500">Una fascia più ampia lascia più tempo per rispondere.</p>
+<label class="flex gap-3 items-center"><input type="checkbox" id="dual-bar-enabled"> Barra rossa laterale lampeggiante</label>
+<label for="dual-bar-side">Posizione della barra</label><select id="dual-bar-side" class="border rounded-xl p-3"><option value="left">Sinistra</option><option value="right">Destra</option></select></fieldset>
             <button onclick="startGame()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-5 rounded-2xl text-xl shadow-sm transition-all uppercase tracking-tight">
                 Avvia Sessione di Test
             </button>
@@ -243,7 +251,7 @@
         </div>
 
         <!-- Controlli inferiori (Pulsanti virtuali per Touch/Click) -->
-        <div class="absolute bottom-8 left-0 right-0 flex justify-center gap-6 px-4 z-[100]">
+        <div class="dual-controls absolute bottom-8 left-0 right-0 flex justify-center gap-6 px-4 z-[100]">
             <div id="controls-hint" class="flex gap-6 w-full max-w-xl justify-center"></div>
         </div>
     </div>
@@ -480,6 +488,9 @@
  window.CogniLabRun?.begin(typeof arguments === "undefined" ? null : arguments[0]);
 
             getAudioContext();
+            state.bandPercent=Number(document.getElementById('response-band-size').value);
+            const side=document.createElement('div');document.querySelector('.dual-side-bar')?.remove();
+            if(document.getElementById('dual-bar-enabled').checked){side.className='dual-side-bar '+document.getElementById('dual-bar-side').value;side.setAttribute('aria-hidden','true');document.getElementById('game-container').append(side);}
             generateRandomRules();
             document.getElementById('menu').classList.add('hidden');
             document.getElementById('game-container').classList.remove('hidden');
@@ -572,19 +583,26 @@
             const areaWidth = area.clientWidth || window.innerWidth;
 
             while (!foundSafeSpot && attempts < 25) {
-                bestX = Math.random() * (areaWidth - 220) + 40;
+                bestX = 8 + Math.random() * Math.max(0,areaWidth - 220);
                 foundSafeSpot = !state.words.some(w => w.y < 160 && Math.abs(parseFloat(w.el.style.left) - bestX) < MIN_SPACING_X);
                 attempts++;
             }
 
             el.style.left = `${bestX}px`;
-            el.style.top = `-50px`;
+            el.style.top = `0px`;
 
             const wordData = { el, text, targets: [...targets], totalTargets: targets.length, y: -50, processed: false };
             area.appendChild(el);
             state.words.push(wordData);
         }
 
+        function responseBounds(){
+            const area=document.getElementById('play-area'),bottom=area.clientHeight-16;
+            const height=Math.max(24,Math.round(area.clientHeight*(state.bandPercent||25)/100));
+            const band=document.getElementById('active-response-band');band.style.height=height+'px';
+            return {top:bottom-height,bottom};
+        }
+        window.addEventListener('resize',()=>{if(!state.gameActive)return;responseBounds();const area=document.getElementById('play-area');for(const w of state.words)w.el.style.left=Math.max(0,Math.min(parseFloat(w.el.style.left)||0,area.clientWidth-w.el.offsetWidth))+'px';});
         function gameLoop(currentTime) {
             if(!state.gameActive) return;
 
@@ -600,8 +618,8 @@
             }
 
             // Calcolo dinamico della zona di risposta attiva (Fascia Verde)
-            const bandBottom = limitY - 16;
-            const bandTop = limitY - 128;
+            const bounds=responseBounds();
+            const bandBottom=bounds.bottom,bandTop=bounds.top;
 
             // Identificazione dello stimolo non elaborato più in basso
             const lowestUnprocessed = state.words
@@ -614,7 +632,7 @@
                 w.el.style.transform = `translateY(${w.y}px)`;
 
                 // Attivazione visuale nella fascia verde
-                if (w === lowestUnprocessed && w.y >= bandTop && w.y <= bandBottom) {
+                if (w === lowestUnprocessed && w.y+w.el.offsetHeight/2 >= bandTop && w.y+w.el.offsetHeight/2 <= bandBottom) {
                     w.el.classList.add('word-in-active-zone');
                 } else {
                     w.el.classList.remove('word-in-active-zone');
@@ -661,7 +679,8 @@
 
             const lowestWord = activeWords[0];
 
-            if (lowestWord && lowestWord.targets.includes(key)) {
+            const bounds=responseBounds(),center=lowestWord?lowestWord.y+lowestWord.el.offsetHeight/2:-Infinity;
+            if (lowestWord && center>=bounds.top && center<=bounds.bottom && lowestWord.targets.includes(key)) {
                 const targetIdx = lowestWord.targets.indexOf(key);
                 state.score += 10;
                 
