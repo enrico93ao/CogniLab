@@ -2,13 +2,14 @@
  'use strict';
  try{const uid=localStorage.getItem('cognilab.lastUser'),session=JSON.parse(sessionStorage.getItem('cognilab.session.'+uid)||'null'),plan=JSON.parse(sessionStorage.getItem('cognilab.plan.'+uid)||'null');window.CogniLabPresetPending=Boolean(session?.programId&&plan?.programId===session.programId&&decodeURIComponent(location.pathname.split('/').pop())===plan.files?.[plan.index]&&!new URLSearchParams(location.search).has('configure'));}catch{}
  if(window.CogniLabPresetPending){document.documentElement.classList.add('assigned-preparing');const style=document.createElement('style');style.textContent='html.assigned-preparing body>*{visibility:hidden!important}html.assigned-preparing [data-assigned-visible]{visibility:visible!important}';document.head.append(style);}
- const presetScript=document.createElement('script');presetScript.src='shared/care-presets.js?v=assigned35';document.head.append(presetScript);
+ const presetScript=document.createElement('script');presetScript.src='shared/care-presets.js?v=journey36';document.head.append(presetScript);
  const audioScript=document.createElement('script');audioScript.src='shared/response-feedback.js?v=ux12';document.head.append(audioScript);
  document.documentElement.classList.add('gym-access-pending');
  const gateStyle=document.createElement('style');gateStyle.textContent='html.gym-access-pending body{visibility:hidden!important}';document.head.append(gateStyle);
  import('./gym-gate.js').catch(()=>location.replace('accesso.html'));
 let active=null,finished=false,lastResult=null,savePromise=Promise.resolve(),saveResolver=null;let retryButton;
  const focusStyle=document.createElement('link');focusStyle.rel='stylesheet';focusStyle.href='shared/exercise-focus.css';document.head.append(focusStyle);
+ const journeyStyle=document.createElement('link');journeyStyle.rel='stylesheet';journeyStyle.href='shared/session-journey.css?v=journey36';document.head.append(journeyStyle);
  const responsiveStyle=document.createElement('link');responsiveStyle.rel='stylesheet';responsiveStyle.href='shared/responsive.css?v=devices1';document.head.append(responsiveStyle);
  const lifecycle=running=>{document.body.classList.toggle('cl-task-running',running);if(parent!==window)parent.postMessage({type:'cognilab-exercise-state',running},location.origin);};
  const status=document.createElement('p');status.className='cl-save-status';status.setAttribute('role','status');status.hidden=true;

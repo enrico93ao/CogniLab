@@ -1,7 +1,15 @@
-# Orientamento e avvio assegnato — 20 ottobre 2026
-- Le stagioni dell’esercizio iniziano il 21 marzo, giugno, settembre e dicembre (convenzione didattica esplicita).
-- Dopo due risposte numeriche errate viene mostrato il conteggio corretto, senza avanzare automaticamente.
-- La città usa il permesso geolocalizzazione del browser e una richiesta Nominatim su coordinate arrotondate a due decimali. Nessun identificativo account viene inviato; nessuna coordinata è registrata nei risultati. Il consenso è richiesto prima della rilevazione. Senza posizione si può indicare la città manualmente o saltare soltanto quella domanda.
-- Nei programmi assegnati il menu è nascosto durante applicazione delle impostazioni e verifica dell’accesso; poi viene attivato il comando di avvio. L’allenamento libero mantiene il menu.
-- Nei giochi in cui i pulsanti di livello avviano direttamente la prova, il professionista deve selezionare il pulsante nella configurazione e salvarla. Il clic nell’anteprima memorizza il comando senza avviare il gioco. Le vecchie configurazioni ambigue richiedono un aggiornamento, senza scegliere arbitrariamente il primo livello.
-- Verifica eseguita: sintassi JS, otto confini stagionali e passaggio anno; avvio assegnato univoco e blocco avvio ambiguo con DOM simulato. La geolocalizzazione reale e il comportamento audio automatico richiedono verifica sul dispositivo.
+# Orientamento temporale e sessioni assegnate — 20 ottobre 2026
+
+- L’esercizio mantiene soltanto data, calendario e sequenze temporali. Eliminate città, domande sulla casa, geolocalizzazione e richieste a servizi esterni.
+- Stagioni dal 21 marzo, giugno, settembre e dicembre: convenzione didattica dichiarata.
+- Dopo due errori nel conteggio dei giorni: suggerimento sul metodo, senza numero risolutivo. Dopo quattro errori: risposta esplicita; il paziente deve comunque inserirla.
+- Le impostazioni dei programmi vengono applicate prima dell’avvio. Il paziente legge la consegna e conferma di essere pronto, senza aprire i menu di configurazione.
+- Inibizione e memoria prepara prima le regole casuali e conserva la schermata nativa delle istruzioni. Il gioco si adatta anche alle finestre basse, con comandi nel flusso e scorrimento verticale di riserva.
+- Un risultato condiviso e salvato abilita il riquadro centrale per continuare. La conclusione recupera il calendario salvato e distingue prossima sessione, fine programma e data non disponibile.
+- Rimuovi paziente: nasconde esclusivamente il record nel proprio elenco; è ripristinabile. Non revoca account, collegamento o programmi attivi, come esplicitato nella conferma.
+- Elimina assegnazione: archivia l’intero programma assegnato con la regola già esistente; nessuna sessione storica o configurazione viene cancellata. Non elimina singole date dal calendario. Lo storico resta consultabile. Non cambia le regole Firebase e non elimina account Authentication.
+- Grafici visibili nelle due dashboard: serie e variazioni di accuratezza soltanto tra esercizi e impostazioni confrontabili, senza un punteggio clinico globale o valori inventati.
+
+Verifiche: DOM simulato per salvataggio, prossima data, istruzioni effettive, suggerimenti progressivi, rimozione/ripristino e grafici; flussi di assegnazione e quattro sessioni; regole valutate localmente; regressione HTML e SEO. Nessuna scrittura su pazienti reali. La verifica visiva su dispositivi fisici resta necessaria.
+
+Revisione automatica: rilevata e rimossa anche la precedente cancellazione permanente nella gestione locale dei pazienti. La funzione ora aggiorna soltanto il flag archived dell’anagrafica privata del professionista, esclude il paziente dall’elenco attivo e offre Ripristina. Non rimuove anagrafica o storico Firebase.

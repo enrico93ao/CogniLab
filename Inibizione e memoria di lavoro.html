@@ -158,9 +158,9 @@
     </style>
 <link rel="stylesheet" href="shared/cognilab.css">
 <script src="shared/interface.js" defer></script>
-<script>window.CogniLabExercise={"id":"inibizione-memoria","title":"Inibizione e memoria di lavoro","category":"Funzioni esecutive","setup":"menu-screen","version":"3.1.0"};</script>
-<script src="shared/exercise-runtime.js?v=ux12"></script>
-<link rel="stylesheet" href="shared/object-images.css"><script src="shared/object-images.js"></script><style>.object-display{background:radial-gradient(circle at 35% 25%,#fff,#edf4fc)!important;box-shadow:0 20px 50px #1c456320,inset 0 0 0 6px #ffffff;border-radius:32px!important;position:relative;overflow:hidden;width:clamp(180px,30vw,330px);height:clamp(180px,30vw,330px)}.object-display .cl-object-photo{width:88%;border-radius:24px}.stimulus-name{display:block;font:700 clamp(14px,2vw,20px) system-ui;color:#334155;text-align:center;margin-top:12px}#special-rules-list{background:#f0f7ff;border-radius:18px;padding:18px}#game-screen{max-width:1400px}</style></head>
+<script>window.CogniLabExercise={"id":"inibizione-memoria","title":"Inibizione e memoria di lavoro","category":"Funzioni esecutive","setup":"menu-screen","version":"3.2.0","assignedPreparation":"inhibition-rules"};</script>
+<script src="shared/exercise-runtime.js?v=journey36"></script>
+<link rel="stylesheet" href="shared/object-images.css"><script src="shared/object-images.js"></script><style>.object-display{background:radial-gradient(circle at 35% 25%,#fff,#edf4fc)!important;box-shadow:0 20px 50px #1c456320,inset 0 0 0 6px #ffffff;border-radius:32px!important;position:relative;overflow:hidden;width:clamp(180px,30vw,330px);height:clamp(180px,30vw,330px)}.object-display .cl-object-photo{width:88%;border-radius:24px}.stimulus-name{display:block;font:700 clamp(14px,2vw,20px) system-ui;color:#334155;text-align:center;margin-top:12px}#special-rules-list{background:#f0f7ff;border-radius:18px;padding:18px}#game-screen{max-width:1400px}</style><link rel="stylesheet" href="shared/inhibition-layout.css?v=journey36"></head>
 <body data-cognilab="exercise">
 
     <div id="feedback-ui" class="feedback-overlay"></div>
@@ -252,7 +252,7 @@
     </div>
 
     <div id="game-screen" class="screen">
-        <div class="absolute top-8 w-full flex justify-between px-10 items-center">
+        <div class="inhibition-hud">
             <div class="flex items-center gap-3">
                 <button onclick="exitToMenu()" class="nav-btn" title="Menu">🏠</button>
                 <button onclick="togglePause()" class="nav-btn" title="Pausa">⏸️</button>
@@ -261,15 +261,15 @@
             <div class="bg-blue-600 text-white px-6 py-2 rounded-full font-bold shadow-sm" id="game-score">Punti: 0</div>
         </div>
         
-        <div class="flex flex-col items-center">
+        <div class="inhibition-stimulus">
             <div id="object-display" class="object-display">📦</div>
         </div>
 
-        <div class="absolute bottom-12 w-full px-10 flex flex-col items-center gap-6">
+        <div class="inhibition-responses">
             <div id="special-keys-area" class="flex flex-wrap justify-center gap-4"></div>
             <div class="flex gap-10">
-                <button onmousedown="handleInput('ArrowLeft')" class="control-btn text-4xl">←</button>
-                <button onmousedown="handleInput('ArrowRight')" class="control-btn text-4xl">→</button>
+                <button onclick="handleInput('ArrowLeft')" class="control-btn text-4xl">←</button>
+                <button onclick="handleInput('ArrowRight')" class="control-btn text-4xl">→</button>
             </div>
         </div>
         <div class="timer-progress" id="item-timer-bar"></div>
@@ -425,7 +425,7 @@
                 const pauseHtml = `<div class="flex justify-between font-bold text-amber-400"><span>${rule.label}</span> <span>Premi ${rule.keyLabel}</span></div>`;
                 list.innerHTML += itemHtml;
                 pauseList.innerHTML += pauseHtml;
-                btnArea.innerHTML += `<button onmousedown="handleInput('${rule.key}')" class="control-btn bg-amber-50 border-2 border-amber-200 text-amber-800 shadow-amber-200">${rule.keyLabel}</button>`;
+                btnArea.innerHTML += `<button onclick="handleInput('${rule.key}')" class="control-btn bg-amber-50 border-2 border-amber-200 text-amber-800 shadow-amber-200">${rule.keyLabel}</button>`;
             });
 
             switchScreen('instruction-screen');

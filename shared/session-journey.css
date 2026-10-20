@@ -1,0 +1,10 @@
+.cl-journey,.cl-assigned-instructions{box-sizing:border-box;width:min(620px,calc(100% - 28px));max-height:90dvh;overflow:auto;margin:auto;border:1px solid #b9dad6;border-radius:28px;padding:clamp(22px,5vw,42px);background:linear-gradient(145deg,#f1fbf6,#fff 65%,#eaf2fc);color:#193d4a;text-align:center;box-shadow:0 25px 90px #153e4940;font:18px/1.6 system-ui}
+.cl-journey::backdrop,.cl-assigned-instructions::backdrop{background:#102f43bb;backdrop-filter:blur(5px)}
+.cl-journey h1,.cl-assigned-instructions h1{font-size:clamp(1.65rem,5vw,2.25rem);line-height:1.18;margin:16px 0;color:#185b62}
+.cl-journey .cl-journey-mark{width:76px;height:76px;display:grid;place-items:center;margin:0 auto;border-radius:50%;background:#d3eee2;font-size:40px;color:#19714f}
+.cl-journey button,.cl-assigned-instructions button{display:block;width:100%;min-height:60px;margin:24px auto 12px;padding:16px 20px;border:0;border-radius:16px;background:#087e80;color:white;font:750 1.15rem/1.4 system-ui;cursor:pointer;box-shadow:0 8px 20px #087e8030;white-space:normal}
+.cl-journey a,.cl-assigned-instructions a{display:inline-block;margin:8px;color:#245e70;text-decoration:underline}
+.cl-journey button:focus-visible,.cl-assigned-instructions button:focus-visible{outline:4px solid #edb54e;outline-offset:4px}
+.cl-journey .cl-journey-progress{display:block;width:100%;height:12px;accent-color:#087e80;margin:24px 0}
+.cl-journey .cl-journey-date,.cl-assigned-consegna{padding:18px;background:#e6f3f1;border-radius:16px;font-weight:650}
+.cl-journey button:disabled{opacity:.6;cursor:wait}

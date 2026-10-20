@@ -49,11 +49,31 @@
    const start=findStart(parsed);
    for(let attempt=0;window.CogniLabGymAuthorized!==true&&attempt<150;attempt++)await new Promise(resolve=>setTimeout(resolve,100));
    if(window.CogniLabGymAuthorized!==true)throw Error('Accesso non verificato: torna alla palestra e riprova.');
-   if(window.CogniLabPrepareAssigned)await window.CogniLabPrepareAssigned();
-   window.CogniLabPresetPending=false;document.documentElement.classList.remove('assigned-preparing');
-   start.click();
+   window.CogniLabPresetPending=false;
+   // Prepare the actual random rules, then let the patient read the native
+   // instruction screen. Starting directly would skip both rules and guidance.
+   if(window.CogniLabExercise?.assignedPreparation==='inhibition-rules'){
+    const prepare=document.querySelector('[onclick="generateRulesAndShow()"]');
+    if(!prepare)throw Error('Consegna non disponibile.');
+    prepare.click();document.documentElement.classList.remove('assigned-preparing');return;
+   }
+   await showAssignedInstructions();
+   document.documentElement.classList.remove('assigned-preparing');start.click();
 
   }catch(error){const notice=document.createElement('p');notice.setAttribute('role','alert');notice.textContent='Configurazione assegnata non applicata: '+error.message;notice.dataset.assignedVisible='true';document.body.prepend(notice);const back=document.createElement('a');back.href='esercizi.html';back.textContent='Torna alla palestra';back.dataset.assignedVisible='true';document.body.prepend(back);document.addEventListener('click',e=>{if(e.target.closest('button')&&/avvia|inizia|start/i.test(e.target.closest('button').textContent)){e.preventDefault();e.stopImmediatePropagation();}},true);}
+ }
+ function showAssignedInstructions(){
+  return new Promise(resolve=>{
+   const dialog=document.createElement('dialog');dialog.dataset.assignedVisible='true';dialog.className='cl-assigned-instructions';
+   const heading=document.createElement('h1');heading.textContent=window.CogniLabExercise?.title||'Il prossimo esercizio';
+   const intro=document.createElement('p');intro.textContent='Le impostazioni sono già pronte. Leggi la consegna e inizia quando ti senti pronto.';
+   const instruction=document.createElement('p');instruction.className='cl-assigned-consegna';
+   const copy=panels().flatMap(panel=>[...panel.querySelectorAll('p')]).map(n=>n.textContent.trim()).filter(t=>t.length>35&&!/configura|imposta|durata sessione|numero di prove/i.test(t)).slice(0,3).join(' ');
+   instruction.textContent=window.CogniLabAssist?.instruction?.()||window.CogniLabExercise?.instructions||copy||'Segui la consegna mostrata nell’area di gioco. Procedi con calma, una risposta alla volta.';
+   const go=document.createElement('button');go.type='button';go.textContent='Ho capito, inizia';go.onclick=()=>{dialog.close();dialog.remove();resolve();};
+   const back=document.createElement('a');back.href='esercizi.html';back.textContent='Torna alla palestra';
+   dialog.append(heading,intro,instruction,go,back);document.body.append(dialog);dialog.addEventListener('cancel',e=>e.preventDefault());dialog.showModal();
+  });
  }
  if(document.readyState==='complete')setTimeout(ready,0);else window.addEventListener('load',()=>setTimeout(ready,0),{once:true});
 })();

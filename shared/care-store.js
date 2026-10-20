@@ -113,6 +113,12 @@ export async function assignProgram(patientUid,input){
  return id;
 }
 export async function archiveProgram(patientUid,id){await requireProfessional();if(!validUid(patientUid)||!validUid(id))throw Error('Programma non valido.');await write(`cognilab/carePrograms/${patientUid}/${id}/status`,'archived');}
+export async function setPatientArchived(patientUid,archived){
+ const user=await requireProfessional();if(!validUid(patientUid)||patientUid===user.uid)throw Error('Paziente non valido.');
+ const base=`cognilab/users/${user.uid}/clinical/registeredPatients/${patientUid}`;
+ if(!await read(base))throw Error('Paziente non presente nel tuo elenco.');
+ await patch({[base+'/archived']:archived===true});
+}
 export async function startAssignedProgram(id){
  const user=await currentCareUser();if(!validUid(id))throw Error('Programma non valido.');
  const program=await read(`cognilab/carePrograms/${user.uid}/${id}`);

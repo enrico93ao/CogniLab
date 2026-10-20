@@ -22,7 +22,8 @@ export function createProgressView(host,{title='I miei progressi'}={}){
  const settings=el('p',undefined,'care-settings'),trend=el('p',undefined,'care-trend'),chart=el('div',undefined,'care-chart');chart.setAttribute('aria-live','polite');host.append(settings,trend,chart);
  const details=el('details',undefined,'care-history');details.append(el('summary','Storico delle prove'));const scroll=el('div',undefined,'care-table-scroll'),table=el('table'),thead=el('thead'),tr=el('tr');
  for(const text of ['Data','Esercizio','Accuratezza','Errori','Durata','Stato']){const th=el('th',text);th.scope='col';tr.append(th);}thead.append(tr);const tbody=el('tbody');table.append(thead,tbody);scroll.append(table);details.append(scroll);host.append(details);
- const detailPanel=el('details',undefined,'care-progress-details');detailPanel.append(el('summary','Esplora i risultati e lo storico'));for(const n of [description,filters,settings,trend,chart,details])detailPanel.append(n);host.append(detailPanel);
+ const detailPanel=el('details',undefined,'care-progress-details');detailPanel.append(el('summary','Cambia esercizio, indicatore o consulta lo storico'));for(const n of [description,filters,settings,details])detailPanel.append(n);host.append(detailPanel);
+ host.insertBefore(trend,detailPanel);host.insertBefore(chart,detailPanel);
  let results=[];
  function draw(){
   const selected=results.filter(r=>r.status==='completed'&&groupKey(r)===group.value),latest=selected.at(-1);
@@ -50,7 +51,7 @@ export function createProgressView(host,{title='I miei progressi'}={}){
  }
  for(const select of [group,metric,period])select.onchange=draw;
  function renderAreas(){
-  areas.replaceChildren(el('h3','Le aree che stai allenando'),el('p','Le ultime due prove a confronto, a parità di esercizio e impostazioni.','care-muted'));
+  areas.replaceChildren(el('h3','Il percorso, a colpo d’occhio'),el('p','Ogni linea confronta lo stesso esercizio con le stesse impostazioni. I cambiamenti riguardano le prove svolte, non una valutazione clinica.','care-muted'));
   const buckets=new Map();
   for(const r of results){
    const area=exerciseById.get(r.exerciseId)?.category;if(!area||r.status!=='completed')continue;
@@ -64,6 +65,14 @@ export function createProgressView(host,{title='I miei progressi'}={}){
    const counts=[0,0,0];let pending=0;
    for(const rows of groups.values()){if(rows.length<2){pending++;continue;}const delta=rows.at(-1).metrics.accuracyPct-rows.at(-2).metrics.accuracyPct;counts[delta>0?0:delta===0?1:2]++;}
    const tile=el('article',undefined,'care-area-tile');tile.append(el('h4',area));const total=counts.reduce((a,b)=>a+b,0);
+   const comparable=[...groups.values()].filter(rows=>rows.length>=2).sort((a,b)=>String(b.at(-1).finishedAt).localeCompare(String(a.at(-1).finishedAt)))[0];
+   if(comparable){
+    const rows=comparable.slice(-8),values=rows.map(r=>r.metrics.accuracyPct),delta=values.at(-1)-values.at(-2),state=delta>0?'up':delta<0?'down':'same';
+    tile.classList.add('care-area-'+state);const value=el('strong',(delta>0?'↗ +':delta<0?'↘ ':'→ ')+Number(delta.toFixed(1)).toLocaleString('it-IT')+' punti','care-area-delta');tile.append(value,el('p',delta>0?'Accuratezza in aumento':delta<0?'Accuratezza in diminuzione':'Accuratezza stabile','care-area-direction'));
+    const ns='http://www.w3.org/2000/svg',svg=document.createElementNS(ns,'svg');svg.classList.add('care-area-spark');svg.setAttribute('viewBox','0 0 260 88');svg.setAttribute('role','img');
+    const caption=document.createElementNS(ns,'title');caption.textContent=rows.at(-1).title+' · accuratezza delle ultime '+rows.length+' prove: '+values.join(', ')+' per cento';svg.append(caption);
+    const line=document.createElementNS(ns,'polyline');line.setAttribute('points',values.map((v,i)=>(10+i/(values.length-1)*240)+','+(76-v*.64)).join(' '));line.setAttribute('fill','none');line.setAttribute('stroke','currentColor');line.setAttribute('stroke-width','4');line.setAttribute('stroke-linecap','round');line.setAttribute('stroke-linejoin','round');svg.append(line);tile.append(svg,el('p',rows.at(-1).title+' · '+rows.length+' prove confrontabili','care-muted'));
+   }
    if(total){const bar=el('div',undefined,'care-area-bar');bar.setAttribute('aria-hidden','true');counts.forEach((count,i)=>{if(count){const segment=el('span',undefined,['up','same','down'][i]);segment.style.width=(count/total*100)+'%';bar.append(segment);}});tile.append(bar);
     const labels=['↗ In aumento','→ Stabile','↘ In diminuzione'];counts.forEach((count,i)=>tile.append(el('p',labels[i]+': '+count,'care-area-count')));
    }else tile.append(el('p','In attesa di due prove confrontabili.','care-muted'));
@@ -76,7 +85,7 @@ export function createProgressView(host,{title='I miei progressi'}={}){
   renderAreas();
   const summary=summarizeResults(results);stats.replaceChildren();for(const [value,label] of [[summary.sessions,'Sessioni con esercizi completati'],[summary.exercises,'Esercizi completati'],[summary.minutes,'Minuti di attività']]){const tile=el('div',undefined,'care-stat');tile.append(el('strong',String(value)),el('span',label));stats.append(tile);}
   const previous=group.value,groups=new Map();for(const r of results.filter(r=>r.status==='completed'))groups.set(groupKey(r),r);group.replaceChildren();const versions=new Map();
-  for(const [key,r] of groups){const number=(versions.get(r.exerciseId)||0)+1;versions.set(r.exerciseId,number);const option=el('option',r.title+' · configurazione '+number);option.value=key;group.append(option);}if(groups.has(previous))group.value=previous;filters.hidden=!groups.size;
+  for(const [key,r] of groups){const number=(versions.get(r.exerciseId)||0)+1;versions.set(r.exerciseId,number);const option=el('option',r.title+' · configurazione '+number);option.value=key;group.append(option);}if(groups.has(previous))group.value=previous;else if(groups.size)group.value=[...groups.keys()].at(-1);filters.hidden=!groups.size;
   tbody.replaceChildren();for(const r of [...results].reverse().slice(0,100)){const row=el('tr'),accuracy=measure(r,'accuracy'),errors=measure(r,'errors');for(const content of [formatDate(r.finishedAt),r.title,accuracy?accuracy.value+'%':'—',errors?String(errors.value):'—',Number.isFinite(r.durationMs)?Math.round(r.durationMs/1000)+' s':'—',r.status==='completed'?'Completato':'Interrotto'])row.append(el('td',content));tbody.append(row);}
   if(!results.length){const row=el('tr'),cell=el('td','Nessuna prova salvata.');cell.colSpan=6;row.append(cell);tbody.append(row);}draw();
  }

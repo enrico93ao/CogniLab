@@ -8,4 +8,5 @@ const roster=await context.professionalPatients();assert.ok(roster.oldPatient);a
 // An existing patient must not be automatically reconnected after later revocation.
 put('cognilab/careLinks/oldPatient/'+owner,null);await context.professionalPatients();assert.equal(writes.length,2);assert.equal(at('cognilab/careLinks/oldPatient/'+owner),null);
 await assert.rejects(()=>context.connectManagedPatient('missing'),/non presente/);
+await context.setPatientArchived('oldPatient',true);assert.equal(at('cognilab/users/'+owner+'/clinical/registeredPatients/oldPatient/archived'),true);assert.equal(at('cognilab/testers/oldPatient'),true);assert.equal(at('cognilab/users/'+owner+'/clinical/registeredPatients/oldPatient/name'),'Created by manager');await context.setPatientArchived('oldPatient',false);assert.equal(at('cognilab/users/'+owner+'/clinical/registeredPatients/oldPatient/archived'),false);await assert.rejects(()=>context.setPatientArchived('missing',true),/non presente/);
 console.log('PASS: enabled patients imported and automatically linked once; disabled/self excluded; later revocation respected; absent account rejected.');

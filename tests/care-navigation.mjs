@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';import fs from 'node:fs';import {createR
 const source=fs.readFileSync(new URL('../shared/shell-account.js',import.meta.url),'utf8').replace(/^import .*;\s*$/gm,''),flush=async()=>{for(let i=0;i<30;i++)await Promise.resolve();};
 for(const index of [0,1]){
  const files=['Stroop.html','Attenzione alternata.html'],dom=new JSDOM('<div class="cl-exercise-heading"></div><iframe id="exercise-frame"></iframe>',{url:'https://example.test/esercizio.html?file='+encodeURIComponent(files[index]),runScripts:'outside-only',virtualConsole:new VirtualConsole()}),w=dom.window;
+ w.HTMLDialogElement.prototype.showModal=function(){this.open=true;};w.HTMLDialogElement.prototype.close=function(){this.open=false;};
  w.auth={currentUser:{uid:'patient'}};w.authReady=Promise.resolve();let sharing='pending',finished=0;w.saveResult=async()=>({sharingState:sharing});w.finishSession=async()=>{finished++;};w.friendlyError=()=> 'Errore';
  w.sessionStorage.setItem('cognilab.plan.patient',JSON.stringify({programId:'plan',files,index,completedSlots:index?[0]:[]}));w.sessionStorage.setItem('cognilab.session.patient',JSON.stringify({programId:'plan',programSlot:String(index)}));
  await w.eval('(async()=>{'+source+'})()');const b=w.document.querySelector('button'),frame=w.document.querySelector('iframe');frame.contentWindow.postMessage=()=>{};

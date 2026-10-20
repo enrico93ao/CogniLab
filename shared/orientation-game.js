@@ -2,7 +2,7 @@ import {MONTHS,SEASONS,season,temporalTasks,shuffle} from './training-model.mjs?
 const el=id=>document.getElementById(id);const taskClock=new window.CogniLabTaskClock();
 const labels={weekday:'Giorno della settimana',day:'Giorno',month:'Mese',year:'Anno',season:'Stagione'};
 const weekdays=['domenica','lunedì','martedì','mercoledì','giovedì','venerdì','sabato'];
-let running=false,level,date,city,step=0,questions=[],position=0,numericErrors=0,attempts=0,correct=0,errors=0,selected=[],useHint=false;
+let running=false,level,date,step=0,questions=[],position=0,numericErrors=0,attempts=0,correct=0,errors=0,selected=[],useHint=false;
 const today=new Date();el('orientation-date').value=[today.getFullYear(),String(today.getMonth()+1).padStart(2,'0'),String(today.getDate()).padStart(2,'0')].join('-');
 function show(id){for(const name of ['setup','orientation-game','orientation-results'])el(name).hidden=name!==id;}
 function normalize(value){return String(value).trim().toLocaleLowerCase('it-IT');}
@@ -12,11 +12,10 @@ function makeQuestions(){
  const answers={weekday:weekdays[date.getDay()],day:String(date.getDate()),month:MONTHS[date.getMonth()],year:String(date.getFullYear()),season:season(date)};
  const fields=level==='super-easy'?['weekday','day','month','year']:Object.keys(answers);
  const temporal={title:'Completa i box con la data di riferimento',answer:fields.map(k=>answers[k]),labels:fields.map(k=>labels[k]),pools:fields.map(k=>k==='weekday'?weekdays:k==='day'?Array.from({length:31},(_,i)=>String(i+1)):k==='month'?MONTHS:k==='year'?Array.from({length:9},(_,i)=>String(date.getFullYear()-4+i)):SEASONS)};
- return [temporal,...(city?[{title:'In quale città ti trovi?',answer:[city],pools:[[city,'Aosta','Torino','Milano','Roma','Genova','Firenze','Bologna']]}]:[]),{title:'In quale stanza ci si lava i denti?',answer:['bagno'],pools:[['bagno','cucina','camera','soggiorno','studio']]},{title:'Mappa della casa: tocca la cucina',answer:['cucina'],map:true},...temporalTasks(level,date)];
+ return [temporal,...temporalTasks(level,date)];
 }
-el('orientation-form').onsubmit=async event=>{
+el('orientation-form').onsubmit=event=>{
  event.preventDefault();if(!event.currentTarget.reportValidity())return;
- if(!el('orientation-city').value.trim())await locationReady();city=el('orientation-city').value.trim();
  const [y,m,d]=el('orientation-date').value.split('-').map(Number);date=new Date(y,m-1,d,12);level=el('orientation-level').value;useHint=level!=='advanced';
  step=0;attempts=correct=errors=0;questions=makeQuestions();taskClock.reset();running=true;window.CogniLabRun.begin(level);show('orientation-game');startQuestion();
 };
@@ -32,13 +31,12 @@ function render(){
  if(position===q.answer.length)return;
  if(q.numeric){el('orientation-number').value='';return;}
  let values;
- if(q.map){values=['bagno','cucina','camera','soggiorno'];choices.style.display='grid';choices.style.gridTemplateColumns='1fr 1fr';}
- else{choices.style.display='flex';values=q.pools?options(q.answer[position],q.pools[position]):shuffle([...q.answer].filter(v=>!selected.includes(v)));}
+ choices.style.display='flex';values=q.pools?options(q.answer[position],q.pools[position]):shuffle([...q.answer].filter(v=>!selected.includes(v)));
  for(const value of values)choices.append(button(value,b=>choose(value,b)));
 }
 function choose(value,b){
  if(!running||taskClock.paused)return;const q=questions[step];if(position>=q.answer.length)return;attempts++;
- if(normalize(value)!==normalize(q.answer[position])){errors++;window.CogniLabAudio?.feedback(false);if(q.numeric)numericErrors++;el('orientation-status').textContent=q.numeric&&numericErrors>=2?'Suggerimento: conta i giorni da '+date.getDate()+'/'+(date.getMonth()+1)+' al '+q.next.day+'/'+(q.next.month+1)+'. Mancano '+q.next.days+' giorni. Inserisci questo numero per continuare.':'Riprova: il box evidenziato aspetta un’altra risposta.';b?.classList.add('wrong');return;}
+ if(normalize(value)!==normalize(q.answer[position])){errors++;window.CogniLabAudio?.feedback(false);if(q.numeric)numericErrors++;el('orientation-status').textContent=q.numeric&&numericErrors>=4?'La risposta è '+q.next.days+' giorni. Inserisci questo numero per continuare.':q.numeric&&numericErrors>=2?'Suggerimento: conta i giorni che restano nel mese di partenza, aggiungi i giorni dei mesi intermedi e infine quelli del mese di arrivo fino al '+q.next.day+'. Usa il calendario dal '+date.getDate()+'/'+(date.getMonth()+1)+' al '+q.next.day+'/'+(q.next.month+1)+'.':'Riprova: il box evidenziato aspetta un’altra risposta.';b?.classList.add('wrong');return;}
  correct++;window.CogniLabAudio?.feedback(true);selected.push(String(value));position++;el('orientation-status').textContent=position===q.answer.length?'Attività completata. Puoi continuare.':'Corretto. Completa il prossimo box.';render();
 }
 el('orientation-number-form').onsubmit=event=>{event.preventDefault();if(event.currentTarget.reportValidity())choose(String(Number(el('orientation-number').value)));};
@@ -51,32 +49,3 @@ async function back(event){event.preventDefault();await window.CogniLabRun.waitF
 el('orientation-back').onclick=back;el('top-back').onclick=back;
 
 window.CogniLabAssist={isRunning:()=>running,pause:()=>taskClock.pause(),resume:()=>taskClock.resume(),finish,instruction:()=>questions[step]?.title||'Completa il box evidenziato scegliendo la risposta corretta.',sample:()=>({labels:['lunedì','giovedì','sabato'],boxLabel:'Giorno',order:[0],instruction:'Questo è un esempio: il giorno da inserire nel box è lunedì. Tocca la tessera corretta.'})};
-
-let locationPromise,detectedCity='';
-function locationReady(){
- if(locationPromise)return locationPromise;
- locationPromise=new Promise(resolve=>{
-  const box=document.createElement('section');box.className='suite-panel';box.dataset.assignedVisible='true';box.setAttribute('role','dialog');box.setAttribute('aria-label','Rileva la città');
-  const p=document.createElement('p');p.textContent='Per riconoscere la città, puoi consentire il rilevamento della posizione. Le coordinate approssimate vengono inviate a OpenStreetMap (Nominatim), senza nome o account, e non vengono salvate nei risultati.';
-  const status=document.createElement('p');status.setAttribute('role','status');
-  const detect=button('Rileva automaticamente',async()=>{
-   detect.disabled=true;status.textContent='Rilevamento della città…';
-   try{
-    if(!navigator.geolocation)throw Error('unavailable');
-    const pos=await new Promise((ok,no)=>navigator.geolocation.getCurrentPosition(ok,no,{enableHighAccuracy:false,timeout:12000,maximumAge:0}));
-    if(pos.coords.accuracy>10000)throw Error('accuracy');
-    const url=new URL('https://nominatim.openstreetmap.org/reverse');url.search=new URLSearchParams({format:'jsonv2',lat:pos.coords.latitude.toFixed(2),lon:pos.coords.longitude.toFixed(2),zoom:'10','accept-language':'it'}).toString();
-    const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),10000);
-    let response;try{response=await fetch(url,{credentials:'omit',signal:controller.signal});}finally{clearTimeout(timer);}
-    if(!response.ok)throw Error('lookup');const data=await response.json(),a=data.address||{};
-    detectedCity=a.city||a.town||a.village||a.municipality||'';if(!detectedCity)throw Error('lookup');
-    el('orientation-city').value=detectedCity;el('orientation-city').readOnly=true;box.remove();resolve();
-   }catch{status.textContent='Posizione non disponibile. Puoi continuare senza la domanda sulla città, oppure inserirla manualmente.';detect.disabled=false;}
-  });
-  const skip=button('Continua senza rilevamento',()=>{box.remove();resolve();});
-  box.append(p,detect,skip,status);document.body.prepend(box);
- });
- return locationPromise;
-}
-el('orientation-detect').onclick=()=>{locationPromise=null;locationReady();};
-window.CogniLabPrepareAssigned=locationReady;

@@ -1,9 +1,9 @@
 import {onAuthStateChanged} from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js';
 import {auth} from './firebase-client.js';
-import {currentCareUser,patientWorkspace,checkCareStorage,professionalPatients,professionalPatient,registerManagedPatient,invitePatient,setConnection,assignProgram,sendAssignmentNotification,archiveProgram,startAssignedProgram,careError} from './care-store.js?v=notify31';
+import {currentCareUser,patientWorkspace,checkCareStorage,professionalPatients,professionalPatient,registerManagedPatient,invitePatient,setConnection,assignProgram,sendAssignmentNotification,archiveProgram,setPatientArchived,startAssignedProgram,careError} from './care-store.js?v=journey36';
 import {programProgress,resultsFromCare} from './care-model.mjs';
 import {exercises,exerciseById} from './exercise-catalog.mjs';
-import {createProgressView} from './progress-view.js?v=ux25';
+import {createProgressView} from './progress-view.js?v=journey36';
 import {pendingCare,retryPending} from './progress-store.js';
 import {requireProfessional} from './clinical-access.js';
 const el=(tag,text,cls)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;if(cls)n.className=cls;return n;};
@@ -41,7 +41,7 @@ function programCard(program,{professional=false,patientUid,onChange}={}){
   const notice=el('p',notification?.message||'Notifica email non ancora richiesta.','care-muted');notice.dataset.notificationProgram=program.id;notice.dataset.notificationPatient=patientUid;notice.setAttribute('role','status');notice.setAttribute('aria-live','polite');node.append(notice);
   const notify=button('Invia / verifica notifica email',()=>action(notify,async()=>{const result=await sendAssignmentNotification(patientUid,program.id);await onChange();if(result.state!=='sent')throw Error(result.message);}));node.append(notify);
 
-  const b=button('Archivia programma',()=>{if(confirm('Archiviare il programma? Il paziente non potrà avviare altre sessioni di questo programma. Lo storico resterà disponibile.'))action(b,async()=>{await archiveProgram(patientUid,program.id);await onChange();},'Programma archiviato.');});node.append(b);
+  const b=button('Elimina assegnazione',()=>{if(confirm('Rimuovere questa assegnazione dai programmi attivi? Il paziente non potrà avviare altre sessioni del programma. Risultati e configurazione resteranno nello storico dei programmi archiviati.'))action(b,async()=>{await archiveProgram(patientUid,program.id);await onChange();},'Assegnazione rimossa dai programmi attivi e conservata nello storico.');},'danger');node.append(b);
  }
  if(professional&&progress.sessions.length){const history=el('details'),s=el('summary','Dettaglio delle sessioni');history.append(s);const ul=el('ul');for(const item of progress.sessions){const date=new Date(item.startedAt).toLocaleDateString('it-IT');ul.append(el('li',date+(item.scheduledDate?' (prevista '+item.scheduledDate.split('-').reverse().join('/')+')':'')+' · '+(item.progress.complete?'Completa':item.status==='interrupted'?'Interrotta':'Da riprendere')+' · '+item.progress.completed+'/'+item.progress.total+' esercizi'));}history.append(ul);node.append(history);}
  return node;
@@ -61,7 +61,8 @@ async function patientView(user){
   const revision=++version;const data=await patientWorkspace();if(revision!==version||auth.currentUser?.uid!==user.uid)return;
   list.replaceChildren();if(!data.programs.length)list.append(empty('Non hai ancora programmi assegnati. Puoi usare gli esercizi della palestra mentre attendi le indicazioni del professionista.'));
   if(data.programs.some(p=>p.status==='active')){const copy=document.getElementById('welcome-subtext');if(copy)copy.textContent='Segui il programma assegnato dal professionista oppure scegli un esercizio dalla palestra.';}
-  for(const program of data.programs.sort((a,b)=>b.createdAt-a.createdAt))list.append(programCard(program));
+  const archived=el('details');archived.append(el('summary','Programmi archiviati'));let archivedCount=0;
+  for(const program of data.programs.sort((a,b)=>b.createdAt-a.createdAt)){if(program.status==='archived'){archived.append(programCard(program));archivedCount++;}else list.append(programCard(program));}if(archivedCount)list.append(archived);
   invites.replaceChildren();
   if(!Object.keys(data.invites).length)invites.append(el('p','Il professionista ti guiderà nella scelta degli esercizi e dei livelli più adatti.','care-muted'));
   for(const [uid,invite] of Object.entries(data.invites)){
@@ -88,6 +89,12 @@ async function professionalView(user){
  const setup=el('div',undefined,'care-grid'),roster=card('Pazienti e richieste','MONITORAGGIO'),invite=card('Collega un paziente','NUOVO COLLEGAMENTO');setup.append(roster,invite);workspace.append(setup);
  const select=el('select');select.id='care-patient-select';roster.append(field('Seleziona un paziente registrato',select));
  const linkStatus=el('p',undefined,'care-muted');roster.append(linkStatus);
+ const removed=el('details');removed.append(el('summary','Pazienti rimossi · recupera'));const removedList=el('div');removed.append(removedList);roster.append(removed);
+ const removePatient=button('Rimuovi paziente dall’elenco',()=>{
+  const patientUid=select.value;if(!patientUid)return;
+  if(!confirm('Rimuovere questo paziente dal tuo elenco? Potrai recuperarlo da “Pazienti rimossi”. Account, collegamento, risultati e programmi già assegnati restano attivi: per interrompere un programma usa “Elimina assegnazione”.'))return;
+  action(removePatient,async()=>{await setPatientArchived(patientUid,true);selected='';select.value='';await loadRoster();await loadSelected();},'Paziente rimosso dall’elenco. Puoi recuperarlo da Pazienti rimossi.');
+ },'danger');removePatient.hidden=true;roster.append(removePatient);
  roster.append(el('p','Il codice account si trova nella dashboard del paziente. La semplice anagrafica delle sessioni in studio non crea un collegamento con un account.','care-muted'));
  const form=el('form'),name=input('name','Nome o identificativo del paziente'),uid=input('uid','Codice copiato dalla dashboard del paziente',128);uid.autocomplete='off';name.autocomplete='off';form.append(field('Nome nel tuo elenco',name),field('Codice account paziente',uid));
  const submit=el('button','Invia richiesta di collegamento','primary');submit.type='submit';form.append(submit);invite.append(form);
@@ -98,10 +105,15 @@ async function professionalView(user){
  async function loadRoster(){
   records=await professionalPatients();if(auth.currentUser?.uid!==user.uid)return;
   const previous=select.value||selected;select.replaceChildren();const placeholder=el('option',Object.keys(records).length?'Scegli un paziente':'Nessun paziente collegato');placeholder.value='';select.append(placeholder);
-  for(const [id,record] of Object.entries(records).sort(([,a],[,b])=>a.name.localeCompare(b.name))){const option=el('option',record.name);option.value=id;select.append(option);}if(records[previous])select.value=previous;
+  removedList.replaceChildren();
+  for(const [id,record] of Object.entries(records).sort(([,a],[,b])=>a.name.localeCompare(b.name))){
+   if(record.archived===true){const row=el('p',record.name+' '),restore=button('Ripristina paziente',()=>action(restore,async()=>{await setPatientArchived(id,false);await loadRoster();},'Paziente ripristinato nell’elenco.'));row.append(restore);removedList.append(row);continue;}
+   const option=el('option',record.name);option.value=id;select.append(option);
+  }if(records[previous]&&records[previous].archived!==true)select.value=previous;
+  removed.hidden=!removedList.childElementCount;
  }
  async function loadSelected(){
-  selected=select.value;const current=++revision;content.replaceChildren();chart.render([]);
+  selected=select.value;removePatient.hidden=!selected;const current=++revision;content.replaceChildren();chart.render([]);
   if(!selected){content.append(empty('Seleziona un paziente per vedere i suoi programmi o crearne uno nuovo.'));linkStatus.textContent='';return;}
   linkStatus.textContent='Verifica del collegamento…';const data=await professionalPatient(selected,records[selected]);
   if(current!==revision||auth.currentUser?.uid!==user.uid)return;
@@ -112,7 +124,9 @@ async function professionalView(user){
   if(!data.accepted){content.append(empty('Il paziente deve accettare il collegamento nella propria dashboard. I suoi risultati non sono accessibili fino a quel momento.'));return;}
   content.append(el('p',records[selected].notificationEmail?'Notifiche inviate automaticamente all’email dell’account: '+records[selected].notificationEmail:'Email dell’account non ancora disponibile: verrà sincronizzata al prossimo accesso del paziente, con le regole Firebase aggiornate.','care-muted'));
   if(!data.programs.length)content.append(empty('Nessun programma assegnato. Prepara il primo qui sotto.'));
-  for(const program of data.programs.sort((a,b)=>b.createdAt-a.createdAt))content.append(programCard(program,{professional:true,patientUid:selected,onChange:async()=>{await loadRoster();await loadSelected();}}));
+  const archived=el('details');archived.append(el('summary','Assegnazioni eliminate · storico e configurazioni'));let archivedCount=0;
+  for(const program of data.programs.sort((a,b)=>b.createdAt-a.createdAt)){const entry=programCard(program,{professional:true,patientUid:selected,onChange:async()=>{await loadRoster();await loadSelected();}});if(program.status==='archived'){archived.append(entry);archivedCount++;}else content.append(entry);}
+  if(archivedCount)content.append(archived);
   chart.render(data.programs.flatMap(p=>resultsFromCare(p.sessions)));
   content.append(builder(selected,loadSelected));message('Dati aggiornati alle '+new Date().toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'})+'.');
  }

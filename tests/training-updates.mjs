@@ -58,21 +58,21 @@ function clock(w){let now=0,id=0;const jobs=new Map();w.Date.now=()=>now;w.setTi
  const stimulus=w.document.getElementById('stimulus');stimulus.dispatchEvent(new w.Event('pointerdown',{cancelable:true}));assert.equal(stimulus.style.visibility,'hidden');await advance(350);assert.equal(stimulus.className,'target-circle');
  w.resetToMenu();w.startGame('shifting');w.moveStimulus();assert.match(w.document.getElementById('instruction-banner').textContent,/TRIANGOLO GIALLO/);assert.equal(stimulus.querySelectorAll('.distractor-triangle').length,1);w.endGame();assert.equal(p.saved.length,1);w.close();
 }
-// Actual orientation UI: offer automatic location for empty city, use confirmed place, complete all
+// Actual temporal orientation: complete all
 // advanced tasks through rendered boxes and retain correct/error totals.
 {
  const p=page('Orientamento temporale-spaziale.html'),w=p.w;Object.assign(w,model);evaluate(p,'shared/orientation-game.js');
- const form=w.document.getElementById('orientation-form');const submit=()=>form.dispatchEvent(new w.Event('submit',{cancelable:true}));submit();assert.equal(p.begins(),0);
- w.document.getElementById('orientation-city').value='Cogne';w.document.getElementById('orientation-date').value='2026-10-15';w.document.getElementById('orientation-level').value='advanced';submit();assert.equal(p.begins(),1);
- const answers=[['giovedì','15','ottobre','2026','autunno'],['Cogne'],['bagno'],['cucina'],...tasks.map(t=>t.answer)];
+ const form=w.document.getElementById('orientation-form');const submit=()=>form.dispatchEvent(new w.Event('submit',{cancelable:true}));
+ w.document.getElementById('orientation-date').value='2026-10-15';w.document.getElementById('orientation-level').value='advanced';submit();assert.equal(p.begins(),1);
+ const answers=[['giovedì','15','ottobre','2026','autunno'],...tasks.map(t=>t.answer)];
  const choose=value=>{const b=[...w.document.querySelectorAll('#orientation-choices button')].find(b=>b.textContent===value);assert.ok(b,value);b.click();};
  choose([...w.document.querySelectorAll('#orientation-choices button')].find(b=>b.textContent!=='giovedì').textContent);
  for(let i=0;i<answers.length;i++){
-  if(i===answers.length-1){w.document.getElementById('orientation-number').value='67';w.document.getElementById('orientation-number-form').dispatchEvent(new w.Event('submit',{cancelable:true}));}
+  if(i===answers.length-1){const input=w.document.getElementById('orientation-number'),answer=()=>w.document.getElementById('orientation-number-form').dispatchEvent(new w.Event('submit',{cancelable:true}));input.value='1';answer();answer();assert.match(w.document.getElementById('orientation-status').textContent,/giorni che restano/);assert.doesNotMatch(w.document.getElementById('orientation-status').textContent,/risposta è/);answer();answer();assert.match(w.document.getElementById('orientation-status').textContent,/risposta è 67 giorni/);input.value='67';answer();}
   else for(const answer of answers[i])choose(answer);
   assert.equal(w.document.getElementById('orientation-next').hidden,false);w.document.getElementById('orientation-next').click();
  }
- assert.equal(p.saved.length,1);assert.equal(p.saved[0].errors,1);assert.equal(p.saved[0].activitiesCompleted,8);assert.equal(p.saved[0].total,p.saved[0].correct+1);w.close();
+ assert.equal(p.saved.length,1);assert.equal(p.saved[0].errors,5);assert.equal(p.saved[0].activitiesCompleted,5);assert.equal(p.saved[0].total,p.saved[0].correct+5);w.close();
 }
 // Legacy controller execution: all combinations of base trail and direction.
 const secondary={alpha:'ABCDEFGHIJKLM'.split(''),reverse:'ZYXWVUTSRQPON'.split(''),months:['Gen','Feb','Mar','Apr','Mag','Giu','Lug','Ago','Set'],days:['Lun','Mar','Mer','Gio','Ven','Sab','Dom','Lun','Mar'],romans:['I','II','III','IV','V','VI','VII','VIII','IX'],compass:['N','E','S','O','NE','SE','SO','NO','N']};
