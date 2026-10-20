@@ -18,3 +18,9 @@ Verifiche del 20 ottobre 2026: confronto iniziale delle utility dei 32 esercizi 
 Restano risorse esterne per alcuni font, Font Awesome e Firebase. Questo intervento non elimina ogni richiesta a servizi esterni e non abilita una modalità completamente offline.
 
 Riferimento tecnico: https://v3.tailwindcss.com/docs/content-configuration
+
+## Manutenzione del foglio pubblico
+
+`shared/public-catalog.css` è ora formattato con selettori e dichiarazioni su righe leggibili, mantenendo l’ordine originale delle sezioni e degli override. Il comando `npm run css:consolidate`, con gli strumenti di `scripts/assets` installati, rimuove soltanto una dichiarazione precedente quando ne esiste una identica per lo stesso selettore, contesto condizionale e priorità. I valori di fallback diversi e le animazioni vengono preservati. Non riordina i componenti né fonde indiscriminatamente gli override.
+
+`npm run test:css` verifica fallback, priorità, media query, keyframe e idempotenza. Il test può confrontare due versioni: `node tests/css-consolidation.mjs prima.css dopo.css`. Il confronto del 20 ottobre 2026 ha dato esito identico in 20 combinazioni di larghezze 320/375/390/768/1280, movimento ridotto e supporto a overflow clip. È un’analisi delle dichiarazioni CSS; rimane distinta da una verifica visiva e touch in browser reali.

@@ -75,3 +75,13 @@ body[data-cognilab='shell'] .exercise-workspace { padding: 20px; }
 .cl-progress td,.cl-progress th { padding: 12px 8px; border-bottom: 1px solid var(--cl-line); text-align: left; }
 .cl-table-scroll { overflow-x: auto; }
 .cl-save-status { position: fixed; bottom: 12px; right: 12px; max-width: min(440px,90vw); background: white; color: var(--cl-ink); border: 1px solid #bfd2d8; padding: 14px; border-radius: 14px; z-index: 10000; box-shadow: var(--cl-shadow); }
+
+/* Account data tools: comfortably usable in the existing scrollable dialog. */
+.cl-account-data{margin-top:20px;border-top:1px solid var(--cl-line);padding-top:14px}
+.cl-account-data summary{cursor:pointer;font-weight:700;padding:10px 0}
+.cl-account-data p{font-size:.9rem;line-height:1.6;margin:12px 0;overflow-wrap:anywhere}
+.cl-account-data h3{font-size:1rem;margin:24px 0 10px}
+.cl-account-data select,.cl-account-data textarea{display:block;width:100%;max-width:100%;margin-top:8px;padding:10px;border:1px solid #bfd2d8;border-radius:10px;background:#fff;color:var(--cl-ink);font:inherit}
+.cl-account-data textarea{font-size:.85rem;line-height:1.5;resize:vertical}
+.cl-account-data .btn{display:inline-block;max-width:100%;white-space:normal;text-align:center;overflow-wrap:anywhere}
+.cl-data-hint{color:#536e7c}

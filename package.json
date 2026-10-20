@@ -20,7 +20,10 @@
     "test:progress": "node tests/progress-v3.mjs",
     "test:storage": "node tests/storage-resilience.mjs && node tests/session-save.mjs",
     "assets:build": "node scripts/assets/build.mjs",
-    "test:assets": "node tests/static-assets.mjs"
+    "test:assets": "node tests/static-assets.mjs",
+    "css:consolidate": "node scripts/assets/consolidate-css.mjs",
+    "test:data": "node tests/account-data.mjs",
+    "test:css": "node tests/css-consolidation.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",

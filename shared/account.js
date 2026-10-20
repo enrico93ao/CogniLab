@@ -1,3 +1,4 @@
+import {mountAccountData} from './account-data-ui.js?v=data32';
 import {requireGymAccess,invitationMessage} from './gym-access.js';
 import {disconnectPresence} from './presence.js';
 import {createUserWithEmailAndPassword,signInWithEmailAndPassword,sendPasswordResetEmail,signOut,updateProfile,onAuthStateChanged,EmailAuthProvider,linkWithCredential,sendEmailVerification} from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js';
@@ -10,6 +11,8 @@ const host=document.querySelector('.nav-right-cluster')||document.querySelector(
 const dialog=document.createElement('dialog');dialog.className='cl-account';
 dialog.innerHTML='<form id="cl-account-form"><h2>Il tuo spazio CogniLab</h2><p>Accedi per ritrovare sessioni e progressi anche su un altro dispositivo.</p><label>Nome<input name="name" autocomplete="name" maxlength="80"></label><label>Email<input name="email" type="email" required autocomplete="email"></label><label>Password<input name="password" type="password" required minlength="6" autocomplete="current-password"></label><p id="cl-account-status" role="status" aria-live="polite"></p><div class="cl-account-actions"><button class="btn" type="submit" name="action" value="login">Accedi</button><button class="btn" type="submit" name="action" value="register">Crea account</button><button type="button" id="cl-reset-password">Password dimenticata</button><button type="button" id="cl-close-account">Chiudi</button></div></form><div id="cl-signed-account" hidden><h2>Il tuo account</h2><p id="cl-account-name"></p><p id="cl-email-status" role="status"></p><button id="cl-resend-verification" class="btn">Reinvia email di conferma</button><p id="cl-logout-status" role="status" aria-live="polite"></p><button id="cl-logout" class="btn">Esci dall’account</button><button id="cl-logout-local" class="btn" hidden>Esci lasciando i risultati su questo dispositivo</button><button id="cl-close-signed">Chiudi</button></div>';
 document.body.append(dialog);
+const dataControls=mountAccountData(document.getElementById('cl-signed-account'));
+let dataAccountUid;
 button.onclick=()=>dialog.showModal();window.CogniLabOpenAccount=()=>dialog.showModal();
 const form=dialog.querySelector('form'),status=document.getElementById('cl-account-status');
 form.querySelector('[value="register"]').hidden=!registrationOpen;
@@ -59,6 +62,7 @@ document.getElementById('cl-logout').onclick=async()=>{
  }catch(e){message.textContent=friendlyError(e);}finally{button.disabled=false;}
 };
 onAuthStateChanged(auth,user=>{
+ if(dataAccountUid!==user?.uid){dataControls.reset();dataAccountUid=user?.uid;}
  const registered=Boolean(user&&!user.isAnonymous);button.textContent=registered?'Il mio account':registrationOpen?'Accedi / Registrati':'Accedi';form.hidden=registered;document.getElementById('cl-signed-account').hidden=!registered;
  document.getElementById('cl-account-name').textContent=user?.displayName||user?.email||'';
  document.getElementById('cl-resend-verification').hidden=!registered||Boolean(user.emailVerified);

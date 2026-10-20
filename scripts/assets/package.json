@@ -1,6 +1,10 @@
 {
-  "name":"cognilab-static-assets",
-  "private":true,
-  "version":"1.0.0",
-  "dependencies":{"tailwindcss":"3.4.17","lucide":"0.468.0"}
+  "name": "cognilab-static-assets",
+  "private": true,
+  "version": "1.0.0",
+  "dependencies": {
+    "tailwindcss": "3.4.17",
+    "lucide": "0.468.0",
+    "postcss": "8.5.6"
+  }
 }
