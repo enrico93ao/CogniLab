@@ -4,11 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Caccia all'Intruso Visivo</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="assets/vendor/exercise-utilities-3.4.17.css?v=assets31">
     
-    <!-- SDK Firebase Compatibili -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <!-- Persistenza gestita dal runtime condiviso CogniLab. -->
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;600;800&display=swap');
@@ -241,14 +239,6 @@
             isActive: false
         };
 
-        // Parametri per integrazione Firebase Dashboard
-        const urlParams = new URLSearchParams(window.location.search);
-        const isSessione = urlParams.get('sessione') === 'true';
-        const pazienteId = urlParams.get('pazienteId') || localStorage.getItem('currentPazienteId') || localStorage.getItem('pazienteId');
-        const sessioneId = urlParams.get('sessioneId') || localStorage.getItem('currentSessioneId');
-        const tipoSessione = urlParams.get('tipoSessione') || localStorage.getItem('tipoSessione') || 'libera';
-        const indiceEsercizio = parseInt(urlParams.get('indiceEsercizio') || localStorage.getItem('indiceEsercizio') || '0', 10);
-
         // Contatori temporanei della griglia attiva
         let roundIntrudersToFind = 0;
         let roundIntrudersFound = 0;
@@ -262,24 +252,6 @@
         };
 
         let audioCtx = null;
-        let database = null;
-
-        // Tenta l'inizializzazione di Firebase usando i dati memorizzati
-        try {
-            const fbConfigStr = localStorage.getItem('firebaseConfig');
-            if (fbConfigStr) {
-                const firebaseConfig = JSON.parse(fbConfigStr);
-                if (!firebase.apps.length) {
-                    firebase.initializeApp(firebaseConfig);
-                }
-                database = firebase.database();
-            } else if (firebase.apps.length) {
-                database = firebase.database();
-            }
-        } catch (e) {
-            console.error("Inizializzazione Firebase saltata o non riuscita:", e);
-        }
-
         function setLevel(size) {
             config.gridSize = size;
             [3,4,5,6].forEach(s => {
@@ -515,78 +487,7 @@
                 document.getElementById(`star-${i}`).classList.toggle('star-active', i <= starCount);
             }
 
-            // Normalizzazione dati e integrazione database
-            const totaleTempoAttivitaS = Math.round((Date.now() - stats.startTime) / 1000);
-            
-            const datiEsercizio = {
-                titolo: "Caccia all'Intruso Visivo",
-                risultati: {
-                    risposteCorrette: stats.foundCount,
-                    totaleDomande: totalAttempts,
-                    percentualeAccuratezza: accuracy,
-                    tempoMedioS: parseFloat(avgTime),
-                    punteggio: stats.foundCount
-                }
-            };
-
-            const btnMain = document.getElementById('btn-main-action');
-            const btnSec = document.getElementById('btn-secondary-action');
-
-            if (isSessione) {
-                btnMain.textContent = "Salvataggio in corso...";
-                btnMain.disabled = true;
-                btnSec.style.display = 'none';
-
-                try {
-                    if (database) {
-                        if (tipoSessione === 'pianificata') {
-                            // Salva dentro l'array dei risultati della sessione corrente pianificata
-                            await database.ref(`sessioni_attive/${pazienteId}/risultati/${indiceEsercizio}`).set(datiEsercizio);
-                            if (sessioneId) {
-                                await database.ref(`storico_pazienti/${pazienteId}/sessioni/${sessioneId}/risultati/${indiceEsercizio}`).set(datiEsercizio);
-                            }
-                        } else {
-                            // Salva nella sessione Libera (aggiunge a eserciziSvolti dell'ultimo blocco di sessione)
-                            const refSessioni = database.ref(`storico_pazienti/${pazienteId}/sessioni`);
-                            const snap = await refSessioni.limitToLast(1).once('value');
-                            if (snap.exists()) {
-                                let lastKey = null;
-                                snap.forEach(child => { lastKey = child.key; });
-                                if (lastKey) {
-                                    await database.ref(`storico_pazienti/${pazienteId}/sessioni/${lastKey}/eserciziSvolti`).push(datiEsercizio);
-                                }
-                            } else {
-                                // Se non ci sono sessioni registrate, creane una nuova sul momento
-                                const nuovaSessioneRef = refSessioni.push();
-                                await nuovaSessioneRef.set({
-                                    data: new Date().toISOString().split('T')[0],
-                                    tipo: "libera",
-                                    eserciziSvolti: [datiEsercizio]
-                                });
-                            }
-                        }
-                    }
-                    
-                    btnMain.textContent = "PROSEGUI";
-                    btnMain.disabled = false;
-                    btnMain.onclick = () => {
-                        const redirectUrl = urlParams.get('redirectUrl') || localStorage.getItem('redirectUrl') || 'esercizi.html';
-                        window.location.href = redirectUrl;
-                    };
-                } catch (err) {
-                    console.error("Errore salvataggio Firebase:", err);
-                    btnMain.textContent = "PROSEGUI (SENZA SALVATAGGIO)";
-                    btnMain.disabled = false;
-                    btnMain.onclick = () => {
-                        const redirectUrl = urlParams.get('redirectUrl') || localStorage.getItem('redirectUrl') || 'esercizi.html';
-                        window.location.href = redirectUrl;
-                    };
-                }
-            } else {
-                btnMain.textContent = "RIPROVA SESSIONE";
-                btnMain.onclick = startGame;
-                btnSec.style.display = 'block';
-            }
+            const btnMain=document.getElementById('btn-main-action');btnMain.textContent='RIPROVA SESSIONE';btnMain.disabled=false;btnMain.onclick=startGame;document.getElementById('btn-secondary-action').style.display='block';
 
  window.CogniLabRun?.complete({correct:window.CogniLabRun.measure(()=>(stats.foundCount)),total:window.CogniLabRun.measure(()=>(totalAttempts)),errors:window.CogniLabRun.measure(()=>(stats.errorCount)),responseTimeMs:window.CogniLabRun.measure(()=>(stats.timestamps.length?Number(avgTime)*1000:null)),score:window.CogniLabRun.measure(()=>(stats.foundCount))});
 }

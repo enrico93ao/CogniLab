@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Il Semaforo delle Parole - Riabilitazione Cognitiva</title>
     <!-- Tailwind CSS per uno stile moderno e reattivo -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="assets/vendor/exercise-utilities-3.4.17.css?v=assets31">
     <!-- Font Inter per la massima leggibilità clinica -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
@@ -424,7 +424,7 @@
                 </div>
             </div>
 
-            <!-- Banner di Stato Firebase Cloud -->
+            <!-- Persistenza gestita dal runtime condiviso CogniLab. -->
             <div id="cloud-status-banner" class="hidden p-4 rounded-xl border flex items-center space-x-3 transition-all duration-300">
                 <div id="cloud-status-icon" class="text-xl"></div>
                 <div>
@@ -462,68 +462,8 @@
         <p>© 2026 Il Semaforo delle Parole - Strumento Digitale per la Riabilitazione Neuropsicologica dell'Attenzione.</p>
     </footer>
 
-    <!-- Firebase Imports e Script Modulo Applicativo -->
+    <!-- Persistenza gestita dal runtime condiviso CogniLab. -->
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        // Variabili Globali per Firebase e Parametri URL
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-
-        // Estrazione parametri dall'URL per sincronizzazione sessioni
-        const urlParams = new URLSearchParams(window.location.search);
-        const isSessione = urlParams.get('sessione') === 'true';
-        const pazienteId = urlParams.get('pazienteId') || urlParams.get('paziente');
-        const sessionId = urlParams.get('sessionId') || urlParams.get('sessioneId');
-        const exerciseIndex = parseInt(urlParams.get('index') || '0', 10);
-        const nextUrl = urlParams.get('nextUrl');
-
-        let db = null;
-        let auth = null;
-        let currentUser = null;
-
-        async function initFirebase() {
- if(window.CogniLabRun)return; // Shared account pipeline owns persistence.
-
-            if (!firebaseConfig) {
-                console.warn("Configurazione Firebase non trovata. Funzionamento solo in locale.");
-                return;
-            }
-            try {
-                const app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
-                auth = getAuth(app);
-
-                if (initialAuthToken) {
-                    const userCredential = await signInWithCustomToken(auth, initialAuthToken);
-                    currentUser = userCredential.user;
-                } else {
-                    const userCredential = await signInAnonymously(auth);
-                    currentUser = userCredential.user;
-                }
-                console.log("Connessione Firebase integrata con successo. UID:", currentUser.uid);
-            } catch (error) {
-                console.error("Errore di inizializzazione Firebase:", error);
-            }
-        }
-
-        // Avvio inizializzazione asincrona di Firebase su caricamento pagina
-        window.addEventListener('load', async () => {
-            await initFirebase();
-            
-            // Auto-compilazione del ID Paziente se passato dall'URL
-            if (pazienteId) {
-                const patientInput = document.getElementById('patientNameInput');
-                if (patientInput) {
-                    patientInput.value = pazienteId;
-                    state.patientName = pazienteId;
-                }
-            }
-        });
-
         const DATASET = {
             facile: {
                 categories: ["CIBI", "ANIMALI", "VESTITI", "VEICOLI"],
@@ -1071,118 +1011,8 @@
             document.getElementById('clinicalFeedbackText').innerText = feedbackText;
             showScreen('results');
 
-            // Invia i dati al Cloud se Firebase è attivo ed è stato richiesto dall'URL
-            if (isSessione) {
-                await salvaDatiSuFirebase(accuracy, avgRt);
-            }
-
  window.CogniLabRun?.complete({correct:window.CogniLabRun.measure(()=>(state.stats.correctGo+state.stats.correctNoGo)),total:window.CogniLabRun.measure(()=>(state.stats.totalGo+state.stats.totalNoGo)),errors:window.CogniLabRun.measure(()=>(state.stats.incorrectGo+state.stats.falseAlarmNoGo)),omissions:window.CogniLabRun.measure(()=>(state.stats.omissionGo)),responseTimeMs:window.CogniLabRun.measure(()=>(avgRt>0?avgRt:null))});
 }
-
-        async function salvaDatiSuFirebase(accuracy, avgRt) {
- if(window.CogniLabRun)return; // Shared account pipeline owns persistence.
-
-            if (!db || !currentUser) {
-                console.warn("Firebase non connesso o utente non autenticato. Salvataggio su Cloud saltato.");
-                showCloudStatus('error', 'Errore di Inizializzazione', 'Impossibile salvare sul Cloud: connessione non riuscita.');
-                return;
-            }
-
-            showCloudStatus('loading', 'Salvataggio in corso', 'Sincronizzazione dei risultati cognitivi sul Cloud...');
-
-            const totaleDomandeCount = state.stats.totalGo + state.stats.totalNoGo;
-            const risposteCorretteCount = state.stats.correctGo + state.stats.correctNoGo;
-
-            // STRUTTURA STANDARD DI SALVATAGGIO DEI DATI DELL'ESERCIZIO
-            const datiEsercizio = {
-                titolo: "Il Semaforo delle Parole", // Corrisponde al data-title della dashboard
-                risultati: {
-                    risposteCorrette: risposteCorretteCount,
-                    totaleDomande: totaleDomandeCount,
-                    percentualeAccuratezza: accuracy,
-                    tempoMedioS: avgRt > 0 ? Number((avgRt / 1000).toFixed(2)) : 0,
-                    punteggio: Math.max(0, Math.round(risposteCorretteCount * 10 - state.stats.falseAlarmNoGo * 5))
-                }
-            };
-
-            try {
-                if (sessionId) {
-                    // Scenario 1: Sessione Pianificata
-                    const sessionDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'sessioni', sessionId);
-                    const sessionSnap = await getDoc(sessionDocRef);
-
-                    if (sessionSnap.exists()) {
-                        const sessionData = sessionSnap.data();
-
-                        // Aggiorna l'array dei risultati per l'indice corrente
-                        let risultatiArray = sessionData.risultati || [];
-                        while (risultatiArray.length <= exerciseIndex) {
-                            risultatiArray.push(null);
-                        }
-                        risultatiArray[exerciseIndex] = datiEsercizio;
-
-                        // Aggiorna l'indice anche dentro l'elenco degli esercizi se presente
-                        let eserciziArray = sessionData.esercizi || [];
-                        if (eserciziArray[exerciseIndex]) {
-                            eserciziArray[exerciseIndex].risultati = datiEsercizio.risultati;
-                            eserciziArray[exerciseIndex].completato = true;
-                        }
-
-                        await setDoc(sessionDocRef, {
-                            risultati: risultatiArray,
-                            esercizi: eserciziArray
-                        }, { merge: true });
-
-                        showCloudStatus('success', 'Sessione Pianificata Salvata', 'Risultati salvati nella sessione. Reindirizzamento...');
-                    } else {
-                        throw new Error(`La sessione pianificata con ID ${sessionId} non è stata trovata.`);
-                    }
-
-                } else if (pazienteId) {
-                    // Scenario 2: Sessione Libera
-                    const sessionsColRef = collection(db, 'artifacts', appId, 'public', 'data', 'storico_pazienti', pazienteId, 'sessioni');
-                    const querySnapshot = await getDocs(sessionsColRef);
-
-                    let listSessioni = [];
-                    querySnapshot.forEach(docSnap => {
-                        listSessioni.push({ id: docSnap.id, ...docSnap.data() });
-                    });
-
-                    // Ordina le sessioni per timestamp descrescente (JS Memory sorting per la regola 2)
-                    listSessioni.sort((a, b) => (b.timestamp || b.data || 0) - (a.timestamp || a.data || 0));
-
-                    if (listSessioni.length > 0) {
-                        const lastSession = listSessioni[0];
-                        let eserciziSvolti = lastSession.eserciziSvolti || [];
-                        eserciziSvolti.push(datiEsercizio);
-
-                        const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'storico_pazienti', pazienteId, 'sessioni', lastSession.id);
-                        await setDoc(docRef, { eserciziSvolti }, { merge: true });
-                        showCloudStatus('success', 'Storico Paziente Aggiornato', 'Esercizio aggiunto alla sessione libera del paziente.');
-                    } else {
-                        // Crea una nuova sessione se non ci sono sessioni attive nel database
-                        const newDocRef = doc(sessionsColRef);
-                        await setDoc(newDocRef, {
-                            data: Date.now(),
-                            timestamp: Date.now(),
-                            eserciziSvolti: [datiEsercizio]
-                        });
-                        showCloudStatus('success', 'Nuova Sessione Libera Creata', 'Risultati registrati con successo in una nuova sessione.');
-                    }
-                }
-
-                // Se è specificato un URL di reindirizzamento (nextUrl), esegui la navigazione
-                if (nextUrl) {
-                    setTimeout(() => {
-                        window.location.href = nextUrl;
-                    }, 2000);
-                }
-
-            } catch (error) {
-                console.error("Errore durante il salvataggio dei risultati:", error);
-                showCloudStatus('error', 'Errore di Salvataggio', 'Non è stato possibile caricare i dati nel database.');
-            }
-        }
 
         // Associazione delle funzioni al namespace window per mantenere intatti gli eventi onclick/onchange inline di index.html
         window.toggleSound = toggleSound;

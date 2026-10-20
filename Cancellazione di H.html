@@ -5,9 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Test Cancellazione Selettiva Clinica Avanzato</title>
     
-    <!-- Firebase SDK (Compat v8) -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <!-- Persistenza gestita dal runtime condiviso CogniLab. -->
 
     <style>
         * {
@@ -346,28 +344,6 @@
     </div>
 
     <script>
-        let database = null;
-        
-        function initFirebaseSafe() {
-            try {
-                const config = window.firebaseConfig || JSON.parse(localStorage.getItem('firebaseConfig'));
-                if (config && config.apiKey && config.apiKey !== "YOUR_API_KEY") {
-                    if (!firebase.apps.length) {
-                        firebase.initializeApp(config);
-                    }
-                    database = firebase.database();
-                }
-            } catch (e) {
-                console.error("Errore Firebase:", e);
-            }
-        }
-
-        const urlParams = new URLSearchParams(window.location.search);
-        const isSessioneAttiva = urlParams.get('sessione') === 'true';
-        const pazienteId = urlParams.get('pazienteId');
-        const sessionId = urlParams.get('sessionId');
-        const indiceEsercizio = parseInt(urlParams.get('indiceEsercizio')) || 0;
-
         const LETTER_TARGET = "H";
         const LETTER_DISTRACTORS = ["N", "M", "K", "F", "E"];
         const SHAPE_TARGET = "circle";
@@ -725,91 +701,10 @@
 
             switchScreen('results-screen');
 
-            const datiEsercizio = {
-                titolo: "Cancellazione Selettiva Clinica", 
-                risultati: {
-                    risposteCorrette: clickedTargets,
-                    totaleDomande: totalTargets,
-                    percentualeAccuratezza: accuracyPercent,
-                    tempoMedioS: tempoTotaleS,
-                    punteggio: punteggioGrezzo,
-                    omissioniSinistra: leftOmissions,
-                    omissioniDestra: rightOmissions,
-                    falsiPositivi: falsePositives
-                }
-            };
-
-            if (isSessioneAttiva && pazienteId && database) {
-                const savingStatus = document.getElementById('savingStatus');
-                const btnAction = document.getElementById('btnAction');
-                
-                savingStatus.style.display = 'block';
-                btnAction.disabled = true;
-
-                if (sessionId) {
-                    const dbPath = `storico_pazienti/${pazienteId}/sessioni/${sessionId}/eserciziSvolti/${indiceEsercizio}`;
-                    database.ref(dbPath).set(datiEsercizio)
-                        .then(() => handleSalvataggioSuccesso())
-                        .catch(err => handleSalvataggioErrore(err));
-                } else {
-                    const refSessioni = database.ref(`storico_pazienti/${pazienteId}/sessioni`);
-                    refSessioni.limitToLast(1).once('value')
-                        .then(snapshot => {
-                            if (snapshot.exists()) {
-                                let lastSessionKey = Object.keys(snapshot.val())[0];
-                                let lastSessionData = snapshot.val()[lastSessionKey];
-                                let esercizi = lastSessionData.eserciziSvolti || [];
-                                
-                                if (!Array.isArray(esercizi)) {
-                                    esercizi = Object.values(esercizi);
-                                }
-                                
-                                esercizi.push(datiEsercizio);
-                                return database.ref(`storico_pazienti/${pazienteId}/sessioni/${lastSessionKey}/eserciziSvolti`).set(esercizi);
-                            } else {
-                                throw new Error("Nessuna sessione attiva.");
-                            }
-                        })
-                        .then(() => handleSalvataggioSuccesso())
-                        .catch(err => handleSalvataggioErrore(err));
-                }
-            } else if (isSessioneAttiva) {
-                const savingStatus = document.getElementById('savingStatus');
-                savingStatus.style.display = 'block';
-                savingStatus.textContent = "Modalità Offline: Dati non salvati su Firebase.";
-                savingStatus.style.color = "#ffc107";
-            }
-
  window.CogniLabRun?.complete({correct:window.CogniLabRun.measure(()=>(clickedTargets)),total:window.CogniLabRun.measure(()=>(totalTargets)),errors:window.CogniLabRun.measure(()=>(falsePositives)),omissions:window.CogniLabRun.measure(()=>(leftOmissions+rightOmissions)),score:window.CogniLabRun.measure(()=>(punteggioGrezzo))});
 }
 
-        function handleSalvataggioSuccesso() {
-            const savingStatus = document.getElementById('savingStatus');
-            const btnAction = document.getElementById('btnAction');
-            savingStatus.textContent = "Risultati salvati correttamente!";
-            savingStatus.style.color = "#28a745";
-            btnAction.disabled = false;
-        }
-
-        function handleSalvataggioErrore(error) {
-            console.error(error);
-            const savingStatus = document.getElementById('savingStatus');
-            const btnAction = document.getElementById('btnAction');
-            savingStatus.textContent = "Errore di salvataggio. Controlla la rete.";
-            savingStatus.style.color = "#dc3545";
-            btnAction.disabled = false;
-        }
-
-        function goToDashboard() {
-            const params = new URLSearchParams(window.location.search);
-            const pId = params.get('pazienteId') || '';
-            const sId = params.get('sessionId') || '';
-            const sess = params.get('sessione') || '';
-            
-            window.top.location.href = `esercizi.html?sessione=${sess}&pazienteId=${pId}&sessionId=${sId}`;
-        }
-
-        window.addEventListener('DOMContentLoaded', initFirebaseSafe);
+        function goToDashboard(){window.top.location.href='esercizi.html';}
     </script>
 <script src="shared/exercise-modern.js" defer></script>
 </body>

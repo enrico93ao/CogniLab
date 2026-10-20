@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mente Attiva PRO - Stimolazione Cognitiva</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="assets/vendor/exercise-utilities-3.4.17.css?v=assets31">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
         
@@ -219,59 +219,6 @@
     </div>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        // Variabili globali del framework
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'mente-attiva';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
-            apiKey: "placeholder",
-            authDomain: "placeholder",
-            projectId: "placeholder",
-            storageBucket: "placeholder",
-            messagingSenderId: "placeholder",
-            appId: "placeholder"
-        };
-
-        // Inizializzazione Firebase
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
-
-        // Parametri per il tracciamento della sessione
-        const urlParams = new URLSearchParams(window.location.search);
-        const isSessione = urlParams.get('sessione') === 'true';
-        const pazienteId = urlParams.get('pazienteId') || urlParams.get('patientId') || 'default-paziente';
-        const sessioneId = urlParams.get('sessioneId') || 'default-sessione';
-        const tipoSessione = urlParams.get('tipo') || 'libera'; // 'libera' o 'pianificata'
-        const esercizioIndex = parseInt(urlParams.get('index') || '0', 10);
-        const returnUrl = urlParams.get('returnUrl') || 'esercizi.html';
-
-        let currentUser = null;
-        let startTime = Date.now();
-
-        // Autenticazione prioritaria e continuata
-        async function authenticate() {
- if(window.CogniLabRun)return; // Shared account pipeline owns persistence.
-
-            try {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    const userCred = await signInWithCustomToken(auth, __initial_auth_token);
-                    currentUser = userCred.user;
-                } else {
-                    const userCred = await signInAnonymously(auth);
-                    currentUser = userCred.user;
-                }
-                console.log("Autenticazione completata con ID:", currentUser.uid);
-            } catch (err) {
-                console.error("Errore durante l'autenticazione Firebase:", err);
-            }
-        }
-
-        // Esegui subito l'autenticazione
-        await authenticate();
-
         const allIcons = ['🍎', '🚗', '🐱', '⚽', '🏠', '🌻', '🍦', '🚲', '🚀', '🔑', '🎸', '⌚', '🐘', '🍕', '🌈', '🚁', '⚓', '🧸', '💡', '🔔', '🏀', '🍄', '🌍', '🦜', '💎', '🎨', '🎲', '🎻', '🍍', '🦩', '🍓', '🧤', '🧢', '🕶️', '🍿', '🧊', '🌋', '⛺'];
 
         let level = 1;
@@ -448,122 +395,6 @@
             settingsPanel.classList.remove('hidden');
         }
 
-        async function saveSessionResults() {
-            if (!isSessione) {
-                console.log("Salvataggio saltato: nessuna sessione attiva rilevata.");
-                return;
-            }
-
-            const syncBox = document.getElementById('sync-container');
-            syncBox.classList.remove('hidden');
-            syncBox.innerText = "Sincronizzazione dei risultati in corso...";
-            syncBox.className = "mb-6 w-full text-center p-4 rounded-2xl font-bold bg-blue-50 text-blue-600 border border-blue-100 animate-pulse";
-
-            if (!currentUser) {
-                console.error("Impossibile salvare: Utente non autenticato.");
-                syncBox.innerText = "Errore: Autenticazione non valida.";
-                syncBox.className = "mb-6 w-full text-center p-4 rounded-2xl font-bold bg-red-100 text-red-700 border border-red-200";
-                return;
-            }
-
-            const totalTimeSpent = Math.round((Date.now() - startTime) / 1000);
-            const totalQuestions = stats.totalCorrect + stats.totalErrors;
-            const calculatedAccuracy = totalQuestions > 0 ? Math.round((stats.totalCorrect / totalQuestions) * 100) : 0;
-
-            // STRUTTURA STANDARD DI SALVATAGGIO DEI DATI DELL'ESERCIZIO
-            const datiEsercizio = {
-                titolo: "Esercizio di Memoria Visiva", 
-                risultati: {
-                    risposteCorrette: stats.totalCorrect,
-                    totaleDomande: totalQuestions,
-                    percentualeAccuratezza: calculatedAccuracy, 
-                    tempoMedioS: totalTimeSpent, 
-                    punteggio: score 
-                }
-            };
-
-            try {
-                const uId = currentUser.uid;
-                
-                if (tipoSessione === 'pianificata') {
-                    // Percorso di sicurezza conforme a RULE 1
-                    const sessionDocRef = doc(db, 'artifacts', appId, 'users', uId, 'storico_pazienti', pazienteId, 'sessioni', sessioneId);
-                    const sessionDoc = await getDoc(sessionDocRef);
-                    
-                    if (sessionDoc.exists()) {
-                        const data = sessionDoc.data();
-                        let esercizi = data.esercizi || [];
-                        
-                        if (esercizi[esercizioIndex]) {
-                            esercizi[esercizioIndex].risultati = datiEsercizio.risultati;
-                            esercizi[esercizioIndex].completato = true;
-                        } else {
-                            esercizi[esercizioIndex] = {
-                                ...datiEsercizio,
-                                completato: true
-                            };
-                        }
-
-                        let risultati = data.risultati || [];
-                        risultati[esercizioIndex] = datiEsercizio;
-
-                        await updateDoc(sessionDocRef, {
-                            esercizi: esercizi,
-                            risultati: risultati
-                        });
-                    }
-                } else {
-                    // Percorso di sicurezza conforme a RULE 1 per sessioni Libere
-                    const sessioniCollRef = collection(db, 'artifacts', appId, 'users', uId, 'storico_pazienti', pazienteId, 'sessioni');
-                    const querySnapshot = await getDocs(sessioniCollRef);
-                    
-                    let sessionDocs = [];
-                    querySnapshot.forEach(docSnap => {
-                        sessionDocs.push({ id: docSnap.id, ...docSnap.data() });
-                    });
-
-                    // Ordinamento sicuro in-memory (RULE 2)
-                    sessionDocs.sort((a, b) => {
-                        const dateA = a.dataCreazione || a.timestamp || a.data || 0;
-                        const dateB = b.dataCreazione || b.timestamp || b.data || 0;
-                        return dateB - dateA;
-                    });
-
-                    if (sessionDocs.length > 0) {
-                        const ultimoDoc = sessionDocs[0];
-                        const lastSessionRef = doc(db, 'artifacts', appId, 'users', uId, 'storico_pazienti', pazienteId, 'sessioni', ultimoDoc.id);
-                        
-                        let eserciziSvolti = ultimoDoc.eserciziSvolti || [];
-                        eserciziSvolti.push(datiEsercizio);
-                        
-                        await updateDoc(lastSessionRef, {
-                            eserciziSvolti: eserciziSvolti
-                        });
-                    } else {
-                        const newSessionId = crypto.randomUUID();
-                        const lastSessionRef = doc(db, 'artifacts', appId, 'users', uId, 'storico_pazienti', pazienteId, 'sessioni', newSessionId);
-                        await setDoc(lastSessionRef, {
-                            dataCreazione: Date.now(),
-                            tipo: 'libera',
-                            eserciziSvolti: [datiEsercizio]
-                        });
-                    }
-                }
-
-                syncBox.innerText = "Risultati salvati con successo. Reindirizzamento...";
-                syncBox.className = "mb-6 w-full text-center p-4 rounded-2xl font-bold bg-emerald-100 text-emerald-700 border border-emerald-200";
-                
-                setTimeout(() => {
-                    window.location.href = returnUrl;
-                }, 1800);
-
-            } catch (err) {
-                console.error("Errore durante la memorizzazione dei risultati:", err);
-                syncBox.innerText = "Errore di connessione al database durante il salvataggio.";
-                syncBox.className = "mb-6 w-full text-center p-4 rounded-2xl font-bold bg-red-100 text-red-700 border border-red-200 animate-none";
-            }
-        }
-
         function showSummary() {
             document.getElementById('main-container').classList.add('hidden');
             const summary = document.getElementById('summary-screen');
@@ -577,8 +408,7 @@
             const accuracy = totalActions > 0 ? Math.round((stats.totalCorrect / totalActions) * 100) : 0;
             document.getElementById('final-accuracy').innerText = accuracy + "%";
 
-            // Avvia automaticamente il salvataggio dei risultati nel database
-            saveSessionResults();
+            // Il runtime condiviso salva il risultato nell’account autenticato.
 
  window.CogniLabRun?.complete({correct:window.CogniLabRun.measure(()=>(stats.totalCorrect)),total:window.CogniLabRun.measure(()=>(totalActions)),errors:window.CogniLabRun.measure(()=>(stats.totalErrors)),score:window.CogniLabRun.measure(()=>(score))});
 }

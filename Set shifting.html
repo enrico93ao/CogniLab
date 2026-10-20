@@ -352,28 +352,8 @@
 
     </div>
 
-    <!-- SCRIPT CONFIGURAZIONE ED INTEGRAZIONE DATABASE (FIREBASE V9+) -->
+    <!-- Persistenza gestita dal runtime condiviso CogniLab. -->
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-        import { getDatabase, ref, get, set, push } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
-
-        // CONFIGURAZIONE FIREBASE (Usa la stessa configurazione centralizzata usata in index.html)
-        const firebaseConfig = {
-            databaseURL: "https://riabilitazione-cognitiva-default-rtdb.europe-west1.firebasedatabase.app"
-        };
-
-        // Inizializzazione Firebase
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-
-        // --- Gestione Parametri URL (Query String) ---
-        const urlParams = new URLSearchParams(window.location.search);
-        const isSessionActive = urlParams.get('sessione') === 'true';
-        const pazienteId = urlParams.get('pazienteId');
-        const sessioneId = urlParams.get('sessioneId');
-        const modalita = urlParams.get('modalita'); // 'pianificata' o 'libera'
-        const esercizioIndex = parseInt(urlParams.get('esercizioIndex'), 10);
-
         // --- Configurazione Task ---
         const TOTAL_TRIALS = 30;
         const TIME_LIMIT = 4000; 
@@ -439,12 +419,7 @@
 
         function returnToMenu() {
             cancelAnimationFrame(animationFrameId);
-            if (isSessionActive) {
-                // Se c'è una sessione attiva, torna all'Hub o Dashboard principale
-                window.top.location.href = `esercizi.html?pazienteId=${pazienteId || ''}&sessioneId=${sessioneId || ''}&sessione=true`;
-            } else {
-                showScreen('start-screen');
-            }
+            showScreen('start-screen');
         }
 
         function showScreen(screenId) {
@@ -601,64 +576,7 @@
             resRtStay.textContent = avgRtStay ? `${Math.round(avgRtStay)} ms` : '--';
             resRtSwitch.textContent = avgRtSwitch ? `${Math.round(avgRtSwitch)} ms` : '--';
 
-            // STRUTTURA STANDARD DI SALVATAGGIO DEI DATI DELL'ESERCIZIO
-            const datiEsercizio = {
-                titolo: "Alternanza Regolata", // Corrisponde al data-title definito nella dashboard
-                risultati: {
-                    risposteCorrette: correctTrials.length,
-                    totaleDomande: total,
-                    percentualeAccuratezza: Math.round(accuracy),
-                    tempoMedioS: parseFloat(totalElapsedTimeS.toFixed(1)),
-                    punteggio: Math.round(accuracy * 10) // Punteggio d'esercizio indicativo
-                }
-            };
-
-            // Se la sessione non è attiva, salta il salvataggio remoto
-            if (!isSessionActive || !pazienteId) {
-                dbStatusText.textContent = "Modalità Ospite: dati non salvati sul cloud.";
-                return;
-            }
-
-            dbStatusText.textContent = "Salvataggio dei dati in corso...";
-
-            try {
-                if (modalita === 'pianificata') {
-                    // SESSIONE PIANIFICATA
-                    if (sessioneId && !isNaN(esercizioIndex)) {
-                        const pathPianificata = `storico_pazienti/${pazienteId}/sessioni/${sessioneId}/eserciziSvolti/${esercizioIndex}`;
-                        await set(ref(db, pathPianificata), datiEsercizio);
-                        
-                        dbStatusText.innerHTML = "<span style='color: #22c55e;'>✓ Salvato! Reindirizzamento alla sessione...</span>";
-                        setTimeout(() => {
-                            window.top.location.href = `esercizi.html?pazienteId=${pazienteId}&sessioneId=${sessioneId}&sessione=true`;
-                        }, 1500);
-                    } else {
-                        throw new Error("Dati sessione pianificata mancanti o corrotti nell'URL.");
-                    }
-                } else {
-                    // SESSIONE LIBERA
-                    // Recuperiamo l'ultimo blocco di sessione attiva per aggiungervi l'esercizio svolto
-                    const sessioniRef = ref(db, `storico_pazienti/${pazienteId}/sessioni`);
-                    const snapshot = await get(sessioniRef);
-
-                    if (snapshot.exists()) {
-                        const sessioniData = snapshot.val();
-                        // Trova l'id dell'ultima sessione creata basandoti sulle chiavi (ordinate cronologicamente da Firebase push)
-                        const sessionKeys = Object.keys(sessioniData);
-                        const lastSessionId = sessionKeys[sessionKeys.length - 1];
-
-                        const pathLibera = `storico_pazienti/${pazienteId}/sessioni/${lastSessionId}/eserciziSvolti`;
-                        await push(ref(db, pathLibera), datiEsercizio);
-                        
-                        dbStatusText.innerHTML = "<span style='color: #22c55e;'>✓ Salvato nella tua sessione libera!</span>";
-                    } else {
-                        throw new Error("Nessuna sessione trovata per il paziente. Avviane una dalla Dashboard.");
-                    }
-                }
-            } catch (error) {
-                console.error("Errore Firebase:", error);
-                dbStatusText.innerHTML = `<span style='color: #ef4444;'>Errore durante il salvataggio: ${error.message}</span>`;
-            }
+            dbStatusText.textContent='Il salvataggio viene gestito dal tuo account CogniLab.';
 
  window.CogniLabRun?.complete({correct:window.CogniLabRun.measure(()=>(correctTrials.length)),total:window.CogniLabRun.measure(()=>(total)),errors:window.CogniLabRun.measure(()=>(trialsHistory.filter(t=>!t.correct&&!t.timeout).length)),omissions:window.CogniLabRun.measure(()=>(trialsHistory.filter(t=>t.timeout).length))});
 }

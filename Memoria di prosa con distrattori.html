@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NeuroBoost v2 - Training Cognitivo</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="assets/vendor/exercise-utilities-3.4.17.css?v=assets31">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
         
@@ -252,168 +252,23 @@
                 </div>
 
                 <div class="flex flex-col gap-3 pt-4">
-                    <button id="btn-save-database" onclick="salvaSuFirebase()" class="btn-gradient text-white py-4 rounded-2xl font-bold text-lg shadow-xl w-full">Salva Sessione e Continua</button>
+                    <button id="btn-save-database" onclick="returnToGym()" class="btn-gradient text-white py-4 rounded-2xl font-bold text-lg shadow-xl w-full">Torna alla palestra</button>
                     <button onclick="location.reload()" class="bg-slate-200 text-slate-700 px-10 py-4 rounded-2xl font-bold hover:bg-slate-300 transition w-full">Nuova Sessione Locale</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        // Variabili Globali per l'Integrazione
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'neuroboost-v2';
-        let db = null;
-        let auth = null;
-        let currentUser = null;
-
-        // Recupero parametri URL
-        const urlParams = new URLSearchParams(window.location.search);
-        const haSessioneAttiva = urlParams.get('sessione') === 'true';
-        const pazienteIdParam = urlParams.get('pazienteId');
-        const sessionIdParam = urlParams.get('sessionId') || urlParams.get('sessioneId');
-        const tipoSessione = urlParams.get('tipoSessione') || urlParams.get('tipo') || 'libera';
-        const indiceEsercizio = parseInt(urlParams.get('indiceEsercizio') || urlParams.get('index') || '0', 10);
-        const nextUrl = urlParams.get('nextUrl') || 'esercizi.html';
-
-        async function initFirebase() {
- if(window.CogniLabRun)return; // Shared account pipeline owns persistence.
-
-            if (typeof __firebase_config === 'undefined') {
-                console.warn("Configurazione Firebase non rilevata. Modalità offline attivata.");
-                return;
-            }
-            try {
-                const config = JSON.parse(__firebase_config);
-                const app = initializeApp(config);
-                db = getFirestore(app);
-                auth = getAuth(app);
-
-                // Autenticazione con Token prioritario o in anonimo
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    const credentials = await signInWithCustomToken(auth, __initial_auth_token);
-                    currentUser = credentials.user;
-                } else {
-                    const credentials = await signInAnonymously(auth);
-                    currentUser = credentials.user;
-                }
-                console.log("Autenticazione Firebase riuscita. UID:", currentUser.uid);
-            } catch (err) {
-                console.error("Errore durante l'inizializzazione di Firebase:", err);
-            }
-        }
-
-        window.salvaSuFirebase = async function() {
- if(window.CogniLabRun)return; // Shared account pipeline owns persistence.
-
-            const overlay = document.getElementById('saving-overlay');
-            overlay.classList.remove('hidden');
-
-            const avgTime = window.stats.intrusoTimes.length > 0 
-                ? parseFloat((window.stats.intrusoTimes.reduce((a,b) => a+b, 0) / window.stats.intrusoTimes.length).toFixed(1)) 
-                : 0;
-            const accuracy = Math.round((window.stats.finalCorrectAnswers / window.stats.totalQuestions) * 100);
-            const totalDuration = Math.round((Date.now() - window.stats.startTime) / 1000);
-            
-            // Formula del punteggio grezzo di gioco
-            const baseScore = Math.round((window.stats.finalCorrectAnswers / window.stats.totalQuestions) * 100);
-            const rawScore = Math.max(0, baseScore - Math.round(window.stats.timesReread * 10));
-
-            // STRUTTURA STANDARD DI SALVATAGGIO DEI DATI DELL'ESERCIZIO
-            const datiEsercizio = {
-                titolo: "Training Cognitivo", // Corrisponde al data-title nel file index.html
-                risultati: {
-                    risposteCorrette: window.stats.finalCorrectAnswers,
-                    totaleDomande: window.stats.totalQuestions,
-                    percentualeAccuratezza: accuracy,
-                    tempoMedioS: totalDuration,
-                    punteggio: rawScore
-                }
-            };
-
-            console.log("Tentativo di salvataggio dati standardizzati:", datiEsercizio);
-
-            if (!db || !currentUser) {
-                console.warn("Firebase non connesso. I dati verranno salvati solo localmente.");
-                alert("Attenzione: Configurazione cloud mancante. Dati salvati localmente.");
-                overlay.classList.add('hidden');
-                window.location.href = nextUrl;
-                return;
-            }
-
-            const targetPazienteId = pazienteIdParam || currentUser.uid;
-
-            try {
-                if (tipoSessione === 'pianificata' && sessionIdParam) {
-                    // SESSIONE PIANIFICATA: Aggiornamento all'indice corrente
-                    const sessionDocRef = doc(db, 'artifacts', appId, 'users', targetPazienteId, 'sessioni', sessionIdParam);
-                    const docSnap = await getDoc(sessionDocRef);
-
-                    if (docSnap.exists()) {
-                        const sData = docSnap.data();
-                        let esercizi = sData.esercizi || [];
-                        let risultati = sData.risultati || [];
-
-                        if (esercizi[indiceEsercizio]) {
-                            esercizi[indiceEsercizio].risultato = datiEsercizio;
-                            esercizi[indiceEsercizio].completato = true;
-                        } else {
-                            esercizi[indiceEsercizio] = { risultato: datiEsercizio, completato: true };
-                        }
-                        risultati[indiceEsercizio] = datiEsercizio;
-
-                        await updateDoc(sessionDocRef, {
-                            esercizi: esercizi,
-                            risultati: risultati,
-                            stato: (indiceEsercizio + 1 >= esercizi.length) ? 'completata' : 'in_corso',
-                            dataFine: new Date().toISOString()
-                        });
-                    }
-                } else {
-                    // SESSIONE LIBERA: Aggiunta all'ultimo blocco di sessione dentro storico_pazienti
-                    const storicoDocRef = doc(db, 'artifacts', appId, 'users', targetPazienteId, 'storico_pazienti', 'sessioni');
-                    const docSnap = await getDoc(storicoDocRef);
-                    let sessioni = [];
-
-                    if (docSnap.exists()) {
-                        sessioni = docSnap.data().sessioni || [];
-                    }
-
-                    if (sessioni.length === 0) {
-                        sessioni.push({
-                            id: sessionIdParam || "sessione_libera_" + Date.now(),
-                            dataStart: new Date(window.stats.startTime).toISOString(),
-                            eserciziSvolti: []
-                        });
-                    }
-
-                    let lastSession = sessioni[sessioni.length - 1];
-                    if (!lastSession.eserciziSvolti) lastSession.eserciziSvolti = [];
-                    
-                    lastSession.eserciziSvolti.push(datiEsercizio);
-                    lastSession.dataEnd = new Date().toISOString();
-
-                    await setDoc(storicoDocRef, { sessioni: sessioni }, { merge: true });
-                }
-
-                console.log("Salvataggio Firebase completato con successo!");
-                overlay.classList.add('hidden');
-                window.location.href = nextUrl;
-            } catch (err) {
-                console.error("Errore durante il salvataggio dei progressi su Firestore:", err);
-                alert("Errore di rete durante il salvataggio dei risultati.");
-                overlay.classList.add('hidden');
-            }
-        };
-
-        // Avvio Firebase al caricamento
-        window.addEventListener('DOMContentLoaded', initFirebase);
-    </script>
+    
 
     <script>
+        async function returnToGym(){
+            const button=document.getElementById('btn-save-database');button.disabled=true;
+            try{if(await window.CogniLabRun?.waitForSave()!==true)return;
+                if(parent!==window)parent.postMessage({type:'cognilab-exit-v3'},location.origin);
+                else location.href='esercizi.html';
+            }finally{button.disabled=false;}
+        }
         const stories = [
             {
                 text: "L'architetto Luca, 45 anni, giovedì scorso ha visitato un cantiere a Milano alle 10:30. Guidava una berlina grigia e portava un casco giallo e una borsa di cuoio. Doveva incontrare l'ingegner Bianchi per discutere del nuovo ponte in cemento.",

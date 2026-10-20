@@ -1,6 +1,6 @@
 import {onAuthStateChanged} from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js';
 import {auth} from './firebase-client.js';
-import {currentCareUser,patientWorkspace,checkCareStorage,professionalPatients,professionalPatient,registerManagedPatient,invitePatient,setConnection,assignProgram,sendAssignmentNotification,archiveProgram,startAssignedProgram,careError} from './care-store.js?v=autoemail24';
+import {currentCareUser,patientWorkspace,checkCareStorage,professionalPatients,professionalPatient,registerManagedPatient,invitePatient,setConnection,assignProgram,sendAssignmentNotification,archiveProgram,startAssignedProgram,careError} from './care-store.js?v=notify31';
 import {programProgress,resultsFromCare} from './care-model.mjs';
 import {exercises,exerciseById} from './exercise-catalog.mjs';
 import {createProgressView} from './progress-view.js?v=ux25';
@@ -19,6 +19,9 @@ async function action(b,operation,success){
  b.disabled=true;b.setAttribute('aria-busy','true');const local=b.careStatus||el('p');b.careStatus=local;local.textContent='Operazione in corso…';local.className='care-action-status care-muted';local.setAttribute('role','status');if(!local.isConnected)b.after(local);
  try{await operation();local.textContent=success||'Operazione completata.';if(success)message(success);}catch(error){local.textContent=careError(error);local.classList.add('care-notice','error');message(careError(error),true);}finally{b.disabled=false;b.removeAttribute('aria-busy');}
 }
+const notificationUpdates=new Map();
+const notificationKey=(patientUid,programId)=>auth.currentUser?.uid+'|'+patientUid+'|'+programId;
+window.addEventListener('cognilab-notification-change',event=>{const {patientUid,programId,status}=event.detail||{};if(!status?.message)return;notificationUpdates.set(notificationKey(patientUid,programId),status);for(const notice of workspace.querySelectorAll('[data-notification-program]'))if(notice.dataset.notificationProgram===programId&&notice.dataset.notificationPatient===patientUid)notice.textContent=status.message;});
 function programCard(program,{professional=false,patientUid,onChange}={}){
  const node=el('article',undefined,'care-program'),progress=programProgress(program,program.sessions),done=progress.remaining===0;
  const row=el('div',undefined,'care-heading-row');row.append(el('h3',program.name),el('span',program.status==='archived'?'Archiviato':done?'Completato':'In corso','care-badge'+(program.status==='archived'?' archived':'')));node.append(row);
@@ -34,8 +37,9 @@ function programCard(program,{professional=false,patientUid,onChange}={}){
   const b=button(progress.resume?'Riprendi la sessione':'Inizia sessione '+(progress.completed+1),()=>action(b,async()=>{location.href=await startAssignedProgram(program.id);}), 'primary');node.append(b);
  }
  if(professional&&program.status==='active'){
-  const notice=el('p',program.notification?.message||'Notifica email non ancora richiesta.','care-muted');node.append(notice);
-  const notify=button('Invia / verifica notifica email',()=>action(notify,async()=>{await sendAssignmentNotification(patientUid,program.id);await onChange();}));node.append(notify);
+  const fresh=notificationUpdates.get(notificationKey(patientUid,program.id)),notification=fresh&&fresh.updatedAt>=(program.notification?.updatedAt||0)?fresh:program.notification;
+  const notice=el('p',notification?.message||'Notifica email non ancora richiesta.','care-muted');notice.dataset.notificationProgram=program.id;notice.dataset.notificationPatient=patientUid;notice.setAttribute('role','status');notice.setAttribute('aria-live','polite');node.append(notice);
+  const notify=button('Invia / verifica notifica email',()=>action(notify,async()=>{const result=await sendAssignmentNotification(patientUid,program.id);await onChange();if(result.state!=='sent')throw Error(result.message);}));node.append(notify);
 
   const b=button('Archivia programma',()=>{if(confirm('Archiviare il programma? Il paziente non potrà avviare altre sessioni di questo programma. Lo storico resterà disponibile.'))action(b,async()=>{await archiveProgram(patientUid,program.id);await onChange();},'Programma archiviato.');});node.append(b);
  }

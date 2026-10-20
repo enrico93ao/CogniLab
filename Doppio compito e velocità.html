@@ -4,10 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Doppio Binario - Test di Multitasking</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Firebase SDK Compatibili -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    <link rel="stylesheet" href="assets/vendor/exercise-utilities-3.4.17.css?v=assets31">
+    <!-- Persistenza gestita dal runtime condiviso CogniLab. -->
     
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
@@ -289,14 +287,6 @@
     </div>
 
     <script>
-        // Parametri per integrazione con la Dashboard Clinica
-        const urlParams = new URLSearchParams(window.location.search);
-        const isSessioneAttiva = urlParams.get('sessione') === 'true';
-        const pazienteId = urlParams.get('pazienteId') || localStorage.getItem('currentPazienteId');
-        const sessioneId = urlParams.get('sessioneId') || localStorage.getItem('currentSessioneId');
-        const indexEsercizio = parseInt(urlParams.get('indexEsercizio') || localStorage.getItem('currentIndexEsercizio') || '0', 10);
-        const tipoSessione = urlParams.get('tipo') || localStorage.getItem('currentTipoSessione') || 'libera';
-
         // Inizializzazione Audio Context nativo
         let audioCtx = null;
         function getAudioContext() {
@@ -758,125 +748,8 @@
             document.getElementById('stats-max-speed').innerText = `${(state.maxSpeedReached / INITIAL_SPEED).toFixed(1)}x`;
             document.getElementById('stats-max-combo').innerText = state.maxCombo;
 
-            // Se la sessione è attiva tramite parametro URL, salviamo direttamente
-            if (isSessioneAttiva) {
-                salvaRisultatiFirebase();
-            }
-
  window.CogniLabRun?.complete({correct:window.CogniLabRun.measure(()=>(state.correct)),total:window.CogniLabRun.measure(()=>(state.correct+state.missed)),errors:window.CogniLabRun.measure(()=>(state.missed)),score:window.CogniLabRun.measure(()=>(state.score))});
 }
-
-        function salvaRisultatiFirebase() {
- if(window.CogniLabRun)return; // Shared account pipeline owns persistence.
-
-            const totaleDomande = state.correct + state.missed;
-            const percentualeAccuratezza = totaleDomande > 0 ? Math.round((state.correct / totaleDomande) * 100) : 0;
-
-            // STRUTTURA STANDARD DI SALVATAGGIO DEI DATI DELL'ESERCIZIO
-            const datiEsercizio = {
-                titolo: "Doppio Binario", // Corrisponde esattamente al data-title di index.html
-                risultati: {
-                    risposteCorrette: state.correct,
-                    totaleDomande: totaleDomande,
-                    percentualeAccuratezza: percentualeAccuratezza,
-                    tempoMedioS: state.duration, 
-                    punteggio: state.score
-                }
-            };
-
-            console.log("Inizializzazione salvataggio clinico standardizzato:", datiEsercizio);
-
-            const btnRestart = document.getElementById('btn-restart');
-            if (btnRestart) {
-                btnRestart.disabled = true;
-                btnRestart.innerText = "Sincronizzazione in corso...";
-            }
-
-            try {
-                // Recupera la configurazione di Firebase salvata precedentemente sul browser
-                const localConfig = localStorage.getItem('firebaseConfig');
-                if (!localConfig) {
-                    console.error("Configurazione Firebase non trovata in localStorage.");
-                    if (btnRestart) {
-                        btnRestart.disabled = false;
-                        btnRestart.innerText = "Esegui Nuovo Test (Errore DB)";
-                    }
-                    return;
-                }
-
-                // Inizializza l'app Firebase se non è già attiva
-                if (firebase.apps.length === 0) {
-                    firebase.initializeApp(JSON.parse(localConfig));
-                }
-
-                const redirectUrl = urlParams.get('redirectUrl') || 'esercizi.html';
-
-                if (tipoSessione === 'pianificata') {
-                    // Sessione Pianificata: salva nell'indice della sessione e reindirizza
-                    const path = `storico_pazienti/${pazienteId}/sessioni/${sessioneId}/risultati/${indexEsercizio}`;
-                    firebase.database().ref(path).set(datiEsercizio)
-                        .then(() => {
-                            console.log("Salvataggio completato correttamente (Pianificata). Reindirizzamento...");
-                            window.location.href = redirectUrl;
-                        })
-                        .catch(err => {
-                            console.error("Errore nella scrittura su Firebase (Pianificata):", err);
-                            if (btnRestart) {
-                                btnRestart.disabled = false;
-                                btnRestart.innerText = "Riprova Salvataggio";
-                            }
-                        });
-                } else {
-                    // Sessione Libera: aggiungi all'array eserciziSvolti dell'ultimo blocco di sessione del paziente
-                    const sessioniRef = firebase.database().ref(`storico_pazienti/${pazienteId}/sessioni`);
-                    sessioniRef.limitToLast(1).once('value', snapshot => {
-                        if (snapshot.exists()) {
-                            const lastSessionKey = Object.keys(snapshot.val())[0];
-                            const lastSession = snapshot.val()[lastSessionKey];
-                            const eserciziSvolti = lastSession.eserciziSvolti || [];
-                            eserciziSvolti.push(datiEsercizio);
-
-                            firebase.database().ref(`storico_pazienti/${pazienteId}/sessioni/${lastSessionKey}/eserciziSvolti`)
-                                .set(eserciziSvolti)
-                                .then(() => {
-                                    console.log("Salvataggio completato correttamente (Libera). Reindirizzamento...");
-                                    window.location.href = redirectUrl;
-                                })
-                                .catch(err => {
-                                    console.error("Errore nella scrittura (Libera):", err);
-                                    if (btnRestart) {
-                                        btnRestart.disabled = false;
-                                        btnRestart.innerText = "Riprova Salvataggio";
-                                    }
-                                });
-                        } else {
-                            // Se non ci sono blocchi sessione creati, ne creiamo uno al volo per ospitare l'esercizio libero
-                            const newSessionRef = sessioniRef.push();
-                            newSessionRef.set({
-                                data: new Date().toISOString(),
-                                tipo: 'libera',
-                                eserciziSvolti: [datiEsercizio]
-                            }).then(() => {
-                                console.log("Nuova sessione creata e sincronizzata. Reindirizzamento...");
-                                window.location.href = redirectUrl;
-                            }).catch(err => {
-                                console.error("Errore nella creazione della sessione autonoma:", err);
-                                if (btnRestart) {
-                                    btnRestart.disabled = false;
-                                    btnRestart.innerText = "Riprova Salvataggio";
-                                }
-                            });
-                        }
-                    });
-                }
-            } catch (error) {
-                console.error("Eccezione catturata durante l'integrazione Firebase:", error);
-                if (btnRestart) {
-                    btnRestart.disabled = false;
-                    btnRestart.innerText = "Esegui Nuovo Test";
-                }
-            }
-        }
 
         // Previene l'uso della barra spaziatrice per azionare involontariamente i bottoni virtuali
         window.addEventListener('keydown', (e) => {

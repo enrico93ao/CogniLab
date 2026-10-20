@@ -6,7 +6,7 @@
   <title>NeuroTraining Pro - Palestra Cognitiva</title>
   
   <!-- Tailwind CSS per uno styling moderno ed elegante -->
-  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="assets/vendor/exercise-utilities-3.4.17.css?v=assets31">
   
   <!-- Font Inter da Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -14,11 +14,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght=300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   
   <!-- Lucide Icons per icone vettoriali nitide -->
-  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="assets/vendor/lucide.subset-0.468.0.js?v=assets31"></script>
 
-  <!-- Firebase App & Database SDK Compatibili -->
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+  <!-- Persistenza gestita dal runtime condiviso CogniLab. -->
 
   <style>
     body {
@@ -191,7 +189,7 @@
           <!-- Generato via JS -->
         </div>
 
-        <!-- Indicatore di salvataggio dei risultati su Firebase -->
+        <!-- Persistenza gestita dal runtime condiviso CogniLab. -->
         <div id="firebase-status" class="hidden w-full text-xs text-center py-3 px-4 rounded-xl font-semibold transition-all"></div>
 
         <button 
@@ -422,166 +420,15 @@
       // Calcola tempo impiegato in secondi
       const tempoImpiegatoInSecondi = Math.round((Date.now() - state.startTime) / 1000);
 
-      // Esegui il salvataggio su Firebase se applicabile
-      salvaRisultatiFirebase(currentScore, 3, tempoImpiegatoInSecondi);
+      // Il risultato viene trasmesso al runtime condiviso.
+
 
       setStep('result');
 
  window.CogniLabRun?.complete({correct:window.CogniLabRun.measure(()=>(currentScore)),total:window.CogniLabRun.measure(()=>(3))});
 }
 
-    // Inizializza la configurazione di Firebase salvata precedentemente in localStorage
-    function initFirebase() {
- if(window.CogniLabRun)return; // Shared account pipeline owns persistence.
-
-      const localConfig = localStorage.getItem('firebaseConfig');
-      if (localConfig) {
-        try {
-          const config = JSON.parse(localConfig);
-          if (!firebase.apps.length) {
-            firebase.initializeApp(config);
-          }
-          return true;
-        } catch (e) {
-          console.error("Errore di inizializzazione Firebase:", e);
-        }
-      }
-      return false;
-    }
-
-    // Mostra lo stato di sincronizzazione all'utente
-    function showFirebaseStatus(success, message = "") {
-      const statusEl = document.getElementById('firebase-status');
-      if (!statusEl) return;
-      
-      statusEl.classList.remove('hidden', 'bg-green-100', 'text-green-700', 'bg-red-100', 'text-red-700', 'bg-blue-100', 'text-blue-700');
-      
-      if (success === 'loading') {
-        statusEl.classList.add('bg-blue-100', 'text-blue-700');
-        statusEl.textContent = message || "Sincronizzazione dei risultati con la cartella clinica...";
-        statusEl.classList.remove('hidden');
-      } else if (success) {
-        statusEl.classList.add('bg-green-100', 'text-green-700');
-        statusEl.textContent = message || "Sincronizzazione avvenuta con successo!";
-        statusEl.classList.remove('hidden');
-      } else {
-        statusEl.classList.add('bg-red-100', 'text-red-700');
-        statusEl.textContent = message || "Connessione non riuscita. Salvataggio locale completato.";
-        statusEl.classList.remove('hidden');
-      }
-    }
-
-    // Funzione principale di salvataggio unificato dei dati della sessione
-    function salvaRisultatiFirebase(risposteCorrette, totaleDomande, tempoImpiegatoInSecondi) {
- if(window.CogniLabRun)return; // Shared account pipeline owns persistence.
-
-      const urlParams = new URLSearchParams(window.location.search);
-      const isSessione = urlParams.get('sessione') === 'true';
-      if (!isSessione) return; // Salva solo se si trova all'interno di una sessione attiva
-
-      const pazienteId = urlParams.get('pazienteId');
-      const sessioneId = urlParams.get('sessioneId');
-      const indiceEsercizio = urlParams.get('indiceEsercizio') || '0';
-      const tipoSessione = urlParams.get('tipoSessione') || 'libera'; // 'pianificata' o 'libera'
-      const titoloEsercizio = urlParams.get('titolo') || "Esercizio Memoria Dinamico";
-
-      const calcoloAccuratezzaPercentuale = Math.round((risposteCorrette / totaleDomande) * 100);
-
-      // STRUTTURA STANDARD DI SALVATAGGIO DEI DATI DELL'ESERCIZIO
-      const datiEsercizio = {
-        titolo: titoloEsercizio,
-        risultati: {
-          risposteCorrette: risposteCorrette,
-          totaleDomande: totaleDomande,
-          percentualeAccuratezza: calcoloAccuratezzaPercentuale,
-          tempoMedioS: tempoImpiegatoInSecondi,
-          punteggio: risposteCorrette
-        }
-      };
-
-      if (!initFirebase()) {
-        showFirebaseStatus(false, "Configurazione database mancante. Dati non salvati.");
-        return;
-      }
-
-      showFirebaseStatus('loading');
-      const db = firebase.database();
-
-      if (tipoSessione === 'pianificata') {
-        // Se la sessione è Pianificata, deve salvare datiEsercizio dentro l'array/nodo dei risultati dell'indice corrente della sessione
-        const path = `storico_pazienti/${pazienteId}/sessioni/${sessioneId}/esercizi/${indiceEsercizio}/risultati`;
-        db.ref(path).set(datiEsercizio.risultati)
-          .then(() => {
-            console.log("Risultati pianificati registrati in:", path);
-            showFirebaseStatus(true, "Risultati della sessione pianificata salvati!");
-          })
-          .catch(err => {
-            console.error("Errore salvataggio sessione pianificata:", err);
-            showFirebaseStatus(false, "Errore di connessione al database.");
-          });
-      } else {
-        // Se la sessione è Libera, deve aggiungere direttamente datiEsercizio all'array eserciziSvolti dell'ultimo blocco di sessione
-        const path = `storico_pazienti/${pazienteId}/sessioni`;
-        db.ref(path).orderByKey().limitToLast(1).once('value')
-          .then(snapshot => {
-            if (snapshot.exists()) {
-              const lastSessionKey = Object.keys(snapshot.val())[0];
-              const exercisesRef = db.ref(`storico_pazienti/${pazienteId}/sessioni/${lastSessionKey}/eserciziSvolti`);
-              
-              exercisesRef.once('value').then(exSnapshot => {
-                let exercisesList = [];
-                if (exSnapshot.exists()) {
-                  if (Array.isArray(exSnapshot.val())) {
-                    exercisesList = exSnapshot.val();
-                  } else {
-                    exercisesList = Object.values(exSnapshot.val());
-                  }
-                }
-                exercisesList.push(datiEsercizio);
-                exercisesRef.set(exercisesList)
-                  .then(() => {
-                    console.log("Esercizio aggiunto a eserciziSvolti nella sessione:", lastSessionKey);
-                    showFirebaseStatus(true, "Esercizio aggiunto alla sessione corrente con successo!");
-                  })
-                  .catch(err => {
-                    console.error("Errore scrittura eserciziSvolti:", err);
-                    showFirebaseStatus(false, "Impossibile aggiungere l'esercizio alla sessione.");
-                  });
-              });
-            } else {
-              showFirebaseStatus(false, "Nessun blocco di sessione attiva per l'utente.");
-            }
-          })
-          .catch(err => {
-            console.error("Errore lettura sessioni:", err);
-            showFirebaseStatus(false, "Errore di connessione alle sessioni del paziente.");
-          });
-      }
-    }
-
-    // Gestione del reindirizzamento al termine della sessione o ritorno
-    function gestisciChiusuraORedirect() {
-      const urlParams = new URLSearchParams(window.location.search);
-      const isSessione = urlParams.get('sessione') === 'true';
-      
-      if (isSessione) {
-        const redirectUrl = urlParams.get('redirectUrl') || 'esercizi.html';
-        const pazienteId = urlParams.get('pazienteId') || '';
-        const sessioneId = urlParams.get('sessioneId') || '';
-        
-        let target = redirectUrl;
-        if (!target.includes('pazienteId=') && pazienteId) {
-          target += (target.includes('?') ? '&' : '?') + 'pazienteId=' + pazienteId;
-        }
-        if (!target.includes('sessioneCorrente=') && sessioneId) {
-          target += '&sessioneCorrente=' + sessioneId;
-        }
-        
-        window.location.href = target;
-      } else {
-        initializeExercise();
-      }
-    }
+    function gestisciChiusuraORedirect(){initializeExercise();}
 
     // Rendering della schermata dei risultati storici
     function renderResultsScreen() {
@@ -684,14 +531,7 @@
     document.getElementById('btn-submit-quiz').addEventListener('click', checkAnswers);
     document.getElementById('btn-restart').addEventListener('click', gestisciChiusuraORedirect);
 
-    // Al caricamento, inizializza le icone della prima pagina e prepara Firebase se in sessione
-    window.onload = function() {
-      lucide.createIcons();
-      const urlParams = new URLSearchParams(window.location.search);
-      if (urlParams.get('sessione') === 'true') {
-        initFirebase();
-      }
-    };
+    window.onload = () => lucide.createIcons();
   </script>
 </body>
 </html>

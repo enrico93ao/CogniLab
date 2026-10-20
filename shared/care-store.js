@@ -1,4 +1,4 @@
-import {notifyAssignment} from './assignment-notifications.js';
+import {notifyAssignment,notificationFailure} from './assignment-notifications.js?v=notify31';
 import {get,ref,set,update} from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js';
 import {auth,authReady,db} from './firebase-client.js';
 import {requireGymAccess} from './gym-access.js';
@@ -93,17 +93,24 @@ export async function setPatientNotificationEmail(patientUid,email){
  const base=`cognilab/users/${user.uid}/clinical/registeredPatients/${patientUid}`;if(!await read(base))throw Error('Paziente non presente nel tuo elenco.');
  await patch({[base+'/notificationEmail']:email});
 }
-export async function sendAssignmentNotification(patientUid,id){
- const user=await requireProfessional();if(!validUid(patientUid)||!validUid(id))throw Error('Paziente o programma non valido.');let result;
- try{const record=await read(`cognilab/users/${user.uid}/clinical/registeredPatients/${patientUid}`);if(record)await recoverPatientEmail(patientUid,record);result=await notifyAssignment(patientUid,id);}catch{result={state:'failed',message:'Programma salvato, ma email non inviata o conferma non disponibile. Puoi riprovare la notifica.'};}
+export async function sendAssignmentNotification(patientUid,id,expectedProfessionalUid){
+ const user=await requireProfessional();if(expectedProfessionalUid&&user.uid!==expectedProfessionalUid)throw Error('Account cambiato.');if(!validUid(patientUid)||!validUid(id))throw Error('Paziente o programma non valido.');let result;
+ try{const record=await read(`cognilab/users/${user.uid}/clinical/registeredPatients/${patientUid}`);if(record)await recoverPatientEmail(patientUid,record);result=await notifyAssignment(patientUid,id,user.uid);}catch(error){result=notificationFailure(error);}
  const status={...result,updatedAt:Date.now()};
+ if(auth.currentUser?.uid!==user.uid)throw Error('Account cambiato. Aggiorna la pagina.');
  await patch({[`cognilab/users/${user.uid}/clinical/registeredPatients/${patientUid}/notifications/${id}`]:status});return status;
 }
 export async function assignProgram(patientUid,input){
  const user=await requireProfessional(),fields=validateProgram(input);if(!validUid(patientUid))throw Error('Seleziona un paziente.');
  if(await read(`cognilab/careLinks/${patientUid}/${user.uid}`)!==true)throw Error('Il paziente deve prima accettare il collegamento dalla propria dashboard.');
  const id=crypto.randomUUID(),program={...fields,professionalId:user.uid,professionalName:String(user.displayName||user.email||'Professionista CogniLab').slice(0,80),createdAt:Date.now(),status:'active',version:1};
- await patch({[`cognilab/carePrograms/${patientUid}/${id}`]:program,[`cognilab/users/${user.uid}/clinical/registeredPatients/${patientUid}/programs/${id}`]:true});try{await sendAssignmentNotification(patientUid,id);}catch{/* Assignment remains saved even if notification status cannot be written. */}return id;
+ const notificationBase=`cognilab/users/${user.uid}/clinical/registeredPatients/${patientUid}/notifications/${id}`;
+ await patch({[`cognilab/carePrograms/${patientUid}/${id}`]:program,[`cognilab/users/${user.uid}/clinical/registeredPatients/${patientUid}/programs/${id}`]:true,[notificationBase]:{state:'pending',message:'Programma salvato. Invio della notifica email in corso; attendi la conferma prima di chiudere la pagina.',updatedAt:Date.now()}});
+ // Assignment is confirmed immediately. Email failure cannot undo the saved program.
+ sendAssignmentNotification(patientUid,id,user.uid).then(status=>{
+  if(typeof window!=='undefined'&&auth.currentUser?.uid===user.uid)window.dispatchEvent(new CustomEvent('cognilab-notification-change',{detail:{patientUid,programId:id,status}}));
+ }).catch(()=>{/* The persisted pending state lets the professional verify later. */});
+ return id;
 }
 export async function archiveProgram(patientUid,id){await requireProfessional();if(!validUid(patientUid)||!validUid(id))throw Error('Programma non valido.');await write(`cognilab/carePrograms/${patientUid}/${id}/status`,'archived');}
 export async function startAssignedProgram(id){

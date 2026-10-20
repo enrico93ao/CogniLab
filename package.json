@@ -14,11 +14,13 @@
     "db:generate": "drizzle-kit generate",
     "start:local": "node scripts/serve.mjs",
     "test:exercises": "node --experimental-vm-modules tests/exercise-audit.mjs && node tests/circle-answer.mjs",
-    "assets:exercises": "node scripts/migration/build-assets.mjs",
-    "test:persistence": "node tests/session-save.mjs && node tests/care-flow.mjs",
+    "assets:exercises": "node scripts/assets/build.mjs",
+    "test:persistence": "node tests/session-save.mjs && node tests/care-flow.mjs && node tests/legacy-persistence.mjs",
     "test:html": "node tests/html-regression.mjs",
     "test:progress": "node tests/progress-v3.mjs",
-    "test:storage": "node tests/storage-resilience.mjs && node tests/session-save.mjs"
+    "test:storage": "node tests/storage-resilience.mjs && node tests/session-save.mjs",
+    "assets:build": "node scripts/assets/build.mjs",
+    "test:assets": "node tests/static-assets.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",

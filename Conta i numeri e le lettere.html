@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Visual Memory Trainer Pro</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="assets/vendor/exercise-utilities-3.4.17.css?v=assets31">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
         
@@ -119,37 +119,7 @@
 </head>
 <body data-cognilab="exercise" class="flex items-center justify-center p-6">
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, updateDoc, arrayUnion, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
-        
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
-
-        // Authentication logic
-        async function initAuth() {
- if(window.CogniLabRun)return; // Shared account pipeline owns persistence.
-
-            try {
-                if (typeof __initial_auth_token !== 'undefined') {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
-            } catch (error) {
-                console.error("Auth Error:", error);
-            }
-        }
-        initAuth();
-
-        window.db = db;
-        window.auth = auth;
-    </script>
+    
 
     <div class="bg-mesh"></div>
 
@@ -306,54 +276,6 @@
             errors: 0, correctNums: 0, totalNums: 0, correctLets: 0, totalLets: 0
         };
 
-        // Logic for saving data to Firebase
-        async function salvaDatiFirebase(accuracy) {
- if(window.CogniLabRun)return; // Shared account pipeline owns persistence.
-
-            const urlParams = new URLSearchParams(window.location.search);
-            const isSessione = urlParams.get('sessione') === 'true';
-            
-            const datiEsercizio = {
-                titolo: "Training Memoria Visiva",
-                risultati: {
-                    risposteCorrette: stats.correctResponses,
-                    totaleDomande: stats.totalAttempts,
-                    percentualeAccuratezza: accuracy,
-                    tempoMedioS: 0,
-                    punteggio: stats.maxLevel * 100 + stats.correctResponses * 10
-                }
-            };
-
-            if (!isSessione || !window.db || !window.auth.currentUser) return;
-
-            const userId = window.auth.currentUser.uid;
-            const pazienteId = urlParams.get('pazienteId');
-            const sessionId = urlParams.get('sessionId');
-
-            try {
-                if (pazienteId && sessionId) {
-                    // SESSIONE PIANIFICATA
-                    const docRef = doc(window.db, 'artifacts', typeof __app_id !== 'undefined' ? __app_id : 'default-app-id', 'users', pazienteId, 'sessioni', sessionId);
-                    const docSnap = await getDoc(docRef);
-                    
-                    if (docSnap.exists()) {
-                        await updateDoc(docRef, {
-                            risultati: arrayUnion(datiEsercizio)
-                        });
-                    }
-                } else {
-                    // SESSIONE LIBERA
-                    const userDocRef = doc(window.db, 'artifacts', typeof __app_id !== 'undefined' ? __app_id : 'default-app-id', 'users', userId, 'storico_pazienti', pazienteId || 'default');
-                    await updateDoc(userDocRef, {
-                        eserciziSvolti: arrayUnion(datiEsercizio)
-                    });
-                }
-            } catch (e) {
-                console.error("Errore salvataggio Firebase:", e);
-            }
-        }
-
-
         function nextLevel() { currentLevel++; startGame(); }
         
         function showFinalSummary() {
@@ -366,7 +288,7 @@
             const accuracy = stats.totalAttempts > 0 ? Math.round((stats.correctResponses / stats.totalAttempts) * 100) : 0;
             
             // Invoke saving function
-            salvaDatiFirebase(accuracy);
+
 
             const circle = document.getElementById('accuracy-circle');
             circle.style.strokeDashoffset = 364.4 - (accuracy / 100) * 364.4;

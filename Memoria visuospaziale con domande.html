@@ -5,26 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NeuroTrain - Riabilitazione Neuropsicologica</title>
     <!-- Tailwind CSS for modern, clean UI -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="assets/vendor/exercise-utilities-3.4.17.css?v=assets31">
     <!-- Tailwind Config for custom medical theme -->
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        clinical: {
-                            50: '#f0fdfa',
-                            100: '#ccfbf1',
-                            600: '#0d9488',
-                            700: '#0f766e',
-                            800: '#115e59',
-                            900: '#134e4a',
-                        }
-                    }
-                }
-            }
-        }
-    </script>
+    
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght=300;400;500;600;700&display=swap');
         body {
@@ -312,221 +295,8 @@
         </div>
     </div>
 
-    <!-- Firebase SDK Imports (v11.6.1 ES Modules) -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        // Extract global environment credentials or fallback gracefully
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-
-        let db = null;
-        let auth = null;
-        let currentUser = null;
-
-        // Immediately-invoked function to set up clinical workspace database
-        async function initFirebase() {
- if(window.CogniLabRun)return; // Shared account pipeline owns persistence.
-
-            if (!firebaseConfig) {
-                console.warn("[NeuroTrain Web Client] Configurazione Firebase non configurata. Esecuzione in modalità Standalone.");
-                return;
-            }
-            try {
-                const app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
-                auth = getAuth(app);
-
-                // Wait for Auth priority setup (Rule 3)
-                if (initialAuthToken) {
-                    const cred = await signInWithCustomToken(auth, initialAuthToken);
-                    currentUser = cred.user;
-                } else {
-                    const cred = await signInAnonymously(auth);
-                    currentUser = cred.user;
-                }
-                console.log("[NeuroTrain DB] Autenticazione completata. ID: ", currentUser.uid);
-            } catch (err) {
-                console.error("[NeuroTrain DB] Errore di autenticazione o inizializzazione Firebase:", err);
-            }
-        }
-
-        // Run setup immediately on script load
-        initFirebase();
-
-        async function salvaDatiEsercizio(datiEsercizio) {
- if(window.CogniLabRun)return; // Shared account pipeline owns persistence.
-
-            const urlParams = new URLSearchParams(window.location.search);
-            const isSessione = urlParams.get('sessione') === 'true';
-            const pazienteId = urlParams.get('pazienteId');
-            const sessionId = urlParams.get('sessionId') || urlParams.get('sessioneId');
-            const tipoSessione = urlParams.get('tipoSessione') || urlParams.get('tipo') || 'libera';
-            const esercizioIndex = parseInt(urlParams.get('esercizioIndex') || '0', 10);
-            const ritornoUrl = urlParams.get('ritornoUrl') || 'esercizi.html';
-
-            if (!isSessione || !pazienteId) {
-                console.log("[NeuroTrain DB] Nessuna sessione attiva trovata nell'URL. Sincronizzazione saltata.");
-                return;
-            }
-
-            if (!db || !currentUser) {
-                console.error("[NeuroTrain DB] Impossibile salvare i risultati: Firebase non pronto o non autenticato.");
-                procediRedirect();
-                return;
-            }
-
-            // Show sync overlay visualizer
-            document.getElementById('saving-overlay').classList.remove('hidden');
-
-            try {
-                if (tipoSessione === 'pianificata' && sessionId) {
-                    console.log("[NeuroTrain DB] Rilevata sessione PIANIFICATA. Aggiornamento in corso...");
-                    
-                    // Search for session document (Respecting RULE 1 - sandboxed paths)
-                    const sessionPathGlobal = doc(db, 'artifacts', appId, 'public', 'data', 'sessioni', sessionId);
-                    const sessionPathNested = doc(db, 'artifacts', appId, 'public', 'data', 'storico_pazienti', pazienteId, 'sessioni', sessionId);
-
-                    let selectedDocRef = sessionPathGlobal;
-                    let snap = await getDoc(sessionPathGlobal);
-
-                    if (!snap.exists()) {
-                        const snap2 = await getDoc(sessionPathNested);
-                        if (snap2.exists()) {
-                            selectedDocRef = sessionPathNested;
-                            snap = snap2;
-                        }
-                    }
-
-                    if (snap.exists()) {
-                        const sessionData = snap.data();
-                        let risultati = sessionData.risultati || [];
-                        let esercizi = sessionData.esercizi || [];
-
-                        // Inject exercise data inside results array index
-                        risultati[esercizioIndex] = datiEsercizio;
-
-                        // Align exercise configuration inside array status
-                        if (esercizi[esercizioIndex]) {
-                            esercizi[esercizioIndex].stato = "completato";
-                            esercizi[esercizioIndex].risultato = datiEsercizio.risultati;
-                        }
-
-                        // Determine if full planning sequence is finished
-                        const tuttiCompletati = esercizi.every(e => e.stato === "completato");
-                        const updatePayload = {
-                            risultati: risultati,
-                            esercizi: esercizi
-                        };
-                        if (tuttiCompletati) {
-                            updatePayload.stato = "completata";
-                        }
-
-                        await updateDoc(selectedDocRef, updatePayload);
-                        console.log("[NeuroTrain DB] Sessione pianificata salvata con successo.");
-                    } else {
-                        console.warn("[NeuroTrain DB] Sessione ID non trovata.");
-                    }
-
-                } else {
-                    console.log("[NeuroTrain DB] Rilevata sessione LIBERA. Aggiunta a eserciziSvolti...");
-                    
-                    // Method 1: Subcollection /storico_pazienti/{pazienteId}/sessioni (RULE 1 sandbox compliant)
-                    const sessioniSubcoll = collection(db, 'artifacts', appId, 'public', 'data', 'storico_pazienti', pazienteId, 'sessioni');
-                    let subcollDocs = [];
-                    try {
-                        const snap = await getDocs(sessioniSubcoll);
-                        subcollDocs = snap.docs;
-                    } catch (e) {
-                        console.log("[NeuroTrain DB] Impossibile recuperare subcollection 'sessioni':", e);
-                    }
-
-                    if (subcollDocs.length > 0) {
-                        // Sort by date/timestamp in memory (RULE 2)
-                        subcollDocs.sort((a, b) => {
-                            const valA = a.data()?.data || a.data()?.timestamp || 0;
-                            const valB = b.data()?.data || b.data()?.timestamp || 0;
-                            return new Date(valB) - new Date(valA);
-                        });
-                        const lastDoc = subcollDocs[0];
-                        const lastDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'storico_pazienti', pazienteId, 'sessioni', lastDoc.id);
-                        
-                        let eserciziSvolti = lastDoc.data().eserciziSvolti || [];
-                        eserciziSvolti.push(datiEsercizio);
-
-                        await updateDoc(lastDocRef, { eserciziSvolti });
-                        console.log("[NeuroTrain DB] Esercizio salvato nell'ultimo blocco di sessione libera (subcollection).");
-                    } else {
-                        // Method 2 Fallback: Patient Root Document with a 'sessioni' array
-                        const patientDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'storico_pazienti', pazienteId);
-                        const pSnap = await getDoc(patientDocRef);
-
-                        if (pSnap.exists()) {
-                            const pData = pSnap.data();
-                            let sessioni = pData.sessioni || [];
-                            
-                            if (sessioni.length > 0) {
-                                // Add to last item of array
-                                let lastSession = sessioni[sessioni.length - 1];
-                                if (!lastSession.eserciziSvolti) lastSession.eserciziSvolti = [];
-                                lastSession.eserciziSvolti.push(datiEsercizio);
-                                
-                                await updateDoc(patientDocRef, { sessioni });
-                                console.log("[NeuroTrain DB] Esercizio salvato nell'ultimo blocco di sessione libera (array in doc paziente).");
-                            } else {
-                                // Create a session block from scratch inside array
-                                const nuovaSessione = {
-                                    id: "sess_" + Date.now(),
-                                    data: new Date().toISOString(),
-                                    tipo: "libera",
-                                    eserciziSvolti: [datiEsercizio]
-                                };
-                                sessioni.push(nuovaSessione);
-                                await updateDoc(patientDocRef, { sessioni });
-                                console.log("[NeuroTrain DB] Creata nuova sessione nell'array paziente.");
-                            }
-                        } else {
-                            console.warn("[NeuroTrain DB] Profilo storico_pazienti non trovato per l'ID specificato.");
-                        }
-                    }
-                }
-            } catch (err) {
-                console.error("[NeuroTrain DB] Imprevisto durante la persistenza dei dati:", err);
-            } finally {
-                // Ensure redirect always fires to avoid locking clinical screens
-                procediRedirect();
-            }
-        }
-
-        // Safely redirect to dashboard index with query parameters intact
-        function procediRedirect() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const isSessione = urlParams.get('sessione') === 'true';
-            const pazienteId = urlParams.get('pazienteId');
-            const sessionId = urlParams.get('sessionId') || urlParams.get('sessioneId');
-            const ritornoUrl = urlParams.get('ritornoUrl') || 'esercizi.html';
-
-            if (isSessione) {
-                let targetUrl = ritornoUrl;
-                const connector = targetUrl.includes('?') ? '&' : '?';
-                targetUrl += `${connector}sessione=true&pazienteId=${pazienteId || ''}`;
-                if (sessionId) {
-                    targetUrl += `&sessionId=${sessionId}`;
-                }
-                
-                setTimeout(() => {
-                    window.location.href = targetUrl;
-                }, 1500);
-            }
-        }
-
-        // Attach persistence callback to window so standard game loop can reach it
-        window.salvaDatiEsercizio = salvaDatiEsercizio;
-        window.procediRedirect = procediRedirect;
-    </script>
+    <!-- Persistenza gestita dal runtime condiviso CogniLab. -->
+    
 
     <!-- Interactive Game Logic Script -->
     <script>
@@ -602,34 +372,11 @@
         const stepQuiz = document.getElementById('step-quiz');
         const stepResults = document.getElementById('step-results');
 
-        // Check if session context is active to update interface elements on start
-        window.addEventListener('DOMContentLoaded', () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('sessione') === 'true') {
-                const homeBtnLabel = document.getElementById('btn-home-label');
-                if (homeBtnLabel) homeBtnLabel.textContent = "Hub Sessione";
-                document.getElementById('btn-home').classList.remove('hidden');
-            }
-        });
-
         // Navigation function: Back to home or Dashboard Hub
         function goHome() {
             playSound('click');
             if (timerInterval) clearInterval(timerInterval);
             
-            const urlParams = new URLSearchParams(window.location.search);
-            const isSessione = urlParams.get('sessione') === 'true';
-            
-            if (isSessione) {
-                // Return immediately to Hub if inside an active medical session
-                if (typeof window.procediRedirect === 'function') {
-                    window.procediRedirect();
-                } else {
-                    window.location.href = urlParams.get('ritornoUrl') || 'esercizi.html';
-                }
-                return;
-            }
-
             // Hide active exercise blocks
             stepObservation.classList.add('hidden');
             stepQuiz.classList.add('hidden');
@@ -1521,33 +1268,6 @@
                 `;
                 feedbackContainer.appendChild(div);
             });
-
-            // PREPARE AND DELIVER UNIFORM CLINICAL DATA STRUCTURE
-            const datiEsercizio = {
-                titolo: "Memoria Visuo-Spaziale & Attenzione", // Must match the data-title attribute in index.html
-                risultati: {
-                    risposteCorrette: correctCount,
-                    totaleDomande: total,
-                    percentualeAccuratezza: pct,
-                    tempoMedioS: elapsedSeconds,
-                    punteggio: correctCount
-                }
-            };
-
-            const urlParams = new URLSearchParams(window.location.search);
-            const isSessione = urlParams.get('sessione') === 'true';
-
-            if (isSessione) {
-                // Sinks the results directly to the active clinical workspace
-                if (typeof window.salvaDatiEsercizio === 'function') {
-                    window.salvaDatiEsercizio(datiEsercizio);
-                } else {
-                    console.warn("[NeuroTrain DB] Modulo salvataggio Firebase non inizializzato correttamente.");
-                    window.procediRedirect();
-                }
-            } else {
-                console.log("[NeuroTrain Standalone] Risultati sessione:", datiEsercizio);
-            }
 
  window.CogniLabRun?.complete({correct:window.CogniLabRun.measure(()=>(correctCount)),total:window.CogniLabRun.measure(()=>(total))});
 }

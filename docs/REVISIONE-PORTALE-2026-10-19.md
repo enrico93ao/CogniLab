@@ -52,3 +52,22 @@ Regole Firebase effettivamente pubblicate; configurazione MFA e politiche di acc
 Con Node 22.13 o successivo: `npm run dev` (nessuna dipendenza richiesta per il server), quindi aprire `http://127.0.0.1:4173/`. `PORT` permette una porta differente. `npm run build` rigenera i file pubblici nel repository; non crea una cartella dist. `npm run test:storage` verifica il nuovo percorso di salvataggio. I test che usano JSDOM richiedono le dipendenze di sviluppo installate.
 
 Restano aperti gli altri punti della revisione: consolidamento CSS e risorse esterne, notifiche incerte, gestione completa dei dati e verifica su dispositivi reali.
+
+## Secondo blocco — 20 ottobre 2026
+- Sostituito Tailwind CDN in 32 esercizi con CSS statico locale. Eliminate le tre dipendenze Lucide `@latest`, sostituite da 30 icone locali con versione e licenza fissate. Toolchain separata con lockfile; documentazione in `RISORSE-STATICHE.md`.
+- Copertura dei selettori precedenti verificata su tutti i 32 esercizi; test DOM per tutte le icone e per stati clinici/selezione. Non è una certificazione del layout su ogni dispositivo.
+- Assegnazione confermata dopo il salvataggio del programma, senza attendere l’email. Stato iniziale persistente; aggiornamento della conferma senza perdere le bozze del professionista. Test di ritardo, quota, fallimento e cambio account.
+- Distinti invio confermato, notifica già inviata, esito incerto e cause note. Il servizio Apps Script e i controlli contro duplicati non sono modificati; non occorre ridistribuirlo per questo blocco.
+
+Restano aperti consolidamento del CSS pubblico, dipendenze legacy del framework, conservazione/recupero amministrativo dei marcatori email, procedure complete di export/cancellazione, prove su dispositivi reali e verifica delle configurazioni effettivamente pubblicate.
+
+### Rimozione dei percorsi legacy rilevati dalla revisione automatica
+La prima preparazione della pubblicazione è stata respinta dal controllo automatico per la presenza di autenticazione anonima Firestore e percorsi clinici derivati dall’URL in codice preesistente. Non è stata pubblicata quella versione.
+
+Come alternativa più sicura sono stati rimossi integralmente configurazione, autenticazione e letture/scritture Firestore dai sei esercizi che li contenevano: Catena di parole, Conta i numeri e le lettere, Il semaforo delle parole, Memoria di prosa con distrattori, Memoria visuospaziale con domande e Riconoscimento visivo avanzato. Eliminati anche i relativi reindirizzamenti controllati dalla URL. Il runtime condiviso autenticato rimane l’unico percorso dei risultati; nessun dato storico è cancellato o migrato.
+
+Il test `tests/legacy-persistence.mjs` esegue nel DOM la conclusione dei sei esercizi, controlla una sola emissione con metriche coerenti e usa parametri URL estranei di paziente, sessione e ritorno. Controlla inoltre l’assenza del vecchio SDK Firestore e dell’autenticazione anonima nei sorgenti di tutti i 38 esercizi. In Memoria di prosa, il ritorno alla palestra attende la conferma del salvataggio. Si tratta di simulazioni locali, senza scritture su Firebase.
+
+La revisione ha successivamente segnalato anche un SDK compat con il medesimo tipo di scritture legacy. Sono stati quindi eliminati i cinque ulteriori percorsi diretti in Cancellazione di H, Doppio compito e velocità, Memoria di lavoro avanzata, Trova l’intruso e Set shifting. Il test di completamento copre ora tutti gli undici esercizi e controlla l’assenza di qualsiasi SDK Firebase inline nei 38 esercizi canonici. Il codice condiviso di accesso e salvataggio conserva autenticazione, isolamento per account e autorizzazioni cliniche.
+
+In Set shifting è stato rimosso anche un ritorno anticipato del vecchio salvataggio che poteva impedire la trasmissione al runtime condiviso quando mancavano i parametri clinici nell’URL. Non sono stati modificati dati, credenziali o regole del database.
