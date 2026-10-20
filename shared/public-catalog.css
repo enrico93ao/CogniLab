@@ -1089,7 +1089,9 @@ details p {
   cursor: pointer;
 }
 
+/* Keep absolutely positioned accessible labels inside the scrollport. */
 .pub-carousel-track {
+  position: relative;
   display: flex;
   gap: 18px;
   overflow-x: auto;
