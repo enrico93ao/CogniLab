@@ -13,11 +13,11 @@ assert.deepEqual(model.trailSequence('alpha',false,['A','B']),['1','A','2','B'])
 assert.equal(model.nextTarget('circle',()=>.9),'circle');
 let rng=[.1,.99];assert.equal(model.nextTarget('circle',()=>rng.shift()),'triangle');
 rng=[.1,0];assert.equal(model.nextTarget('circle',()=>rng.shift()),'square');
-for(const [date,name] of [[new Date(2026,0,1),'inverno'],[new Date(2026,2,1),'primavera'],[new Date(2026,5,1),'estate'],[new Date(2026,8,1),'autunno']])assert.equal(model.season(date),name);
-assert.equal(model.nextSeason(new Date(2026,9,15)).days,47);
-assert.equal(model.nextSeason(new Date(2028,1,28)).days,2);
-assert.equal(model.nextSeason(new Date(2026,11,31)).days,60);
-assert.equal(model.nextSeason(new Date(2026,2,1)).name,'estate');
+for(const [date,name] of [[new Date(2026,0,1),'inverno'],[new Date(2026,2,21),'primavera'],[new Date(2026,5,21),'estate'],[new Date(2026,8,21),'autunno']])assert.equal(model.season(date),name);
+assert.equal(model.nextSeason(new Date(2026,9,15)).days,67);
+assert.equal(model.nextSeason(new Date(2028,1,28)).days,22);
+assert.equal(model.nextSeason(new Date(2026,11,31)).days,80);
+assert.equal(model.nextSeason(new Date(2026,2,21)).name,'estate');
 assert.equal(model.temporalTasks('base',new Date()).length,2);
 assert.equal(model.temporalTasks('super-easy',new Date()).length,0);
 const tasks=model.temporalTasks('advanced',new Date(2026,9,15));
@@ -58,7 +58,7 @@ function clock(w){let now=0,id=0;const jobs=new Map();w.Date.now=()=>now;w.setTi
  const stimulus=w.document.getElementById('stimulus');stimulus.dispatchEvent(new w.Event('pointerdown',{cancelable:true}));assert.equal(stimulus.style.visibility,'hidden');await advance(350);assert.equal(stimulus.className,'target-circle');
  w.resetToMenu();w.startGame('shifting');w.moveStimulus();assert.match(w.document.getElementById('instruction-banner').textContent,/TRIANGOLO GIALLO/);assert.equal(stimulus.querySelectorAll('.distractor-triangle').length,1);w.endGame();assert.equal(p.saved.length,1);w.close();
 }
-// Actual orientation UI: reject empty city, use confirmed place, complete all
+// Actual orientation UI: offer automatic location for empty city, use confirmed place, complete all
 // advanced tasks through rendered boxes and retain correct/error totals.
 {
  const p=page('Orientamento temporale-spaziale.html'),w=p.w;Object.assign(w,model);evaluate(p,'shared/orientation-game.js');
@@ -68,7 +68,7 @@ function clock(w){let now=0,id=0;const jobs=new Map();w.Date.now=()=>now;w.setTi
  const choose=value=>{const b=[...w.document.querySelectorAll('#orientation-choices button')].find(b=>b.textContent===value);assert.ok(b,value);b.click();};
  choose([...w.document.querySelectorAll('#orientation-choices button')].find(b=>b.textContent!=='giovedì').textContent);
  for(let i=0;i<answers.length;i++){
-  if(i===answers.length-1){w.document.getElementById('orientation-number').value='47';w.document.getElementById('orientation-number-form').dispatchEvent(new w.Event('submit',{cancelable:true}));}
+  if(i===answers.length-1){w.document.getElementById('orientation-number').value='67';w.document.getElementById('orientation-number-form').dispatchEvent(new w.Event('submit',{cancelable:true}));}
   else for(const answer of answers[i])choose(answer);
   assert.equal(w.document.getElementById('orientation-next').hidden,false);w.document.getElementById('orientation-next').click();
  }

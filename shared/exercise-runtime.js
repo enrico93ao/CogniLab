@@ -1,7 +1,8 @@
 (() => {
  'use strict';
- try{const uid=localStorage.getItem('cognilab.lastUser'),session=JSON.parse(sessionStorage.getItem('cognilab.session.'+uid)||'null'),plan=JSON.parse(sessionStorage.getItem('cognilab.plan.'+uid)||'null');window.CogniLabPresetPending=Boolean(session?.programId&&plan?.programId===session.programId&&session.programConfigurations?.[Number(session.programSlot)]&&decodeURIComponent(location.pathname.split('/').pop())===plan.files?.[plan.index]&&!new URLSearchParams(location.search).has('configure'));}catch{}
- const presetScript=document.createElement('script');presetScript.src='shared/care-presets.js?v=2';document.head.append(presetScript);
+ try{const uid=localStorage.getItem('cognilab.lastUser'),session=JSON.parse(sessionStorage.getItem('cognilab.session.'+uid)||'null'),plan=JSON.parse(sessionStorage.getItem('cognilab.plan.'+uid)||'null');window.CogniLabPresetPending=Boolean(session?.programId&&plan?.programId===session.programId&&decodeURIComponent(location.pathname.split('/').pop())===plan.files?.[plan.index]&&!new URLSearchParams(location.search).has('configure'));}catch{}
+ if(window.CogniLabPresetPending){document.documentElement.classList.add('assigned-preparing');const style=document.createElement('style');style.textContent='html.assigned-preparing body>*{visibility:hidden!important}html.assigned-preparing [data-assigned-visible]{visibility:visible!important}';document.head.append(style);}
+ const presetScript=document.createElement('script');presetScript.src='shared/care-presets.js?v=assigned35';document.head.append(presetScript);
  const audioScript=document.createElement('script');audioScript.src='shared/response-feedback.js?v=ux12';document.head.append(audioScript);
  document.documentElement.classList.add('gym-access-pending');
  const gateStyle=document.createElement('style');gateStyle.textContent='html.gym-access-pending body{visibility:hidden!important}';document.head.append(gateStyle);
