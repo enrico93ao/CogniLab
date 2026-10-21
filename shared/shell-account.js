@@ -11,18 +11,24 @@ const planKey=planUid?'cognilab.plan.'+planUid:null;
 let plan;try{plan=planKey?JSON.parse(sessionStorage.getItem(planKey)):null;}catch{}
 let nextButton;const saving=new Set();
 let journey;
-function showNext(){
+function showNext({pending=false,error=null,retry=null}={}){
  if(!plan?.programId||!nextButton)return;
- journey?.remove();journey=document.createElement('dialog');journey.className='cl-journey';
+ // The iframe becomes inert before any network request: its result/menu
+ // buttons cannot receive clicks or keyboard focus while saving.
+ frame.setAttribute('inert','');frame.style.pointerEvents='none';
+ journey?.remove();journey=document.createElement('dialog');journey.className='cl-journey';journey.setAttribute('aria-busy',String(pending));
+ journey.addEventListener('cancel',event=>event.preventDefault());
  const remaining=plan.files.map((_,i)=>i).filter(i=>!plan.completedSlots.includes(i));
- const mark=document.createElement('span');mark.className='cl-journey-mark';mark.textContent='✓';mark.setAttribute('aria-hidden','true');
- const title=document.createElement('h1');title.textContent=remaining.length?'Ottimo, continuiamo!':'Hai completato tutti gli esercizi!';
- const text=document.createElement('p');text.textContent=remaining.length?'Un esercizio alla volta: il tuo impegno conta. Sei pronto per il prossimo?':'Hai dedicato tempo al tuo allenamento. Ora puoi concludere la sessione.';
- const bar=document.createElement('progress');bar.className='cl-journey-progress';bar.max=plan.files.length;bar.value=plan.completedSlots.length;bar.setAttribute('aria-label',plan.completedSlots.length+' esercizi completati su '+plan.files.length);
- const go=document.createElement('button');go.textContent=remaining.length?'Prosegui con l’esercizio successivo →':'Concludi la sessione →';go.onclick=async()=>{go.disabled=true;await nextButton.onclick();go.disabled=false;};
- const back=document.createElement('button');back.textContent='Rivedi il risultato';back.style.cssText='background:transparent;color:#245e70;box-shadow:none;font-size:1rem';back.onclick=()=>journey.close();
- journey.append(mark,title,text,bar,go,back);document.body.append(journey);journey.showModal();
+ const mark=document.createElement('span');mark.className='cl-journey-mark';mark.textContent=pending?'…':error?'!':'✓';mark.setAttribute('aria-hidden','true');
+ const title=document.createElement('h1');title.tabIndex=-1;title.textContent=pending?'Esercizio terminato':error?'Un momento: il risultato è in attesa':remaining.length?'Ottimo, continuiamo!':'Hai completato tutti gli esercizi!';
+ const text=document.createElement('p');text.setAttribute('role','status');text.setAttribute('aria-live','polite');text.textContent=pending?'Salvataggio in corso… Non devi fare nulla. Il pulsante per continuare si attiverà appena il risultato sarà confermato.':error|| (remaining.length?'Un esercizio alla volta: il tuo impegno conta. Sei pronto per il prossimo?':'Hai dedicato tempo al tuo allenamento. Ora puoi concludere la sessione.');
+ const bar=document.createElement('progress');bar.className='cl-journey-progress';bar.max=plan.files.length;bar.value=plan.completedSlots.length;bar.setAttribute('aria-label',plan.completedSlots.length+' esercizi salvati su '+plan.files.length);
+ const go=document.createElement('button');go.disabled=pending;go.textContent=pending?'Salvataggio in corso…':error?'Riprova il salvataggio':remaining.length?'Prosegui con l’esercizio successivo →':'Concludi la sessione →';go.onclick=async()=>{go.disabled=true;if(error){await retry?.();}else{await nextButton.onclick();go.disabled=false;}};
+ journey.append(mark,title,text,bar,go);
+ if(error){const back=document.createElement('button');back.className='cl-journey-secondary';back.style.cssText='background:#eef3f6;color:#294e60;box-shadow:none;font-size:1rem';back.textContent='Torna alla dashboard per sincronizzare';back.onclick=()=>leave(false);journey.append(back);}
+ document.body.append(journey);journey.showModal();title.focus({preventScroll:true});journey.scrollTop=0;
 }
+
 async function showCompleted(){
  const programId=plan.programId;let nextDate=null,allDone=false,dateKnown=false,archived=false;
  try{const data=await patientWorkspace(),program=data.programs.find(p=>p.id===programId);if(program){archived=program.status==='archived';const progress=programProgress(program,program.sessions);nextDate=program.schedule?.[progress.completed]||null;allDone=progress.remaining===0;dateKnown=true;}}catch{}
@@ -56,24 +62,36 @@ if(plan?.files?.length&&plan.files[plan.index]===file){
   }
  };
 }
+const inFlightResults=new Map();
+function queueSave(payload){
+ const id=payload?.id;if(inFlightResults.has(id))return inFlightResults.get(id);
+ const task=saveExerciseResult(payload);inFlightResults.set(id,task);saving.add(task);
+ const clear=()=>{inFlightResults.delete(id);saving.delete(task);};task.then(clear,clear);return task;
+}
+async function saveExerciseResult(payload){
+ const assigned=Boolean(nextButton&&plan?.programId&&payload?.status==='completed');
+ if(assigned){nextButton.disabled=true;showNext({pending:true});}
+ let ok=false,message;
+ try{
+  if(auth.currentUser?.uid!==planUid)throw {code:'account-changed'};
+  const result=await Promise.race([saveResult(payload),new Promise((_,reject)=>setTimeout(()=>reject({code:'sync-pending'}),15000))]);
+  ok=result.sharingState!=='pending';
+  message=ok?'Risultato salvato nella sessione e sincronizzato con il tuo account.':'Risultato salvato nel tuo account. La condivisione con il professionista è in attesa: riprova il salvataggio o torna alla dashboard per sincronizzare.';
+ }catch(error){message=error.code==='account-changed'?'Account cambiato. Torna alla palestra prima di continuare.':error.code==='login-required'?'Accedi alla palestra per conservare i risultati.':friendlyError(error)+(error.code==='save-memory-only'?'':' Se registrato nella coda locale, il risultato verrà ritentato dalla palestra.');}
+ if(auth.currentUser?.uid!==planUid){ok=false;message='Account cambiato. Torna alla palestra prima di continuare.';}
+ if(nextButton&&auth.currentUser&&ok&&payload.status==='completed'){
+  if(!plan.completedSlots.includes(plan.index))plan.completedSlots.push(plan.index);
+  sessionStorage.setItem(planKey,JSON.stringify(plan));nextButton.disabled=false;showNext();
+ }else if(assigned)showNext({error:message,retry:()=>queueSave(payload)});
+ frame.contentWindow.postMessage({type:'cognilab-save-status',id:payload?.id,ok,message},location.origin);
+}
 window.addEventListener('message',async event=>{
  if(event.origin!==location.origin||event.source!==frame.contentWindow)return;
- if(event.data?.type==='cognilab-exit-v3'){leave(false);return;}
+ if(event.data?.type==='cognilab-exit-v3'){if(journey?.open)return;leave(false);return;}
  if(event.data?.type!=='cognilab-result-v3')return;
- const task=(async()=>{
-  let ok=false,message;
-  try{
-   const result=await Promise.race([saveResult(event.data.result),new Promise((_,reject)=>setTimeout(()=>reject({code:'sync-pending'}),15000))]);
-   ok=result.sharingState!=='pending';
-   message=ok?'Risultato salvato nella sessione e sincronizzato con il tuo account.':'Risultato salvato nel tuo account. La condivisione con il professionista è in attesa: riprova il salvataggio o torna alla dashboard per sincronizzare.';
-  }catch(error){message=error.code==='login-required'?'Accedi alla palestra per conservare i risultati.':friendlyError(error)+(error.code==='save-memory-only'?'':' Se registrato nella coda locale, il risultato verrà ritentato dalla palestra.');}
-  if(nextButton&&auth.currentUser&&ok&&event.data.result.status==='completed'){
-   if(!plan.completedSlots.includes(plan.index))plan.completedSlots.push(plan.index);
-   sessionStorage.setItem(planKey,JSON.stringify(plan));nextButton.disabled=false;showNext();
-  }
-  frame.contentWindow.postMessage({type:'cognilab-save-status',id:event.data.result.id,ok,message},location.origin);
- })();saving.add(task);try{await task;}finally{saving.delete(task);}
+ await queueSave(event.data.result);
 });
+
 async function leave(feedback){await Promise.allSettled([...saving]);const result=frame.contentWindow?.CogniLabRun?.abort();if(result)try{await saveResult(result);}catch{}location.href='esercizi.html'+(feedback?'?feedback=1':'');}
 window.tornaAllaDashboard=event=>{event.preventDefault();leave(false);};
 window.terminaSessioneGlobale=()=>leave(true);

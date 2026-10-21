@@ -17,7 +17,7 @@ function dom(html){const d=new JSDOM(html,{url:'https://example.test/esercizio.h
  let saved=false,finished=0;Object.assign(w,{auth:{currentUser:{uid:'patient'}},authReady:Promise.resolve(),friendlyError:()=> 'Errore',requireProfessional:async()=>{},programProgress,saveResult:async()=>{if(!saved)throw Error('offline');return {sharingState:'saved'};},finishSession:async()=>{finished++;},patientWorkspace:async()=>({programs:[{id:'p',exercises:['stroop-original'],totalSessions:2,schedule:['2026-10-20','2026-10-23'],sessions:{one:{results:{r:{status:'completed',exerciseId:'stroop-original',programSlot:'0'}}}}}]})});
  await w.eval('(async()=>{'+strip(read('shared/shell-account.js'))+'})()');
  const result={id:'r',status:'completed'},send=()=>w.dispatchEvent(new w.MessageEvent('message',{origin:w.location.origin,source:w.document.querySelector('iframe').contentWindow,data:{type:'cognilab-result-v3',result}}));
- send();await flush();assert.equal(w.document.querySelector('dialog'),null);saved=true;send();await flush();
+ send();await flush();assert.ok(w.document.querySelector('dialog').open);assert.match(w.document.querySelector('dialog').textContent,/Riprova il salvataggio/);assert.ok(w.document.querySelector('iframe').hasAttribute('inert'));saved=true;send();await flush();
  const dialog=w.document.querySelector('dialog');assert.ok(dialog.open);assert.match(dialog.textContent,/Hai completato tutti gli esercizi/);assert.equal(dialog.querySelector('progress').value,1);
  dialog.querySelector('button').click();await flush();assert.equal(finished,1);assert.match(w.document.querySelector('dialog').textContent,/23 ottobre 2026/);assert.match(w.document.querySelector('dialog').textContent,/Ben fatto/);w.close();
 }

@@ -1,0 +1,7 @@
+# Questionario finale e passaggio immediato — 21 ottobre 2026
+
+Le risposte vengono scritte da saveFeedback in cognilab/feedback/UID/ID_INVIO nel Realtime Database configurato. Ogni invio contiene q1, q2 e q3 (interi da 1 a 5) e submittedAt (timestamp del server). Con invio anonimo si usa l’UID tecnico dell’accesso Firebase anonimo separato; il payload non contiene nome o email. Disabilitando l’opzione anonima si usa l’UID dell’account corrente. Non è presente un riepilogo gestionale dei questionari nella dashboard clinica; il gestore li consulta nella console Firebase autorizzata. Non vengono cambiati permessi o dati.
+
+Nei programmi assegnati la ricezione del risultato completato mostra immediatamente il dialogo di passaggio, prima di attendere la rete. Il contenuto dell’iframe diventa inert e non riceve puntatore o tastiera. Il dialogo non si chiude con Esc e non offre Rivedi il risultato. Il pulsante iniziale resta disabilitato durante il salvataggio. Solo la conferma del salvataggio e della condivisione abilita l’avanzamento. Se c’è un errore o la condivisione resta pendente, il dialogo consente di ritentare lo stesso risultato oppure tornare alla dashboard per sincronizzare. Gli invii contemporanei dello stesso risultato vengono accorpati. Un cambio account impedisce l’avanzamento.
+
+Test con promise di rete controllata: dialogo sincrono, iframe bloccato, origine del messaggio controllata, Esc prevenuto, nessun doppio invio in corso, errore, condivisione pendente, recupero e avanzamento confermato. Nessuna scrittura nel Firebase effettivo.
