@@ -102,8 +102,8 @@
     </style>
 <link rel="stylesheet" href="shared/cognilab.css">
 <script src="shared/interface.js" defer></script>
-<script>window.CogniLabExercise={"id":"rispondi-contrario","title":"Rispondi il contrario","category":"Funzioni esecutive","setup":"start-screen"};</script>
-<script src="shared/exercise-runtime.js?v=clarity37"></script>
+<script>window.CogniLabExercise={"id":"rispondi-contrario","title":"Rispondi il contrario","category":"Funzioni esecutive","setup":"start-screen","version":"4.0.0","stimulusVersion":"opposite-learning43"};</script>
+<script src="shared/exercise-runtime.js?v=opposite43"></script>
 </head>
 <body data-cognilab="exercise">
 
@@ -116,7 +116,7 @@
                 </svg>
             </div>
             <h1 class="text-3xl font-bold text-slate-900 mb-3 tracking-tight">Il Gioco del Contrario</h1>
-            <p class="text-slate-500 mb-8 leading-relaxed">Allena la tua mente a ignorare l'istinto. Scegli la risposta <strong>illogica</strong>.</p>
+            <p class="text-slate-500 mb-8 leading-relaxed">Scegli la risposta <strong>illogica</strong>: evita quella vera. Completa tutte e 15 le domande senza errori. Dopo un errore o il tempo scaduto riparti dalle stesse domande, nello stesso ordine.</p>
             
             <div class="mode-selector mb-8">
                 <button id="btn-timed" class="mode-tab active" onclick="setMode(true)">60 Secondi</button>
@@ -156,13 +156,14 @@
                 <div id="progress-bar" class="progress-bar-fill" style="width: 0%"></div>
             </div>
 
-            <div id="exercise-content" class="text-center">
+            <p id="learning-status" role="status" aria-live="polite" class="mb-4 text-center text-slate-700"></p><div id="exercise-content" class="text-center">
                 <h2 id="question-text" class="text-2xl md:text-3xl font-bold text-slate-800 mb-12 leading-tight min-h-[80px]"></h2>
                 <div id="options-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
             </div>
         </div>
     </div>
 
+    <button id="skip-assigned" hidden onclick="skipAssigned()" style="position:fixed;bottom:16px;left:50%;transform:translateX(-50%);z-index:60;padding:12px 20px;border-radius:14px;background:#fff;color:#164e63;border:2px solid #0f766e;font-weight:700;max-width:90vw">Salta questo esercizio e prosegui →</button>
     <!-- Failure Overlay -->
     <div id="fail-overlay" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-900/90 backdrop-blur-md p-6">
         <div class="glass-card max-w-sm w-full p-8 text-center animate-fade">
@@ -171,13 +172,13 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
             </div>
-            <h2 class="text-2xl font-bold text-slate-900 mb-2">Impulso Rilevato!</h2>
+            <h2 class="text-2xl font-bold text-slate-900 mb-2">Riproviamo insieme</h2>
             <p id="fail-msg" class="text-slate-500 mb-8 leading-relaxed"></p>
             <div class="flex flex-col gap-3">
                 <button onclick="restoreSession()" class="w-full py-4 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-all">
-                    Riprova Sessione
+                    Ricomincia ora
                 </button>
-                <button onclick="location.reload()" class="text-sm font-semibold text-slate-400 hover:text-indigo-500">
+                <button id="failure-menu" onclick="location.reload()" class="text-sm font-semibold text-slate-400 hover:text-indigo-500">
                     Torna al Menu
                 </button>
             </div>
@@ -203,7 +204,7 @@
     <script>
         const fullDatabase = [
             // LOGICA INGANNEVOLE
-            { q: "Quanti compleanni ha un uomo medio?", impulse: "Uno all'anno", target: "Solo uno" },
+            { q: "Quanti compleanni si festeggiano normalmente in un anno?", impulse: "Uno", target: "Dodici" },
             { q: "Il papà di Rosa ha 5 figlie: Fata, Fete, Fiti, Foto. La quinta è?", impulse: "Rosa", target: "Futu" },
             { q: "Alcuni mesi hanno 31 giorni, altri 30. Quanti ne hanno 28?", impulse: "Tutti e 12", target: "Solo Febbraio" },
             { q: "Se hai una scatola con un solo fiammifero e entri in una stanza fredda e buia con una stufa, una lampada e un camino, cosa accendi per primo?", impulse: "Il fiammifero", target: "La stufa" },
@@ -215,7 +216,7 @@
             { q: "Cosa succede se lanci un sasso blu nel Mar Rosso?", impulse: "Si bagna", target: "Diventa rosso" },
             
             // CONCETTI BASE & ISTINTO
-            { q: "Di che colore sono le nuvole?", impulse: "Bianche", target: "Nere" },
+            { q: "Di che colore è il latte bianco?", impulse: "Bianco", target: "Nero" },
             { q: "Il fuoco è freddo?", impulse: "No", target: "Sì" },
             { q: "Lo zucchero è salato?", impulse: "No", target: "Sì" },
             { q: "Qual è il verso del cane?", impulse: "Bau", target: "Miao" },
@@ -239,122 +240,92 @@
             { q: "Chi va piano va sano e va...", impulse: "Lontano", target: "Velocemente" },
             { q: "Rosso di sera, bel tempo si...", impulse: "Spera", target: "Vede" },
             { q: "Una mela al giorno toglie il medico di...", impulse: "Torno", target: "Cucina" },
-            { q: "L'abito non fa il...", impulse: "Monaco", target: "Sarto" }
+            { q: "L'abito non fa il...", impulse: "Monaco", target: "Sarto" },
+            {"q": "Se sorpassi chi è secondo in una gara, in quale posizione sei?", "impulse": "Secondo", "target": "Primo"},
+            {"q": "Un chilo di ferro e un chilo di cotone: quale pesa di più?", "impulse": "Pesano uguale", "target": "Il ferro"},
+            {"q": "Un gallo depone un uovo sul tetto: da che parte rotola?", "impulse": "Il gallo non depone uova", "target": "A destra"},
+            {"q": "Se oggi è martedì, quale giorno era ieri?", "impulse": "Lunedì", "target": "Mercoledì"},
+            {"q": "Se domani è venerdì, che giorno è oggi?", "impulse": "Giovedì", "target": "Sabato"},
+            {"q": "Una candela accesa illumina o oscura la stanza?", "impulse": "Illumina", "target": "Oscura"},
+            {"q": "Se una porta non è chiusa, è...", "impulse": "Aperta", "target": "Chiusa"},
+            {"q": "Se il bicchiere è vuoto, contiene acqua?", "impulse": "No", "target": "Sì"},
+            {"q": "Quale viene prima nell’alfabeto: A o Z?", "impulse": "A", "target": "Z"},
+            {"q": "Quale numero è minore: 3 o 8?", "impulse": "Tre", "target": "Otto"},
+            {"q": "Quanto fa dieci meno cinque?", "impulse": "Cinque", "target": "Quindici"},
+            {"q": "Se dividi una mela in due parti uguali, ottieni due...", "impulse": "Metà", "target": "Mele intere"},
+            {"q": "Quante zampe ha normalmente un gatto?", "impulse": "Quattro", "target": "Due"},
+            {"q": "Quale animale nitrisce?", "impulse": "Il cavallo", "target": "Il gatto"},
+            {"q": "Quale animale fa le fusa?", "impulse": "Il gatto", "target": "Il cavallo"},
+            {"q": "Quale animale ha la proboscide?", "impulse": "L’elefante", "target": "La giraffa"},
+            {"q": "Dove si trova il volante di un’automobile?", "impulse": "Davanti al conducente", "target": "Nel bagagliaio"},
+            {"q": "Con quale oggetto si apre normalmente una serratura?", "impulse": "Con una chiave", "target": "Con una forchetta"},
+            {"q": "Dove si conserva normalmente il gelato?", "impulse": "Nel congelatore", "target": "Nel forno acceso"},
+            {"q": "Quale oggetto si usa per pettinarsi?", "impulse": "Il pettine", "target": "Il cucchiaio"},
+            {"q": "Cosa si indossa normalmente sulle mani quando fa freddo?", "impulse": "I guanti", "target": "Le scarpe"},
+            {"q": "Il ghiaccio al caldo tende a...", "impulse": "Sciogliersi", "target": "Congelarsi ancora"},
+            {"q": "Il contrario di acceso è...", "impulse": "Spento", "target": "Luminoso"},
+            {"q": "Il contrario di salire è...", "impulse": "Scendere", "target": "Arrampicarsi"},
+            {"q": "Una scala che scende porta in alto o in basso?", "impulse": "In basso", "target": "In alto"},
+            {"q": "Se non hai perso le chiavi, le hai ancora?", "impulse": "Sì", "target": "No"},
+            {"q": "Se una luce non è spenta, è accesa?", "impulse": "Sì", "target": "No"},
+            {"q": "Quale parola significa il contrario di mai?", "impulse": "Sempre", "target": "Nessuna volta"},
+            {"q": "Chi dorme non piglia...", "impulse": "Pesci", "target": "Cuscini"},
+            {"q": "Tra il dire e il fare c’è di mezzo il...", "impulse": "Mare", "target": "Sole"},
+            {"q": "Meglio tardi che...", "impulse": "Mai", "target": "Subito"},
+            {"q": "Il mattino ha l’oro in...", "impulse": "Bocca", "target": "Tasca"},
+            {"q": "Non tutto il male viene per...", "impulse": "Nuocere", "target": "Dormire"},
+            {"q": "Can che abbaia non...", "impulse": "Morde", "target": "Cammina"},
+            {"q": "Chi trova un amico trova un...", "impulse": "Tesoro", "target": "Ombrello"},
+            {"q": "A caval donato non si guarda in...", "impulse": "Bocca", "target": "Coda"},
+            {"q": "Tra moglie e marito non mettere il...", "impulse": "Dito", "target": "Cappello"},
+            {"q": "Quale numero viene subito dopo il nove?", "impulse": "Dieci", "target": "Otto"},
+            {"q": "Se una fila si accorcia, contiene più o meno persone di prima?", "impulse": "Meno", "target": "Più"},
+            {"q": "Quanti minuti ci sono in un’ora?", "impulse": "Sessanta", "target": "Cento"}
         ];
 
-        let currentSessionQuestions = [];
-        let currentIndex = 0;
-        let timeLeft = 60;
-        let timer = null;
-        let isTimedMode = true;
-
-        function setMode(timed) {
-            isTimedMode = timed;
-            document.getElementById('btn-timed').classList.toggle('active', timed);
-            document.getElementById('btn-relax').classList.toggle('active', !timed);
+        let currentSessionQuestions=[],currentIndex=0,timeLeft=60,timer=null,isTimedMode=true;
+        let retryTimer=null,questionTimer=null,phase='setup',deadline=0,attempts=0,errors=0,timeouts=0,totalAnswers=0,correctAnswers=0;
+        function assignedContext(){try{const uid=localStorage.getItem('cognilab.lastUser'),session=JSON.parse(sessionStorage.getItem('cognilab.session.'+uid)||'null'),plan=JSON.parse(sessionStorage.getItem('cognilab.plan.'+uid)||'null');return session?.programId&&plan?.programId===session.programId&&plan.files?.[plan.index]===decodeURIComponent(location.pathname.split('/').pop())?{session,plan,uid}:null;}catch{return null;}}
+        function setMode(timed){isTimedMode=timed;document.getElementById('btn-timed').classList.toggle('active',timed);document.getElementById('btn-relax').classList.toggle('active',!timed);}
+        function shuffled(items){const copy=[...items];for(let i=copy.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[copy[i],copy[j]]=[copy[j],copy[i]];}return copy;}
+        function initSession(){
+            if(phase==='running'||phase==='feedback')return;
+            const assigned=assignedContext();if(assigned)setMode(true);
+            window.CogniLabRun?.begin();
+            currentSessionQuestions=shuffled(fullDatabase).slice(0,15).map(q=>({...q,options:shuffled([q.impulse,q.target])}));
+            attempts=0;errors=0;timeouts=0;totalAnswers=0;correctAnswers=0;
+            document.getElementById('start-screen').classList.add('hidden-screen');document.getElementById('exercise-screen').classList.remove('hidden-screen');
+            document.getElementById('skip-assigned').hidden=!assigned||parent===window;document.getElementById('failure-menu').hidden=!!assigned;
+            restoreSession();
         }
-
-        function initSession() {
- window.CogniLabRun?.begin(typeof arguments === "undefined" ? null : arguments[0]);
-
-            currentSessionQuestions = [...fullDatabase]
-                .sort(() => Math.random() - 0.5)
-                .slice(0, 15);
-            
-            currentIndex = 0;
-            document.getElementById('start-screen').classList.add('hidden-screen');
-            document.getElementById('exercise-screen').classList.remove('hidden-screen');
-            
-            if (isTimedMode) {
-                timeLeft = 60;
-                runTimer();
-            } else {
-                document.getElementById('timer-display').innerText = "MODALITÀ RELAX";
-            }
-            renderItem();
+        function renderTimer(){document.getElementById('timer-display').textContent=isTimedMode?'TEMPO: '+Math.floor(timeLeft/60).toString().padStart(2,'0')+':'+(timeLeft%60).toString().padStart(2,'0'):'MODALITÀ SENZA LIMITI';}
+        function runTimer(){clearInterval(timer);timer=setInterval(()=>{if(!['running','answering'].includes(phase))return;timeLeft=Math.max(0,Math.ceil((deadline-Date.now())/1000));renderTimer();if(timeLeft<=0){timeouts++;showFailure('Il tempo è terminato. Ripartiamo dalle stesse 15 domande, con 60 secondi a disposizione.');}},1000);}
+        function renderItem(){
+            clearTimeout(questionTimer);const data=currentSessionQuestions[currentIndex];document.getElementById('question-text').textContent=data.q;
+            document.getElementById('item-counter').textContent='RISPOSTE '+currentIndex+'/15';document.getElementById('progress-bar').style.width=(currentIndex/15*100)+'%';
+            document.getElementById('learning-status').textContent='Tentativo '+attempts+' · '+(isTimedMode?'15 risposte corrette entro 60 secondi':'15 risposte corrette senza errori');
+            const grid=document.getElementById('options-grid');grid.replaceChildren();for(const opt of data.options){const b=document.createElement('button');b.className='option-button p-5 md:p-6 rounded-2xl font-bold text-lg text-slate-700 shadow-sm';b.textContent=opt;b.onclick=()=>processAnswer(opt);grid.append(b);}
         }
-
-        function runTimer() {
-            clearInterval(timer);
-            timer = setInterval(() => {
-                timeLeft--;
-                const disp = document.getElementById('timer-display');
-                const seconds = timeLeft.toString().padStart(2, '0');
-                disp.innerText = `TEMPO: 00:${seconds}`;
-                
-                if (timeLeft <= 10) disp.classList.add('text-rose-500');
-                else disp.classList.remove('text-rose-500');
-
-                if (timeLeft <= 0) {
-                    clearInterval(timer);
-                    showFailure("Tempo scaduto! Ricorda che l'inibizione deve essere anche rapida.");
-                }
-            }, 1000);
+        function processAnswer(val){
+            if(phase!=='running')return;if(isTimedMode&&Date.now()>=deadline){timeouts++;showFailure('Il tempo è terminato. Ripartiamo dalle stesse 15 domande.');return;}const item=currentSessionQuestions[currentIndex];if(val!==item.impulse&&val!==item.target)return;
+            phase='answering';totalAnswers++;const correct=val===item.target;window.CogniLabAudio?.feedback(correct);
+            for(const b of document.querySelectorAll('#options-grid button'))b.disabled=true;
+            if(!correct){errors++;showFailure('La risposta “'+val+'” è quella vera. In questo gioco scegli “'+item.target+'”. Ripartiamo dalle stesse 15 domande.');return;}
+            correctAnswers++;currentIndex++;
+            if(currentIndex===15){phase='finished';clearInterval(timer);document.getElementById('skip-assigned').hidden=true;document.getElementById('progress-bar').style.width='100%';document.getElementById('win-overlay').classList.remove('hidden');window.CogniLabRun?.complete({criterionMet:true,finalCorrect:15,correct:correctAnswers,total:totalAnswers,errors,omissions:timeouts,score:attempts,scoreUnit:'tentativi',scoreDirection:'lower'});return;}
+            questionTimer=setTimeout(()=>{if(phase!=='answering')return;phase='running';renderItem();},180);
         }
-
-        function renderItem() {
-            const data = currentSessionQuestions[currentIndex];
-            const qEl = document.getElementById('question-text');
-            
-            // Effetto fade sulla domanda
-            qEl.style.opacity = 0;
-            setTimeout(() => {
-                qEl.innerText = data.q;
-                qEl.style.opacity = 1;
-            }, 150);
-
-            document.getElementById('item-counter').innerText = `ITEM ${(currentIndex + 1).toString().padStart(2, '0')}/15`;
-            document.getElementById('progress-bar').style.width = `${(currentIndex / 15) * 100}%`;
-
-            const grid = document.getElementById('options-grid');
-            grid.innerHTML = '';
-            
-            const options = [data.impulse, data.target].sort(() => Math.random() - 0.5);
-            
-            options.forEach((opt, index) => {
-                const b = document.createElement('button');
-                b.className = 'option-button p-5 md:p-6 rounded-2xl font-bold text-lg text-slate-700 shadow-sm outline-none animate-fade';
-                b.style.animationDelay = `${index * 0.1}s`;
-                b.innerText = opt;
-                b.onclick = () => processAnswer(opt);
-                grid.appendChild(b);
-            });
+        function showFailure(msg){
+            if(phase==='finished'||phase==='skipped')return;phase='feedback';clearInterval(timer);clearTimeout(questionTimer);document.getElementById('fail-msg').textContent=msg+' La prova ricomincia tra pochi secondi, oppure premi Ricomincia ora.';document.getElementById('fail-overlay').classList.remove('hidden');clearTimeout(retryTimer);retryTimer=setTimeout(restoreSession,3500);
+            // Errors and timeouts do not complete an assigned slot.
         }
-
-        function processAnswer(val) {
-            const currentItem = currentSessionQuestions[currentIndex];window.CogniLabAudio?.feedback(val !== currentItem.impulse);
-            
-            if (val === currentItem.impulse) {
-                showFailure(`Hai scelto "${val}". Questa è la risposta logica/vera! Devi invece inibire l'istinto e scegliere quella errata.`);
-            } else {
-                currentIndex++;
-                if (currentIndex >= currentSessionQuestions.length) {
-                    clearInterval(timer);
-                    document.getElementById('win-overlay').classList.remove('hidden');
-                } else {
-                    renderItem();
-                }
-            }
-
- if(currentIndex>=currentSessionQuestions.length) window.CogniLabRun?.complete({correct:window.CogniLabRun.measure(()=>(currentIndex)),total:window.CogniLabRun.measure(()=>(currentSessionQuestions.length)),errors:window.CogniLabRun.measure(()=>(0))});
-}
-
-        function showFailure(msg) {
-            clearInterval(timer);
-            document.getElementById('fail-msg').innerText = msg;
-            document.getElementById('fail-overlay').classList.remove('hidden');
-
- window.CogniLabRun?.complete({correct:currentIndex,total:currentIndex+1,errors:msg.startsWith("Tempo")?0:1,omissions:msg.startsWith("Tempo")?1:0});
-}
-
-        function restoreSession() {
-            currentIndex = 0;
-            document.getElementById('fail-overlay').classList.add('hidden');
-            if (isTimedMode) {
-                timeLeft = 60;
-                runTimer();
-            }
-            renderItem();
+        function restoreSession(){
+            if(phase==='finished'||phase==='skipped')return;clearTimeout(retryTimer);clearTimeout(questionTimer);clearInterval(timer);currentIndex=0;attempts++;phase='running';timeLeft=60;deadline=Date.now()+60000;document.getElementById('fail-overlay').classList.add('hidden');renderTimer();if(isTimedMode)runTimer();renderItem();
+        }
+        function skipAssigned(){
+            if(parent===window||!assignedContext()||['finished','skipped'].includes(phase))return;
+            if(!confirm('Saltare questo esercizio? Sarà registrato come non completato e potrai proseguire con il programma.'))return;
+            phase='skipped';clearInterval(timer);clearTimeout(retryTimer);clearTimeout(questionTimer);document.getElementById('skip-assigned').disabled=true;document.getElementById('skip-assigned').textContent='Salvataggio della scelta…';const result=window.CogniLabRun?.abort();if(result){result.skipped=true;result.metrics={correct:correctAnswers,total:totalAnswers,errors,omissions:timeouts,score:attempts,scoreUnit:'tentativi',scoreDirection:'lower'};parent.postMessage({type:'cognilab-result-v3',result},location.origin);}
         }
     </script>
 </body>

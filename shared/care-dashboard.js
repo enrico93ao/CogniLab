@@ -2,8 +2,8 @@ import {sessionDuration,exerciseDuration,durationLabel,durationExplanation} from
 import {mountFeedbackSummary,feedbackManagerUid} from './feedback-summary.js?v=feedback39';
 import {onAuthStateChanged} from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js';
 import {auth} from './firebase-client.js';
-import {currentCareUser,patientWorkspace,checkCareStorage,professionalPatients,professionalPatient,registerManagedPatient,invitePatient,setConnection,assignProgram,sendAssignmentNotification,archiveProgram,setPatientArchived,startAssignedProgram,careError} from './care-store.js?v=edit41';
-import {programProgress,resultsFromCare} from './care-model.mjs';
+import {currentCareUser,patientWorkspace,checkCareStorage,professionalPatients,professionalPatient,registerManagedPatient,invitePatient,setConnection,assignProgram,sendAssignmentNotification,archiveProgram,setPatientArchived,startAssignedProgram,careError} from './care-store.js?v=opposite43';
+import {programProgress,resultsFromCare} from './care-model.mjs?v=opposite43';
 import {exercises,exerciseById} from './exercise-catalog.mjs';
 import {createProgressView} from './progress-view.js?v=journey36';
 import {pendingCare,retryPending} from './progress-store.js';
@@ -35,6 +35,7 @@ function programCard(program,{professional=false,patientUid,onChange,onEdit}={})
  if(program.instructions)node.append(el('p',program.instructions));
  const details=el('details'),summary=el('summary',program.exercises.length+' prove per ogni sessione');details.append(summary);const list=el('ol');for(const [slot,id] of program.exercises.entries())list.append(el('li',(exerciseById.get(id)?.title||'Esercizio non disponibile')+' · '+durationLabel(exerciseDuration(id,program.configurations?.[slot])).replace('Durata stimata per sessione: ','')));details.append(list);node.append(details);
  if(program.schedule?.[progress.completed]&&!done)node.append(el('p','Prossima sessione prevista: '+program.schedule[progress.completed].split('-').reverse().join('/'),'care-muted'));
+ const skippedCount=progress.sessions.reduce((n,item)=>n+(item.progress.skipped||0),0);if(skippedCount)node.append(el('p',skippedCount+' esercizi saltati e registrati come non completati.','care-notice'));
  if(progress.resume&&!done&&program.status==='active')node.append(el('p','Sessione da riprendere: '+progress.resume.progress.completed+' esercizi su '+progress.resume.progress.total+' già salvati.','care-muted'));
  if(!professional&&program.status==='active'&&!done){
   const b=button(progress.resume?'Riprendi la sessione':'Inizia sessione '+(progress.completed+1),()=>action(b,async()=>{location.href=await startAssignedProgram(program.id);}), 'primary');node.append(b);
@@ -47,7 +48,7 @@ function programCard(program,{professional=false,patientUid,onChange,onEdit}={})
 
   const b=button('Elimina assegnazione',()=>{if(confirm('Rimuovere questa assegnazione dai programmi attivi? Il paziente non potrà avviare altre sessioni del programma. Risultati e configurazione resteranno nello storico dei programmi archiviati.'))action(b,async()=>{await archiveProgram(patientUid,program.id);await onChange();},'Assegnazione rimossa dai programmi attivi e conservata nello storico.');},'danger');node.append(b);
  }
- if(professional&&progress.sessions.length){const history=el('details'),s=el('summary','Dettaglio delle sessioni');history.append(s);const ul=el('ul');for(const item of progress.sessions){const date=new Date(item.startedAt).toLocaleDateString('it-IT');ul.append(el('li',date+(item.scheduledDate?' (prevista '+item.scheduledDate.split('-').reverse().join('/')+')':'')+' · '+(item.progress.complete?'Completa':item.status==='interrupted'?'Interrotta':'Da riprendere')+' · '+item.progress.completed+'/'+item.progress.total+' esercizi'));}history.append(ul);node.append(history);}
+ if(professional&&progress.sessions.length){const history=el('details'),s=el('summary','Dettaglio delle sessioni');history.append(s);const ul=el('ul');for(const item of progress.sessions){const date=new Date(item.startedAt).toLocaleDateString('it-IT');ul.append(el('li',date+(item.scheduledDate?' (prevista '+item.scheduledDate.split('-').reverse().join('/')+')':'')+' · '+(item.progress.complete?(item.progress.skipped?'Conclusa con esercizi saltati':'Completa'):item.status==='interrupted'?'Interrotta':'Da riprendere')+' · '+item.progress.completed+'/'+item.progress.total+' esercizi'+(item.progress.skipped?' · '+item.progress.skipped+' saltati (non completati)':'')));}history.append(ul);node.append(history);}
  return node;
 }
 async function patientView(user){

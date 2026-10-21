@@ -1,4 +1,4 @@
-import {sessionProgress} from './care-model.mjs';
+import {sessionProgress} from './care-model.mjs?v=opposite43';
 import {withAccessTimeout} from './access-timeout.js';
 import {recordSessionResult,clearSessionJournal} from './session-journal.js';
 import {requireProfessional} from './clinical-access.js';

@@ -14,13 +14,14 @@ export function validateProgram(input){
  return {name,instructions,totalSessions,exercises,...(input.configurations?{configurations}:{}),...(schedule.length?{schedule}:{})};
 }
 export function sessionProgress(program,session={}){
- const sequence=Array.from(program.exercises||[]),completed=new Set();
+ const sequence=Array.from(program.exercises||[]),completed=new Set(),skipped=new Set();
  for(const r of Object.values(session.results||{})){
   const slot=Number(r.programSlot);
-  if(r.status==='completed'&&Number.isInteger(slot)&&String(slot)===String(r.programSlot)&&sequence[slot]===r.exerciseId)completed.add(slot);
+  if(Number.isInteger(slot)&&String(slot)===String(r.programSlot)&&sequence[slot]===r.exerciseId){if(r.status==='completed')completed.add(slot);else if(r.status==='interrupted'&&r.skipped===true&&r.exerciseId==='rispondi-contrario')skipped.add(slot);}
  }
- const nextSlot=sequence.findIndex((_,index)=>!completed.has(index));
- return {completed:completed.size,total:sequence.length,nextSlot,complete:sequence.length>0&&nextSlot===-1};
+ for(const slot of completed)skipped.delete(slot);
+ const nextSlot=sequence.findIndex((_,index)=>!completed.has(index)&&!skipped.has(index));
+ return {completed:completed.size,skipped:skipped.size,completedSlots:[...completed],skippedSlots:[...skipped],total:sequence.length,nextSlot,complete:sequence.length>0&&nextSlot===-1};
 }
 export function programProgress(program,sessions={}){
  const entries=Object.entries(sessions).map(([id,session])=>({id,...session,progress:sessionProgress(program,session)})).sort((a,b)=>(b.startedAt||'').localeCompare(a.startedAt||''));

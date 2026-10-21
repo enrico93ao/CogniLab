@@ -40,4 +40,4 @@ export function durationLabel(value){
  const min=Math.max(1,Math.ceil(value.minSeconds/60)),max=Math.max(min,Math.ceil(value.maxSeconds/60));
  return 'Durata stimata per sessione: circa '+(min===max?min:min+'–'+max)+' min';
 }
-export const durationExplanation='Pause e lettura delle istruzioni escluse. Per ogni prova senza timer si considera un intervallo orientativo di 2–5 minuti: il tempo effettivo dipende dalla persona. Le voci non configurate saranno ricalcolate dopo il salvataggio delle impostazioni.';
+export const durationExplanation='Pause e lettura delle istruzioni escluse. Per ogni prova senza timer si considera un intervallo orientativo di 2–5 minuti: il tempo effettivo dipende dalla persona. I tentativi ripetuti dopo un errore possono prolungare la sessione. Le voci non configurate saranno ricalcolate dopo il salvataggio delle impostazioni.';

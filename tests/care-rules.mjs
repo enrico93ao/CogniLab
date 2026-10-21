@@ -38,6 +38,7 @@ const r={id:'result1',exerciseId:'stroop-original',programId:'plan',programOwner
 assert.equal(write('cognilab/careSessions/patient/plan/s1',{startedAt:'2026-10-15',results:{result1:r}},user('patient')),true);
 assert.equal(write('cognilab/careSessions/patient/plan/s1',{startedAt:'2026-10-15',results:{result1:{...r,exerciseId:'il-pianoforte'}}},user('patient')),false,'wrong exercise cannot fill the slot');
 assert.equal(write('cognilab/careSessions/patient/plan/s1',{startedAt:'2026-10-15'},user('pro')),false,'professional cannot write patient results');
+assert.equal(write('cognilab/careSessions/patient/plan/s1',{startedAt:'2026-10-15',results:{result1:{...r,status:'interrupted',skipped:true}}},user('patient')),true,'explicit skip marker may be stored with interrupted result, no completion forged');
 delete db.cognilab.careLinks.patient.pro;
 assert.equal(read('cognilab/carePrograms/patient/plan',user('pro')),false);assert.equal(read('cognilab/careSessions/patient/plan',user('pro')),false);
 assert.equal(write('cognilab/careSessions/patient/plan/s1',{startedAt:'2026-10-15'},user('patient')),false);
