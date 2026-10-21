@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NeuroBoost v2 - Training Cognitivo</title>
+    <title>Memoria di prosa con distrattori | CogniLab</title>
     <link rel="stylesheet" href="assets/vendor/exercise-utilities-3.4.17.css?v=assets31">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
@@ -101,7 +101,7 @@
 <link rel="stylesheet" href="shared/cognilab.css">
 <script src="shared/interface.js" defer></script>
 <script>window.CogniLabExercise={"id":"memoria-prosa","title":"Memoria di prosa con distrattori","category":"Memoria","setup":"start-screen"};</script>
-<script src="shared/exercise-runtime.js?v=clarity37"></script>
+<script src="shared/exercise-runtime.js?v=copy44"></script>
 </head>
 <body data-cognilab="exercise" class="min-h-screen flex flex-col items-center justify-center p-4">
 
@@ -125,7 +125,7 @@
         <div class="bg-white px-8 py-6 border-b flex justify-between items-center">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center text-indigo-600 font-bold">NB</div>
-                <h1 class="text-xl font-extrabold tracking-tight text-slate-800" id="stage-title">NeuroBoost v2</h1>
+                <h1 class="text-xl font-extrabold tracking-tight text-slate-800" id="stage-title">Memoria di prosa</h1>
             </div>
             <div id="timer-display" class="hidden font-bold bg-slate-100 text-indigo-600 px-4 py-2 rounded-2xl text-lg border border-indigo-100 shadow-sm">00:00</div>
         </div>
@@ -135,7 +135,7 @@
             <!-- Start Screen -->
             <div id="start-screen" class="text-center space-y-8 fade-in">
                 <h2 class="text-4xl font-black text-slate-800">Pronti?</h2>
-                <p class="text-slate-500 text-lg">Inizia la tua sessione quotidiana di potenziamento cognitivo. Ogni volta contenuti diversi.</p>
+                <p class="text-slate-500 text-lg">Leggi il racconto, svolgi le attività proposte e rispondi alle domande. I racconti possono cambiare a ogni sessione.</p>
                 <button onclick="setupAndStart()" class="btn-gradient text-white px-10 py-4 rounded-2xl font-bold text-lg tracking-wide uppercase transition hover:scale-105 active:scale-95 animate-pulse">Inizia Sessione</button>
             </div>
 
@@ -188,10 +188,10 @@
                 </div>
             </div>
 
-            <!-- Supporto Metacognitivo -->
+            <!-- Rileggi il racconto -->
             <div id="step-correction-reading" class="hidden space-y-8 fade-in">
                 <div class="space-y-2">
-                    <span class="text-amber-600 font-bold uppercase text-xs tracking-widest">Supporto Metacognitivo</span>
+                    <span class="text-amber-600 font-bold uppercase text-xs tracking-widest">Rileggi il racconto</span>
                     <h3 class="text-2xl font-bold text-slate-800">Cerca le informazioni mancanti</h3>
                 </div>
                 <p class="text-slate-700 leading-relaxed text-xl font-medium bg-amber-50/50 p-8 rounded-3xl border border-amber-100" id="correction-reading-text"></p>
@@ -253,7 +253,7 @@
 
                 <div class="flex flex-col gap-3 pt-4">
                     <button id="btn-save-database" onclick="returnToGym()" class="btn-gradient text-white py-4 rounded-2xl font-bold text-lg shadow-xl w-full">Torna alla palestra</button>
-                    <button onclick="location.reload()" class="bg-slate-200 text-slate-700 px-10 py-4 rounded-2xl font-bold hover:bg-slate-300 transition w-full">Nuova Sessione Locale</button>
+                    <button onclick="location.reload()" class="bg-slate-200 text-slate-700 px-10 py-4 rounded-2xl font-bold hover:bg-slate-300 transition w-full">Nuova sessione</button>
                 </div>
             </div>
         </div>
@@ -547,13 +547,13 @@
 
             let evaluation = "";
             if (initialMemoryPerc === 100) {
-                evaluation = "Prestazione eccezionale! Memoria a lungo termine intatta e assenza di fallimenti di codifica. Massima focalizzazione.";
+                evaluation = "Hai risposto correttamente a tutte le domande già prima della rilettura.";
             } else if (finalMemoryPerc === 100 && window.stats.correctionsAttempted) {
-                evaluation = "Ottima flessibilità cognitiva e capacità di monitoraggio. Il paziente ha sfruttato la rilettura per auto-correggersi efficacemente.";
+                evaluation = "Dopo aver riletto il racconto, hai corretto tutte le risposte.";
             } else if (finalMemoryPerc > initialMemoryPerc) {
-                evaluation = "Il paziente dimostra capacità di apprendimento e miglioramento dopo feedback, anche se alcune informazioni rimangono difficili da rievocare.";
+                evaluation = "Dopo la rilettura sono aumentate le risposte corrette. Nel riepilogo puoi controllare quali informazioni mancavano.";
             } else {
-                evaluation = "Sessione completata. Si raccomanda di continuare l'allenamento per supportare la codifica e il recupero mnestico.";
+                evaluation = "La sessione è terminata. Confronta le risposte con il racconto e, se serve, chiedi al professionista come proseguire.";
             }
             document.getElementById('global-eval').innerText = evaluation;
 

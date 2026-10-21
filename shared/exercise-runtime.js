@@ -1,10 +1,10 @@
 (() => {
  'use strict';
- const guidanceScript=document.createElement('script');guidanceScript.src='shared/exercise-guidance.js?v=opposite43';guidanceScript.async=false;document.head.append(guidanceScript);
+ const guidanceScript=document.createElement('script');guidanceScript.src='shared/exercise-guidance.js?v=copy44';guidanceScript.async=false;document.head.append(guidanceScript);
  const clarityStyle=document.createElement('link');clarityStyle.rel='stylesheet';clarityStyle.href='shared/exercise-clarity.css?v=clarity37';document.head.append(clarityStyle);
  try{const uid=localStorage.getItem('cognilab.lastUser'),session=JSON.parse(sessionStorage.getItem('cognilab.session.'+uid)||'null'),plan=JSON.parse(sessionStorage.getItem('cognilab.plan.'+uid)||'null');window.CogniLabPresetPending=Boolean(session?.programId&&plan?.programId===session.programId&&decodeURIComponent(location.pathname.split('/').pop())===plan.files?.[plan.index]&&!new URLSearchParams(location.search).has('configure'));}catch{}
  if(window.CogniLabPresetPending){document.documentElement.classList.add('assigned-preparing');const style=document.createElement('style');style.textContent='html.assigned-preparing body>*{visibility:hidden!important}html.assigned-preparing [data-assigned-visible]{visibility:visible!important}';document.head.append(style);}
- const presetScript=document.createElement('script');presetScript.src='shared/care-presets.js?v=clarity37';presetScript.async=false;document.head.append(presetScript);
+ const presetScript=document.createElement('script');presetScript.src='shared/care-presets.js?v=copy44';presetScript.async=false;document.head.append(presetScript);
  const audioScript=document.createElement('script');audioScript.src='shared/response-feedback.js?v=ux12';document.head.append(audioScript);
  document.documentElement.classList.add('gym-access-pending');
  const gateStyle=document.createElement('style');gateStyle.textContent='html.gym-access-pending body{visibility:hidden!important}';document.head.append(gateStyle);

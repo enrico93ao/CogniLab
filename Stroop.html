@@ -54,7 +54,7 @@
 <link rel="stylesheet" href="shared/cognilab.css">
 <script src="shared/interface.js" defer></script>
 <script>window.CogniLabExercise={"id":"stroop-original","title":"Stroop","category":"Attenzione","setup":"main-menu"};</script>
-<script src="shared/exercise-runtime.js?v=clarity37"></script>
+<script src="shared/exercise-runtime.js?v=copy44"></script>
 </head>
 <body data-cognilab="exercise" class="flex flex-col min-h-screen">
 
@@ -116,7 +116,7 @@
         <div class="bg-white p-6 md:p-10 rounded-[2.5rem] shadow-2xl border border-slate-100 w-full max-w-lg text-center">
             <div id="rating-stars" class="text-3xl mb-2">⭐⭐⭐⭐⭐</div>
             <h2 class="text-3xl font-extrabold text-slate-800 mb-1">Sessione Completata</h2>
-            <p id="performance-feedback" class="text-slate-500 mb-8 italic">Ottima capacità di concentrazione!</p>
+            <p id="performance-feedback" class="text-slate-500 mb-8 italic">Ecco le risposte registrate durante la prova.</p>
             
             <!-- Info Sessione -->
             <div class="flex justify-center gap-2 mb-6">
@@ -320,17 +320,17 @@
 
             // Calcolo Rating e Feedback
             let stars = "⭐⭐";
-            let feedback = "Continua ad allenarti per migliorare!";
+            let feedback = "La prova è terminata. Qui trovi risposte corrette, errori e tempi.";
             
             if (accuracy >= 95) {
                 stars = "⭐⭐⭐⭐⭐";
-                feedback = avgTime < 1.0 ? "Prestazione eccellente! Sei un fulmine." : "Ottima precisione, prova a velocizzarti!";
+                feedback = avgTime < 1.0 ? "Prestazione eccellente! Hai risposto in tempi brevi." : "Quasi tutte le risposte sono corrette. Nel riepilogo trovi anche il tempo medio.";
             } else if (accuracy >= 85) {
                 stars = "⭐⭐⭐⭐";
                 feedback = "Buon equilibrio tra velocità e precisione.";
             } else if (accuracy >= 70) {
                 stars = "⭐⭐⭐";
-                feedback = "Niente male, prova a rallentare per non sbagliare.";
+                feedback = "Alcune risposte erano errate. Ricorda di seguire il colore dell’inchiostro.";
             }
 
             document.getElementById('rating-stars').innerText = stars;

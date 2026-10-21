@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Doppio Binario - Test di Multitasking</title>
+    <title>Doppio Binario - Esercizio di attenzione divisa</title>
     <link rel="stylesheet" href="assets/vendor/exercise-utilities-3.4.17.css?v=assets31">
     <!-- Persistenza gestita dal runtime condiviso CogniLab. -->
     
@@ -139,7 +139,7 @@
 <link rel="stylesheet" href="shared/cognilab.css">
 <script src="shared/interface.js" defer></script>
 <script>window.CogniLabExercise={"id":"doppio-compito","title":"Doppio compito e velocità","category":"Funzioni esecutive","setup":"menu","version":"3.1.0"};</script>
-<script src="shared/exercise-runtime.js?v=clarity37"></script>
+<script src="shared/exercise-runtime.js?v=copy44"></script>
 </head>
 <body data-cognilab="exercise" class="flex items-center justify-center min-h-screen">
 
@@ -147,7 +147,7 @@
     <div id="menu" class="bg-white border border-slate-200 p-8 md:p-10 rounded-3xl shadow-sm w-full max-w-lg z-50 text-center mx-4">
         <div class="mb-3">
             <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block mr-2 animate-pulse"></span>
-            <span class="text-slate-500 text-xs font-bold tracking-[0.2em] uppercase">Piattaforma di Riabilitazione Cognitiva</span>
+            <span class="text-slate-500 text-xs font-bold tracking-[0.2em] uppercase">CogniLab · Esercizi cognitivi</span>
         </div>
         <h1 class="text-4xl font-extrabold mb-8 text-slate-900 tracking-tight">DOPPIO BINARIO</h1>
         
@@ -194,7 +194,7 @@
 <label class="flex gap-3 items-center"><input type="checkbox" id="dual-bar-enabled"> Barra rossa laterale lampeggiante</label>
 <label for="dual-bar-side">Posizione della barra</label><select id="dual-bar-side" class="border rounded-xl p-3"><option value="left">Sinistra</option><option value="right">Destra</option></select></fieldset>
             <button onclick="startGame()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-5 rounded-2xl text-xl shadow-sm transition-all uppercase tracking-tight">
-                Avvia Sessione di Test
+                Avvia esercizio
             </button>
         </div>
     </div>
@@ -238,11 +238,11 @@
             <div id="active-response-band" class="absolute bottom-4 left-0 right-0 h-28 bg-emerald-500/5 border-y-2 border-dashed border-emerald-500/20 flex items-center justify-between px-6 pointer-events-none z-0">
                 <div class="flex items-center gap-2">
                     <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                    <span class="text-[10px] font-bold text-emerald-600/60 uppercase tracking-widest">Schiaccia Ora</span>
+                    <span class="text-[10px] font-bold text-emerald-600/60 uppercase tracking-widest">Premi ora</span>
                 </div>
-                <span class="text-[10px] font-bold text-emerald-600/40 uppercase tracking-[0.2em] hidden sm:inline">Zona di Validazione Esercizio</span>
+                <span class="text-[10px] font-bold text-emerald-600/40 uppercase tracking-[0.2em] hidden sm:inline">Zona in cui rispondere</span>
                 <div class="flex items-center gap-2">
-                    <span class="text-[10px] font-bold text-emerald-600/60 uppercase tracking-widest">Schiaccia Ora</span>
+                    <span class="text-[10px] font-bold text-emerald-600/60 uppercase tracking-widest">Premi ora</span>
                     <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                 </div>
             </div>

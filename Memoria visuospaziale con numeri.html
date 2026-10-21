@@ -48,7 +48,7 @@
 <link rel="stylesheet" href="shared/cognilab.css">
 <script src="shared/interface.js" defer></script>
 <script>window.CogniLabExercise={"id":"memoria-visuospaziale-numeri","title":"Memoria visuospaziale con numeri","category":"Visuospaziale","setup":"screen-menu","version":"3.1.0"};</script>
-<script src="shared/exercise-runtime.js?v=clarity37"></script>
+<script src="shared/exercise-runtime.js?v=copy44"></script>
 </head>
 <body data-cognilab="exercise" class="bg-gradient-to-br from-[#f0f4f8] to-[#e2e8f0] min-h-screen text-slate-800 flex flex-col justify-between overflow-x-hidden">
 
@@ -246,7 +246,7 @@
                 </div>
                 <h2 class="text-2xl font-extrabold text-slate-800 tracking-tight">Sessione Completata!</h2>
                 <p id="summary-compliment" class="text-sm text-slate-500 leading-relaxed px-4">
-                    Ottimo lavoro, hai completato tutti i 10 round. Ecco i dettagli della tua performance cognitiva.
+                    Hai terminato le 10 prove. Qui trovi i risultati della sessione.
                 </p>
             </div>
 
@@ -266,14 +266,14 @@
 
             <!-- Analisi Dettagliata Visuo-Spaziale -->
             <div class="bg-slate-50 rounded-2xl p-4 border border-slate-100 space-y-2.5">
-                <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider">Valutazione della Performance</h3>
+                <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider">Risultati della prova</h3>
                 <div class="space-y-2 text-xs text-slate-600">
                     <div class="flex justify-between items-center py-1 border-b border-slate-200/60">
                         <span>Tempo medio di risposta:</span>
                         <span id="summary-avg-time" class="font-bold text-slate-800">1.2 secondi</span>
                     </div>
                     <div class="flex justify-between items-center py-1">
-                        <span>Stato cognitivo stimato:</span>
+                        <span>Esito della prova:</span>
                         <span id="summary-cognitive-rating" class="font-bold text-indigo-600">Ottimo</span>
                     </div>
                 </div>
@@ -310,10 +310,10 @@
             </div>
             <div class="space-y-3 text-xs text-slate-600 leading-relaxed">
                 <p>
-                    La <strong>memoria di lavoro visuo-spaziale</strong> è una componente cruciale del nostro sistema cognitivo che ci permette di trattenere temporaneamente e manipolare informazioni spaziali (la posizione di oggetti o elementi nello spazio).
+                    La <strong>memoria di lavoro visuospaziale</strong> permette di tenere a mente e usare per breve tempo informazioni sulle posizioni degli oggetti.
                 </p>
                 <p>
-                    Questa applicazione stimola il <strong>Taccuino Visuo-Spaziale</strong>, facilitando la plasticità neuronale e migliorando la prontezza mentale attraverso un esercizio ludico privo di stress.
+                    In questo esercizio osservi dove si trovano i numeri e provi a ritrovarli dopo che sono scomparsi.
                 </p>
                 <p class="bg-slate-50 p-3 rounded-xl border border-slate-100 font-medium text-slate-500">
                     Consiglio: Evita di verbalizzare i numeri ad alta voce (es. "alto a destra, centro, basso"). Prova invece a concentrarti sulla "forma geometrica complessiva" creata dal percorso dei numeri.
@@ -327,7 +327,7 @@
 
     <!-- Footer -->
     <footer class="w-full max-w-4xl mx-auto px-4 py-4 text-center text-[10px] text-slate-400 font-medium">
-        Dispositivo Medico non diagnostico • Focalizzato sulla stimolazione della memoria visuo-spaziale attiva.
+        CogniLab · Esercizio di memoria visuospaziale. Non è un test diagnostico.
     </footer>
 
     <!-- LOGICA DI GIOCO IN JAVASCRIPT -->
@@ -899,25 +899,25 @@
 
             // Valutazione dello stato cognitivo stimato
             let rating = "Inizio";
-            let compliment = "Sessione conclusa. Continua ad allenarti regolarmente per stimolare le connessioni neuronali visuo-spaziali!";
+            let compliment = "La sessione è terminata. Qui trovi i risultati delle prove svolte.";
             
             if (percentSuccess === 100) {
-                rating = "Eccellente (Zenith)";
+                rating = "Tutte le prove riuscite";
                 compliment = isAdaptiveMode 
-                    ? "Incredibile! Ottima performance in modalità adattiva. Hai dimostrato una plasticità cerebrale eccezionale!"
-                    : "Incredibile! Hai dimostrato una memoria visuo-spaziale perfetta e impeccabile. Ottimo potenziale di focus!";
+                    ? "Hai completato correttamente tutte le prove della modalità adattiva."
+                    : "Hai completato correttamente tutte le prove di questa sessione.";
             } else if (percentSuccess >= 80) {
-                rating = "Ottimo";
-                compliment = "Eccellente coordinazione visuo-spaziale! Il tuo taccuino cognitivo lavora a pieno regime.";
+                rating = "Almeno 8 prove riuscite su 10";
+                compliment = "Hai completato correttamente almeno 8 prove su 10.";
             } else if (percentSuccess >= 60) {
-                rating = "Buono";
+                rating = "Almeno 6 prove riuscite su 10";
                 compliment = "Buon punteggio. Mantieni viva l'attenzione cercando di guardare la griglia nel suo insieme geometrico.";
             } else if (percentSuccess >= 40) {
-                rating = "Sufficiente";
-                compliment = "La tua memoria risponde bene, ma puoi migliorare. Fai una breve pausa e riprova rilassando lo sguardo.";
+                rating = "Almeno 4 prove riuscite su 10";
+                compliment = "Hai completato correttamente almeno 4 prove su 10. Puoi fermarti o riprovare con le indicazioni del professionista.";
             } else {
-                rating = "Necessita Allenamento";
-                compliment = "Non ti preoccupare, la memoria spaziale risente molto di stanchezza o distrazioni. Riprova con calma!";
+                rating = "Meno di 4 prove riuscite";
+                compliment = "In questa sessione sono riuscite meno di 4 prove su 10. Il risultato riguarda questo esercizio, non una valutazione della memoria.";
             }
 
             document.getElementById('summary-cognitive-rating').textContent = rating;

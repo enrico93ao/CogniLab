@@ -15,7 +15,7 @@ export function mountFeedbackSummary(host){
  if(auth.currentUser?.uid!==feedbackManagerUid)return {refresh:async()=>{},clear:()=>{}};
  const element=(tag,text,cls)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;if(cls)n.className=cls;return n;};
  const card=element('section',undefined,'care-card care-feedback-summary');card.setAttribute('aria-label','Riepilogo questionari di gradimento');
- card.append(element('div','SOLO SUPER USER','care-eyebrow'),element('h2','Come viene vissuta la palestra'));
+ card.append(element('div','SOLO SUPER USER','care-eyebrow'),element('h2','Questionari di gradimento'));
  const note=element('p','Medie delle valutazioni da 1 a 5. La media generale riunisce le tre domande. Sono inclusi i questionari registrati e anonimi, senza mostrare nomi, email o singole risposte.','care-muted');
  const status=element('p','Caricamento dei questionari…','care-notice');status.setAttribute('role','status');status.setAttribute('aria-live','polite');
  const count=element('p',undefined,'care-feedback-count'),grid=element('div',undefined,'care-feedback-grid'),updated=element('p',undefined,'care-muted');

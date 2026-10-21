@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Relazioni Logiche - Pro Edition</title>
+    <title>Relazioni Logiche - CogniLab</title>
     <link rel="stylesheet" href="assets/vendor/exercise-utilities-3.4.17.css?v=assets31">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
@@ -60,7 +60,7 @@
 <link rel="stylesheet" href="shared/cognilab.css">
 <script src="shared/interface.js" defer></script>
 <script>window.CogniLabExercise={"id":"relazioni-logiche","title":"Relazioni logiche","category":"Funzioni esecutive","setup":"menu-screen"};</script>
-<script src="shared/exercise-runtime.js?v=clarity37"></script>
+<script src="shared/exercise-runtime.js?v=copy44"></script>
 </head>
 <body data-cognilab="exercise" class="flex items-center justify-center p-4 md:p-8">
 
@@ -128,7 +128,7 @@
 
         <div id="stats-screen" class="hidden space-y-8">
             <div class="text-center">
-                <h2 class="text-3xl font-black">Performance Finale</h2>
+                <h2 class="text-3xl font-black">Risultati della sessione</h2>
                 <p id="performance-rank" class="text-blue-600 font-bold uppercase tracking-widest text-sm mt-1"></p>
             </div>
 
@@ -379,10 +379,10 @@
             setTimeout(() => circle.style.strokeDashoffset = offset, 100);
 
             // Titolo prestazione
-            let rank = "Apprendista";
-            if (perc === 100) rank = "Genio della Logica 🏆";
-            else if (perc >= 80) rank = "Mente Analitica 🧠";
-            else if (perc >= 50) rank = "Pensatore Strategico 📈";
+            let rank = "Meno della metà delle risposte corrette";
+            if (perc === 100) rank = "Tutte le risposte corrette";
+            else if (perc >= 80) rank = "Almeno 8 risposte corrette su 10";
+            else if (perc >= 50) rank = "Almeno metà delle risposte corrette";
             document.getElementById('performance-rank').innerText = rank;
 
             // Storico dettagliato

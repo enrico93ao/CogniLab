@@ -45,7 +45,7 @@
 <link rel="stylesheet" href="shared/cognilab.css">
 <script src="shared/interface.js" defer></script>
 <script>window.CogniLabExercise={"id":"cifrario","title":"Il cifrario","category":"Funzioni esecutive","setup":"menuScreen"};</script>
-<script src="shared/exercise-runtime.js?v=clarity37"></script>
+<script src="shared/exercise-runtime.js?v=copy44"></script>
 </head>
 <body data-cognilab="exercise" class="min-h-full flex flex-col justify-between overflow-x-hidden relative bg-slate-950">
 
@@ -114,7 +114,7 @@
             </div>
             
             <div class="mt-4 text-center text-slate-400 text-xs px-4 leading-relaxed">
-                <p>💡 <strong>Istruzioni:</strong> Associa ogni figura geometrica della sequenza al rispettivo numero mostrato nella legenda fissa in alto. Premi i tasti corrispondenti il più velocemente possibile per allenare la scarica visuo-motoria.</p>
+                <p>💡 <strong>Istruzioni:</strong> Associa ogni figura geometrica della sequenza al rispettivo numero mostrato nella legenda fissa in alto. Premi i tasti corrispondenti il più velocemente possibile seguendo la legenda.</p>
             </div>
         </main>
 
@@ -200,7 +200,7 @@
         <main id="resultScreen" class="hidden flex-1 flex flex-col justify-start my-auto max-w-2xl mx-auto w-full">
             <div class="bg-slate-900/95 border border-slate-800 rounded-2xl p-4 sm:p-6 shadow-2xl backdrop-blur-md text-center">
                 <span class="text-[10px] px-2.5 py-1 rounded-full bg-emerald-950/80 text-emerald-400 border border-emerald-800/60 font-extrabold tracking-widest uppercase">Sessione Completata</span>
-                <h2 class="text-xl sm:text-2xl font-black mt-2 mb-4 text-slate-100">Report delle Performance Cognitive</h2>
+                <h2 class="text-xl sm:text-2xl font-black mt-2 mb-4 text-slate-100">Risultati della sessione</h2>
 
                 <!-- Metrics grid -->
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mb-6">
@@ -217,7 +217,7 @@
                         <p id="resAvgSpeed" class="text-xl font-extrabold text-amber-400 mt-0.5">0s</p>
                     </div>
                     <div class="bg-slate-950/85 p-3 rounded-xl border border-slate-800">
-                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Affaticamento</p>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Variazione velocità</p>
                         <p id="resFatigue" class="text-xl font-extrabold text-rose-400 mt-0.5">0%</p>
                     </div>
                 </div>
@@ -226,19 +226,19 @@
                 <div class="mb-5">
                     <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2 text-left flex items-center gap-1.5">
                         <svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 002 2h2a2 2 0 002-2"></path></svg>
-                        Grafico della Velocità di Scarica (Rendimento Attentivo / Tempo)
+                        Velocità delle risposte durante la sessione
                     </h3>
                     <div class="bg-slate-950 rounded-xl p-2 sm:p-4 border border-slate-800 h-64 relative">
                         <canvas id="performanceChart"></canvas>
                     </div>
                     <p class="text-[9px] text-slate-400 mt-2 text-left leading-normal">
-                        *L'asse temporale mostra l'andamento della sessione. Eventuali cali o flessioni della linea indicano momenti di affaticamento dell'attenzione sostenuta.
+                        Il grafico mostra come cambia la velocità durante la prova. Le variazioni, da sole, non permettono di stabilire se ci sia affaticamento.
                     </p>
                 </div>
 
                 <!-- Personal feedback analysis -->
                 <div class="bg-slate-950 border border-slate-800 p-4 rounded-xl text-left mb-6">
-                    <h4 class="text-xs font-extrabold text-cyan-400 uppercase tracking-wide mb-1">Analisi Funzionale Attentiva</h4>
+                    <h4 class="text-xs font-extrabold text-cyan-400 uppercase tracking-wide mb-1">Commento ai risultati</h4>
                     <p id="cognitiveEvaluation" class="text-xs sm:text-sm text-slate-300 leading-relaxed font-light">
                         Elaborazione statistica in corso...
                     </p>
@@ -258,7 +258,7 @@
 
         <!-- FOOTER / NOTA SCIENTIFICA -->
         <footer class="text-center py-2 shrink-0 border-t border-slate-900 mt-2">
-            <p class="text-[9px] text-slate-500 font-medium">Training cognitivo clinico basato sul principio del Digit Symbol Substitution Test • © 2026</p>
+            <p class="text-[9px] text-slate-500 font-medium">Esercizio di associazione tra simboli e numeri. Non è un test diagnostico • © 2026</p>
         </footer>
 
     </div>
@@ -955,7 +955,7 @@
             let evaluation = "";
             
             if (correctCount === 0) {
-                evaluation = "Filtro attentivo debole. Consigliamo di riprovare riducendo al minimo le distrazioni e memorizzando preliminarmente gli accoppiamenti numerici della legenda.";
+                evaluation = "In questa prova non è stata completata una sequenza. Prima di riprovare, controlla con calma le associazioni nella legenda.";
                 document.getElementById('cognitiveEvaluation').innerText = evaluation;
                 return;
             }
@@ -963,34 +963,34 @@
             let speedProfile = "";
             const floatSpeed = parseFloat(avgSpeed);
             if (floatSpeed < (currentLevel === 1 ? 2.2 : 3.8)) {
-                speedProfile = "Velocità di elaborazione e scarica motoria eccezionale. Dimostra una notevole fluidità nei processi di scansione percettiva visiva.";
+                speedProfile = "Hai completato le sequenze in tempi brevi per questa impostazione del gioco.";
             } else if (floatSpeed < (currentLevel === 1 ? 4.8 : 6.5)) {
-                speedProfile = "Velocità esecutiva nei range medi di attenzione focalizzata normotipica.";
+                speedProfile = "Il tempo medio per sequenza è riportato nel riepilogo. Confrontalo con prove svolte con le stesse impostazioni.";
             } else {
-                speedProfile = "I tempi di reazione indicano una latenza nell'elaborazione visuo-spaziale delle icone geometriche o nel recupero della mappa cifrata.";
+                speedProfile = "In questa prova le sequenze hanno richiesto più tempo. Puoi consultare il tempo medio nel riepilogo.";
             }
 
             let accuracyProfile = "";
             if (accuracy >= 94) {
-                accuracyProfile = " L'accuratezza rasenta l'eccellenza: hai mantenuto un controllo inibitorio eccellente sopprimendo gli impulsi di errore prassico anche sotto sforzo temporale.";
+                accuracyProfile = " Quasi tutte le selezioni sono corrette.";
             } else if (accuracy >= 82) {
-                accuracyProfile = " L'accuratezza è moderata, indicando transitori deficit attentivi superati grazie ad un'adeguata autocorrezione.";
+                accuracyProfile = " La maggior parte delle selezioni è corretta; nel riepilogo trovi anche gli errori.";
             } else {
-                accuracyProfile = " Si riscontra un pattern impulsivo marcato (Speed-Accuracy Trade-off). Hai privilegiato la velocità esecutiva compromettendo severamente la precisione del codice.";
+                accuracyProfile = " Ci sono state diverse selezioni errate. Prima di premere, ricontrolla il numero associato alla figura.";
             }
 
             let fatigueProfile = "";
             if (fatigueValue < -12) {
-                fatigueProfile = " Si rileva una flessione sensibile nella seconda parte della sessione. Questo indica una vulnerabilità della tenuta attentiva prolungata (rapido affaticamento corticale prefrontale).";
+                fatigueProfile = " Nella seconda parte della prova la velocità delle risposte è diminuita. Il dato, da solo, non ne spiega la causa.";
             } else if (fatigueValue >= -12 && fatigueValue <= 4) {
-                fatigueProfile = " La tenuta dell'attenzione risulta perfettamente costante e resiliente, immune al carico temporale e alle distrazioni dello sfondo.";
+                fatigueProfile = " La velocità delle risposte è rimasta abbastanza simile nelle due parti della prova.";
             } else {
-                fatigueProfile = " Si evidenzia un forte effetto di riscaldamento cognitivo (warming up): l'efficacia dell'attenzione selettiva e del filtro visivo si è consolidata ed è migliorata con il passare dei secondi.";
+                fatigueProfile = " Nella seconda parte della prova la velocità delle risposte è aumentata.";
             }
 
             let distractorNote = "";
             if (currentLevel === 2) {
-                distractorNote = " L'allenamento a Livello 2 ha stimolato vigorosamente la corteccia prefrontale costringendoti a ignorare gli elementi fluttuanti, a superare l'effetto Stroop di mismatch dei colori e ad aggiornare continuamente la mappa mentale della legenda a ogni sequenza completata.";
+                distractorNote = " Nel livello 2 la legenda cambia a ogni sequenza: controllala prima di rispondere. Questi dati descrivono il gioco e non sono una valutazione clinica.";
             }
 
             evaluation = `${speedProfile}${accuracyProfile}${fatigueProfile}${distractorNote}`;
@@ -1016,7 +1016,7 @@
                 data: {
                     labels: chartDataPoints,
                     datasets: [{
-                        label: 'Velocità di scarica',
+                        label: 'Velocità delle risposte',
                         data: speedDataPoints,
                         borderColor: mainColor,
                         backgroundColor: gradientBg,

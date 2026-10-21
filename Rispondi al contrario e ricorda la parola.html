@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NeuroFlow - Training Cognitivo Pro</title>
+  <title>Rispondi al contrario e ricorda | CogniLab</title>
   <!-- Caricamento di Tailwind CSS per uno stile moderno e reattivo -->
   <link rel="stylesheet" href="assets/vendor/exercise-utilities-3.4.17.css?v=assets31">
   <!-- Caricamento delle icone Lucide -->
@@ -49,7 +49,7 @@
 <link rel="stylesheet" href="shared/cognilab.css">
 <script src="shared/interface.js" defer></script>
 <script>window.CogniLabExercise={"id":"contrario-ricorda","title":"Rispondi al contrario e ricorda la parola","category":"Funzioni esecutive","setup":"screen-start"};</script>
-<script src="shared/exercise-runtime.js?v=clarity37"></script>
+<script src="shared/exercise-runtime.js?v=copy44"></script>
 </head>
 <body data-cognilab="exercise" class="min-h-screen bg-[#F1F5F9] flex flex-col items-center justify-center p-4 text-slate-900 selection:bg-indigo-100">
 
@@ -82,7 +82,7 @@
             Allena il tuo <span class="text-indigo-600">Focus Cognitivo</span>
           </h2>
           <p class="text-sm text-slate-500 font-medium leading-relaxed">
-            Un test clinico di inibizione e memoria di lavoro. Rispondi all'opposto della realtà e tieni contemporaneamente a mente le parole chiave.
+            Un esercizio che combina due compiti. Rispondi all'opposto della realtà e tieni contemporaneamente a mente le parole chiave.
           </p>
         </div>
 
@@ -91,13 +91,13 @@
             <div class="bg-white p-3 rounded-xl shadow-sm"><i data-lucide="zap" class="w-5 h-5 text-indigo-600"></i></div>
             <div>
               <p class="text-xs font-black uppercase text-slate-400">Logica Inversa</p>
-              <p class="text-sm font-bold text-slate-700">Inibisci la verità automatica.</p>
+              <p class="text-sm font-bold text-slate-700">Scegli il contrario della risposta vera.</p>
             </div>
           </div>
           <div class="group flex items-center gap-4 p-5 bg-slate-50 rounded-3xl border border-slate-100 transition-all">
             <div class="bg-white p-3 rounded-xl shadow-sm"><i data-lucide="timer" class="w-5 h-5 text-indigo-600"></i></div>
             <div>
-              <p class="text-xs font-black uppercase text-slate-400">Working Memory</p>
+              <p class="text-xs font-black uppercase text-slate-400">Memoria di lavoro</p>
               <p class="text-sm font-bold text-slate-700">Memorizza l'ultima parola.</p>
             </div>
           </div>
@@ -112,7 +112,7 @@
           </div>
 
           <button id="btn-start" class="w-full bg-slate-900 hover:bg-indigo-600 text-white font-black py-5 rounded-2xl transition-all shadow-2xl flex items-center justify-center gap-3 group active:scale-[0.98]">
-            START SESSION <i data-lucide="chevron-right" class="group-hover:translate-x-1 transition-transform w-5 h-5"></i>
+            Inizia la sessione <i data-lucide="chevron-right" class="group-hover:translate-x-1 transition-transform w-5 h-5"></i>
           </button>
         </div>
       </section>
@@ -123,7 +123,7 @@
           <div class="flex justify-between items-end mb-4">
             <span class="text-[10px] font-black text-indigo-600 uppercase tracking-widest flex items-center gap-2">
               <span class="w-2 h-2 rounded-full bg-indigo-600 animate-pulse"></span>
-              Task: Inibizione
+              Regola del contrario
             </span>
             <span id="question-progress-text" class="text-[10px] font-black text-slate-300 uppercase tracking-widest">1 / 3</span>
           </div>
@@ -174,7 +174,7 @@
              <i id="result-icon" data-lucide="award" class="w-10 h-10"></i>
           </div>
           <h2 id="result-headline" class="text-3xl font-black text-slate-800 tracking-tight leading-none uppercase">
-            Leggendario!
+            Risposte registrate
           </h2>
         </div>
 
@@ -217,29 +217,29 @@
           <div class="bg-indigo-600 text-white w-16 h-16 rounded-[1.5rem] flex items-center justify-center mx-auto mb-4 shadow-xl shadow-indigo-100">
             <i data-lucide="activity" class="w-8 h-8"></i>
           </div>
-          <h2 class="text-2xl font-black text-slate-800 tracking-tight leading-none uppercase">Neuro-Report Finale</h2>
+          <h2 class="text-2xl font-black text-slate-800 tracking-tight leading-none uppercase">Riepilogo finale</h2>
           <p class="text-slate-400 text-[10px] font-bold uppercase tracking-widest mt-2 italic">Analisi sessione completata</p>
         </div>
 
         <!-- Session Stats Grid -->
         <div class="grid grid-cols-3 gap-3 mb-8">
           <div class="bg-white border border-slate-100 p-4 rounded-3xl text-center shadow-sm">
-            <p class="text-[8px] font-black text-slate-400 uppercase mb-1 text-center">Accuracy</p>
+            <p class="text-[8px] font-black text-slate-400 uppercase mb-1 text-center">Risposte corrette</p>
             <p id="stat-accuracy" class="text-xl font-black text-indigo-600 text-center">0%</p>
           </div>
           <div class="bg-white border border-slate-100 p-4 rounded-3xl text-center shadow-sm">
-            <p class="text-[8px] font-black text-slate-400 uppercase mb-1 text-center">Max Level</p>
+            <p class="text-[8px] font-black text-slate-400 uppercase mb-1 text-center">Livello raggiunto</p>
             <p id="stat-max-level" class="text-xl font-black text-slate-800 text-center">0</p>
           </div>
           <div class="bg-white border border-slate-100 p-4 rounded-3xl text-center shadow-sm">
-            <p class="text-[8px] font-black text-slate-400 uppercase mb-1 text-center">Trials</p>
+            <p class="text-[8px] font-black text-slate-400 uppercase mb-1 text-center">Prove</p>
             <p id="stat-trials" class="text-xl font-black text-slate-800 text-center">0</p>
           </div>
         </div>
 
         <!-- Progress List -->
         <div class="flex-1 space-y-3 overflow-y-auto pr-2 custom-scrollbar mb-8">
-          <p class="text-[9px] font-black text-slate-300 uppercase tracking-widest mb-2 px-2">Cronologia Performance</p>
+          <p class="text-[9px] font-black text-slate-300 uppercase tracking-widest mb-2 px-2">Risultati delle prove</p>
           <div id="summary-history-list" class="space-y-3">
             <!-- Storico sessioni iniettato via JS -->
           </div>
@@ -257,11 +257,11 @@
     <!-- Footer con dettagli protocollo clinico -->
     <footer class="px-10 py-5 bg-white border-t border-slate-50 flex justify-between items-center shrink-0">
        <span class="text-[7px] font-black tracking-[0.4em] uppercase text-slate-300 flex items-center gap-2">
-         <i data-lucide="activity" class="w-2 h-2"></i> Protocol: NEURO-FLOW-V3
+         <i data-lucide="activity" class="w-2 h-2"></i> CogniLab · Risposte e memoria
        </span>
        <div class="flex gap-1.5 items-center">
           <div class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></div>
-          <span class="text-[7px] font-black tracking-[0.4em] uppercase text-emerald-500">Sync Active</span>
+          <span class="text-[7px] font-black tracking-[0.4em] uppercase text-emerald-500">Salvataggio dei risultati</span>
        </div>
     </footer>
 
@@ -513,7 +513,7 @@
       if (isPerfect) {
         iconContainer.className = 'inline-flex items-center justify-center w-20 h-20 rounded-[2rem] mb-6 shadow-2xl bg-amber-100 text-amber-600 rotate-6';
         icon.setAttribute('data-lucide', 'award');
-        headline.innerText = 'Leggendario!';
+        headline.innerText = 'Risposte registrate';
         btnNextText.innerText = `PROSSIMO LIVELLO (${Math.min(numQuestions + 1, 10)})`;
         btnNextIcon.setAttribute('data-lucide', 'trending-up');
       } else {

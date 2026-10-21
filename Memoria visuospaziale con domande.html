@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NeuroTrain - Riabilitazione Neuropsicologica</title>
+    <title>Memoria visuospaziale con domande | CogniLab</title>
     <!-- Tailwind CSS for modern, clean UI -->
     <link rel="stylesheet" href="assets/vendor/exercise-utilities-3.4.17.css?v=assets31">
     <!-- Tailwind Config for custom medical theme -->
@@ -17,7 +17,7 @@
 <link rel="stylesheet" href="shared/cognilab.css">
 <script src="shared/interface.js" defer></script>
 <script>window.CogniLabExercise={"id":"memoria-visuospaziale-domande","title":"Memoria visuospaziale con domande","category":"Visuospaziale","setup":"step-difficulty"};</script>
-<script src="shared/exercise-runtime.js?v=clarity37"></script>
+<script src="shared/exercise-runtime.js?v=copy44"></script>
 </head>
 <body data-cognilab="exercise" class="bg-slate-50 min-h-screen text-slate-800 flex flex-col justify-between">
 
@@ -31,8 +31,8 @@
                     </svg>
                 </div>
                 <div>
-                    <h1 class="text-xl font-bold text-slate-900 tracking-tight">NeuroTrain v2.2</h1>
-                    <p class="text-xs text-slate-500 font-medium">Software Clinico di Stimolazione Cognitiva</p>
+                    <h1 class="text-xl font-bold text-slate-900 tracking-tight">Memoria visiva con domande</h1>
+                    <p class="text-xs text-slate-500 font-medium">CogniLab · Memoria visiva</p>
                 </div>
             </div>
             <div class="flex items-center space-x-3">
@@ -57,8 +57,8 @@
         <div id="step-difficulty" class="bg-white rounded-2xl shadow-xl p-8 border border-slate-100">
             <div class="text-center mb-8">
                 <span class="text-clinical-600 font-bold text-sm tracking-wider uppercase bg-clinical-50 px-3 py-1 rounded-full">Fase 1</span>
-                <h2 class="text-2xl font-bold text-slate-900 mt-3 mb-2">Seleziona il Livello di Carico Cognitivo</h2>
-                <p class="text-slate-500 text-sm max-w-lg mx-auto">Scegli la complessità degli stimoli visivi. L'esercizio allenerà la tua abilità di codifica rapida e la ritenzione spaziale a breve termine.</p>
+                <h2 class="text-2xl font-bold text-slate-900 mt-3 mb-2">Scegli la difficoltà</h2>
+                <p class="text-slate-500 text-sm max-w-lg mx-auto">Scegli quanti dettagli osservare e per quanto tempo. Poi rispondi alle domande sull’immagine.</p>
             </div>
 
             <div class="grid md:grid-cols-3 gap-6">
@@ -141,7 +141,7 @@
             <div class="text-center mb-8 border-b border-slate-100 pb-6">
                 <span class="text-clinical-600 font-bold text-sm tracking-wider uppercase bg-clinical-50 px-3 py-1 rounded-full">Fase 3</span>
                 <h2 class="text-2xl font-bold text-slate-900 mt-3 mb-2">Verifica del Richiamo Visivo</h2>
-                <p class="text-slate-500 text-sm">L'immagine è stata nascosta. Rispondi alle domande basandoti sulla tua traccia mnemonica.</p>
+                <p class="text-slate-500 text-sm">L'immagine è stata nascosta. Rispondi alle domande ricordando ciò che hai osservato.</p>
                 
                 <!-- Progress bar -->
                 <div class="w-full bg-slate-100 h-2 rounded-full mt-6 overflow-hidden">
@@ -184,8 +184,8 @@
         <div id="step-results" class="bg-white rounded-2xl shadow-xl p-8 border border-slate-100 hidden">
             <div class="text-center mb-8">
                 <span class="text-clinical-600 font-bold text-sm tracking-wider uppercase bg-clinical-50 px-3 py-1 rounded-full">Fase 4</span>
-                <h2 class="text-2xl font-bold text-slate-900 mt-3 mb-2">Profilo di Risposta Clinico</h2>
-                <p class="text-slate-500 text-sm">Resoconto dettagliato del tasso di accuratezza e dei domini cognitivi stimolati.</p>
+                <h2 class="text-2xl font-bold text-slate-900 mt-3 mb-2">Risultati della prova</h2>
+                <p class="text-slate-500 text-sm">Qui trovi le risposte date e le percentuali di risposte corrette nelle diverse parti della prova.</p>
             </div>
 
             <!-- Score Circular Visualization -->
@@ -212,7 +212,7 @@
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-clinical-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
-                    <span>Analisi dei Domini Cognitivi</span>
+                    <span>Risultati per tipo di domanda</span>
                 </h4>
                 <div class="space-y-4">
                     <!-- Attenzione Selettiva -->
@@ -277,7 +277,7 @@
     <!-- Footer -->
     <footer class="bg-slate-100 border-t border-slate-200 py-4 px-6 text-center text-xs text-slate-500">
         <div class="max-w-4xl mx-auto flex flex-col md:flex-row justify-between items-center gap-2">
-            <span>Sviluppato secondo i protocolli neuropsicologici clinici standardizzati di valutazione ed enhancement cognitivo.</span>
+            <span>Esercizio di allenamento: i risultati descrivono la prova e non costituiscono una valutazione neuropsicologica.</span>
             <span class="font-semibold text-slate-600">&copy; 2026 NeuroTrain Labs. Tutti i diritti riservati.</span>
         </div>
     </footer>
@@ -1207,20 +1207,20 @@
             let rating = '';
             let neuropsychFeedback = '';
             if (pct === 100) {
-                rating = 'Prestazione Ottimale (Eccellente)';
-                neuropsychFeedback = 'Straordinaria capacità di immagazzinamento visuo-spaziale ed eccellente stabilità attentiva. L\'ancoraggio visivo dei dettagli è rapido ed efficace. Le tue funzioni esecutive non mostrano alcuna deflessione visibile.';
+                rating = 'Tutte le risposte corrette';
+                neuropsychFeedback = 'Hai risposto correttamente a tutte le domande su questa immagine.';
             } else if (pct >= 70) {
-                rating = 'Prestazione Buona (Preservata)';
-                neuropsychFeedback = 'Buon livello di vigilanza ed elaborazione dei dettagli. La memoria di lavoro trattiene le informazioni chiave anche in contesti moderatamente complessi. Continua così per mantenere flessibile ed elastica la tua riserva cognitiva.';
+                rating = 'Almeno il 70% di risposte corrette';
+                neuropsychFeedback = 'Hai risposto correttamente ad almeno il 70% delle domande su questa immagine.';
             } else if (pct >= 50) {
-                rating = 'Prestazione Lievemente Deficitaria (Sotto Soglia)';
-                neuropsychFeedback = 'Si evidenzia qualche incertezza nel recupero attivo a breve termine o una vulnerabilità ad elementi distrattori ambientali. Ti consigliamo di ripetere l\'esercizio a difficoltà media rallentando l\'esplorazione oculare in modo sistematico.';
+                rating = 'Almeno la metà delle risposte corrette';
+                neuropsychFeedback = 'Hai risposto correttamente ad almeno la metà delle domande su questa immagine. Nel riepilogo puoi rivedere i dettagli che mancavano.';
             } else {
-                rating = 'Prestazione Deficitaria (Richiede Allenamento)';
-                neuropsychFeedback = 'Il carico cognitivo imposto ha superato la capacità di ritenzione momentanea. Questo è del tutto normale: la memoria visiva richiede allenamento continuo per ottimizzare le proprie strategie di codifica semantica degli oggetti.';
+                rating = 'Meno della metà delle risposte corrette';
+                neuropsychFeedback = 'Hai risposto correttamente a meno della metà delle domande su questa immagine. Il risultato riguarda la prova svolta; con il professionista puoi valutare quale difficoltà scegliere.';
             }
-            document.getElementById('clinical-rating').textContent = `Classificazione: ${rating}`;
-            document.getElementById('neuropsych-feedback-text').innerHTML = `<strong>Valutazione Clinica:</strong> ${neuropsychFeedback}`;
+            document.getElementById('clinical-rating').textContent = `Esito della prova: ${rating}`;
+            document.getElementById('neuropsych-feedback-text').innerHTML = `<strong>Commento alla prova:</strong> ${neuropsychFeedback}`;
 
             // Domain analysis percentages
             const attentionQuestions = userAnswers.filter(a => a.domain === 'attention');

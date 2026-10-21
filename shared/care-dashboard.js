@@ -1,11 +1,11 @@
 import {sessionDuration,exerciseDuration,durationLabel,durationExplanation} from './session-duration.mjs';
-import {mountFeedbackSummary,feedbackManagerUid} from './feedback-summary.js?v=feedback39';
+import {mountFeedbackSummary,feedbackManagerUid} from './feedback-summary.js?v=copy44';
 import {onAuthStateChanged} from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js';
 import {auth} from './firebase-client.js';
 import {currentCareUser,patientWorkspace,checkCareStorage,professionalPatients,professionalPatient,registerManagedPatient,invitePatient,setConnection,assignProgram,sendAssignmentNotification,archiveProgram,setPatientArchived,startAssignedProgram,careError} from './care-store.js?v=opposite43';
 import {programProgress,resultsFromCare} from './care-model.mjs?v=opposite43';
 import {exercises,exerciseById} from './exercise-catalog.mjs';
-import {createProgressView} from './progress-view.js?v=journey36';
+import {createProgressView} from './progress-view.js?v=copy44';
 import {pendingCare,retryPending} from './progress-store.js';
 import {requireProfessional} from './clinical-access.js';
 const el=(tag,text,cls)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;if(cls)n.className=cls;return n;};
@@ -53,7 +53,7 @@ function programCard(program,{professional=false,patientUid,onChange,onEdit}={})
 }
 async function patientView(user){
  const shortcut=document.querySelector('.care-shortcuts a[href="#care-workspace"]');if(shortcut)shortcut.textContent='Il mio programma';
- const top=card('Il tuo allenamento, un passo alla volta','IL TUO PERCORSO');top.classList.add('care-hero');top.append(el('p','Qui trovi i programmi del professionista. Puoi riprendere una sessione lasciata a metà e ritrovare i risultati anche da un altro dispositivo.'));
+ const top=card('Il tuo programma di esercizi','IL TUO PERCORSO');top.classList.add('care-hero');top.append(el('p','Qui trovi i programmi assegnati dal tuo professionista. Se interrompi una sessione, puoi riprenderla dagli esercizi già salvati, anche su un altro dispositivo.'));
  const refresh=button('Aggiorna programmi',()=>action(refresh,load));top.append(refresh);workspace.append(top);
  const grid=el('div',undefined,'care-grid'),programHost=card('I programmi assegnati','DA SVOLGERE'),account=card('Un percorso su misura per te','SUPPORTO PROFESSIONALE');grid.append(programHost,account);workspace.append(grid);
  const list=el('div');programHost.append(list);

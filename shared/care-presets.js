@@ -1,5 +1,7 @@
 (() => {
  'use strict';
+ const editorialLabelUpdates=new Map([["Avvia Sessione di Test","Avvia esercizio"],["Nuova Sessione Locale","Nuova sessione"],["Livello 1\n                        CONSIGLIATO\n                    \n                    Difficile\n                    \n                        Griglia 4x4 con 4 cells da ricordare. La griglia ruoterà esattamente di 90° in senso orario.","Livello 1\n                        CONSIGLIATO\n                    \n                    Difficile\n                    \n                        Griglia 4x4 con 4 caselle da ricordare. La griglia ruoterà esattamente di 90° in senso orario."],["Livello 2\n                        MENTAL BENDER\n                    \n                    Estremo\n                    \n                        Griglia 5x5 con 5 cells da ricordare. La griglia subirà una rotazione casuale (90°, 180° o speculare).","Livello 2\n                        LIVELLO AVANZATO\n                    \n                    Estremo\n                    \n                        Griglia 5x5 con 5 caselle da ricordare. La griglia subirà una rotazione casuale (90°, 180° o speculare)."],["Orientamento temporale e spaziale","Orientamento temporale"],["START SESSION","Inizia la sessione"]]);
+ const sameLabel=(stored,current)=>stored===current||editorialLabelUpdates.get(stored)===current;
  const preview=new URLSearchParams(location.search).has('configure');
  const panels=()=>String(window.CogniLabExercise?.setup||'').split(',').map(id=>document.getElementById(id.trim())).filter(Boolean);
  const controls=panel=>[...panel.querySelectorAll('input,select')].filter(c=>c.dataset.uiProxy!=='true'&&!['password','text','email','file','hidden','submit','button'].includes(c.type));
@@ -9,7 +11,7 @@
  const isStart=b=>/\b(avvia|inizia|start|comincia)\b/i.test(b.textContent)||/^(?:window\.)?(?:startGame|startExercise|initGame|initSession|setupAndStart|selectDifficulty)\s*\(/.test(b.getAttribute('onclick')||'');
  const describe=b=>({index:[...document.querySelectorAll('button')].indexOf(b),label:b.textContent.trim(),handler:b.getAttribute('onclick')||''});
  function findStart(config){
-  if(config?.start){const b=document.querySelectorAll('button')[config.start.index];if(!b||!isStart(b)||b.textContent.trim()!==config.start.label||(b.getAttribute('onclick')||'')!==config.start.handler)throw Error('Il comando di avvio è cambiato.');return b;}
+  if(config?.start){const b=document.querySelectorAll('button')[config.start.index];if(!b||!isStart(b)||!sameLabel(config.start.label,b.textContent.trim())||(b.getAttribute('onclick')||'')!==config.start.handler)throw Error('Il comando di avvio è cambiato.');return b;}
   const roots=panels(),all=[...document.querySelectorAll('button')].filter(b=>isStart(b)&&!b.disabled&&!b.closest('[hidden],.hidden'));
   const local=all.filter(b=>roots.some(p=>p.contains(b)));const list=local.length?local:all;
   if(list.length!==1)throw Error('Il professionista deve selezionare il livello di avvio e salvare nuovamente la configurazione.');
@@ -23,7 +25,7 @@
   if(!config||config.format!==1||!Array.isArray(config.controls))throw Error('Configurazione non valida');
   if(preview&&config.start)prescribedStart=config.start;
   const allowed=new Map(panels().map(p=>[p.id,p]));
-  for(const item of config.buttons||[]){const panel=allowed.get(item.panel),b=panel?.querySelectorAll('button')[item.index];if(!b||!safeButton(b)||(item.label&&item.label!==b.textContent.trim()))throw Error('Le opzioni del menu sono cambiate: aggiorna la configurazione.');if(isStart(b))continue;if(!selected(b))b.click();}
+  for(const item of config.buttons||[]){const panel=allowed.get(item.panel),b=panel?.querySelectorAll('button')[item.index];if(!b||!safeButton(b)||(item.label&&!sameLabel(item.label,b.textContent.trim())))throw Error('Le opzioni del menu sono cambiate: aggiorna la configurazione.');if(isStart(b))continue;if(!selected(b))b.click();}
   for(const item of config.controls){const panel=allowed.get(item.panel),c=panel&&controls(panel)[item.index];if(!c||(item.key&&item.key!==(c.id||c.name||c.type)))throw Error('Il menu è cambiato: chiedi al professionista di aggiornare la configurazione.');
    if(c.tagName==='SELECT'&&![...c.options].some(o=>o.value===String(item.value)))throw Error('Opzione non più disponibile');
    if(['checkbox','radio'].includes(c.type)){const desired=item.checked===true;if(c.checked!==desired&&(c.type==='checkbox'||desired))c.click();c.checked=desired;}else c.value=String(item.value);

@@ -27,7 +27,7 @@
 <link rel="stylesheet" href="shared/cognilab.css">
 <script src="shared/interface.js" defer></script>
 <script>window.CogniLabExercise={"id":"orologio-invisibile","title":"L'orologio invisibile","category":"Attenzione","setup":"screen-setup"};</script>
-<script src="shared/exercise-runtime.js?v=clarity37"></script>
+<script src="shared/exercise-runtime.js?v=copy44"></script>
 </head>
 <body data-cognilab="exercise" class="bg-slate-50 text-slate-800 min-h-screen flex flex-col justify-between">
 
@@ -59,7 +59,7 @@
                     <span class="bg-emerald-100 text-emerald-800 text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider">Nuova Sessione</span>
                     <h2 class="text-3xl font-extrabold text-slate-900 tracking-tight">Allena il tuo Orologio Interno</h2>
                     <p class="text-slate-500 leading-relaxed">
-                        Questo esercizio allena la capacità di stimare lo scorrere del tempo in assenza di stimoli esterni, stimolando la focalizzazione continua e riducendo l'impulsività.
+                        Segui il ritmo della lancetta. Quando l’orologio scompare, continua a contare il tempo e premi STOP al momento richiesto.
                     </p>
                 </div>
 
@@ -282,8 +282,8 @@
             <div id="screen-results" class="hidden space-y-8">
                 <div class="text-center max-w-2xl mx-auto space-y-3">
                     <span class="bg-indigo-100 text-indigo-800 text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider">Sessione Completata</span>
-                    <h2 class="text-3xl font-extrabold text-slate-900 tracking-tight">Analisi della Performance</h2>
-                    <p class="text-slate-500">I dati sottostanti offrono un quadro chiaro sulle attitudini di stima temporale del paziente.</p>
+                    <h2 class="text-3xl font-extrabold text-slate-900 tracking-tight">Risultati della prova</h2>
+                    <p class="text-slate-500">Qui trovi gli scarti tra il momento richiesto e quello in cui hai premuto STOP.</p>
                 </div>
 
                 <!-- Statistiche Chiave Riassuntive -->
@@ -350,7 +350,7 @@
                 <!-- Report Clinico Esplicativo dell'Equilibrio Cognitivo -->
                 <div class="bg-indigo-50/50 rounded-2xl p-6 border border-indigo-100 max-w-3xl mx-auto space-y-3">
                     <h4 class="text-sm font-bold text-indigo-900 flex items-center gap-2">
-                        <i class="fa-solid fa-clipboard-question text-base"></i> Interpretazione Terapeutica del Profilo
+                        <i class="fa-solid fa-clipboard-question text-base"></i> Commento ai tempi registrati
                     </h4>
                     <p id="txt-clinical-report" class="text-xs text-indigo-950 leading-relaxed">
                         In attesa dei dati statistici...
@@ -753,15 +753,15 @@
 
             if (absErr <= 150) { // Ottima precisione cognitiva
                 feedbackClass = "bg-emerald-50 border-emerald-200 text-emerald-800";
-                titleText = `<i class="fa-solid fa-circle-check text-xl mr-2"></i> Eccellente Precisione!`;
-                descriptionText = `Scarto di soli <strong>${absErr} ms</strong>. Sincronizzazione ed attenzione ottimali.`;
+                titleText = `<i class="fa-solid fa-circle-check text-xl mr-2"></i> Tempo vicino al bersaglio`;
+                descriptionText = `Scarto di soli <strong>${absErr} ms</strong>. Il punto di arresto è vicino a quello richiesto.`;
             } else if (absErr <= 350) { // Precisione moderata, buona prestazione
                 feedbackClass = "bg-amber-50 border-amber-200 text-amber-800";
                 titleText = `<i class="fa-solid fa-circle-exclamation text-xl mr-2"></i> Buono`;
-                descriptionText = `Scarto di <strong>${absErr} ms</strong> (${result.anticipo ? 'Anticipato' : 'Ritardato'}). Buona sincronizzazione cerebrale.`;
+                descriptionText = `Scarto di <strong>${absErr} ms</strong> (${result.anticipo ? 'Anticipato' : 'Ritardato'}). Confronta il punto di arresto con quello richiesto.`;
             } else { // Errore significativo
                 feedbackClass = "bg-rose-50 border-rose-200 text-rose-800";
-                titleText = `<i class="fa-solid fa-circle-xmark text-xl mr-2"></i> Errore Significativo`;
+                titleText = `<i class="fa-solid fa-circle-xmark text-xl mr-2"></i> Scarto dal tempo richiesto`;
                 descriptionText = `Scarto di <strong>${absErr} ms</strong> (${result.anticipo ? 'Anticipato' : 'Ritardato'}). Cerca di mantenere costante il ritmo interno.`;
             }
 
@@ -882,11 +882,11 @@
             let text = "";
 
             if (biasType === "Equilibrato") {
-                text = `Il paziente ha completato la sessione mostrando un eccellente equilibrio temporale complessivo (errore medio di <strong>${avgAbsError} ms</strong>). La distribuzione bilanciata tra anticipazioni (${countAnticipo}) e ritardi (${countRitardo}) indica che non è presente una deviazione cronobiologica strutturale né stati evidenti di impulsività motoria. La capacità di mantenere a mente il ritmo in assenza di indizi visivi riflette ottime capacità di attenzione sostenuta e memoria di lavoro.`;
+                text = `Le risposte in anticipo (${countAnticipo}) e in ritardo (${countRitardo}) sono distribuite in modo simile. Lo scarto medio assoluto è <strong>${avgAbsError} ms</strong>. Il dato descrive la stima dei tempi in questa prova.`;
             } else if (biasType === "Anticipo") {
-                text = `Il paziente mostra una marcata e prevalente tendenza ad <strong>anticipare</strong> la stima del tempo ideale (${countAnticipo} risposte in anticipo su ${total}). Questo tipo di risposta è comunemente associato a una accelerazione dell'orologio interno o a un'impulsività di natura esecutiva (difficoltà di inibizione del comportamento). Si suggerisce di focalizzarsi su respirazioni rallentate prima dell'avvio e, se possibile, utilizzare la modalità Facile per rafforzare la traccia acustica del tempo prima di progredire.`;
+                text = `Hai premuto STOP in anticipo in <strong>${countAnticipo} prove su ${total}</strong>. Lo scarto medio assoluto è <strong>${avgAbsError} ms</strong>. Alla prossima prova segui il ritmo della lancetta prima che scompaia.`;
             } else if (biasType === "Ritardo") {
-                text = `La sessione rileva una propensione sistematica al <strong>ritardo</strong> nella stima temporale (${countRitardo} risposte in ritardo su ${total}). Questo ritardo (scarto medio di <strong>${avgAbsError} ms</strong>) può indicare una lieve tendenza all'affaticamento o cali transitori di attenzione sostenuta durante la fase invisibile della traccia. Il tempo interno del soggetto si muove più lentamente di quello reale. Si consiglia di pianificare sessioni di allenamento brevi ma frequenti, mantenendo impostazioni standard o rapide per stimolare la focalizzazione reattiva.`;
+                text = `Hai premuto STOP in ritardo in <strong>${countRitardo} prove su ${total}</strong>. Lo scarto medio assoluto è <strong>${avgAbsError} ms</strong>. Questi risultati non permettono, da soli, di stabilire la causa delle differenze di tempo.`;
             }
 
             reportEl.innerHTML = text;

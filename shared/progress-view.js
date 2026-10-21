@@ -51,7 +51,7 @@ export function createProgressView(host,{title='I miei progressi'}={}){
  }
  for(const select of [group,metric,period])select.onchange=draw;
  function renderAreas(){
-  areas.replaceChildren(el('h3','Il percorso, a colpo d’occhio'),el('p','Ogni linea confronta lo stesso esercizio con le stesse impostazioni. I cambiamenti riguardano le prove svolte, non una valutazione clinica.','care-muted'));
+  areas.replaceChildren(el('h3','Andamento degli esercizi'),el('p','Ogni linea confronta lo stesso esercizio con le stesse impostazioni. I cambiamenti riguardano le prove svolte, non una valutazione clinica.','care-muted'));
   const buckets=new Map();
   for(const r of results){
    const area=exerciseById.get(r.exerciseId)?.category;if(!area||r.status!=='completed')continue;
@@ -81,7 +81,7 @@ export function createProgressView(host,{title='I miei progressi'}={}){
   }
  }
  function render(source){
-  results=[...source].sort((a,b)=>String(a.finishedAt||'').localeCompare(String(b.finishedAt||'')));status.textContent=results.length?'Il tuo percorso si aggiorna dopo ogni attività.':'Il tuo storico inizierà dal primo esercizio salvato.';
+  results=[...source].sort((a,b)=>String(a.finishedAt||'').localeCompare(String(b.finishedAt||'')));status.textContent=results.length?'Qui trovi i risultati delle attività salvate.':'Il tuo storico inizierà dal primo esercizio salvato.';
   renderAreas();
   const summary=summarizeResults(results);stats.replaceChildren();for(const [value,label] of [[summary.sessions,'Sessioni con esercizi completati'],[summary.exercises,'Esercizi completati'],[summary.minutes,'Minuti di attività']]){const tile=el('div',undefined,'care-stat');tile.append(el('strong',String(value)),el('span',label));stats.append(tile);}
   const previous=group.value,groups=new Map();for(const r of results.filter(r=>r.status==='completed'))groups.set(groupKey(r),r);group.replaceChildren();const versions=new Map();
