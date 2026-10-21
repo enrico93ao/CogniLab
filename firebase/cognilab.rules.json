@@ -66,7 +66,8 @@
             }
           },
           ".read": "auth != null && auth.uid === $uid"
-        }
+        },
+        ".read": "auth != null && auth.token.firebase.sign_in_provider !== 'anonymous' && auth.uid === 'eWoQhl1qwqVKRupDabTM6vfMyyI3' && root.child('cognilab/professionals').child(auth.uid).val() === true"
       },
       "stats": {
         ".read": "(auth != null && auth.token.firebase.sign_in_provider !== 'anonymous' && (root.child('cognilab/access/publicRegistrationOpen').val() === true || root.child('cognilab/testers').child(auth.uid).val() === true || root.child('cognilab/professionals').child(auth.uid).val() === true)) && (auth != null)",

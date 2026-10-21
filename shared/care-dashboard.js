@@ -1,3 +1,4 @@
+import {mountFeedbackSummary,feedbackManagerUid} from './feedback-summary.js?v=feedback39';
 import {onAuthStateChanged} from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js';
 import {auth} from './firebase-client.js';
 import {currentCareUser,patientWorkspace,checkCareStorage,professionalPatients,professionalPatient,registerManagedPatient,invitePatient,setConnection,assignProgram,sendAssignmentNotification,archiveProgram,setPatientArchived,startAssignedProgram,careError} from './care-store.js?v=journey36';
@@ -83,6 +84,7 @@ async function patientView(user){
 }
 async function professionalView(user){
  await requireProfessional();
+ if(user.uid===feedbackManagerUid)mountFeedbackSummary(workspace);
  const progressLink=document.querySelector('.care-shortcuts a[href="#care-personal-progress"]');if(progressLink)progressLink.href='#care-registered-progress';
  const top=card('Programmi e progressi dei pazienti','SPAZIO PROFESSIONISTA');top.classList.add('care-hero');top.append(el('p','Collega un account registrato, prepara una sequenza di esercizi e segui le sessioni svolte dal paziente. I risultati sono distinti per esercizio e impostazioni.'));
  const refresh=button('Aggiorna pazienti e risultati',()=>action(refresh,async()=>{await loadRoster();await loadSelected();}));top.append(refresh);workspace.append(top);

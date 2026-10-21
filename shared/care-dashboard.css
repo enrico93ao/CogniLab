@@ -40,3 +40,14 @@ body[data-cognilab='hub'] .kpi-grid{gap:12px;margin-bottom:20px}body[data-cognil
 .care-area-tile .care-area-count{font-size:.8rem;font-weight:500;display:inline-block;margin:3px 10px 3px 0}
 .care-area-tile .care-area-bar{height:10px;margin-top:16px}
 @media(max-width:480px){.care-progress .care-chart{padding:4px}.care-area-delta{font-size:1.75rem}.care-progress .care-area-tile{padding:18px}}
+
+.care-feedback-summary{border:1px solid #b8d9d6;background:linear-gradient(130deg,#eff9f6,#fff 65%,#eff4fb)}
+.care-feedback-count{font-size:1.1rem;font-weight:750;color:#254f5b;margin:18px 0}
+.care-feedback-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin:20px 0}
+.care-feedback-tile{padding:20px;border-radius:18px;background:#fff;border:1px solid #d6e7e5;display:flex;flex-direction:column;gap:8px;color:#193d4a}
+.care-feedback-tile h3{margin:0;font-size:.92rem;line-height:1.5;min-height:2.8em;color:#385c6a}
+.care-feedback-tile strong{font-size:2.3rem;line-height:1.2;color:#145f68;letter-spacing:-.04em}
+.care-feedback-tile span{font-size:.8rem;color:#496571}
+.care-feedback-tile progress{display:block;width:100%;height:10px;accent-color:#087e80;margin-top:8px}
+@media(max-width:1000px){.care-feedback-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:480px){.care-feedback-tile{padding:16px}.care-feedback-tile strong{font-size:1.9rem}.care-feedback-tile h3{font-size:.83rem}}
