@@ -57,12 +57,13 @@
     if(!prepare)throw Error('Consegna non disponibile.');
     prepare.click();document.documentElement.classList.remove('assigned-preparing');return;
    }
-   await showAssignedInstructions();
-   document.documentElement.classList.remove('assigned-preparing');start.click();
+   const accepted=await showAssignedInstructions();if(accepted===false){location.href='esercizi.html';return;}
+   document.documentElement.classList.remove('assigned-preparing');window.CogniLabAssignedStarting=true;try{start.click();}finally{window.CogniLabAssignedStarting=false;}
 
   }catch(error){const notice=document.createElement('p');notice.setAttribute('role','alert');notice.textContent='Configurazione assegnata non applicata: '+error.message;notice.dataset.assignedVisible='true';document.body.prepend(notice);const back=document.createElement('a');back.href='esercizi.html';back.textContent='Torna alla palestra';back.dataset.assignedVisible='true';document.body.prepend(back);document.addEventListener('click',e=>{if(e.target.closest('button')&&/avvia|inizia|start/i.test(e.target.closest('button').textContent)){e.preventDefault();e.stopImmediatePropagation();}},true);}
  }
  function showAssignedInstructions(){
+  if(window.CogniLabGuidance)return window.CogniLabGuidance.show();
   return new Promise(resolve=>{
    const dialog=document.createElement('dialog');dialog.dataset.assignedVisible='true';dialog.className='cl-assigned-instructions';
    const heading=document.createElement('h1');heading.textContent=window.CogniLabExercise?.title||'Il prossimo esercizio';

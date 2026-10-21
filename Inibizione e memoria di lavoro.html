@@ -159,8 +159,8 @@
 <link rel="stylesheet" href="shared/cognilab.css">
 <script src="shared/interface.js" defer></script>
 <script>window.CogniLabExercise={"id":"inibizione-memoria","title":"Inibizione e memoria di lavoro","category":"Funzioni esecutive","setup":"menu-screen","version":"3.2.0","assignedPreparation":"inhibition-rules"};</script>
-<script src="shared/exercise-runtime.js?v=journey36"></script>
-<link rel="stylesheet" href="shared/object-images.css"><script src="shared/object-images.js"></script><style>.object-display{background:radial-gradient(circle at 35% 25%,#fff,#edf4fc)!important;box-shadow:0 20px 50px #1c456320,inset 0 0 0 6px #ffffff;border-radius:32px!important;position:relative;overflow:hidden;width:clamp(180px,30vw,330px);height:clamp(180px,30vw,330px)}.object-display .cl-object-photo{width:88%;border-radius:24px}.stimulus-name{display:block;font:700 clamp(14px,2vw,20px) system-ui;color:#334155;text-align:center;margin-top:12px}#special-rules-list{background:#f0f7ff;border-radius:18px;padding:18px}#game-screen{max-width:1400px}</style><link rel="stylesheet" href="shared/inhibition-layout.css?v=journey36"></head>
+<script src="shared/exercise-runtime.js?v=clarity37"></script>
+<link rel="stylesheet" href="shared/object-images.css"><script src="shared/object-images.js"></script><style>.object-display{background:radial-gradient(circle at 35% 25%,#fff,#edf4fc)!important;box-shadow:0 20px 50px #1c456320,inset 0 0 0 6px #ffffff;border-radius:32px!important;position:relative;overflow:hidden;width:clamp(180px,30vw,330px);height:clamp(180px,30vw,330px)}.object-display .cl-object-photo{width:88%;border-radius:24px}.stimulus-name{display:block;font:700 clamp(14px,2vw,20px) system-ui;color:#334155;text-align:center;margin-top:12px}#special-rules-list{background:#f0f7ff;border-radius:18px;padding:18px}#game-screen{max-width:1400px}</style><link rel="stylesheet" href="shared/inhibition-layout.css?v=clarity37"></head>
 <body data-cognilab="exercise">
 
     <div id="feedback-ui" class="feedback-overlay"></div>
@@ -230,8 +230,8 @@
 
     <div id="instruction-screen" class="screen bg-slate-900 text-white">
         <div class="max-w-xl w-full">
-            <h2 class="text-3xl font-bold text-blue-400 mb-8 text-center">Ricorda la Consegna</h2>
-            <div class="space-y-6 mb-12">
+            <h2 class="text-3xl font-bold text-blue-400 mb-8 text-center">Prima di iniziare: come rispondere</h2>
+            <ol class="inhibition-directions"><li>Guarda la figura e il <strong>colore del bordo</strong>. Controlla prima le eccezioni riportate qui sotto.</li><li>Se una regola corrisponde alla figura, premi il tasto indicato da quella regola e <strong>ignora il peso</strong>. Se corrispondono più regole, segui la prima dall’alto.</li><li>Solo se nessuna eccezione si applica, premi <strong>← per leggero</strong> oppure <strong>→ per pesante</strong>. Puoi usare i pulsanti sullo schermo o la tastiera.</li></ol><div class="space-y-6 mb-12">
                 <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700">
                     <h3 class="text-xs font-bold text-slate-400 uppercase mb-4 tracking-widest">Risposte Base (Peso)</h3>
                     <div class="grid grid-cols-2 gap-4">
@@ -241,7 +241,7 @@
                 </div>
                 <div class="bg-amber-900/30 p-6 rounded-2xl border border-amber-500/30">
                     <h3 class="text-xs font-bold text-amber-500 uppercase mb-4 tracking-widest">Inibizione (Eccezioni)</h3>
-                    <p class="text-sm text-slate-400 mb-4 italic">Se l'oggetto soddisfa queste condizioni, ignora il peso e premi:</p>
+                    <p class="text-sm text-slate-400 mb-4 italic">Queste regole hanno la precedenza sul peso. Controllale dall’alto verso il basso:</p>
                     <ul id="special-rules-list" class="space-y-3 text-lg"></ul>
                 </div>
             </div>

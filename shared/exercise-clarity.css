@@ -1,0 +1,23 @@
+/* Instruction surfaces define both foreground and background explicitly. */
+.cl-explicit-instructions{box-sizing:border-box;width:min(720px,calc(100% - 28px));max-height:90dvh;overflow:auto;margin:auto;padding:clamp(22px,4vw,38px);border:1px solid #b4cdd6;border-radius:26px;background:#fff;color:#193d4a;font:18px/1.65 system-ui;text-align:left;box-shadow:0 24px 80px #12314355}
+.cl-explicit-instructions::backdrop{background:#102f43c9;backdrop-filter:blur(4px)}
+.cl-explicit-instructions h2{color:#155a63;font:750 clamp(1.5rem,4vw,2rem)/1.2 system-ui;margin:0 0 20px}
+.cl-explicit-instructions .cl-guidance-title{color:#476270;background:#fff;font-size:.9rem;font-weight:650;margin:0 0 12px}
+.cl-explicit-instructions ol{margin:0;padding-left:30px;color:#193d4a;background:#fff}
+.cl-explicit-instructions li{padding:13px 12px;margin:10px 0;background:#edf5f7;color:#193d4a;border-radius:12px;line-height:1.65}
+.cl-explicit-instructions li::marker{color:#17656e;font-weight:800}
+.cl-explicit-instructions button{display:block;width:100%;margin:24px 0 0;padding:16px;border:0;border-radius:14px;background:#08666d;color:#fff;font:750 1.1rem/1.4 system-ui;min-height:56px;cursor:pointer}
+.cl-explicit-instructions button.cl-guidance-back{background:#eef3f6;color:#294e60;box-shadow:none;font-size:1rem;margin-top:10px}
+.cl-explicit-instructions button:focus-visible{outline:4px solid #d99218;outline-offset:3px}
+/* Selected menu tiles must not inherit white type from a dark menu. */
+.cl-menu-option>span,.cl-kind-option>span,.cl-menu-choice[aria-pressed=true] span,.cl-menu-choice[aria-pressed=true] strong{color:inherit!important}
+.cl-menu-choice[aria-pressed=true] small{color:#36586a!important}
+/* Captions follow the model vertically; the audio control stays to its side. */
+.cl-modern-match #target-container>div{display:grid;grid-template-columns:52px minmax(0,1fr) 52px;grid-template-areas:'. prompt audio' '. figure audio' '. caption audio';gap:6px 10px;align-items:center}
+.cl-modern-match #target-container>div>*{margin:0!important}
+.cl-modern-match #target-container #instruction-text{grid-area:prompt;color:#345564;font-size:1rem}
+.cl-modern-match #target-container #target-display{grid-area:figure;justify-self:center}
+.cl-modern-match #target-container #target-name{grid-area:caption;justify-self:center;color:#193d4a;font-size:clamp(1.1rem,3vw,1.6rem);line-height:1.35;overflow-wrap:anywhere;max-width:100%}
+.cl-modern-match #target-container .speaker-btn{grid-area:audio;justify-self:center;align-self:center;width:48px;height:48px;padding:10px}
+.cl-modern-visual #target-area #target-text{color:#193d4a!important}
+@media(max-width:480px){.cl-modern-match #target-container>div{grid-template-columns:42px minmax(0,1fr) 42px;column-gap:4px}.cl-modern-match #target-container .speaker-btn{width:42px;height:44px;padding:8px}}

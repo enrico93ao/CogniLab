@@ -10,10 +10,20 @@ body{height:100dvh;overflow-y:auto}
 #game-screen{height:100dvh;min-height:0;max-width:none;justify-content:space-between;gap:12px;position:relative;padding-bottom:20px;overflow-y:auto}
 .inhibition-hud{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;width:min(100%,1100px);flex:none}
 .inhibition-hud>div{flex-wrap:wrap;gap:8px}
-.inhibition-stimulus{display:flex;flex:1;min-height:100px;align-items:center;justify-content:center;padding:12px}
+.inhibition-stimulus{display:flex;flex-direction:column;gap:10px;flex:1;min-height:100px;align-items:center;justify-content:center;padding:12px}
 #object-display.object-display{width:clamp(100px,30vh,270px);height:clamp(100px,30vh,270px);max-width:65vw;max-height:38dvh;flex:none;border-width:7px;font-size:clamp(48px,14vh,110px)}
 .inhibition-responses{display:flex;flex-direction:column;align-items:center;gap:12px;width:100%;flex:none}
 .inhibition-responses>div{gap:14px;flex-wrap:wrap;justify-content:center}
 .inhibition-responses .control-btn{min-height:48px;padding:12px 20px;min-width:90px}
 @media(max-height:600px){.inhibition-hud .nav-btn{width:40px;height:40px}#game-timer,#game-score{font-size:1rem;padding:8px 12px}.inhibition-stimulus{padding:0}.inhibition-responses{gap:6px}.inhibition-responses .control-btn{padding:8px 14px}}
 @media(max-width:480px){.inhibition-hud{justify-content:center}.screen{padding:12px}#menu-screen .game-card{padding:20px}#instruction-screen .p-6{padding:16px}.inhibition-responses .control-btn{min-width:76px}}
+
+/* Light rule cards inside the dark instruction page need dark text. */
+#special-rules-list{background:#f0f7ff;color:#193d4a;border:1px solid #bad1e5}
+#special-rules-list li,#special-rules-list li>span:first-child{color:#193d4a}
+#special-rules-list li>span:last-child{background:#d6e6f5;color:#17466e;white-space:nowrap;margin-left:12px}
+#special-rules-list li{gap:12px;align-items:center;line-height:1.6;flex-wrap:wrap}
+#instruction-screen .inhibition-directions{padding:18px 18px 18px 40px;background:#eaf3fa;color:#193d4a;border-radius:18px;line-height:1.7;margin:0 0 24px}
+#instruction-screen .inhibition-directions li{color:#193d4a;margin:10px 0}
+#instruction-screen .inhibition-directions li::marker{font-weight:800;color:#164b73}
+#game-screen .inhibition-stimulus #stimulus-name{position:static;display:block;width:100%;max-width:32ch;margin:0;text-align:center;color:#193d4a;line-height:1.4;flex:none;overflow-wrap:anywhere}

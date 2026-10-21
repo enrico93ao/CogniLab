@@ -139,7 +139,7 @@
 <link rel="stylesheet" href="shared/cognilab.css">
 <script src="shared/interface.js" defer></script>
 <script>window.CogniLabExercise={"id":"doppio-compito","title":"Doppio compito e velocità","category":"Funzioni esecutive","setup":"menu","version":"3.1.0"};</script>
-<script src="shared/exercise-runtime.js?v=journey36"></script>
+<script src="shared/exercise-runtime.js?v=clarity37"></script>
 </head>
 <body data-cognilab="exercise" class="flex items-center justify-center min-h-screen">
 
@@ -474,6 +474,10 @@
             });
         }
 
+        window.CogniLabPrepareGuidance=()=>{
+            generateRandomRules();state.guideRulesReady=true;
+            return state.activeRules.map(rule=>'Premi '+rule.key+' per: '+rule.label+'. Rispondi soltanto dentro la fascia verde.');
+        };
         function startGame() {
  window.CogniLabRun?.begin(typeof arguments === "undefined" ? null : arguments[0]);
 
@@ -481,7 +485,7 @@
             state.bandPercent=Number(document.getElementById('response-band-size').value);
             const side=document.createElement('div');document.querySelector('.dual-side-bar')?.remove();
             if(document.getElementById('dual-bar-enabled').checked){side.className='dual-side-bar '+document.getElementById('dual-bar-side').value;side.setAttribute('aria-hidden','true');document.getElementById('game-container').append(side);}
-            generateRandomRules();
+            if(!state.guideRulesReady)generateRandomRules();state.guideRulesReady=false;
             document.getElementById('menu').classList.add('hidden');
             document.getElementById('game-container').classList.remove('hidden');
             state.gameActive = true;
