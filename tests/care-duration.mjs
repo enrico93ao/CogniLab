@@ -1,0 +1,19 @@
+import {sessionDuration,exerciseDuration,durationLabel,durationExplanation} from '../shared/session-duration.mjs';
+import assert from 'node:assert/strict';import fs from 'node:fs';import {createRequire} from 'node:module';
+import {programProgress,resultsFromCare,summarizeResults} from '../shared/care-model.mjs';import {exerciseById,exercises} from '../shared/exercise-catalog.mjs';import {groupKey} from '../shared/progress-model.mjs';
+const require=createRequire(import.meta.url),{JSDOM}=require(process.env.COGNILAB_QA_JSDOM||'/tmp/cognilab-qa/node_modules/jsdom'),read=p=>fs.readFileSync(new URL('../'+p,import.meta.url),'utf8'),flush=async()=>{for(let i=0;i<20;i++)await Promise.resolve();};
+const source=read('shared/care-dashboard.js').replace(/^import .*;\s*$/gm,'');
+function page(mode){const dom=new JSDOM('<section id="care-workspace"></section>',{url:'https://example.test/',runScripts:'outside-only'}),w=dom.window;w.localStorage.setItem('hub_mode',mode);w.confirm=()=>true;w.HTMLDialogElement.prototype.showModal=function(){};Object.assign(w,{sessionDuration,exerciseDuration,durationLabel,durationExplanation,feedbackManagerUid:"eWoQhl1qwqVKRupDabTM6vfMyyI3",mountFeedbackSummary:()=>{},programProgress,resultsFromCare,summarizeResults,exerciseById,exercises,groupKey,careError:e=>e.message,onAuthStateChanged:()=>()=>{},pendingCare:()=>({}),retryPending:async()=>{},checkCareStorage:async()=>{},requireProfessional:async()=>({uid:'pro'}),auth:{currentUser:{uid:mode==='clinical'?'pro':'patient'}}});w.currentCareUser=async()=>w.auth.currentUser;w.eval(read('shared/progress-view.js').replace(/^import .*;\s*$/gm,'').replace(/\bexport /g,''));return {dom,w};}
+{
+ const {w}=page('clinical');w.professionalPatients=async()=>({patient:{name:'Test'}});w.professionalPatient=async()=>({accepted:true,programs:[]});
+ await w.eval('(async()=>{'+source+'})()');const select=w.document.getElementById('care-patient-select');select.value='patient';select.dispatchEvent(new w.Event('change'));await flush();
+ const check=w.document.querySelector('[data-exercise-id="il-pianoforte"]');check.checked=true;check.dispatchEvent(new w.Event('change'));const rows=()=>[...w.document.querySelectorAll('.care-order li')];
+ const click=(row,text)=>[...row.querySelectorAll('button')].find(b=>b.textContent===text).click();
+ click(rows()[0],'Configura esercizio');let frame=w.document.querySelector('dialog iframe');w.dispatchEvent(new w.MessageEvent('message',{origin:w.location.origin,source:frame.contentWindow,data:{type:'cognilab-config',configuration:{format:1,controls:[{key:'music-duration',type:'select-one',value:'4'}],buttons:[]}}}));
+ assert.match(w.document.querySelector('.care-builder .care-duration').textContent,/4 min/);click(rows()[0],'Aggiungi variante');assert.match(w.document.querySelector('.care-builder .care-duration').textContent,/8 min/);
+ const repeat=rows()[1].querySelector('input');repeat.value='2';repeat.dispatchEvent(new w.Event('change'));assert.match(w.document.querySelector('.care-builder .care-duration').textContent,/12 min/);click(rows()[0],'×');assert.match(w.document.querySelector('.care-builder .care-duration').textContent,/8 min/);w.close();
+}
+{
+ const {w}=page('free_training');w.patientWorkspace=async()=>({user:w.auth.currentUser,invites:{},links:{},programs:[{id:'p',name:'Programma',status:'active',totalSessions:2,createdAt:1,professionalName:'Pro',exercises:['il-pianoforte'],configurations:[JSON.stringify({format:1,controls:[{key:'music-duration',type:'select-one',value:'6'}],buttons:[]})],sessions:{}}]});await w.eval('(async()=>{'+source+'})()');assert.match(w.document.querySelector('.care-program .care-duration').textContent,/6 min/);w.close();
+}
+console.log('PASS: builder duration changes with configuration, variants, repetitions and removal; patient program displays persisted preset duration. DOM fixtures.');
