@@ -100,12 +100,14 @@ export async function sendAssignmentNotification(patientUid,id,expectedProfessio
  if(auth.currentUser?.uid!==user.uid)throw Error('Account cambiato. Aggiorna la pagina.');
  await patch({[`cognilab/users/${user.uid}/clinical/registeredPatients/${patientUid}/notifications/${id}`]:status});return status;
 }
-export async function assignProgram(patientUid,input){
+export async function assignProgram(patientUid,input,replacesId=null){
  const user=await requireProfessional(),fields=validateProgram(input);if(!validUid(patientUid))throw Error('Seleziona un paziente.');
  if(await read(`cognilab/careLinks/${patientUid}/${user.uid}`)!==true)throw Error('Il paziente deve prima accettare il collegamento dalla propria dashboard.');
+ let previous=null;if(replacesId){if(!validUid(replacesId))throw Error('Programma non valido.');previous=await read(`cognilab/carePrograms/${patientUid}/${replacesId}`);if(!previous||previous.professionalId!==user.uid||previous.status!=='active')throw Error('Il programma è cambiato. Aggiorna l’elenco prima di modificarlo.');}
  const id=crypto.randomUUID(),program={...fields,professionalId:user.uid,professionalName:String(user.displayName||user.email||'Professionista CogniLab').slice(0,80),createdAt:Date.now(),status:'active',version:1};
  const notificationBase=`cognilab/users/${user.uid}/clinical/registeredPatients/${patientUid}/notifications/${id}`;
- await patch({[`cognilab/carePrograms/${patientUid}/${id}`]:program,[`cognilab/users/${user.uid}/clinical/registeredPatients/${patientUid}/programs/${id}`]:true,[notificationBase]:{state:'pending',message:'Programma salvato. Invio della notifica email in corso; attendi la conferma prima di chiudere la pagina.',updatedAt:Date.now()}});
+ if(auth.currentUser?.uid!==user.uid)throw Error('Account cambiato. Aggiorna la pagina.');
+ await patch({...(previous?{[`cognilab/carePrograms/${patientUid}/${replacesId}/status`]:'archived'}:{}),[`cognilab/carePrograms/${patientUid}/${id}`]:program,[`cognilab/users/${user.uid}/clinical/registeredPatients/${patientUid}/programs/${id}`]:true,[notificationBase]:{state:'pending',message:'Programma salvato. Invio della notifica email in corso; attendi la conferma prima di chiudere la pagina.',updatedAt:Date.now()}});
  // Assignment is confirmed immediately. Email failure cannot undo the saved program.
  sendAssignmentNotification(patientUid,id,user.uid).then(status=>{
   if(typeof window!=='undefined'&&auth.currentUser?.uid===user.uid)window.dispatchEvent(new CustomEvent('cognilab-notification-change',{detail:{patientUid,programId:id,status}}));
