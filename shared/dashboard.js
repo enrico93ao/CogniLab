@@ -1,4 +1,4 @@
-import {createProgressView} from './progress-view.js?v=journey36';
+import {createProgressView} from './progress-view.js?v=language2';
 import {requireProfessional} from './clinical-access.js';
 import {errorCode} from './firebase-errors.js';
 import {onAuthStateChanged} from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js';

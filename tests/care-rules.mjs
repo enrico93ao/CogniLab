@@ -28,6 +28,7 @@ assert.equal(write('cognilab/careLinks/patient/pro',true,user('pro')),false,'pro
 const plan=db.cognilab.carePrograms.patient.plan;
 assert.equal(write('cognilab/carePrograms/patient/newPlan',plan,user('pro')),true);
 assert.equal(write('cognilab/carePrograms/patient/newPlan',{...plan,exercises:['ascolta-indica']},user('pro')),true);
+for(const exerciseId of ['ascolta-ripeti','ricomponi-parola','storia-immagini','associazioni-semantiche','oggetti-funzioni']){assert.equal(write('cognilab/carePrograms/patient/newPlan',{...plan,exercises:[exerciseId]},user('pro')),true);assert.equal(write('cognilab/carePrograms/patient/newPlan',{...plan,exercises:[exerciseId]},user('stranger')),false);}
 assert.equal(write('cognilab/carePrograms/patient/newPlan',{...plan,exercises:['ascolta-indica']},user('stranger')),false);
 assert.equal(write('cognilab/carePrograms/patient/newPlan',{...plan,professionalId:'otherPro'},user('pro')),false);
 assert.equal(write('cognilab/carePrograms/patient/newPlan',plan,user('patient')),false);

@@ -1,4 +1,10 @@
 window.CogniLabCatalog = [
+  {"title": "Ascolta e ripeti", "file": "Ascolta e ripeti.html"},
+  {"title": "Ricomponi la parola", "file": "Ricomponi la parola.html"},
+  {"title": "Rimetti in ordine la storia", "file": "Rimetti in ordine la storia.html"},
+  {"title": "Quali immagini stanno insieme?", "file": "Quali immagini stanno insieme.html"},
+  {"title": "A cosa serve?", "file": "A cosa serve.html"},
+
   {"title": "Ascolta e indica", "file": "Ascolta e indica.html"},
   {"title":"Il pianoforte","file":"Il pianoforte.html"},
   {"title":"Lista della spesa","file":"Lista della spesa.html"},

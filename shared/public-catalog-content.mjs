@@ -10,6 +10,12 @@ export const areas=[
 ];
 // Descriptions are written from the current task instructions, not clinical outcome claims.
 export const descriptions={
+ "ascolta-ripeti":["Ascolta una parola o una breve espressione mentre guardi l’immagine e prova a ripeterla.", "Tre livelli, riascolto e registrazione dei tentativi dichiarati; nessuna valutazione automatica della pronuncia."],
+ "ricomponi-parola":["Guarda l’immagine e tocca le lettere per ricomporre il nome.", "Parole brevi con modello, parole più lunghe o lettere in più; correzione libera e aiuti progressivi."],
+ "storia-immagini":["Leggi o ascolta un breve racconto e rimetti le scene nell’ordine degli eventi.", "Tre, quattro o cinque scene; supporto del testo e descrizioni delle scene configurabili."],
+ "associazioni-semantiche":["Scegli l’immagine collegata al bersaglio secondo la relazione di significato richiesta.", "Associazioni tra oggetti, categorie e contesti, con due, quattro o sei alternative."],
+ "oggetti-funzioni":["Scegli l’oggetto adatto alla funzione descritta nella domanda.", "Risposte tramite immagini, lettura ad alta voce facoltativa e tre livelli di difficoltà."],
+
  'ascolta-indica':['Ascolta una parola e scegli l’immagine corrispondente, senza dover parlare o scrivere.','Tre livelli con 2, 4 o 6 immagini, riascolto e aiuti progressivi; nessun tempo limite.'],
  'il-pianoforte':['Ascolta una sequenza di tasti e ripetila sulla tastiera. La melodia cresce dopo una risposta corretta.','Se sbagli, la stessa sequenza viene mostrata di nuovo; la durata si sceglie nel menu.'],
  'lista-della-spesa':['Osserva i prodotti, svolgi una breve attività di distrazione e ricostruisci la lista.','Sono disponibili tre livelli: leggi quanti prodotti dovrai ricordare prima di iniziare.'],

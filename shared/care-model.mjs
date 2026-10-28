@@ -1,4 +1,4 @@
-import {exerciseById} from './exercise-catalog.mjs';
+import {exerciseById} from './exercise-catalog.mjs?v=language2';
 export const validUid=value=>typeof value==='string'&&/^[A-Za-z0-9_-]{1,128}$/.test(value);
 export function validateProgram(input){
  const name=String(input.name||'').trim(),instructions=String(input.instructions||'').trim(),totalSessions=Number(input.totalSessions),exercises=Array.from(input.exercises||[]);

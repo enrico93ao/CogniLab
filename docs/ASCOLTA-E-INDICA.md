@@ -21,6 +21,8 @@ Si salvano risposte corrette, scelte totali, errori, risposte al primo tentativo
 
 ## Attivazione su Firebase — necessaria per l’assegnazione
 
+**Aggiornamento:** per abilitare tutti e sei i nuovi esercizi con una sola modifica, seguire ora `docs/NUOVI-ESERCIZI-LINGUAGGIO.md`. Le istruzioni seguenti descrivono la precedente attivazione del solo Ascolta e indica.
+
 La pubblicazione su GitHub Pages non distribuisce le regole di Realtime Database.
 
 Nella console Firebase del progetto **hub-di-stimolazione-cognitiva**, aprire **Realtime Database → Regole**. Nel percorso:

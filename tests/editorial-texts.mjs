@@ -6,7 +6,7 @@ for(const file of ['Il cifrario.html','Il semaforo delle parole.html',"L'orologi
 }
 assert.match(read('esercizi-orientamento.html'),/convenzione scelta per l’esercizio/);assert.doesNotMatch(read('esercizi-orientamento.html'),/conferma il luogo|calendario meteorologico/i);
 assert.doesNotMatch(read('catalogo-esercizi.html'),/proprie\.\.<\/p>|differente\.\.<\/p>/);
-assert.match(read('index.html'),/39 esercizi in italiano/);assert.match(read('dott-enrico-dalessandro.html'),/San Camillo/);
+assert.match(read('index.html'),/44 esercizi in italiano/);assert.match(read('dott-enrico-dalessandro.html'),/San Camillo/);
 const source=read('shared/care-presets.js').replace('window.CogniLabConfiguration={capture,apply};','window.CogniLabConfiguration={capture,apply,findStart};');
 {
  const d=new JSDOM('<section id="setup"><button onclick="initSession()">Avvia esercizio</button></section>',{url:'https://example.test/?configure=1',runScripts:'outside-only'}),w=d.window;w.CogniLabExercise={setup:'setup'};w.eval(source);

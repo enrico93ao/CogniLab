@@ -1,7 +1,11 @@
 export function numberOrNull(value){return typeof value==='number'&&Number.isFinite(value)&&value>=0?value:null;}
 export function normalizeMetrics(raw={}){
  const correct=numberOrNull(raw.correct),total=numberOrNull(raw.total);
- return {correct,total,errors:numberOrNull(raw.errors),omissions:numberOrNull(raw.omissions),accuracyPct:correct!==null&&total>0&&correct<=total?Math.round(correct/total*10000)/100:null,responseTimeMs:numberOrNull(raw.responseTimeMs),score:numberOrNull(raw.score),scoreUnit:typeof raw.scoreUnit==='string'?raw.scoreUnit.slice(0,30):'punti',scoreDirection:raw.scoreDirection==='lower'?'lower':'higher'};
+ const details={};
+ for(const key of ['plannedTrials','trialsCompleted','replays','listened','practiced','notPracticed','firstTry','assisted','withoutHint','plannedWords','wordsCompleted'])if(Number.isSafeInteger(raw[key])&&raw[key]>=0&&raw[key]<=1000000)details[key]=raw[key];
+ for(const key of ['allTrialsCompleted','allWordsCompleted'])if(typeof raw[key]==='boolean')details[key]=raw[key];
+ if(raw.oralAssessment==='not-assessed')details.oralAssessment='not-assessed';
+ return {...details,correct,total,errors:numberOrNull(raw.errors),omissions:numberOrNull(raw.omissions),accuracyPct:correct!==null&&total>0&&correct<=total?Math.round(correct/total*10000)/100:null,responseTimeMs:numberOrNull(raw.responseTimeMs),score:numberOrNull(raw.score),scoreUnit:typeof raw.scoreUnit==='string'?raw.scoreUnit.slice(0,30):'punti',scoreDirection:raw.scoreDirection==='lower'?'lower':'higher'};
 }
 export function groupKey(result){return result.exerciseId+'|'+(result.exerciseVersion||'legacy')+'|'+JSON.stringify(Object.fromEntries(Object.entries(result.settings||{}).sort(([a],[b])=>a.localeCompare(b))));}
 export function comparableSeries(results,key){return results.filter(r=>r.status==='completed'&&groupKey(r)===key).sort((a,b)=>a.finishedAt.localeCompare(b.finishedAt));}

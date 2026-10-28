@@ -2,6 +2,12 @@
  'use strict';
  // Practical instructions, deliberately independent of scores and diagnoses.
  const guides={
+  "ascolta-ripeti":["Guarda l’immagine e ascolta la parola o la breve espressione.", "Prova a ripeterla. Puoi riascoltare con Ascolta di nuovo.", "Premi Ho provato a ripetere oppure Questa volta non ho ripetuto. La pronuncia non viene valutata dal sito."],
+  "ricomponi-parola":["Guarda l’immagine e tocca le lettere nell’ordine giusto per comporre il nome.", "Per correggere, tocca una lettera già inserita. Aiutami mostra la parola da ricomporre.", "Premi Controlla la parola. Nel livello avanzato ci sono due lettere in più da lasciare fuori."],
+  "storia-immagini":["Leggi o ascolta il racconto. Poi premi Ho letto, scelgo le immagini.", "Tocca le scene nell’ordine del racconto. Le scene scelte compaiono nella tua sequenza.", "Per correggere, tocca una scena della tua sequenza. Quando hai scelto tutte le scene premi Controlla la sequenza."],
+  "associazioni-semantiche":["Guarda l’immagine e leggi la domanda. Puoi anche ascoltarla.", "Scegli l’immagine collegata secondo la domanda: per esempio, dove cresce un frutto o quale oggetto si usa insieme a un altro.", "Se sbagli, prova un’altra immagine. Dopo la risposta corretta premi Prossima prova."],
+  "oggetti-funzioni":["Leggi o ascolta che cosa devi fare nella situazione proposta.", "Tocca l’oggetto adatto a quella funzione. Non serve rispondere a voce.", "Puoi rileggere o riascoltare la domanda. Dopo la risposta corretta premi Prossima prova."],
+
   'ascolta-indica':['Ascolta la parola. Non devi rispondere a voce.','Tocca l’immagine corrispondente. Puoi premere Ascolta di nuovo per riascoltare.','Se sbagli, prova un’altra immagine. Dopo la risposta corretta premi Prossima parola.'],
   'il-pianoforte':['Ascolta e guarda i tasti che si illuminano. Aspetta che la melodia finisca.','Premi gli stessi tasti nello stesso ordine. Prima una nota, poi sequenze più lunghe.','Se sbagli, osserva nuovamente la stessa sequenza e riprova.'],
   'lista-della-spesa':['Osserva i prodotti della lista e cerca di ricordarli.','Durante la pausa conta soltanto i cerchi blu: non contare i quadrati gialli.','Alla fine seleziona i prodotti che erano nella lista e premi Conferma la lista.'],

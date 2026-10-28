@@ -1,5 +1,11 @@
 // Percorsi del catalogo consentiti per i programmi.
 export const exercises=[
+  {"title": "Ascolta e ripeti", "file": "Ascolta e ripeti.html", "id": "ascolta-ripeti", "category": "Linguaggio"},
+  {"title": "Ricomponi la parola", "file": "Ricomponi la parola.html", "id": "ricomponi-parola", "category": "Linguaggio"},
+  {"title": "Rimetti in ordine la storia", "file": "Rimetti in ordine la storia.html", "id": "storia-immagini", "category": "Linguaggio"},
+  {"title": "Quali immagini stanno insieme?", "file": "Quali immagini stanno insieme.html", "id": "associazioni-semantiche", "category": "Linguaggio"},
+  {"title": "A cosa serve?", "file": "A cosa serve.html", "id": "oggetti-funzioni", "category": "Linguaggio"},
+
   {"title": "Ascolta e indica", "file": "Ascolta e indica.html", "id": "ascolta-indica", "category": "Linguaggio"},
   {
     "title": "Il pianoforte",

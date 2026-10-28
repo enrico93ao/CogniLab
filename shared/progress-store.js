@@ -6,7 +6,7 @@ import {isPermissionDenied} from './firebase-errors.js';
 import {guestFeedbackClient} from './feedback-guest.js';
 import {ref,set,update,get,serverTimestamp} from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js';
 import {db,auth,authReady} from './firebase-client.js';
-import {normalizeMetrics} from './progress-model.mjs';
+import {normalizeMetrics} from './progress-model.mjs?v=language2';
 const uuid=()=>crypto.randomUUID();
 const privateAccounts=new Set();
 const memoryQueues=new Map(),acknowledged=new Map(),memorySessions=new Map(),memoryOnly=new Set();

@@ -2,10 +2,10 @@ import {sessionDuration,exerciseDuration,durationLabel,durationExplanation} from
 import {mountFeedbackSummary,feedbackManagerUid} from './feedback-summary.js?v=copy44';
 import {onAuthStateChanged} from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js';
 import {auth} from './firebase-client.js';
-import {currentCareUser,patientWorkspace,checkCareStorage,professionalPatients,professionalPatient,registerManagedPatient,invitePatient,setConnection,assignProgram,sendAssignmentNotification,archiveProgram,setPatientArchived,startAssignedProgram,careError} from './care-store.js?v=opposite43';
-import {programProgress,resultsFromCare} from './care-model.mjs?v=opposite43';
-import {exercises,exerciseById} from './exercise-catalog.mjs';
-import {createProgressView} from './progress-view.js?v=copy44';
+import {currentCareUser,patientWorkspace,checkCareStorage,professionalPatients,professionalPatient,registerManagedPatient,invitePatient,setConnection,assignProgram,sendAssignmentNotification,archiveProgram,setPatientArchived,startAssignedProgram,careError} from './care-store.js?v=language2';
+import {programProgress,resultsFromCare} from './care-model.mjs?v=language2';
+import {exercises,exerciseById} from './exercise-catalog.mjs?v=language2';
+import {createProgressView} from './progress-view.js?v=language2';
 import {pendingCare,retryPending} from './progress-store.js';
 import {requireProfessional} from './clinical-access.js';
 const el=(tag,text,cls)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;if(cls)n.className=cls;return n;};
