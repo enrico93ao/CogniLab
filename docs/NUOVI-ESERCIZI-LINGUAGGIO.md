@@ -43,16 +43,10 @@ newData.val() === 'il-pianoforte'
 Sostituire solo quel frammento con:
 
 ```text
-newData.val() === 'ascolta-indica' ||
-newData.val() === 'ascolta-ripeti' ||
-newData.val() === 'ricomponi-parola' ||
-newData.val() === 'storia-immagini' ||
-newData.val() === 'associazioni-semantiche' ||
-newData.val() === 'oggetti-funzioni' ||
-newData.val() === 'il-pianoforte'
+newData.val() === 'ascolta-indica' || newData.val() === 'ascolta-ripeti' || newData.val() === 'ricomponi-parola' || newData.val() === 'storia-immagini' || newData.val() === 'associazioni-semantiche' || newData.val() === 'oggetti-funzioni' || newData.val() === 'il-pianoforte'
 ```
 
-Lasciare invariato il resto e premere **Pubblica** una sola volta. Se Ascolta e indica è già presente, evitare di aggiungerlo nuovamente. `firebase/cognilab.rules.json` contiene il riferimento completo aggiornato: prima di sostituire tutte le regole, confrontare eventuali modifiche fatte in console successivamente. Non modificare i rami `.read` e `.write` per abilitare questi esercizi.
+Il frammento deve rimanere su un’unica riga dentro la stringa `.validate` (l’editor può mostrarla a capo visivamente). Lasciare invariato il resto e premere **Pubblica** una sola volta. Se Ascolta e indica è già presente, evitare di aggiungerlo nuovamente. `firebase/cognilab.rules.json` contiene il riferimento completo aggiornato: prima di sostituire tutte le regole, confrontare eventuali modifiche fatte in console successivamente. Non modificare i rami `.read` e `.write` per abilitare questi esercizi.
 
 Fino all’aggiornamento, Firebase può rifiutare l’assegnazione dei nuovi esercizi; i programmi esistenti continuano a usare gli stessi identificativi e impostazioni. Dopo l’aggiornamento assegnare una sessione a un account di prova e controllare il risultato da entrambe le dashboard.
 
