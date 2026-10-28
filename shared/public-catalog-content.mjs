@@ -10,6 +10,7 @@ export const areas=[
 ];
 // Descriptions are written from the current task instructions, not clinical outcome claims.
 export const descriptions={
+ 'ascolta-indica':['Ascolta una parola e scegli l’immagine corrispondente, senza dover parlare o scrivere.','Tre livelli con 2, 4 o 6 immagini, riascolto e aiuti progressivi; nessun tempo limite.'],
  'il-pianoforte':['Ascolta una sequenza di tasti e ripetila sulla tastiera. La melodia cresce dopo una risposta corretta.','Se sbagli, la stessa sequenza viene mostrata di nuovo; la durata si sceglie nel menu.'],
  'lista-della-spesa':['Osserva i prodotti, svolgi una breve attività di distrazione e ricostruisci la lista.','Sono disponibili tre livelli: leggi quanti prodotti dovrai ricordare prima di iniziare.'],
  'attenzione-alternata':['Collega gli stimoli seguendo la sequenza richiesta: lettere, numeri o elementi alternati.','Controlla ordine diretto o inverso e la scelta tra stimoli statici e in movimento.'],

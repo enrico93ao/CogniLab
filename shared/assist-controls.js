@@ -1,8 +1,8 @@
 (() => {
- const start=document.querySelector('#trail-start,#exploration-start,#music-start,#orientation-form button[type=submit]');if(!start)return;
+ const start=document.querySelector('#listen-start,#trail-start,#exploration-start,#music-start,#orientation-form button[type=submit]');if(!start)return;
  const make=(tag,text,className)=>{const node=document.createElement(tag);if(text)node.textContent=text;if(className)node.className=className;return node;};
  const adapter=()=>window.CogniLabAssist;
- const intro=make('div',null,'cl-assist-demo');intro.append(make('span','Vuoi provare prima di iniziare?'));const demo=make('button','Mostrami come si fa');demo.type='button';demo.id='cl-demo-open';intro.append(demo);start.before(intro);
+ const intro=make('div',null,'cl-assist-demo');intro.append(make('span','Vuoi provare prima di iniziare?'));const demo=make('button','Mostrami come si fa');demo.type='button';demo.id='cl-demo-open';intro.append(demo);if(start.id!=='listen-start')start.before(intro);
  const bar=make('details',null,'cl-assist-bar');bar.hidden=true;bar.id='cl-assist-drawer';const handle=make('summary','Comandi');handle.setAttribute('aria-label','Apri i comandi dell’esercizio');const commands=make('nav',null,'cl-assist-commands');commands.setAttribute('aria-label','Comandi dell’esercizio');const pause=make('button','Ⅱ Pausa'),help=make('button','Ripeti la consegna'),end=make('button','Concludi');pause.id='cl-task-pause';help.id='cl-task-help';end.id='cl-task-end';commands.append(pause,help,end);bar.append(handle,commands);document.body.append(bar);document.body.classList.add('cl-assist-enabled');
  let hoverOpen=false;bar.addEventListener('pointerenter',event=>{if(event.pointerType==='mouse'&&!bar.open){bar.open=true;hoverOpen=true;}});bar.addEventListener('pointerleave',()=>{if(hoverOpen&&!bar.contains(document.activeElement)){bar.open=false;hoverOpen=false;}});bar.addEventListener('keydown',event=>{if(event.key==='Escape'){bar.open=false;hoverOpen=false;handle.focus();}});document.addEventListener('pointerdown',event=>{if(!bar.contains(event.target)){bar.open=false;hoverOpen=false;}});
  const dialog=make('dialog',null,'cl-assist-dialog');dialog.id='cl-assist-dialog';dialog.setAttribute('aria-labelledby','cl-assist-title');document.body.append(dialog);
@@ -16,7 +16,7 @@
  pause.onclick=()=>{setPaused(true);open('In pausa');dialog.append(make('p','Timer, movimenti e sequenze sono fermi. Riprendi quando sei pronto.'));const actions=make('div',null,'cl-assist-actions');actions.append(action('Riprendi l’esercizio',close,true),action('Rileggi la consegna',showHelp));dialog.append(actions);};
  help.onclick=showHelp;
  end.onclick=()=>{setPaused(true);open('Concludere la prova?');dialog.append(make('p','Verranno salvati i risultati delle risposte già date.'));const actions=make('div',null,'cl-assist-actions');actions.append(action('Continua la prova',close),action('Concludi e salva',()=>{close();adapter()?.finish();sync();},true));dialog.append(actions);};
- dialog.addEventListener('cancel',event=>{event.preventDefault();close();});dialog.addEventListener('close',()=>{revision++;if('speechSynthesis' in window)speechSynthesis.cancel();if(paused)setPaused(false);});
+ dialog.addEventListener('cancel',event=>{event.preventDefault();close();});dialog.addEventListener('close',()=>{revision++;if(paused){if('speechSynthesis' in window)speechSynthesis.cancel();setPaused(false);}});
  function sync(){const running=Boolean(adapter()?.isRunning());bar.hidden=!running;if(!running)bar.open=false;if(!running&&paused)close();}
  new MutationObserver(sync).observe(document.body,{attributes:true,attributeFilter:['class']});
  demo.onclick=()=>{

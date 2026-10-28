@@ -2,6 +2,7 @@
  'use strict';
  // Practical instructions, deliberately independent of scores and diagnoses.
  const guides={
+  'ascolta-indica':['Ascolta la parola. Non devi rispondere a voce.','Tocca l’immagine corrispondente. Puoi premere Ascolta di nuovo per riascoltare.','Se sbagli, prova un’altra immagine. Dopo la risposta corretta premi Prossima parola.'],
   'il-pianoforte':['Ascolta e guarda i tasti che si illuminano. Aspetta che la melodia finisca.','Premi gli stessi tasti nello stesso ordine. Prima una nota, poi sequenze più lunghe.','Se sbagli, osserva nuovamente la stessa sequenza e riprova.'],
   'lista-della-spesa':['Osserva i prodotti della lista e cerca di ricordarli.','Durante la pausa conta soltanto i cerchi blu: non contare i quadrati gialli.','Alla fine seleziona i prodotti che erano nella lista e premi Conferma la lista.'],
   'attenzione-alternata':['Leggi il tipo di percorso e l’ordine indicati prima di iniziare.','Tocca un elemento alla volta seguendo quella sequenza, anche se gli elementi si muovono.','Se il percorso è alternato, passa ogni volta da un numero all’altro tipo di elemento.'],

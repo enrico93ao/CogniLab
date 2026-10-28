@@ -23,7 +23,7 @@ for (const name of fs.readdirSync(root).filter(name => name.endsWith('.html'))) 
 }
 const catalogContext = {window:{}}; vm.runInNewContext(read('shared/catalog.js'), catalogContext);
 const catalog = catalogContext.window.CogniLabCatalog;
-assert.equal(catalog.length, 38);
+assert.equal(catalog.length, 39);
 for (const item of catalog) assert.ok(fs.existsSync(path.join(root,item.file)), item.file);
 {
   const page = dom('index.html'); const w = page.window;
@@ -56,7 +56,7 @@ for (const [param, valid] of [
   assert.ok([...w.document.querySelectorAll('.card')].every(card => card.hidden));
   assert.equal(w.document.querySelector('.cl-empty').hidden,false);
   input.value = ''; input.dispatchEvent(new w.Event('input'));
-  assert.equal([...w.document.querySelectorAll('.card')].filter(card => !card.hidden).length,38);
+  assert.equal([...w.document.querySelectorAll('.card')].filter(card => !card.hidden).length,39);
   assert.equal(w.document.querySelector('.kpi-grid'),null);
   assert.equal(w.document.querySelector('.card').getAttribute('role'),'link');
   w.close();
@@ -86,4 +86,4 @@ for (const [param, valid] of [
   w.showFinalSummary(); exposure(); assert.equal(w.eval('countPhase'),'summary','Cancelled exposure cannot reopen answers');
   w.close();
 }
-console.log(`PASS: ${nativeScripts} native scripts; 38 exercise links; shared theme; home persistence; safe iframe URLs; timer recovery; catalog search; counting game lifecycle and metrics.`);
+console.log(`PASS: ${nativeScripts} native scripts; 39 exercise links; shared theme; home persistence; safe iframe URLs; timer recovery; catalog search; counting game lifecycle and metrics.`);

@@ -1,5 +1,6 @@
 // Percorsi del catalogo consentiti per i programmi.
 export const exercises=[
+  {"title": "Ascolta e indica", "file": "Ascolta e indica.html", "id": "ascolta-indica", "category": "Linguaggio"},
   {
     "title": "Il pianoforte",
     "file": "Il pianoforte.html",

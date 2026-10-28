@@ -28,4 +28,4 @@ assert.ok(contrast([25,61,74],[240,247,255])>=4.5);assert.ok(contrast([23,70,110
  assert.equal(w.getComputedStyle(list.querySelector('span')).color,'rgb(25, 61, 74)');assert.equal(w.getComputedStyle(w.document.querySelector('.inhibition-stimulus')).flexDirection,'column');assert.match(w.document.getElementById('instruction-screen').textContent,/colore del bordo/);assert.match(w.document.getElementById('instruction-screen').textContent,/prima dall’alto/);w.close();
 }
 assert.match(read('shared/exercise-clarity.css'),/grid-area:figure/);assert.match(read('shared/exercise-clarity.css'),/grid-area:caption/);
-console.log('PASS: 38 explicit guides; free start waits for acknowledgement; cancellation; assigned start without duplicate dialog; rule text contrast >=4.5:1 and caption column. DOM/CSS simulation, not physical-device layout.');
+console.log('PASS: 39 explicit guides; free start waits for acknowledgement; cancellation; assigned start without duplicate dialog; rule text contrast >=4.5:1 and caption column. DOM/CSS simulation, not physical-device layout.');

@@ -27,6 +27,8 @@ assert.equal(write('cognilab/careLinks/patient/otherPro',true,user('patient')),f
 assert.equal(write('cognilab/careLinks/patient/pro',true,user('pro')),false,'professional cannot approve own link');
 const plan=db.cognilab.carePrograms.patient.plan;
 assert.equal(write('cognilab/carePrograms/patient/newPlan',plan,user('pro')),true);
+assert.equal(write('cognilab/carePrograms/patient/newPlan',{...plan,exercises:['ascolta-indica']},user('pro')),true);
+assert.equal(write('cognilab/carePrograms/patient/newPlan',{...plan,exercises:['ascolta-indica']},user('stranger')),false);
 assert.equal(write('cognilab/carePrograms/patient/newPlan',{...plan,professionalId:'otherPro'},user('pro')),false);
 assert.equal(write('cognilab/carePrograms/patient/newPlan',plan,user('patient')),false);
 assert.equal(write('cognilab/carePrograms/patient/newPlan',{...plan,exercises:['../index.html']},user('pro')),false);
