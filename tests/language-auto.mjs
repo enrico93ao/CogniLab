@@ -12,7 +12,7 @@ function harness(mode){
  function solve(){
   const i=Number(progress().match(/(\d+) di/)[1])-1;if(mode==='listen'){spoken.onend?.();[...node('listen-options').children].find(b=>b.dataset.word===spoken.text).click();}
   else if(mode==='repeat'){spoken.onend?.();click('language-practiced');}
-  else if(mode==='spell'){for(const c of bank[i].name.toUpperCase())[...node('language-letter-bank').children].find(b=>!b.disabled&&b.textContent===c).click();click('language-check');}
+  else if(mode==='spell'){for(const c of bank[i].name.toUpperCase())[...node('language-letter-bank').children].find(b=>!b.disabled&&b.textContent===c).click();assert.equal(node('language-check'),null);}
   else if(mode==='story'){click('language-story-ready');for(let j=0;j<bank[i].steps.length;j++)node('language-scene-bank').querySelector('[data-step="'+j+'"]').click();click('language-check');}
   else node('language-workspace').querySelector('[data-answer="'+bank[i].answer+'"]').click();
  }
@@ -31,7 +31,7 @@ for(const [mode]of specs){
 }
 for(const mode of ['listen','spell','story','semantic','function']){
  const h=harness(mode);h.click(h.prefix+'-start');if(mode==='listen'){h.spoken.onend?.();[...h.node('listen-options').children].find(b=>b.dataset.word!==h.spoken.text).click();}
- else if(mode==='spell'){h.node('language-letter-bank').children[0].click();h.click('language-check');}
+ else if(mode==='spell'){const length=h.bank[0].name.length;for(let i=0;i<length;i++){const buttons=[...h.node('language-letter-bank').children];buttons.find(b=>!b.disabled&&(i>0||b.textContent!==h.bank[0].name[0].toUpperCase())).click();}}
  else if(mode==='story'){h.click('language-story-ready');for(let j=h.bank[0].steps.length-1;j>=0;j--)h.node('language-scene-bank').querySelector('[data-step="'+j+'"]').click();h.click('language-check');}
  else [...h.node('language-workspace').querySelectorAll('.language-choice')].find(b=>b.dataset.answer!==h.bank[0].answer).click();h.tick(2000);assert.match(h.progress(),/ 1 di /);assert.equal(h.results.length,0);h.dom.window.close();
 }

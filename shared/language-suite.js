@@ -47,16 +47,20 @@ function redrawLetters(){
  selected.forEach((id,position)=>{answer.append(button(tiles.find(t=>t.id===id).letter,null,()=>{if(!active())return;selected.splice(position,1);redrawLetters();},'language-slot'));});
  for(const b of el('language-letter-bank').children)b.disabled=selected.includes(Number(b.dataset.tile));
 }
+function checkSpelling(){
+ if(!active()||selected.length!==item().name.length)return;
+ stats.attempts++;const value=selected.map(id=>tiles.find(t=>t.id===id).letter).join('');
+ if(value===item().name.toUpperCase()){status('La parola è corretta!');doneRound();return;}
+ fail();status('Rivedi la parola. Tocca una lettera per toglierla e sostituirla, oppure chiedi un aiuto.');
+ if(roundErrors>=2&&el('language-hints').checked)spellHelp(roundErrors>=4);
+}
 function spellBoard(){
  el('language-question').textContent='Guarda l’immagine e componi la parola';showPicture(item().name,el('language-stimulus'));
  if(level()==='base')el('language-stimulus').append(make('p',item().name.toUpperCase(),'language-word'));
  const answer=make('div',undefined,'language-answer');answer.id='language-letter-answer';answer.setAttribute('role','group');answer.setAttribute('aria-label','Parola composta: tocca una lettera per toglierla');const bank=make('div',undefined,'language-letter-board');bank.id='language-letter-bank';tiles=letterTiles(item().name,level());
- for(const tile of tiles){const b=button(tile.letter,null,()=>{if(!active()||selected.includes(tile.id))return;selected.push(tile.id);redrawLetters();},'language-tile');b.dataset.tile=tile.id;bank.append(b);}
+ for(const tile of tiles){const b=button(tile.letter,null,()=>{if(!active()||selected.includes(tile.id)||selected.length>=item().name.length)return;selected.push(tile.id);redrawLetters();checkSpelling();},'language-tile');b.dataset.tile=tile.id;bank.append(b);}
  const hint=make('p',undefined,'language-help');hint.id='language-spell-help';hint.hidden=true;
- const controls=make('div',undefined,'language-actions');controls.append(button('Cancella le lettere','language-clear',()=>{if(!active())return;selected=[];redrawLetters();},'suite-btn suite-secondary'),button('Aiutami','language-help',()=>spellHelp(true),'suite-btn suite-secondary'),button('Controlla la parola','language-check',()=>{
-  if(!active())return;if(!selected.length){status('Scegli le lettere per comporre il nome dell’immagine.');return;}stats.attempts++;const value=selected.map(id=>tiles.find(t=>t.id===id).letter).join('');if(value===item().name.toUpperCase()){status('La parola è corretta!');doneRound();return;}
-  fail();status('Rivedi la parola. Puoi toccare una lettera per toglierla o chiedere un aiuto.');if(roundErrors>=2&&el('language-hints').checked)spellHelp(roundErrors>=4);
- }));workspace().append(answer,bank,hint,controls);redrawLetters();status(level()==='avanzato'?'Ci sono due lettere in più: scegli soltanto quelle che servono.':'Tocca le lettere nell’ordine giusto.');
+ const controls=make('div',undefined,'language-actions');controls.append(button('Cancella le lettere','language-clear',()=>{if(!active())return;selected=[];redrawLetters();},'suite-btn suite-secondary'),button('Aiutami','language-help',()=>spellHelp(true),'suite-btn suite-secondary'));workspace().append(answer,bank,hint,controls);redrawLetters();status(level()==='avanzato'?'Ci sono due lettere in più: scegli soltanto quelle che servono.':'Tocca le lettere nell’ordine giusto.');
 }
 function sceneCard(step,position,handler,cls){const b=button('',null,handler,cls);b.dataset.scene=step.scene;b.setAttribute('aria-label',step.caption);b.innerHTML=sceneMarkup(step.scene);if(el('language-labels').checked)b.append(make('span',step.caption,'language-caption'));return b;}
 function redrawScenes(){

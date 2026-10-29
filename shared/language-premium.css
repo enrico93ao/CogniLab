@@ -78,3 +78,8 @@ body.language-premium.cl-task-running .suite-main{padding:10px 12px 16px}.langua
 
 .language-premium .language-prompt .suite-btn svg,.language-premium .listen-prompt .suite-btn svg{width:20px;height:20px;flex:0 0 20px}
 @media(max-height:480px) and (min-width:760px){.language-premium[data-language-mode=listen] .listen-grid[data-count="6"],.language-premium[data-language-mode=function] .language-grid[data-count="6"]{grid-template-columns:repeat(6,minmax(0,1fr))}.language-premium[data-language-mode=listen] .listen-grid[data-count="4"],.language-premium[data-language-mode=function] .language-grid[data-count="4"]{grid-template-columns:repeat(4,minmax(0,1fr))}}
+
+/* Keep the spelling model above the answer at every viewport width. */
+.language-premium[data-language-mode='spell'] .cl-language-stage{grid-template-columns:minmax(0,1fr);grid-template-areas:'hud' 'prompt' 'error' 'stimulus' 'workspace' 'status' 'actions';grid-template-rows:auto auto auto auto minmax(0,1fr) auto auto}
+.language-premium[data-language-mode='spell'] .language-stimulus{justify-self:center;max-width:640px;padding:12px 18px;gap:8px}
+.language-premium[data-language-mode='spell'] .language-stimulus .language-object-wrap{max-width:min(var(--lp-target-size),130px)}
