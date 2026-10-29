@@ -1,6 +1,6 @@
 (() => {
  'use strict';
- const guidanceScript=document.createElement('script');guidanceScript.src='shared/exercise-guidance.js?v=language2';guidanceScript.async=false;document.head.append(guidanceScript);
+ const guidanceScript=document.createElement('script');guidanceScript.src='shared/exercise-guidance.js?v=language-auto4';guidanceScript.async=false;document.head.append(guidanceScript);
  const clarityStyle=document.createElement('link');clarityStyle.rel='stylesheet';clarityStyle.href='shared/exercise-clarity.css?v=clarity37';document.head.append(clarityStyle);
  try{const uid=localStorage.getItem('cognilab.lastUser'),session=JSON.parse(sessionStorage.getItem('cognilab.session.'+uid)||'null'),plan=JSON.parse(sessionStorage.getItem('cognilab.plan.'+uid)||'null');window.CogniLabPresetPending=Boolean(session?.programId&&plan?.programId===session.programId&&decodeURIComponent(location.pathname.split('/').pop())===plan.files?.[plan.index]&&!new URLSearchParams(location.search).has('configure'));}catch{}
  if(window.CogniLabPresetPending){document.documentElement.classList.add('assigned-preparing');const style=document.createElement('style');style.textContent='html.assigned-preparing body>*{visibility:hidden!important}html.assigned-preparing [data-assigned-visible]{visibility:visible!important}';document.head.append(style);}

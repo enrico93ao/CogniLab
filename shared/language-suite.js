@@ -1,8 +1,8 @@
 import {deckFor,optionsFor,letterTiles,shuffle} from './language-suite-model.mjs';
 import {picture,sceneMarkup} from './language-pictures.mjs';
 import {ItalianVoice} from './italian-voice.mjs';
-const el=id=>document.getElementById(id),mode=document.body.dataset.languageMode,voice=new ItalianVoice();
-let running=false,paused=false,solved=false,index=0,deck=[],stats,roundErrors=0,assisted=false,heard=false,selected=[],tiles=[],sceneOrder=[],generation=0;
+const el=id=>document.getElementById(id),mode=document.body.dataset.languageMode,voice=new ItalianVoice(),clock=new window.CogniLabTaskClock();
+let running=false,paused=false,solved=false,index=0,deck=[],stats,roundErrors=0,assisted=false,heard=false,selected=[],tiles=[],sceneOrder=[],generation=0,advanceTimer=null;
 const item=()=>deck[index],level=()=>el('language-level').value,workspace=()=>el('language-workspace');
 const show=id=>{for(const name of ['setup','language-game','language-results'])el(name).hidden=name!==id;};
 const make=(tag,text,cls)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;if(cls)n.className=cls;return n;};
@@ -19,9 +19,11 @@ function speak(replay=false){
  voice.speak(speechText(),Number(el('language-rate').value),{done:()=>{if(token!==generation||!active())return;if(mode==='repeat'){heard=true;for(const b of workspace().querySelectorAll('button'))b.disabled=false;status('Ora prova a ripetere. Quando hai finito, premi Ho provato a ripetere.');}},error:()=>{if(token!==generation||!running)return;el('language-audio-error').hidden=false;el('language-audio-error').textContent=mode==='repeat'?'La voce italiana non è disponibile o non ha riprodotto la parola. Controlla l’audio e premi Ascolta di nuovo.':'L’audio non è disponibile. Puoi seguire la consegna scritta e continuare, oppure riprovare con Ascolta di nuovo.';}});
 }
 function showPicture(name,parent){const n=make('div',undefined,'language-object-wrap');n.innerHTML=picture(name);parent.append(n);}
+function clearAdvance(){if(advanceTimer!==null)clock.clearTimeout(advanceTimer);advanceTimer=null;}
+function advance(){if(!running||paused||!solved)return;clearAdvance();if(index+1===deck.length)finish();else{index++;render();}}
 function doneRound(){
  if(!active())return;solved=true;voice.cancel();stats.completed++;if(mode!=='repeat'){if(!roundErrors&&!assisted)stats.firstTry++;if(assisted)stats.assisted++;else stats.withoutHint++;feedback(true);}for(const b of workspace().querySelectorAll('button'))b.disabled=true;
- el('language-replay').disabled=true;el('language-next').hidden=false;el('language-next').textContent=index+1===deck.length?'Concludi e salva →':'Prossima prova →';el('language-next').focus({preventScroll:true});
+ el('language-replay').disabled=true;el('language-next').hidden=false;el('language-next').textContent=index+1===deck.length?'Concludi e salva →':'Prossima prova →';status(el('language-status').textContent+' Passaggio automatico tra un istante.');clearAdvance();advanceTimer=clock.setTimeout(()=>{advanceTimer=null;advance();},1200);
 }
 function fail(){stats.errors++;roundErrors++;feedback(false);}
 function repeatBoard(){
@@ -78,22 +80,22 @@ function storyBoard(){
  el('language-question').textContent='Leggi o ascolta, poi metti in ordine le scene';const story=make('article',undefined,'language-story');story.id='language-story-copy';story.append(make('h3',item().title),make('p',item().text));workspace().append(story,button('Ho letto, scelgo le immagini','language-story-ready',revealStory));status('Puoi premere Ascolta di nuovo per sentire il racconto.');
 }
 function render(){
- generation++;solved=false;roundErrors=0;assisted=false;heard=false;selected=[];voice.cancel();workspace().replaceChildren();el('language-stimulus').replaceChildren();el('language-next').hidden=true;el('language-replay').disabled=false;el('language-audio-error').hidden=true;
+ clearAdvance();generation++;solved=false;roundErrors=0;assisted=false;heard=false;selected=[];voice.cancel();workspace().replaceChildren();el('language-stimulus').replaceChildren();el('language-next').hidden=true;el('language-replay').disabled=false;el('language-audio-error').hidden=true;
  el('language-progress').textContent=`${mode==='story'?'Storia':'Prova'} ${index+1} di ${deck.length}`;
  if(mode==='repeat')repeatBoard();else if(mode==='spell')spellBoard();else if(mode==='story')storyBoard();else choiceBoard();
 }
-function start(){if(running)return;window.CogniLabRun.begin();deck=deckFor(mode,level(),Number(el('language-trials').value));workspace().inert=false;stats={completed:0,firstTry:0,assisted:0,withoutHint:0,errors:0,attempts:0,replays:0,practiced:0,notPracticed:0};index=0;running=true;paused=false;show('language-game');render();}
+function start(){if(running)return;clock.reset();window.CogniLabRun.begin();deck=deckFor(mode,level(),Number(el('language-trials').value));workspace().inert=false;stats={completed:0,firstTry:0,assisted:0,withoutHint:0,errors:0,attempts:0,replays:0,practiced:0,notPracticed:0};index=0;running=true;paused=false;show('language-game');render();}
 function finish(){
- if(!running)return;const complete=stats.completed===deck.length;running=false;paused=false;generation++;voice.cancel();show('language-results');el('language-result-title').textContent=complete?'Esercizio completato':'Esercizio concluso';
+ if(!running)return;const complete=stats.completed===deck.length;running=false;paused=false;clearAdvance();clock.cancelAll();generation++;voice.cancel();show('language-results');el('language-result-title').textContent=complete?'Esercizio completato':'Esercizio concluso';
  const summary=el('language-summary');summary.replaceChildren();const tile=(value,label)=>{const n=make('div');n.append(make('strong',String(value)),make('span',label));summary.append(n);};
  let metrics={plannedTrials:deck.length,trialsCompleted:stats.completed,allTrialsCompleted:complete,replays:stats.replays};
  if(mode==='repeat'){el('language-report').textContent=`Hai ascoltato ${stats.completed} parole o espressioni sulle ${deck.length} previste. I tentativi sono dichiarati da te: il sito non valuta la pronuncia e non assegna un’accuratezza.`;tile(stats.completed,'Stimoli ascoltati');tile(stats.practiced,'Tentativi dichiarati');tile(stats.notPracticed,'Senza ripetizione');metrics={...metrics,listened:stats.completed,practiced:stats.practiced,notPracticed:stats.notPracticed,oralAssessment:'not-assessed'};}
  else{el('language-report').textContent=`Hai completato ${stats.completed} prove sulle ${deck.length} previste: ${stats.firstTry} al primo tentativo, senza aiuti.`;tile(stats.firstTry,'Al primo tentativo');tile(stats.assisted,'Con suggerimento');tile(stats.errors,'Risposte da rivedere');metrics={...metrics,correct:stats.completed,total:stats.attempts,errors:stats.errors,firstTry:stats.firstTry,assisted:stats.assisted,withoutHint:stats.withoutHint,score:stats.firstTry};}
  window.CogniLabRun[complete?'complete':'interrupt'](metrics);
 }
-el('language-start').onclick=start;el('language-replay').onclick=()=>speak(true);el('language-next').onclick=()=>{if(!running||paused||!solved)return;if(index+1===deck.length)finish();else{index++;render();}};
+el('language-start').onclick=start;el('language-replay').onclick=()=>speak(true);el('language-next').onclick=advance;
 el('language-end').onclick=()=>{if(running&&confirm('Vuoi concludere adesso? Verranno salvate le risposte date finora.'))finish();};el('language-again').onclick=async()=>{await window.CogniLabRun.waitForSave();show('setup');};
 async function back(event){event.preventDefault();if(running){if(!confirm('Vuoi uscire? Le risposte date finora saranno salvate.'))return;finish();}await window.CogniLabRun.waitForSave();if(parent!==window)parent.postMessage({type:'cognilab-exit-v3'},location.origin);else location.href='esercizi.html';}
 el('language-back').onclick=back;el('language-result-back').onclick=back;
-window.CogniLabAssist={isRunning:()=>running,pause:()=>{paused=true;voice.cancel();workspace().inert=true;},resume:()=>{paused=false;workspace().inert=false;if(!solved&&mode==='repeat')speak();},finish,instruction:()=>window.CogniLabExercise.instructions};
-window.addEventListener('pagehide',()=>{running=false;generation++;voice.cancel();});
+window.CogniLabAssist={isRunning:()=>running,pause:()=>{paused=true;clock.pause();voice.cancel();workspace().inert=true;},resume:()=>{paused=false;clock.resume();workspace().inert=false;if(!solved&&mode==='repeat')speak();},finish,instruction:()=>window.CogniLabExercise.instructions};
+window.addEventListener('pagehide',()=>{running=false;clearAdvance();clock.cancelAll();generation++;voice.cancel();});

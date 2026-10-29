@@ -8,7 +8,7 @@ for(const mode of specs.map(s=>s[0]))for(const level of ['base','intermedio','av
 }
 function harness(mode,level='base',audio=true){
  const file=specs.find(s=>s[0]===mode)[1],dom=new JSDOM(read(file),{url:'https://example.test/CogniLab/'+encodeURIComponent(file),runScripts:'outside-only'}),w=dom.window;let spoken,bank;const results=[];
- w.eval(read('shared/object-images.js'));w.eval(read('shared/language-pictures.mjs').replace(/export /g,''));
+ w.eval(read('shared/task-clock.js'));w.eval(read('shared/object-images.js'));w.eval(read('shared/language-pictures.mjs').replace(/export /g,''));
  for(const word of pictureWords)assert.ok(w.picture(word.name));for(const story of stories)for(const s of story.steps)assert.match(w.sceneMarkup(s.scene),/<svg/);
  const images=new Set(pictureWords.map(w=>w.name));for(const item of [...relations,...functions])for(const n of [item.image,item.answer,...item.distractors].filter(Boolean))assert.ok(images.has(n),n);
  for(const script of w.document.querySelectorAll('script:not([src])'))w.eval(script.textContent);
