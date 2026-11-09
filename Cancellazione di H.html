@@ -44,6 +44,8 @@
 
         #game-screen {
             padding: 0;
+            width: 100%;
+            height: 100dvh;
             background-color: #ffffff;
             display: none;
             flex-direction: column;
@@ -56,7 +58,8 @@
         }
 
         .top-bar-header {
-            height: 50px;
+            min-height: 50px;
+            flex: none;
             background-color: #f1f3f5;
             border-bottom: 1px solid #dee2e6;
             display: flex;
@@ -66,21 +69,34 @@
         }
 
         .canvas-area {
-            position: relative;
-            flex-grow: 1;
-            width: 100vw;
+            display: flex;
+            flex: 1 1 0;
+            min-height: 0;
+            min-width: 0;
             background-color: #ffffff;
         }
 
-        canvas {
+        .canvas-scroll {
+            flex: 1 1 0;
+            min-width: 0;
+            overflow: auto;
+            scrollbar-gutter: stable;
+            overscroll-behavior: contain;
+        }
+
+        #cancellationCanvas {
             display: block;
             background-color: #ffffff;
             cursor: crosshair;
+            max-width: none;
+            max-height: none;
+            touch-action: manipulation;
         }
 
         .bottom-bar {
-            height: 80px;
-            width: 100vw;
+            min-height: 64px;
+            flex: none;
+            width: 100%;
             background-color: #f1f3f5;
             border-top: 2px solid #dee2e6;
             display: flex;
@@ -92,11 +108,8 @@
 
         .red-cue-bar {
             display: none;
-            position: absolute;
-            right: 0;
-            top: 0;
-            height: 100%;
-            width: 35px;
+            flex: 0 0 44px;
+            min-width: 44px;
             background-color: #dc3545;
             z-index: 20;
             cursor: pointer;
@@ -284,10 +297,12 @@
     <!-- 2. AREA DEL COMPITO -->
     <div id="game-screen" class="screen">
         <div class="top-bar-header">
-            <span>Cancellazione selettiva</span><span>Seleziona i bersagli, poi termina la prova.</span>
+            <span>Cancellazione selettiva</span><span>Seleziona i bersagli. Se non li vedi tutti, scorri l’area delle lettere e delle figure.</span>
         </div>
         <div class="canvas-area">
-            <canvas id="cancellationCanvas"></canvas>
+            <div class="canvas-scroll" id="cancellation-scroll" tabindex="0" role="region" aria-label="Area degli stimoli">
+                <canvas id="cancellationCanvas"></canvas>
+            </div>
             <div id="rightCueBar" class="red-cue-bar" onclick="handleBarClick()"></div>
         </div>
         <div class="bottom-bar">
@@ -350,7 +365,9 @@
         const SHAPE_DISTRACTORS = ["square", "triangle", "diamond", "star"];
 
         const FONT_STYLE = "bold 44px Arial";
-        const HIT_RADIUS = 38; 
+        const HIT_RADIUS = 24;
+        const MIN_CELL = 48;
+        const RANDOM_CELL = 56; 
 
         let canvas, ctx;
         let audioCtx = null;
@@ -435,11 +452,6 @@
             canvas = document.getElementById('cancellationCanvas');
             ctx = canvas.getContext('2d');
 
-            areaW = window.innerWidth;
-            areaH = window.innerHeight - 130; 
-            canvas.width = areaW;
-            canvas.height = areaH;
-
             showLines = document.getElementById('enable-guide-lines').checked;
             const enableRedBar = document.getElementById('enable-red-bar').checked;
             useConstraint = document.getElementById('enable-row-constraint').checked;
@@ -461,22 +473,36 @@
             if (diffLevel === 'medium') rowsCount = 7;
             if (diffLevel === 'hard') rowsCount = 10;
 
-            rowHeights = [];
-            for (let i = 0; i <= rowsCount; i++) {
-                rowHeights.push((areaH / rowsCount) * i);
-            }
-
             let totalCount = 70;
             if (diffLevel === 'easy') totalCount = 30;
             if (diffLevel === 'hard') totalCount = 130;
 
-            if (dispMode === 'grid') {
-                generateGridMode(stimType, rowsCount);
-            } else {
-                generateRandomMode(stimType, totalCount, rowsCount);
-            }
-
             switchScreen('game-screen');
+            const scroll = document.getElementById('cancellation-scroll');
+            // Measure the visible play area after the header, footer and cue have taken their space.
+            // Keep the board fixed during this trial, so rotation never moves an answered stimulus.
+            canvas.width = canvas.height = 1;
+            canvas.style.width = canvas.style.height = '1px';
+            const cols = rowsCount === 5 ? 6 : rowsCount === 7 ? 10 : 13;
+            const randomCols = Math.max(2, Math.floor(scroll.clientWidth / RANDOM_CELL));
+            areaW = dispMode === 'grid'
+                ? Math.max(scroll.clientWidth, cols * MIN_CELL)
+                : Math.max(scroll.clientWidth, randomCols * RANDOM_CELL);
+            areaH = dispMode === 'grid'
+                ? Math.max(scroll.clientHeight, rowsCount * MIN_CELL)
+                : Math.max(scroll.clientHeight, Math.ceil(totalCount / randomCols) * RANDOM_CELL);
+            rowHeights = Array.from({length: rowsCount + 1}, (_, i) => areaH * i / rowsCount);
+            const pixelRatio = Math.min(window.devicePixelRatio || 1, 3);
+            canvas.style.width = areaW + 'px';
+            canvas.style.height = areaH + 'px';
+            canvas.width = Math.round(areaW * pixelRatio);
+            canvas.height = Math.round(areaH * pixelRatio);
+            ctx.setTransform(canvas.width / areaW, 0, 0, canvas.height / areaH, 0, 0);
+            scroll.scrollTo(0, 0);
+
+            if (dispMode === 'grid') generateGridMode(stimType, rowsCount);
+            else generateRandomMode(stimType, totalCount, randomCols);
+
             drawCanvas();
             startTime = performance.now();
         }
@@ -519,32 +545,37 @@
             ensureTargetPresence(type);
         }
 
-        function generateRandomMode(type, count, rows) {
-            const minDistance = count === 130 ? 50 : 66; 
-            let attempts = 0;
-
-            while (stimuli.length < count && attempts < 5000) {
-                attempts++;
-                let x = Math.floor(Math.random() * (areaW - 120)) + 60;
-                let y = Math.floor(Math.random() * (areaH - 60)) + 30;
-
-                let overlapped = false;
-                for (let i = 0; i < stimuli.length; i++) {
-                    if (Math.hypot(x - stimuli[i].x, y - stimuli[i].y) < minDistance) {
-                        overlapped = true;
-                        break;
-                    }
+        function generateRandomMode(type, count, cols) {
+            const points = [];
+            // Prefer freely scattered points. If the available area is too dense,
+            // use shuffled, offset cells so no device silently loses stimuli.
+            for (let tries = 0; points.length < count && tries < 5000; tries++) {
+                const x = HIT_RADIUS + Math.random() * (areaW - 2 * HIT_RADIUS);
+                const y = HIT_RADIUS + Math.random() * (areaH - 2 * HIT_RADIUS);
+                if (points.every(p => Math.hypot(x - p.x, y - p.y) >= MIN_CELL)) points.push({x, y});
+            }
+            if (points.length < count) {
+                points.length = 0;
+                const rows = Math.ceil(count / cols);
+                const cellW = areaW / cols;
+                const cellH = areaH / rows;
+                const cells = Array.from({length: rows * cols}, (_, i) => i);
+                for (let i = cells.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [cells[i], cells[j]] = [cells[j], cells[i]];
                 }
-
-                if (!overlapped) {
-                    let isTarget = Math.random() < 0.24;
-                    let name = isTarget ? (type === 'letters' ? LETTER_TARGET : SHAPE_TARGET) : (type === 'letters' ? LETTER_DISTRACTORS[Math.floor(Math.random() * LETTER_DISTRACTORS.length)] : SHAPE_DISTRACTORS[Math.floor(Math.random() * SHAPE_DISTRACTORS.length)]);
-                    let rIdx = getRowIndexByY(y);
-
-                    stimuli.push({
-                        type: type, name: name, x: x, y: y, isTarget: isTarget, cancelled: false, rowIndex: rIdx
+                for (const i of cells.slice(0, count)) {
+                    points.push({
+                        x: (i % cols + .5) * cellW + (Math.random() - .5) * (cellW - MIN_CELL),
+                        y: (Math.floor(i / cols) + .5) * cellH + (Math.random() - .5) * (cellH - MIN_CELL)
                     });
                 }
+            }
+            for (const {x, y} of points) {
+                const isTarget = Math.random() < 0.24;
+                const distractors = type === 'letters' ? LETTER_DISTRACTORS : SHAPE_DISTRACTORS;
+                const name = isTarget ? (type === 'letters' ? LETTER_TARGET : SHAPE_TARGET) : distractors[Math.floor(Math.random() * distractors.length)];
+                stimuli.push({type, name, x, y, isTarget, cancelled: false, rowIndex: getRowIndexByY(y)});
             }
             ensureTargetPresence(type);
         }
@@ -619,11 +650,21 @@
             canvas = document.getElementById('cancellationCanvas');
             if(canvas) {
                 canvas.addEventListener('click', function(event) {
+                    if (!document.getElementById('game-screen').classList.contains('active')) return;
                     const rect = canvas.getBoundingClientRect();
+                    if (!rect.width || !rect.height) return;
                     const mouseX = (event.clientX - rect.left) * (areaW / rect.width);
                     const mouseY = (event.clientY - rect.top) * (areaH / rect.height);
 
-                    let clicked = stimuli.find(s => Math.hypot(mouseX - s.x, mouseY - s.y) < HIT_RADIUS);
+                    let clicked = null;
+                    let nearest = HIT_RADIUS;
+                    for (const stimulus of stimuli) {
+                        const distance = Math.hypot(mouseX - stimulus.x, mouseY - stimulus.y);
+                        if (distance < nearest) {
+                            nearest = distance;
+                            clicked = stimulus;
+                        }
+                    }
 
                     if (clicked) {
                         if (useConstraint && clicked.rowIndex !== activeRowIndex) {
@@ -669,6 +710,7 @@
         }
 
         function endExercise() {
+            if (!document.getElementById('game-screen').classList.contains('active')) return;
             const tempFine = performance.now();
             const tempoTotaleS = parseFloat(((tempFine - startTime) / 1000).toFixed(1));
             
